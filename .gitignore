@@ -215,4 +215,6 @@ Chalmers.ILL/Views/Web.config.transform
 Chalmers.ILL/Xslt
 Chalmers.ILL/default.aspx
 FormHandler
-Chalmers.ILL/*.config
+Chalmers.ILL/Web.ChalmersILL.config
+Chalmers.ILL/Web.ChillinTest.Debug.config
+Chalmers.ILL/Web.ChillinTest.Release.config
