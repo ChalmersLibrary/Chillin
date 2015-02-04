@@ -54,9 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CreateMediaRootFolder.cs" />
-    <Compile Include="CreateMemberGroups.cs" />
-    <Compile Include="CreateMemberType.cs" />
+    <Compile Include="ChillinInitialConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
