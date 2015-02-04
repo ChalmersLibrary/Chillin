@@ -51,7 +51,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 var ms = Services.MediaService;
                 var cs = Services.ContentService;
-                var mainFolder = ms.GetById(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoOrderItemAttachmentsMediaFolderId"]));
+                var mainFolder = ms.GetChildren(-1).First(m => m.Name == ConfigurationManager.AppSettings["umbracoOrderItemAttachmentsMediaFolderName"]);
                 using (Semaphore semLock = new Semaphore(0, 1))
                 {
                     TypedEventHandler<IMediaService, SaveEventArgs<IMedia>> handler = (sender, e) => { semLock.Release(e.SavedEntities.Count()); };
@@ -132,7 +132,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 var ms = Services.MediaService;
                 var cs = Services.ContentService;
-                var mainFolder = ms.GetById(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoOrderItemAttachmentsMediaFolderId"]));
+                var mainFolder = ms.GetChildren(-1).First(m => m.Name == ConfigurationManager.AppSettings["umbracoOrderItemAttachmentsMediaFolderName"]);
                 using (Semaphore semLock = new Semaphore(0, 1))
                 {
                     TypedEventHandler<IMediaService, SaveEventArgs<IMedia>> handler = (sender, e) => { semLock.Release(e.SavedEntities.Count()); };

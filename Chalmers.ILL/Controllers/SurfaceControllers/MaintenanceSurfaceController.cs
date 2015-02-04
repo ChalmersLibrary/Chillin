@@ -47,7 +47,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var cs = UmbracoContext.Application.Services.ContentService;
 
                 bool removedMedia = false;
-                foreach (var m in ms.GetChildren(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoOrderItemAttachmentsMediaFolderId"])))
+                foreach (var m in ms.GetChildren(ms.GetChildren(-1).First(m => m.Name == ConfigurationManager.AppSettings["umbracoOrderItemAttachmentsMediaFolderName"]).Id))
                 {
                     if (m.CreateDate < DateTime.Now.AddDays(-30))
                     {

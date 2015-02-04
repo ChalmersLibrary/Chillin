@@ -51,7 +51,11 @@ namespace Chalmers.ILL.PackageActions
             try
             {
                 var ms = ApplicationContext.Current.Services.MediaService;
-                ms.Delete(ms.GetMediaByPath("OrderItemAttachments"));
+                var oia = ms.GetChildren(-1).First(m => m.Name == "OrderItemAttachments");
+                if (oia != null)
+                {
+                    ms.Delete(oia);
+                }
             } 
             catch (Exception e)
             {
