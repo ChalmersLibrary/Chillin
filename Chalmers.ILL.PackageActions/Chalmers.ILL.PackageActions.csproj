@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="businesslogic">
+      <HintPath>..\Chalmers.ILL\bin\businesslogic.dll</HintPath>
+    </Reference>
     <Reference Include="cms">
       <HintPath>..\..\Chalmers.ILL\Chalmers.ILL\bin\cms.dll</HintPath>
     </Reference>
@@ -52,6 +55,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CreateMediaRootFolder.cs" />
+    <Compile Include="CreateMemberGroups.cs" />
+    <Compile Include="CreateMemberType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
