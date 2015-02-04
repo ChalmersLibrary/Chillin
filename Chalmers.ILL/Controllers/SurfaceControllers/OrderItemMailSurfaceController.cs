@@ -120,7 +120,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Set status property if it differs from newStatus
                 if (currentStatus != m.newStatus)
                 {
-                    OrderItemStatus.SetOrderItemStatusInternal(m.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionGuid"], m.newStatus), false, false);
+                    OrderItemStatus.SetOrderItemStatusInternal(m.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], m.newStatus), false, false);
                 }
 
                 contentService.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);

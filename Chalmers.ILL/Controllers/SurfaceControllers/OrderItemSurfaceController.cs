@@ -375,43 +375,36 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
         private List<UmbracoDropdownListNtextDataType> GetAvailableTypes()
         {
-            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionGuid"]);
+            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"]);
         }
 
         private List<UmbracoDropdownListNtextDataType> GetAvailableStatuses()
         {
-            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionGuid"]);
+            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"]);
         }
 
         private List<UmbracoDropdownListNtextDataType> GetAvailableDeliveryLibraries()
         {
-            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionGuid"]);
+            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"]);
         }
 
         private List<UmbracoDropdownListNtextDataType> GetAvailableCancellationReasons()
         {
-            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderCancellationReasonDataTypeDefinitionGuid"]);
+            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderCancellationReasonDataTypeDefinitionName"]);
         }
 
         private List<UmbracoDropdownListNtextDataType> GetAvailablePurchasedMaterials()
         {
-            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderPurchasedMaterialDataTypeDefinitionGuid"]);
+            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderPurchasedMaterialDataTypeDefinitionName"]);
         }
 
-        private List<UmbracoDropdownListNtextDataType> GetAvailableValues(string dataTypeDefitionGuidString)
-        {
-            Guid dataTypeGuid;
-            Guid.TryParse(dataTypeDefitionGuidString, out dataTypeGuid);
-            return GetAvailableValues(dataTypeGuid);
-        }
-
-        private List<UmbracoDropdownListNtextDataType> GetAvailableValues(Guid dataTypeKey)
+        private List<UmbracoDropdownListNtextDataType> GetAvailableValues(string dataTypeName)
         {
             // Connect to Umbraco DataTypeService
             var ds = UmbracoContext.Application.Services.DataTypeService;
 
             // Get the Definition Id
-            int dataTypeDefinitionId = ds.GetDataTypeDefinitionById(dataTypeKey).Id;
+            int dataTypeDefinitionId = ds.GetAllDataTypeDefinitions().First(x => x.Name == dataTypeName).Id;
 
             // Get a sorted list of all prevalues
             SortedList typeTypes = PreValues.GetPreValues(dataTypeDefinitionId);

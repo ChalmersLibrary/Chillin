@@ -62,7 +62,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Set status = Beställd
                 try
                 {
-                    OrderItemStatus.SetOrderItemStatusInternal(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionGuid"], "03:Beställd"), false, false);
+                    OrderItemStatus.SetOrderItemStatusInternal(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "03:Beställd"), false, false);
                 }
                 catch (Exception)
                 {

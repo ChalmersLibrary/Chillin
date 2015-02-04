@@ -44,17 +44,13 @@ namespace Chalmers.ILL.Utilities
         /// </summary>
         /// <param name="prevalue">Prevalue string</param>
         /// <returns>Prevalue Id</returns>
-        public static int DataTypePrevalueId(string guid, string prevalue)
+        public static int DataTypePrevalueId(string dataTypeName, string prevalue)
         {
             // Connect to Umbraco DataTypeService
             var ds = new Umbraco.Core.Services.DataTypeService();
 
-            // Query the Order Status DataType by GUID
-            Guid dataTypeGuid;
-            Guid.TryParse(guid, out dataTypeGuid);
-
             // Get the Definition Id
-            int dataTypeDefinitionId = ds.GetDataTypeDefinitionById(dataTypeGuid).Id;
+            int dataTypeDefinitionId = ds.GetAllDataTypeDefinitions().First(x => x.Name == dataTypeName).Id;
 
             // Get a sorted list of all prevalues
             SortedList statusTypes = PreValues.GetPreValues(dataTypeDefinitionId);

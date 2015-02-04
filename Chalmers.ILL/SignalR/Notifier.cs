@@ -47,10 +47,8 @@ namespace Chalmers.ILL.SignalR
             // Extract the real chillin order status id from the umbraco id.
             int chillinOrderStatusId = 0;
             var ds = new Umbraco.Core.Services.DataTypeService();
-            Guid dataTypeGuid;
-            Guid.TryParse(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionGuid"], out dataTypeGuid);
             PreValue iter;
-            foreach (DictionaryEntry pv in PreValues.GetPreValues(ds.GetDataTypeDefinitionById(dataTypeGuid).Id))
+            foreach (DictionaryEntry pv in PreValues.GetPreValues(ds.GetAllDataTypeDefinitions().First(x => x.Name == ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"]).Id))
             {
                 iter = ((PreValue)pv.Value);
                 if (iter.Id == OrderStatusId)

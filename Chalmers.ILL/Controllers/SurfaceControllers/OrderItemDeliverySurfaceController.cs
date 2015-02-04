@@ -63,7 +63,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Set status = Levererad
                 try
                 {
-                    OrderItemStatus.SetOrderItemStatusInternal(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionGuid"], "05:Levererad"), false, false);
+                    OrderItemStatus.SetOrderItemStatusInternal(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
                 }
                 catch (Exception)
                 {

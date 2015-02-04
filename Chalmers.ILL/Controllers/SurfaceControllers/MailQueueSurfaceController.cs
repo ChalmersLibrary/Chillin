@@ -198,7 +198,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Set the OrderItem Status so it appears in lists
                             try
                             {
-                                OrderItemStatus.SetOrderItemStatusInternal(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionGuid"], "02:Åtgärda"), false, false);
+                                OrderItemStatus.SetOrderItemStatusInternal(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "02:Åtgärda"), false, false);
                             }
                             catch (Exception es)
                             {
@@ -259,7 +259,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Set the OrderItem Status so it appears in lists
                             try
                             {
-                                OrderItemStatus.SetOrderItemStatusInternal(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionGuid"], "09:Mottagen"), false, false);
+                                OrderItemStatus.SetOrderItemStatusInternal(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "09:Mottagen"), false, false);
                             }
                             catch (Exception es)
                             {

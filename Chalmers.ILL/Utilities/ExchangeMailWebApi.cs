@@ -16,7 +16,6 @@ using HtmlAgilityPack;
 using System.Configuration;
 using System.Diagnostics;
 using Npgsql;
-using System.Configuration;
 
 namespace Chalmers.ILL.Utilities
 {
