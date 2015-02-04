@@ -23,7 +23,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     Member.AddMemberToCache(m);
                     MemberWrapper.AddMemberToCache(Response, m);
-                    string redirectUrl = Umbraco.TypedContent(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoOrderListPageContentId"])).Url + "?login=ok";
+                    string redirectUrl = Umbraco.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url + "?login=ok";
                     Response.Redirect(redirectUrl);
                 }
                 else

@@ -68,11 +68,11 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li id="orders-button" class="@(CurrentPage.Url == Umbraco.TypedContent(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoOrderListPageContentId"])).Url ? "active" : null)"><a href="@Umbraco.TypedContent(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoOrderListPageContentId"])).Url">Beställningar <span id="pending-order-counter" class="badge" data-pending-order-items="[]">0</span></a></li>
+                    <li id="orders-button" class="@(CurrentPage.Url == Umbraco.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url ? "active" : null)"><a href="@Umbraco.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url">Beställningar <span id="pending-order-counter" class="badge" data-pending-order-items="[]">0</span></a></li>
                 </ul>
                 
                 <!-- Search form -->
-                <form class="navbar-form navbar-left" role="search" action="@Umbraco.TypedContent(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoOrderListPageContentId"])).Url">
+                <form class="navbar-form navbar-left" role="search" action="@Umbraco.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url">
                     <div class="form-group">
                         <input type="text" class="form-control" name="query" id="query" value="@Request.Params["query"]" placeholder="Namn, referens mm">
                     </div>
@@ -93,9 +93,9 @@
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">@MemberWrapper.GetCurrentMemberText(Request, Response) <b class="caret"></b></a>
                             <ul class="dropdown-menu">
                                 <li><a href="@Umbraco.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoRootContentDocumentType"]).First().Url">Hjälp</a></li>
-                                <li><a href="@Umbraco.TypedContent(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoSettingsPageContentId"])).Url">Inställningar</a></li>
-                                <li><a href="@Umbraco.TypedContent(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoStatisticsPageContentId"])).Url">Statistik</a></li>
-                                <li><a href="@Umbraco.TypedContent(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoLogoutPageContentId"])).Url">Logga ut</a></li>
+                                <li><a href="@Umbraco.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoSettingsPageContentDocumentType"]).First().Url">Inställningar</a></li>
+                                <li><a href="@Umbraco.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoStatisticsPageContentDocumentType"]).First().Url">Statistik</a></li>
+                                <li><a href="@Umbraco.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoLogoutPageContentDocumentType"]).First().Url">Logga ut</a></li>
                             </ul>
                         </li>
                     </ul>

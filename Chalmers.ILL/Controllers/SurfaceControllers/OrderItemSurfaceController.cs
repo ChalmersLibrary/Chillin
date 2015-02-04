@@ -126,7 +126,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var cs = Services.ContentService;
 
             // Get a new OrderItem populated with values for this node
-            var orderListNode = cs.GetById(Convert.ToInt32(ConfigurationManager.AppSettings["umbracoOrderListContentId"]));
+            var orderListNode = Umbraco.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListContentDocumentType"]).First();
 
             // Give counter for versions for each node found
             foreach (var node in cs.GetChildren(orderListNode.Id))
