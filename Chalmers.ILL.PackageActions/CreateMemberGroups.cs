@@ -13,7 +13,7 @@ using umbraco.cms.businesslogic.member;
 
 namespace Chalmers.ILL.PackageActions
 {
-    class CreateMemberGroups
+    class CreateMemberGroups : IPackageAction
     {
         public string Alias()
         {
