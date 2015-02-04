@@ -1,0 +1,34 @@
+﻿@model Chalmers.ILL.Models.OrderItemModel
+@using System.Globalization
+
+<div class="action-header">Skriv till loggen</div>
+
+<form class="form" role="form" onsubmit="return false;">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="message">Inlägg</label>
+                <textarea class="form-control" rows="6" id="message" name="message"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="followUpDate">Följs upp</label>
+                <div class="input-group date datetimepicker">
+                    <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+
+            <button class="btn btn-success" onclick="writeLogItem(@Model.NodeId, this.form.message.value, 'LOG', this.form.followUpDate.value);">Spara</button>
+        </div>
+   </div>
+    <script type="text/javascript">
+        $(function () {
+            $('.datetimepicker').datetimepicker({
+                language: 'sv'
+            });
+        });
+    </script>
+</form>

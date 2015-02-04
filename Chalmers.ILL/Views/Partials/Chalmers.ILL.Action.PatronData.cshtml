@@ -1,0 +1,136 @@
+﻿@model Chalmers.ILL.Models.OrderItemModel
+
+<div class="action-header">Hämta beställardata</div>
+
+<form class="form" role="form" onsubmit="return false;">
+    <div class="row">
+        <div class="sub-action-header col-sm-12">
+            Enkel uppdatering
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+            @if (!String.IsNullOrEmpty(Model.SierraInfo.barcode))
+            {
+                <button name="fetch-patron-data-button" type="button" class="btn btn-success" onclick="fetchDataFromSierraUsingLibraryCardNumber(@Model.NodeId, '@Model.SierraInfo.barcode');">Beställardata <span class="glyphicon glyphicon-refresh"></span></button>
+            }
+            else
+            {
+                <button name="fetch-patron-data-button" type="button" class="btn btn-success disabled" onclick="fetchDataFromSierraUsingLibraryCardNumber(@Model.NodeId, '@Model.SierraInfo.barcode');">Beställardata <span class="glyphicon glyphicon-refresh"></span></button>
+            }
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="sub-action-header col-sm-12">
+            Sökning
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="input-group col-sm-6">
+                <div id="patron-data-query-count" class="input-group-addon wide">0</div>
+                <input type="text" class="form-control" id="patron-data-query-input" name="patron-data-query-input" value="@Model.PatronName">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="row patron-list-header">
+                        <div class="col-sm-2">Namn</div>
+                        <div class="col-sm-3">E-mail</div>
+                        <div class="col-sm-2">Bibliotekskortsnummer</div>
+                        <div class="col-sm-2">Personnummer</div>
+                        <div class="col-sm-1">P-Typ</div>
+                        <div class="col-sm-2">Sista giltighetsdag</div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div id="patron-data-search-result-list" class="patron-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <button class="btn btn-success" onclick="updateWithSelectedPatronData();">Läs in vald beställardata</button>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    function selectPatron(item) {
+        $("#patron-data-search-result-list > .row").removeClass("selected-row");
+        $(item).addClass("selected-row");
+    }
+
+    function searchPatronData() {
+        var queryText = $("#patron-data-query-input").val();
+        if (queryText.length > 2) {
+            $.getJSON("/umbraco/surface/OrderItemPatronDataSurface/QueryPatronDataFromCache?query=" + queryText, function (json) {
+                if (json.Success) {
+                    var data = JSON.parse(json.Message);
+                    var list = $("#patron-data-search-result-list");
+                    list.html("");
+                
+                    $("#patron-data-query-count").text(data.response.numFound);
+
+                    if (data.response.numFound > 0 && data.response.numFound < 10) {
+                        $("#patron-data-query-count").removeClass("alert-warning alert-danger").addClass("alert-success");
+                    } else if (data.response.numFound >= 10 && data.response.numFound < 50) {
+                        $("#patron-data-query-count").removeClass("alert-success alert-danger").addClass("alert-warning");
+                    } else {
+                        $("#patron-data-query-count").removeClass("alert-success alert-warning").addClass("alert-danger");
+                    }
+
+                    data.response.docs.forEach(function (data) {
+                        var date = new Date(data.expdate);
+                        var dateStr = date.getFullYear() + "-" + 
+                            ("00" + (date.getMonth() + 1)).substr(-2) + "-" + 
+                            ("00" + date.getDate()).substr(-2) + " " + 
+                            ("00" + date.getHours()).substr(-2) + ":" + 
+                            ("00" + date.getMinutes()).substr(-2);
+                        list.append("<div class='row' onclick='selectPatron(this);'>\
+                        <div class='col-sm-2 patron-data-pname'>" + data.pname + "</div>\
+                        <div class='col-sm-3 patron-data-email'>" + splitAndFix(data.email) + "</div>\
+                        <div class='col-sm-2 patron-data-barcode'>" + splitAndFix(data.barcode) + "</div>\
+                        <div class='col-sm-2 patron-data-pnum'>" + data.pnum + "</div>\
+                        <div class='col-sm-1 patron-data-ptype'>" + data.ptype + "</div>\
+                        <div class='col-sm-2 patron-data-expdate'>" + dateStr + "</div>\
+                    </div>")
+                    });
+                } else {
+                    alert(json.Message);
+                }
+            });
+        }
+    }
+
+    function updateWithSelectedPatronData() {
+        var selectedItem = $("#patron-data-search-result-list > .selected-row");
+
+        if (selectedItem.length == 0) {
+            alert("Du måste välja någon beställardata i listan att läsa in.")
+        } else {
+            var lcn = selectedItem.find(".patron-data-barcode").text().split(/[,;]/)[0];
+            
+            fetchDataFromSierraUsingLibraryCardNumber(@Model.NodeId, lcn);
+        }
+    }
+
+    function splitAndFix(stuff) {
+        var ret = "";
+        stuff.split(/[;,]/).forEach(function (part) {
+            ret = ret + part + ", ";
+        });
+        return (ret.length > 0 ? ret.substring(0, ret.length-2) : "");
+    }
+
+    $(function () {
+        searchPatronData();
+        $("#patron-data-query-input").focus().select().on("input", searchPatronData);
+    });
+</script>

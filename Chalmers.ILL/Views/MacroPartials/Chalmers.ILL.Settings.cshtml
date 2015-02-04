@@ -1,0 +1,10 @@
+﻿@inherits Umbraco.Web.Macros.PartialViewMacroPage
+@using Chalmers.ILL.Models
+
+<h2>Inställningar</h2>
+
+<h3>Byt lösenord</h3>
+
+@{
+    Html.RenderPartial("~/Views/Partials/Chalmers.ILL.ChangePassword.cshtml", new PasswordModel());
+}

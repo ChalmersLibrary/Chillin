@@ -1,0 +1,21 @@
+﻿@model Chalmers.ILL.Models.OrderItemModel
+
+<div class="action-header">Redigera referens</div>
+
+<form class="form" role="form" onsubmit="return false;">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="originalOrder">Originalbeställning</label>
+                <textarea class="form-control" rows="20" id="originalOrder" name="originalOrder" disabled="disabled">@Model.OriginalOrder</textarea>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="reference">Referens</label>
+                <textarea class="form-control" rows="20" id="reference" name="reference">@Model.Reference</textarea>
+            </div>
+            <button class="btn btn-success" onclick="setOrderItemReference(@Model.NodeId, this.form.reference.value)">Spara referens</button>
+        </div>
+    </div>
+</form>

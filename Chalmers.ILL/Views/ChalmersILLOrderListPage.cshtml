@@ -1,0 +1,247 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@using umbraco.cms.businesslogic.member;
+@using System.Web.Security;
+@using Examine;
+@using Chalmers.ILL.Controllers.SurfaceControllers;
+@using Chalmers.ILL.Wrappers;
+@using Chalmers.ILL.Extensions;
+@using Umbraco.Core.Logging;
+@using System.Globalization;
+
+
+@{
+    Layout = "ChalmersILL.cshtml";
+}
+
+@functions
+{
+    /// <summary>
+    /// Checks who, if any, the given node is being edited by. Using the relation locking system.
+    /// </summary>
+    /// <param name="nodeId">The node which should be checked if open for editing.</param>
+    /// <returns>A string with the member ID of the editor, or an empty string if no one is editing the node.</returns>
+    string EditedBy(int nodeId)
+    {
+        string ret = "";
+
+        var relType = umbraco.cms.businesslogic.relation.RelationType.GetByAlias(OrderItemSurfaceController.lockRelationType);
+        var relations = umbraco.cms.businesslogic.relation.Relation.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
+
+        if (relations.Count() > 0)
+        {
+            ret = relations.First().Parent.Id.ToString();
+        }
+
+        return ret;
+    }
+
+    /// <summary>
+    /// Appends the given arguments to the query string in the given URL.
+    /// </summary>
+    /// <param name="url">The URL string which should be modified.</param>
+    /// <param name="arguments">The arguments which should be added.</param>
+    /// <returns>The new URL string containing the modified query string.</returns>
+    string AppendArgumentsToQueryString(string url, List<Tuple<string, string>> arguments)
+    {
+        var uriBuilder = new UriBuilder(url);
+        var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+        foreach (var arg in arguments)
+        {
+            query[arg.Item1] = arg.Item2;
+        }
+        uriBuilder.Query = query.ToString();
+        return uriBuilder.ToString();
+    }
+
+    /// <summary>
+    /// Looks at an order item and returns the correct sorting order index based on status.
+    /// </summary>
+    /// <param name="item">The search result from Examine containing the order item.</param>
+    /// <returns>An index reflecting the sort order.</returns>
+    int GetSortOrderFromOrderItemSearchResult(SearchResult item)
+    {
+        var status = item.Fields["Status"];
+        var i = Convert.ToInt32(status == "" ? "0" : status.Split(':').First());
+
+        // Fix the fact that the status indexes does not always decide the sorting order
+        i = i * 100;
+        if (i == 900)
+        {
+            i = 450;
+        }
+
+        return i;
+    }
+}
+
+@{
+    var orderCriterium = "Status";
+    string theQuery = "";
+    string debugMessage = "";
+    if (!String.IsNullOrEmpty(Request.QueryString["orderCriterium"]))
+    {
+        orderCriterium = Request.QueryString["orderCriterium"];
+    }
+}
+
+<div class="text-center">
+    <div id="library-filter-buttons" class="btn-group" data-pending-filter-change="0">
+        <button id="library00-button" type="button" value="" class="btn btn-default active">Alla <span id="allaBibliotek" class="badge">0</span></button>
+        <button id="library01-button" type="button" value=".Huvudbiblioteket" class="btn btn-default">Huvudbiblioteket <span id="Huvudbiblioteket" class="badge">0</span></button>
+        <button id="library02-button" type="button" value=".Lindholmenbiblioteket" class="btn btn-default">Lindholmenbiblioteket <span id="Lindholmenbiblioteket" class="badge">0</span></button>
+        <button id="library03-button" type="button" value=".Arkitekturbiblioteket" class="btn btn-default">Arkitekturbiblioteket <span id="Arkitekturbiblioteket" class="badge">0</span></button>
+    </div>
+</div>
+
+<div>
+    <h2 id="order-list-title">Beställningar - Alla bibliotek</h2>  
+    <div id="filter-buttons" class="btn-group" data-pending-filter-change="0">
+        <button id="status00-button" type="button" value="" class="btn btn-default active">Alla <span id="status00-counter" class="badge">0</span></button>
+        <button id="status01-button" type="button" value=".chillin-status-01" class="btn btn-default btn-success">Ny <span id="status01-counter" class="badge">0</span></button>
+        <button id="status02-button" type="button" value=".chillin-status-02" class="btn btn-default btn-danger">Åtgärda <span id="status02-counter" class="badge">0</span></button>
+        <button id="status03-button" type="button" value=".chillin-status-03" class="btn btn-default btn-danger">Beställd <span id="status03-counter" class="badge">0</span></button>
+        <button id="status04-button" type="button" value=".chillin-status-04" class="btn btn-default btn-danger">Väntar <span id="status04-counter" class="badge">0</span></button>
+        <button id="status09-button" type="button" value=".chillin-status-09" class="btn btn-default btn-danger">Mottagen <span id="status09-counter" class="badge">0</span></button>
+        <button id="status05-button" type="button" value=".chillin-status-05" class="btn btn-default btn-info">Levererad <span id="status05-counter" class="badge">0</span></button>
+        <button id="status06-button" type="button" value=".chillin-status-06" class="btn btn-default btn-info">Annullerad <span id="status06-counter" class="badge">0</span></button>
+        <button id="status07-button" type="button" value=".chillin-status-07" class="btn btn-default btn-info">Överförd <span id="status07-counter" class="badge">0</span></button>
+        <button id="status08-button" type="button" value=".chillin-status-08" class="btn btn-default btn-info">Inköpt <span id="status08-counter" class="badge">0</span></button>
+    </div>
+</div>
+
+@if (!String.IsNullOrEmpty(Request.QueryString["query"]))
+{
+    theQuery += "query=";
+    theQuery += Request.QueryString["query"];
+    <h3>Beställningar som matchar <strong>@Request.QueryString["query"]</strong></h3>
+}
+
+<div class="order-list container-fluid">
+
+    <div class="row header">
+        <div class="col-sm-1"><a id="sort-on-follow-up-link" href="#">Följ upp </a></div>
+        <div class="col-sm-5">Referens</div>
+        <div class="col-sm-2">Namn</div>
+        <div class="col-sm-2">Bibliotek</div>
+        <div class="col-sm-1"><a id="sort-on-type-link" href="#">Typ </a></div>
+        <div class="col-sm-1"><a id="sort-on-status-link" href="#">Status <span id="sort-icon" class="glyphicon glyphicon-chevron-down"></span></a></div>
+    </div>
+
+    @{
+        int loggedInMember = MemberWrapper.GetCurrentMemberId(Request, Response);
+        if (!String.IsNullOrEmpty(Request.QueryString["query"]))
+        {
+            // Connect to an Examine Search Provider
+            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
+
+            // Specify Search Criteria
+            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+            
+            // Specify the query            
+            var query = searchCriteria.RawQuery(Request.Params["query"]);
+            
+            // Loop trough results
+            var results = searcher.Search(query);
+            foreach (var item in results.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => DateTime.ParseExact(y.Fields["FollowUpDate"], "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None)))
+            {          
+                @RenderOrderList(loggedInMember, item.Id, DateTime.ParseExact(item.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None),
+                    item.Fields.GetValueString("PatronName"), item.Fields.GetValueString("DeliveryLibrary"), item.Fields.GetValueString("Status"), item.Fields.GetValueString("Type"), 
+                    item.Fields.GetValueString("Reference"), EditedBy(item.Id));
+            }
+            
+            // Add debug message
+            debugMessage += "query.BooleanOperation=" + query.BooleanOperation + ", ";
+            debugMessage += "query.ToString()=" + query.ToString();
+        }
+        else
+        {
+            // Connect to an Examine Search Provider
+            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
+
+            // Specify Search Criteria
+            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+
+            // Specify the query
+            var longAgo = DateTime.MinValue;
+            var now = DateTime.Now;
+            var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
+                (Status:01\:Ny OR 
+                 Status:02\:Åtgärda OR
+                 Status:09\:Mottagen OR 
+                 Status:03\:Beställd OR 
+                 Status:04\:Väntar)"); // TODO: Should also do the range query here, but not playing nice...
+            
+            // Search for our items
+            var results = searcher.Search(query);
+
+            foreach (var result in results.Where(x => (x.Fields["Status"] != "03:Beställd" && x.Fields["Status"] != "04:Väntar") || DateTime.ParseExact(x.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None) < DateTime.Now).OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.Fields["FollowUpDate"]))
+            {
+                DateTime convertDate = DateTime.ParseExact(result.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                @RenderOrderList(loggedInMember, result.Id, convertDate, result.Fields.GetValueString("PatronName"), result.Fields.GetValueString("DeliveryLibrary"), result.Fields.GetValueString("Status"), 
+                    result.Fields.GetValueString("Type"), result.Fields.GetValueString("Reference"), EditedBy(result.Id));
+            }
+        }
+    }
+</div><!-- /order-list -->
+
+@* Debug for Search or List *@
+@if (Request.Params["debug"] == "1" && debugMessage != "")
+{
+    <div class="debug-message">
+        <strong>debugMessage:</strong> @debugMessage
+    </div>
+}
+
+
+@helper ParseStatusPrevalue(string prevalue)
+{
+    @prevalue.Split(':').Last()
+}
+
+@helper RenderOrderList(int memberId, object Id, DateTime date, object patronName, object library, object status, object type, object reference, object editorID)
+{
+    string css_class = "";
+    string data_attribute = "";
+    int loggedInMember = memberId;
+    
+    // Check if item is marked as being edited; if so, check so it is not edited by the member currently logged in
+    if ((editorID.ToString().AsInt() != 0) && (editorID.ToString().AsInt() != loggedInMember))
+    {
+        css_class = "illedit row striped locked";
+    }
+    else
+    {
+        css_class = "illedit row striped";
+    }
+
+    // Mark this item with data-attribute so we can unlock it when doing document.ready unlocking
+    if ((editorID.ToString().AsInt() != 0) && (editorID.ToString().AsInt() == loggedInMember))
+    {
+        data_attribute = "data-locked-by-memberid=\"" + editorID.ToString() + "\"";
+    }
+    
+    <div id="@Id" class="@css_class" data-editorid="@editorID.ToString().AsInt()" @data_attribute>
+        <div class="col-sm-1" data-fud="@date.Ticks" data-column="createDate">@date.ToShortDateString()</div>
+        <div class="col-sm-5" data-column="reference">@reference</div>
+        <div class="col-sm-2" data-column="patronName">@patronName</div>
+        <div class="col-sm-2 deliveryLibrary @library" data-column="deliveryLibrary">@library</div>
+        <div class="col-sm-1" data-column="type">@type</div>
+        <div class="col-sm-1" data-column="status">
+            @if (status.ToString().StartsWith("01:"))
+            {
+                <span class="order-item-status label label-success status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
+            }
+            else if (status.ToString().StartsWith("05:") ||
+                     status.ToString().StartsWith("06:") ||
+                     status.ToString().StartsWith("07:") ||
+                     status.ToString().StartsWith("08:"))
+            {
+                <span class="order-item-status label label-info status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
+            }
+            else
+            {
+                <span class="order-item-status label label-danger status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
+            }
+        </div>
+    </div>
+}

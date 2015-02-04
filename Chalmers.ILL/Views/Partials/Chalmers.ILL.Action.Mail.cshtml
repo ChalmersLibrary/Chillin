@@ -1,0 +1,59 @@
+﻿@model Chalmers.ILL.Models.OrderItemModel
+@using System.Globalization
+
+<div class="action-header">Skicka mail</div>
+
+<form class="form" role="form" onsubmit="return false;">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="message">Meddelande</label>
+                <textarea class="form-control" rows="11" id="message" name="message">
+                    
+                    @{
+                        if (Model.LogItemsList.Where(x => x.Type == "MAIL").Count() > 0)
+                        {
+                            foreach (var logItem in Model.LogItemsList.Where(x => x.Type == "MAIL"))
+                            {
+                                @Html.Raw("\n---\n" + logItem.Message)
+                                //We just want the first log entry
+                                break;
+                            }
+                        }
+                        else
+                        {
+                           @Html.Raw("\n---\n" + Model.OriginalOrder)
+                        }
+                    }
+                </textarea>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="recipientName">Mottagarens namn</label>
+                <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.PatronName">
+            </div>
+            <div class="form-group">
+                <label for="recipientEmail">Mottagande e-postadress</label>
+                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.PatronEmail">
+            </div>
+            <div class="form-group">
+                <label for="followUpDate">Följs upp</label>
+                <div class="input-group date datetimepicker">
+                    <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+            <button class="btn btn-success" onclick="sendMailToPatron(@Model.NodeId, this.form.recipientEmail.value.toString().trim(), this.form.recipientName.value, this.form.message.value, '04:Väntar', this.form.followUpDate.value);">Skicka e-post</button>
+        </div>
+   </div>
+    <script type="text/javascript">
+        $(function () {
+            $('.datetimepicker').datetimepicker({
+                language: 'sv'
+            });
+        });
+    </script>
+</form>

@@ -1,0 +1,106 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@using System.Configuration;
+@{
+    Layout = "ChalmersILL.cshtml";
+}
+
+@{
+    if (Convert.ToBoolean(ConfigurationManager.AppSettings["showManulMailFetchingTools"]))
+    {
+        <form class="form" role="form" onsubmit="return false;">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>NY BESTÄLLNING!</h1>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="message">Meddelande</label>
+                        <textarea class="form-control" rows="11" id="message" name="message"></textarea>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="recipientName">Namn</label>
+                        <input type="text" class="form-control" id="recipientName" name="recipientName" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="recipientEmail">E-post</label>
+                        <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="recipientLibNr">Bibliotekskortsnummer</label>
+                        <input type="text" class="form-control" id="recipientLibNr" name="recipientLibNr" value="">
+                    </div>
+                    <button class="btn btn-success" onclick="sendMailForNewOrder(this.form.message.value.toString().trim(), this.form.recipientName.value.toString().trim(), this.form.recipientEmail.value.toString().trim(), this.form.recipientLibNr.value.toString().trim());">Skicka in beställning</button>
+                </div>
+            </div>
+        </form>
+    }
+}
+
+<h2>Startsida</h2>
+
+<div>
+    <h3>Översikt status</h3>
+    <ul class="list-group">
+        <li class="list-group-item"><span class="label label-success">Ny</span> - nyinkommen beställning, syns alltid i listan.</li>
+        <li class="list-group-item"><span class="label label-danger">Åtgärda</span> - ska tas om hand, syns alltid i listan.</li>
+        <li class="list-group-item"><span class="label label-danger">Beställd</span> - hos leverantör, syns bara om uppföljningsdatum passerats.</li>
+        <li class="list-group-item"><span class="label label-danger">Väntar</span> - avvaktar svar från lt eller dyl, syns bara om uppföljningsdatum passerats.</li>
+        <li class="list-group-item"><span class="label label-danger">Mottagen</span> - leverans eller svar från leverantör, syns alltid i listan.</li>
+        <li class="list-group-item"><span class="label label-info">Levererad</span> - klar, levererad till lt, syns aldrig i listan</li>
+        <li class="list-group-item"><span class="label label-info">Annullerad</span> - avbeställd, syns aldrig i listan.</li>
+        <li class="list-group-item"><span class="label label-info">Överförd</span> - bokbeställning inklistrad i Sierras fjärrlånemodul, syns aldrig i listan.</li>
+        <li class="list-group-item"><span class="label label-info">Inköpt</span> - färdigbehandlat inköpsförslag ,syns aldrig i listan.</li>
+    </ul>
+
+    <p>
+        Listan man får vid start ska visa allt man har att arbeta med för tillfället - nya beställningar, beställningar som skall åtgärdas och de som har passerat uppföljningsdatum. <br />
+        Övriga beställningar söker man fram.
+    </p>
+</div>
+
+<div>
+    <h3>Söktips</h3>
+    <ul class="list-group">
+        <li class="list-group-item">+ för AND</li>
+        <li class="list-group-item">- för NOT</li>
+        <li class="list-group-item">* trunkerar, ? går också att använda mitt i ord.</li>
+    </ul>
+
+    <p>
+        Sökningen görs i de fält som ingår i beställningen. Skriv in fältnamnet och : för att söka i bara det fältet. Andra sökningar där : ingår går inte att göra. <br />
+        Det går bra att söka på en status, t ex beställd för att se allt som ligger och väntar på leverans.
+    </p>
+
+    <h4>Fältnamn</h4>
+    <ul class="list-group">
+        <li class="list-group-item">PatronName:</li>
+        <li class="list-group-item">PatronEmail:</li>
+        <li class="list-group-item">PatronCardNo:</li>
+    </ul>
+</div>
+
+<p>Meddelandemallar finns på <a href="https://intranet.lib.chalmers.se/arbetssidor/fjarrin/Documents/Meddelande-mallar.docx">intranätet</a></p>
+
+
+<!--
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post" role="form" action="/umbraco/surface/MailQueueSurface/ReadFromQueue" target="#output">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input name="username" id="username" type="text" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="Type">Password:</label>
+                    <input name="password" id="password" type="password" class="form-control" />
+                </div>
+                <button type="submit" class="btn btn-primary">Read MailQueue (returns JSON)</button>
+            </form>
+        </div>
+        <div class="col-md-6" id="output">
+            Output...
+        </div>
+    </div>
+-->

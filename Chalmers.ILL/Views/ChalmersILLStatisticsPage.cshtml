@@ -1,0 +1,564 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@{
+    Layout = "ChalmersILL.cshtml";
+}
+
+<script src="/scripts/Chart.min.js" charset="utf-8"></script>
+
+<h2>Statistik</h2>
+
+<form class="form" role="form" onsubmit="return false;">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="fromDate">Från</label>
+                <div class="input-group date datetimepicker">
+                    <input type="text" class="form-control" id="fromDate" name="fromDate" value="2014-01-01 00:00">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="toDate">Till</label>
+                <div class="input-group date datetimepicker">
+                    <input type="text" class="form-control" id="toDate" name="toDate" value="2015-01-01 00:00">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label for="granularity">Fördelning</label>
+            <div id="granularity">
+                <label>
+                    <input type="radio" name="granularityOptions" value="year">
+                    År
+                </label>
+                <label>
+                    <input type="radio" name="granularityOptions" value="month" checked="checked">
+                    Månad
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Ny Datavariabel
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="var-name">Variabelnamn</label>
+                                        <input type="text" class="form-control" id="var-name" name="var-name" value="" placeholder="Beskrivande namn för ny datavariabel">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="dropdown" style="margin-bottom: 0.2cm;">
+                                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown">
+                                            Uträkning av datapunkt: <span id="selected-calc-type" data-calc-type="COUNT">Antal ordrar</span>
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="var sct = $(event.target).parent().parent().parent().find('#selected-calc-type'); sct.text($(event.target).text()); sct.data('calc-type', $(event.target).data('calc-type')); return false;" data-calc-type="COUNT">Antal ordrar</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="var sct = $(event.target).parent().parent().parent().find('#selected-calc-type'); sct.text($(event.target).text()); sct.data('calc-type', $(event.target).data('calc-type')); return false;" data-calc-type="AVERAGE_ORDER_LENGTH">Medelvärde av handläggningstid</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#" onclick="var sct = $(event.target).parent().parent().parent().find('#selected-calc-type'); sct.text($(event.target).text()); sct.data('calc-type', $(event.target).data('calc-type')); return false;" data-calc-type="MEDIAN_ORDER_LENGTH">Medianvärde av handläggningstid</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="button" class="btn btn-success" style="margin-top: 0.5cm; margin-bottom: 0.5cm;" onclick="addStatisticsVariable(); return false;">Spara variabel</button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="stat-variable-options" class="col-md-12">
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="button" class="btn btn-success" onclick="addStatisticsVariable(); return false;">Spara variabel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    Befintliga Datavariabler
+                </div>
+                <div class="panel-body">
+                    <div class="col-md-12" style="margin-bottom:0.5cm;">
+                        <button type="button" class="btn btn-success" onclick="fetchStatistics(); return false;">Skapa tabell</button>
+                    </div>
+                    <div id="stat-variable-list" class="col-md-12" style="min-height:600px;">
+ 
+                    </div>
+                    <div class="col-md-12">
+                        <button type="button" class="btn btn-success" onclick="fetchStatistics(); return false;">Skapa tabell</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="stat-data-view" class="col-md-12" style="display:none;">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
+                        <table id="data-table"></table>
+                    </div>
+                    <div id="bar-chart-container" class="col-md-12">
+                    </div>
+                    <div class="col-md-12">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="export-filename">Filnamn</label>
+                                <input type="text" class="form-control" id="export-filename" name="export-filename" value="data">
+                            </div>
+                            <button type="button" class="btn btn-default" onclick="exportTableToCsv(); return false;">Ladda ner som CSV</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function () {
+        // Change how the legends are shown in the bar graph.
+        Chart.defaults.global.multiTooltipTemplate = "<%= datasetLabel %> - <%= value %>";
+
+        $('.datetimepicker').datetimepicker({
+            language: 'sv'
+        });
+
+        // Load available filters and values on filters.
+        lockScreen();
+        $.ajax({
+            type: "GET",
+            url: "/umbraco/surface/StatisticsSurface/GetAvailableValues",
+            data: { Keys: ["pType", "Status", "ProviderName", "Type", "DeliveryLibrary", "HomeLibrary", "CancellationReason", "PurchasedMaterial"] },
+            traditional: true,
+            success: function (res) {
+                if (res.Success) {
+                    var row;
+                    var addedFilters = 0;
+                    for (i = 0; i < res.KeyValues.length; i++) {
+                        if (addedFilters % 3 == 0) {
+                            row = $("<div class='row'>");
+                        }
+
+                        if (res.KeyValues[i].AvailableValues.length > 0) {
+                            var filterOptions = $("<ul class='list-group' style='margin-bottom: 0px;'>");
+                            for (o = 0; o < res.KeyValues[i].AvailableValues.length; o++) {
+                                filterOptions.append($("<li class='list-group-item' style='padding:0px;'><button type='button' class='btn btn-default' style='width:100%; height:100%; overflow:none;' onclick='$(event.target).toggleClass(\"btn-info\"); return false;'>" + res.KeyValues[i].AvailableValues[o] + "</button></li>"));
+                            }
+
+                            var filter = $("<div class='col-md-4'>").data("filter-name", res.KeyValues[i].Key);
+                            filter.append($("<div class='panel panel-default'>")
+                                .append($("<div class='panel-heading'>")
+                                    .text(res.KeyValues[i].Name)
+                                )
+                                .append($("<div class='panel-body' style='padding: 0px; max-height: 400px; overflow: auto;'>")
+                                    .append(filterOptions)
+                                )
+                                .append($("<div class='panel-footer'>")
+                                    .append("<button type='button' class='btn btn-default' style='width: 100%;' onclick='$(event.target).parent().parent().find(\".panel-body li button\").removeClass(\"btn-info\");'>Nollställ filter</button>")
+                                )
+                            );
+
+                            row.append(filter);
+                            addedFilters++;
+                        }
+
+                        if ((addedFilters != 0 && addedFilters % 3 == 0) || i == res.KeyValues.length - 1) {
+                            $("#stat-variable-options").append(row);
+                        }
+                    }
+                } else {
+                    alert("Error: " + res.Message);
+                }
+                unlockScreen();
+            },
+            error: function (jqxhr, textStatus, error) {
+                alert("Error: " + textStatus + " " + error);
+                unlockScreen();
+            }
+        });
+    });
+
+    function buildGroupedOrQueryString(key, arr) {
+        var ret = "";
+
+        if (arr.length == 1) {
+            ret = key + ":" + arr[0];
+        } else if (arr.length > 1) {
+            ret = "(";
+            for (i = 0; i < arr.length; i++) {
+                ret = ret + key + ":" + arr[i];
+                if (i < arr.length - 1) {
+                    ret = ret + " OR ";
+                }
+            }
+            ret = ret + ")";
+        }
+        return ret;
+    }
+
+    function addStatisticsVariable(baseQuery) {
+        if (!$("#var-name").val()) {
+            alert("Du måste skriva in ett namn för datavariabeln.");
+        } else {
+            var luceneQuery = baseQuery;
+
+            if (!luceneQuery) {
+                luceneQuery = "";
+            }
+
+            var filterList = $("<ul class='list-group'>");
+
+            $("#stat-variable-options > .row > div").each(function (index) {
+                var name = $(this).data("filter-name");
+                var prettyName = $(this).find(".panel-heading").text();
+                var settingsArr = [];
+                $(this).find(".panel-body li button[class~='btn-info']").each(function (index) {
+                    settingsArr.push("\"" + $(this).text() + "\"");
+                });
+
+                if (settingsArr.length > 0) {
+                    filterList.append($("<li class='list-group-item'>" + prettyName + ": " + settingsArr.toString() + "</li>"));
+                }
+
+                if (luceneQuery && settingsArr.length > 0) {
+                    luceneQuery = luceneQuery + " AND ";
+                }
+                luceneQuery = luceneQuery + buildGroupedOrQueryString(name, settingsArr);
+            });
+
+            var filterListDiv = $("<div>")
+                .append($("<h4>Filter</h4>"))
+                .append(filterList);
+
+            var panelBody = $("<div class='panel-body'>");
+            panelBody.append($("<div><h4>Uträkning</h4>" + $("#selected-calc-type").text() + "</div>"))
+            if (filterList.html().length > 0) {
+                panelBody.append(filterListDiv);
+            }
+            panelBody.append($("<div align='right'><button type='button' class='btn btn-danger' onclick='$(this).parent().parent().parent().parent().remove(); return false;'><span class='glyphicon glyphicon-remove'></span></button></div>"));
+
+            var newStatVar = $("<div class='col-md-12'>")
+                .append($("<div class='panel panel-primary'>")
+                    .append($("<div class='panel-heading'>")
+                        .append($("<h3 class='panel-title'>" + $("#var-name").val() + "</h3>"))
+                    )
+                    .append(panelBody)
+                );
+
+            var statData = {
+                Name: $("#var-name").val(),
+                LuceneQueries: [luceneQuery],
+                CalculationType: $("#selected-calc-type").data("calc-type"),
+                Values: []
+            };
+
+            $(newStatVar).data("stat-var", statData);
+
+            $("#stat-variable-list").append(newStatVar);
+
+            $("#var-name").val("");
+        }
+    }
+
+    function getQueryDateString(date) {
+        return "" + date.getUTCFullYear() +
+            ("00" + (date.getUTCMonth() + 1)).substr(-2) +
+            ("00" + date.getUTCDate()).substr(-2) +
+            ("00" + date.getUTCHours()).substr(-2) +
+            ("00" + date.getUTCMinutes()).substr(-2) +
+            ("00" + date.getUTCSeconds()).substr(-2) +
+            ("000" + date.getUTCMilliseconds()).substr(-3);
+    }
+
+    function getHeaderDateString(date) {
+        return "" + date.getFullYear() + "-" +
+            ("00" + (date.getMonth() + 1)).substr(-2) + "-" +
+            ("00" + date.getDate()).substr(-2) + " " + 
+            ("00" + date.getHours()).substr(-2) + ":" +
+            ("00" + date.getMinutes()).substr(-2);
+    }
+
+    function isStartOfMonth(date) {
+        return date.getDate() == 1 && date.getHours() == 0 && date.getMinutes() == 0;
+    }
+
+    function isStartOfYear(date) {
+        return isStartOfMonth(date) && date.getMonth() == 0;
+    }
+
+    function getExactYear(startDate, endDate) {
+        var ret = "";
+        if (isStartOfYear(startDate) && isStartOfYear(endDate) && (startDate.getFullYear() + 1 == endDate.getFullYear())) {
+            ret = startDate.getFullYear().toString();
+        }
+        return ret;
+    }
+
+    function getExactMonth(startDate, endDate) {
+        var ret = "";
+        if (isStartOfMonth(startDate) && isStartOfMonth(endDate) && ((startDate.getMonth() + 1) % 12 == endDate.getMonth())) {
+            var m = startDate.getMonth();
+            if (m == 0) {
+                ret = "Januari " + startDate.getFullYear().toString();
+            } else if (m == 1) {
+                ret = "Februari " + startDate.getFullYear().toString();
+            } else if (m == 2) {
+                ret = "Mars " + startDate.getFullYear().toString();
+            } else if (m == 3) {
+                ret = "April " + startDate.getFullYear().toString();
+            } else if (m == 4) {
+                ret = "Maj " + startDate.getFullYear().toString();
+            } else if (m == 5) {
+                ret = "Juni " + startDate.getFullYear().toString();
+            } else if (m == 6) {
+                ret = "Juli " + startDate.getFullYear().toString();
+            } else if (m == 7) {
+                ret = "Augusti " + startDate.getFullYear().toString();
+            } else if (m == 8) {
+                ret = "September " + startDate.getFullYear().toString();
+            } else if (m == 9) {
+                ret = "Oktober " + startDate.getFullYear().toString();
+            } else if (m == 10) {
+                ret = "November " + startDate.getFullYear().toString();
+            } else if (m == 11) {
+                ret = "December " + startDate.getFullYear().toString();
+            }
+        }
+        return ret;
+    }
+
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    function getChartFillColor(i) {
+        var ret = getRandomColor();
+        var c = ["rgba(220,30,30,0.5)", "rgba(30,220,30,0.5)", "rgba(30,30,220,0.5)", "rgba(220,110,30,0.5)"];
+        if (i < c.length) {
+            ret = c[i];
+        }
+        return ret;
+    }
+    
+    function getChartStrokeColor(i) {
+        var ret = getRandomColor();
+        var c = ["rgba(220,30,30,0.8)", "rgba(30,220,30,0.8)", "rgba(30,30,220,0.8)", "rgba(220,110,30,0.8)"];
+        if (i < c.length) {
+            ret = c[i];
+        }
+        return ret;
+    }
+
+    function getChartHighlightFill(i) {
+        var ret = getRandomColor();
+        var c = ["rgba(220,30,30,0.75)", "rgba(30,220,30,0.75)", "rgba(30,30,220,0.75)", "rgba(220,110,30,0.75)"];
+        if (i < c.length) {
+            ret = c[i];
+        }
+        return ret;
+    }
+
+    function getChartHighlightStroke(i) {
+        var ret = getRandomColor();
+        var c = ["rgba(220,30,30,1)", "rgba(30,220,30,1)", "rgba(30,30,220,1)", "rgba(220,110,30,1)"];
+        if (i < c.length) {
+            ret = c[i];
+        }
+        return ret;
+    }
+
+    function calculateBaseLuceneQueries(statVar, createHeader) {
+        var ret = [""];
+
+        var baseQuery = statVar.LuceneQueries.pop().toString();
+
+        if (baseQuery) {
+            baseQuery = baseQuery + " AND ";
+        }
+
+        var fromDateStr = $("#fromDate").val();
+        var toDateStr = $("#toDate").val();
+
+        var dateRegex = /([0-9]{4})\-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2})/;
+        var fromDateMatch = fromDateStr.match(dateRegex);
+        var toDateMatch = toDateStr.match(dateRegex);
+
+        var startDate = new Date(fromDateMatch[1], fromDateMatch[2] - 1, fromDateMatch[3], fromDateMatch[4], fromDateMatch[5], 0, 0);
+        var movingStartDate = new Date(fromDateMatch[1], fromDateMatch[2] - 1, fromDateMatch[3], fromDateMatch[4], fromDateMatch[5], 0, 0);
+        var movingEndDate = new Date(fromDateMatch[1], fromDateMatch[2] - 1, fromDateMatch[3], fromDateMatch[4], fromDateMatch[5], 0, 0);
+        var endDate = new Date(toDateMatch[1], toDateMatch[2] - 1, toDateMatch[3], toDateMatch[4], toDateMatch[5], 0, 0);
+        var granOption = $("#granularity input:radio[name=granularityOptions]:checked").val();
+
+        if (granOption === "day") {
+            movingEndDate.setDate(movingStartDate.getDate() + 1);
+        } else if (granOption === "month") {
+            movingEndDate.setMonth(movingStartDate.getMonth() + 1);
+        } else { // default to year
+            movingEndDate.setFullYear(movingStartDate.getFullYear() + 1);
+        }
+        
+        while (movingStartDate.getTime() < endDate.getTime()) {
+            if (createHeader) {
+                var header = getExactYear(movingStartDate, movingEndDate);
+                if (!header) {
+                    header = getExactMonth(movingStartDate, movingEndDate);
+                }
+                if (!header) {
+                    header = getHeaderDateString(movingStartDate) + " - " + getHeaderDateString(movingEndDate);
+                }
+                ret.push(header);
+            }
+            statVar.LuceneQueries.push(baseQuery + "createDate:[" + getQueryDateString(movingStartDate) + " TO " + getQueryDateString(movingEndDate) + "] AND NOT createDate:" + getQueryDateString(movingEndDate));
+            if (granOption === "day") {
+                movingStartDate.setDate(movingStartDate.getDate() + 1);
+                movingEndDate.setDate(movingStartDate.getDate() + 1);
+            } else if (granOption === "month") {
+                movingStartDate.setMonth(movingStartDate.getMonth() + 1);
+                movingEndDate.setMonth(movingStartDate.getMonth() + 1);
+            } else { // default to year
+                movingStartDate.setFullYear(movingStartDate.getFullYear() + 1);
+                movingEndDate.setFullYear(movingStartDate.getFullYear() + 1);
+            }
+
+            if (movingEndDate > endDate) {
+                movingEndDate = endDate;
+            }
+        }
+
+        return ret;
+    }
+
+    function fetchStatistics() {
+        lockScreen();
+
+        $("#data-table").html("");
+
+        var headers = [];
+        var data = { StatisticsData: [] };
+        var chartDatasets = [];
+
+        var first = true;
+        $("#stat-variable-list > div").each(function (index) {
+            var statVarRef = $(this).data("stat-var");
+            var statVar = {
+                Name: statVarRef.Name,
+                LuceneQueries: statVarRef.LuceneQueries.slice(0),
+                CalculationType: statVarRef.CalculationType,
+                Values: []
+            };
+            if (first) {
+                headers = calculateBaseLuceneQueries(statVar, first);
+            } else {
+                calculateBaseLuceneQueries(statVar, first);
+            }
+
+            data.StatisticsData.push(statVar);
+
+            first = false;
+        });
+
+        $.post("/umbraco/surface/StatisticsSurface/GetData", { json: JSON.stringify(data) }).done(function (res) {
+            if (res.Success) {
+                var headerRow = $("<tr>");
+                for (h = 0; h < headers.length; h++) {
+                    headerRow.append("<th>" + headers[h] + "</th>");
+                }
+                var count = 0;
+                $("#data-table").append(headerRow);
+                for (i = 0; i < res.StatisticsData.length; i++) {
+                    var tr = $("<tr>");
+                    tr.append("<td>" + res.StatisticsData[i].Name + "</td>");
+                    for (k = 0; k < res.StatisticsData[i].Values.length; k++) {
+                        tr.append("<td>" + res.StatisticsData[i].Values[k] + "</td>");
+                    }
+                    $("#data-table").append(tr);
+
+                    chartDatasets.push({
+                        label: res.StatisticsData[i].Name,
+                        fillColor: getChartFillColor(count),
+                        strokeColor: getChartStrokeColor(count),
+                        highlightFill: getChartHighlightFill(count),
+                        highlightStroke: getChartHighlightStroke(count),
+                        data: res.StatisticsData[i].Values
+                    });
+                    count++;
+                }
+            }
+            else {
+                alert(res.Message);
+            }
+            unlockScreen();
+
+            var chartHeaders = headers.slice(0);
+            chartHeaders.shift();
+            var chartData = {
+                labels: chartHeaders,
+                datasets: chartDatasets
+            };
+
+            $("#bar-chart-container").html("");
+            $("#stat-data-view").show();
+            var canvas = $("<canvas id='bar-chart' width='" + $("#bar-chart-container").width() + "' height='" + ($("#bar-chart-container").width()/2.8) + "'></canvas>");
+            $("#bar-chart-container").append(canvas);
+            var ctx = document.getElementById("bar-chart").getContext("2d");
+            new Chart(ctx).Bar(chartData);
+            $(window).scrollTop($("#stat-data-view").offset().top - 40);
+
+        }).fail(function (jqxhr, textStatus, error) {
+            alert("Error: " + textStatus + " " + error);
+            unlockScreen();
+        });
+    }
+
+    function exportTableToCsv() {
+        var data = "";
+        var rows = $("#data-table tr");
+        rows.each(function (rowIndex) {
+            var cols = $(this).find("td,th");
+            cols.each(function (colIndex) {
+                data = data + encodeURIComponent($(this).text());
+                if (colIndex != cols.length - 1) {
+                    data = data + "%09" /*"%2C"*/;
+                }
+            });
+            data = data + "%0A";
+        });
+        var uri = "data:application/octet-stream," + data;
+        var downloadLink = document.createElement("a");
+        downloadLink.href = uri;
+        downloadLink.download = $("#export-filename").val() + ".csv";
+        
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+</script>

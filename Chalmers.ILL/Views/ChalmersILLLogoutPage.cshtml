@@ -1,0 +1,16 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+@using umbraco.cms.businesslogic.member
+@using Chalmers.ILL.Wrappers;
+@{
+    Layout = "ChalmersILL.cshtml";
+}
+@{
+	if (library.IsLoggedOn())
+    {
+        var memberId = MemberWrapper.GetCurrentMemberId(Request, Response);
+        Member.RemoveMemberFromCache(memberId);
+        Member.ClearMemberFromClient(memberId);
+        MemberWrapper.ClearMemberCache(Response);
+    }
+	Response.Redirect("/");
+}

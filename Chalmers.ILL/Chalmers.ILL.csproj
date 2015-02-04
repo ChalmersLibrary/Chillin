@@ -1,0 +1,384 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{57218F89-EF67-4430-89C2-8B40C7C5EA2E}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Chalmers.ILL</RootNamespace>
+    <AssemblyName>Chalmers.ILL</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="businesslogic, Version=1.0.5021.24868, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\businesslogic.dll</HintPath>
+    </Reference>
+    <Reference Include="cms, Version=1.0.5021.24868, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\cms.dll</HintPath>
+    </Reference>
+    <Reference Include="Examine, Version=0.1.52.2941, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Examine.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.4.6.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="interfaces, Version=1.0.5021.24867, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Core">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.0.1\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.SystemWeb">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.SystemWeb.2.0.1\lib\net45\Microsoft.AspNet.SignalR.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\EWS-Api-2.0.1.0.1\lib\net35\Microsoft.Exchange.WebServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin">
+      <HintPath>..\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.2.0.2\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security">
+      <HintPath>..\packages\Microsoft.Owin.Security.2.0.2\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>..\packages\Npgsql.2.0.14.3\lib\net45\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql">
+      <HintPath>..\packages\Npgsql.2.0.14.3\lib\net45\Npgsql.dll</HintPath>
+    </Reference>
+    <Reference Include="Owin">
+      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.0\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.0\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.0\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\Microsoft ASP.NET\ASP.NET MVC 4\Assemblies\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\System.Web.WebPages.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="umbraco, Version=1.0.5021.24870, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\umbraco.dll</HintPath>
+    </Reference>
+    <Reference Include="Umbraco.Core, Version=1.0.5298.15481, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Umbraco.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="UmbracoExamine, Version=0.6.0.24869, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\UmbracoExamine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bin\System.Web.Mvc.dll" />
+    <Content Include="Config\404handlers.config" />
+    <Content Include="Config\BaseRestExtensions.config" />
+    <Content Include="Config\ClientDependency.config" />
+    <Content Include="Config\Dashboard.config" />
+    <Content Include="Config\EmbeddedMedia.config" />
+    <Content Include="Config\ExamineIndex.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\ExamineSettings.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\feedProxy.config" />
+    <Content Include="Config\FileSystemProviders.config" />
+    <Content Include="Config\log4net.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\metablogConfig.config" />
+    <Content Include="Config\restExtensions.config" />
+    <Content Include="Config\scripting.config" />
+    <Content Include="Config\Skinning.config" />
+    <Content Include="Config\tinyMceConfig.config" />
+    <Content Include="Config\umbracoSettings.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\UrlRewriting.config" />
+    <Content Include="Config\xsltExtensions.config" />
+    <Content Include="images\chilli-plain.svg" />
+    <Content Include="images\chilli.png" />
+    <Content Include="images\help.png" />
+    <Content Include="images\help.svg" />
+    <Content Include="bower.json" />
+    <Content Include="images\lock-plain.svg" />
+    <Content Include="images\lock.png" />
+    <Content Include="Scripts\chalmers.ill.js" />
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Views\Web.config" />
+    <Content Include="Views\Web.config.transform" />
+    <Content Include="Views\ChalmersILL.cshtml" />
+    <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
+    <Content Include="Views\ChalmersILLStartPage.cshtml" />
+    <Content Include="Views\MacroPartials\Chalmers.ILL.Login.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.Login.cshtml" />
+    <Content Include="Views\ChalmersILLLogoutPage.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\ChalmersILLLoginPage.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.LogItem.cshtml" />
+    <Content Include="Views\MacroPartials\Chalmers.ILL.LogItem.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.OrderItem.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Partials\Chalmers.ILL.Action.Provider.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.Reference.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.Mail.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.ChangePassword.cshtml" />
+    <Content Include="Views\ChalmersILLSettingsPage.cshtml" />
+    <Content Include="Views\MacroPartials\Chalmers.ILL.Settings.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.LogEntry.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.Delivery.cshtml" />
+    <Content Include="Views\ChalmersILLStatisticsPage.cshtml" />
+    <Content Include="Xslt\Web.config" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.PatronData.cshtml" />
+    <None Include="Web.ChalmersILL.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.ChillinTest.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Web.ChillinTest.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config\Splashes\booting.aspx" />
+    <Content Include="Config\Splashes\noNodes.aspx" />
+    <Content Include="Css\chalmers.ill.main.css" />
+    <Content Include="default.aspx" />
+    <Content Include="Global.asax" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controllers\SurfaceControllers\GetMemberSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\LoginSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\LogItemSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\MaintenanceSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemDeliveryLibrarySurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemDeliverySurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemMailSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemProviderSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemReferenceSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemStatusSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\MailQueueSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemPurchasedMaterialSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemCancellationReasonSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemTypeSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemPatronDataSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\SystemSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\StatisticsSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
+    <Compile Include="Extensions\ContentServiceExtensions.cs" />
+    <Compile Include="Extensions\DictionaryExtensions.cs" />
+    <Compile Include="Models\KeyValue.cs" />
+    <Compile Include="Models\StatisticsVariable.cs" />
+    <Compile Include="Models\UmbracoDropdownListNtextDataType.cs" />
+    <Compile Include="Models\MailAttachment.cs" />
+    <Compile Include="Models\OrderAttachment.cs" />
+    <Compile Include="Models\Lock.cs" />
+    <Compile Include="Models\MailQueueModel.cs" />
+    <Compile Include="Models\OutgoingMailModel.cs" />
+    <Compile Include="Models\PasswordModel.cs" />
+    <Compile Include="Controllers\SurfaceControllers\PasswordSurfaceController.cs" />
+    <Compile Include="EventHandlers\OwinStartup.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Models\LoginModel.cs" />
+    <Compile Include="Models\LogItem.cs" />
+    <Compile Include="Models\OrderItemModel.cs" />
+    <Compile Include="Models\ResultResponse.cs" />
+    <Compile Include="Models\SierraModel.cs" />
+    <Compile Include="Patron\IPatronDataProvider.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SignalR\NotificationHub.cs" />
+    <Compile Include="SignalR\Notifier.cs" />
+    <Compile Include="Statistics\DefaultStatCalc.cs" />
+    <Compile Include="Statistics\DefaultStatMngr.cs" />
+    <Compile Include="Statistics\IStatisticsCalculator.cs" />
+    <Compile Include="Statistics\IStatisticsManager.cs" />
+    <Compile Include="Utilities\ExchangeMailWebApi.cs" />
+    <Compile Include="Utilities\Helpers.cs" />
+    <Compile Include="Utilities\Logging.cs" />
+    <Compile Include="Utilities\OrderItem.cs" />
+    <Compile Include="Utilities\OrderItemAttachments.cs" />
+    <Compile Include="Utilities\OrderItemCancellationReason.cs" />
+    <Compile Include="Utilities\OrderItemDeliveryLibrary.cs" />
+    <Compile Include="Utilities\OrderItemDrm.cs" />
+    <Compile Include="Utilities\OrderItemPurchasedMaterial.cs" />
+    <Compile Include="Utilities\OrderItemStatus.cs" />
+    <Compile Include="Utilities\OrderItemType.cs" />
+    <Compile Include="Patron\Sierra.cs" />
+    <Compile Include="Wrappers\MemberWrapper.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MacroScripts\" />
+    <Folder Include="Masterpages\" />
+    <Folder Include="Properties\PublishProfiles\" />
+    <Folder Include="UserControls\" />
+    <Folder Include="Views\Home\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ChillinTest.Release|AnyCPU'">
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <ExcludeFilesFromDeployment>Local.config</ExcludeFilesFromDeployment>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ChalmersILL|AnyCPU'">
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <ExcludeFilesFromDeployment>Local.config</ExcludeFilesFromDeployment>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ChillinTest.Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <ExcludeFilesFromDeployment>Local.config</ExcludeFilesFromDeployment>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>49387</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:49387/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <PreBuildEvent>cd $(ProjectDir)
+bower install</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

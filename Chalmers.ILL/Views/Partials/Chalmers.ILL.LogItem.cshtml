@@ -1,0 +1,10 @@
+﻿@model Chalmers.ILL.Models.LogItem
+
+@foreach (var item in Model)
+{
+    <div>
+        <div class="col-lg-2">@item.CreateDate.ToShortDateString()</div>
+        <div class="col-lg-3">@item.MemberName</div>
+        <div class="col-lg-7">@item.Message</div>
+    </div>
+}

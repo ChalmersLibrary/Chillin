@@ -1,0 +1,37 @@
+﻿@model Chalmers.ILL.Models.OrderItemModel
+
+<div class="action-header">Lägg en beställning</div>
+
+<form class="form" role="form" onsubmit="return false;">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="providerName">Leverantör</label>
+                <input type="text" class="form-control" id="providerName" name="providerName" placeholder="Leverantörens namn" value="@Model.ProviderName">
+            </div>
+            <div class="form-group">
+                <label for="providerOrderId">Leverantörens order-id</label>
+                <input type="text" class="form-control" id="providerOrderId" name="providerOrderId" placeholder="Beställningsnummer" value="@Model.ProviderOrderId">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="followUpDate">Följs upp</label>
+                <div class="input-group date datetimepicker">
+                    <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@(DateTime.Now.AddDays(1).ToString("yyyy-MM-dd HH:mm"))">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+            <button class="btn btn-success" onclick="setOrderItemProvider(@Model.NodeId, this.form.providerName.value, this.form.providerOrderId.value, this.form.followUpDate.value)">Spara beställning</button>
+        </div>
+    </div>   
+    <script type="text/javascript">
+        $(function () {
+            $('.datetimepicker').datetimepicker({
+                language: 'sv'
+            });
+        });
+    </script>
+</form>
