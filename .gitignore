@@ -218,3 +218,4 @@ FormHandler
 Chalmers.ILL/Web.ChalmersILL.config
 Chalmers.ILL/Web.ChillinTest.Debug.config
 Chalmers.ILL/Web.ChillinTest.Release.config
+Chalmers.ILL/Local.config
