@@ -5,6 +5,7 @@ This is the system that is used on Chalmers Library for handling incoming inter 
 ## Prerequisites
 1. npm https://www.npmjs.com
 2. bower http://bower.io
+3. An Exchange-account for incoming and outgoing mail.
 
 ## Setup
 1. Clone this repository.
