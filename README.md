@@ -2,6 +2,10 @@
 
 This is the system that is used on Chalmers Library for handling incoming inter library loans and purchases. It is highly tailored to our needs and you should not expect to be able to just take it and use it for your purposes without much hard work and many modifications. Hopefully the code can still be an interesting platform to start from or to draw inspiration from if developing something similar. We welcome constructive criticism and ideas.
 
+## Prerequisites
+1. npm https://www.npmjs.com
+2. bower http://bower.io
+
 ## Setup
 1. Clone this repository.
 2. Delete all files in the repository except the .git folder.
