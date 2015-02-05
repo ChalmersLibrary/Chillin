@@ -181,7 +181,7 @@ namespace Chalmers.ILL.Utilities
 
             // Create the OrderItem
             var uh = new Umbraco.Web.UmbracoHelper(Umbraco.Web.UmbracoContext.Current);
-            IContent content = cs.CreateContent(contentName, uh.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListContentDocumentType"]).First().Id, "ChalmersILLOrderItem");
+            IContent content = cs.CreateContent(contentName, uh.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListContentDocumentType"]).First().Id, "ChalmersILLOrderItem");
 
             // Set properties
             content.SetValue("originalOrder", HttpUtility.UrlDecode(model.OriginalOrder));

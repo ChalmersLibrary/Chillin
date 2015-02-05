@@ -3,7 +3,7 @@
 @{
     Layout = null;
 }
-@{   
+@{
     var isNotLocalhost = Request.ServerVariables["SERVER_NAME"] != "localhost";
     var isNotTestServer = Request.ServerVariables["SERVER_NAME"] != ConfigurationManager.AppSettings["testServer"];
     var isNotSecureLiveServer = !(Request.ServerVariables["SERVER_PORT_SECURE"] == "1" && Request.ServerVariables["SERVER_NAME"] == ConfigurationManager.AppSettings["liveServer"]);
@@ -32,7 +32,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="@Umbraco.ContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoRootContentDocumentType"]).First().Url">
+            <a class="navbar-brand" href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoRootContentDocumentType"]).First().Url">
                 Chalmers fjärrlån &amp; bokförvärv
             </a>
         </div>

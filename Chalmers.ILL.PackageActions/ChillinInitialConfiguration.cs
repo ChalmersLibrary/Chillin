@@ -10,6 +10,7 @@ using Umbraco.Core.Services;
 using Umbraco.Core;
 using Umbraco.Core.Logging;
 using umbraco.cms.businesslogic.member;
+using umbraco.cms.businesslogic.web;
 using System.Web.Security;
 
 namespace Chalmers.ILL.PackageActions
@@ -24,7 +25,7 @@ namespace Chalmers.ILL.PackageActions
         public bool Execute(string packageName, System.Xml.XmlNode xmlData)
         {
             var ret = true;
-            LogHelper.Info<ChillinInitialConfiguration>("ChillinInitialConfiguration Execute START");
+
             try
             {
                 var ms = ApplicationContext.Current.Services.MediaService;
@@ -37,21 +38,23 @@ namespace Chalmers.ILL.PackageActions
                 MemberType.MakeNew(umbraco.BusinessLogic.User.GetUser(0), "Standard");
 
                 var cs = ApplicationContext.Current.Services.ContentService;
+                var uh = new Umbraco.Web.UmbracoHelper(Umbraco.Web.UmbracoContext.Current);
                 var rootContent = cs.GetByLevel(1).First();
+
                 cs.PublishWithChildren(rootContent);
 
-                var uh = new Umbraco.Web.UmbracoHelper(Umbraco.Web.UmbracoContext.Current);
-                uh.TypedContent(rootContent.Id);
+                var loginPage = uh.TypedContentAtXPath("//ChalmersILLLoginPage").First();
 
-                Access.AddMemberGroupToDocument(rootContent.Id, mga.Id);
-                Access.AddMemberGroupToDocument(rootContent.Id, mgv.Id);
+                Access.ProtectPage(false, rootContent.Id, loginPage.Id, loginPage.Id);
+                Access.AddMembershipRoleToDocument(rootContent.Id, "Administrator");
+                Access.AddMembershipRoleToDocument(rootContent.Id, "Viewer");
             }
             catch (Exception e)
             {
                 LogHelper.Error<ChillinInitialConfiguration>("Error in ChillinInitialConfiguration.Execute: ", e);
                 ret = false;
             }
-            LogHelper.Info<ChillinInitialConfiguration>("ChillinInitialConfiguration Execute END");
+
             return ret;
         }
 
@@ -64,27 +67,34 @@ namespace Chalmers.ILL.PackageActions
         public bool Undo(string packageName, System.Xml.XmlNode xmlData)
         {
             var ret = true;
-            LogHelper.Info<ChillinInitialConfiguration>("ChillinInitialConfiguration Undo START");
+
             try
             {
                 var ms = ApplicationContext.Current.Services.MediaService;
+                var cs = ApplicationContext.Current.Services.ContentService;
                 var oia = ms.GetChildren(-1).First(m => m.Name == "OrderItemAttachments");
                 if (oia != null)
                 {
                     ms.Delete(oia);
                 }
 
+                var uh = new Umbraco.Web.UmbracoHelper(Umbraco.Web.UmbracoContext.Current);
+                var rootContent = uh.ContentAtXPath("//ChalmersILL").First();
                 var mga = MemberType.GetByAlias("Administrator");
                 if (mga != null)
                 {
+                    Access.RemoveMembershipRoleFromDocument(rootContent.Id, "Administrator");
                     mga.delete();
                 }
 
                 var mgv = MemberType.GetByAlias("Viewer");
                 if (mgv != null)
                 {
+                    Access.RemoveMembershipRoleFromDocument(rootContent.Id, "Viewer");
                     mgv.delete();
                 }
+
+                Access.RemoveProtection(rootContent.Id);
 
                 var mt = MemberType.GetByAlias("Standard");
                 if (mt != null)
@@ -92,15 +102,14 @@ namespace Chalmers.ILL.PackageActions
                     mt.delete();
                 }
 
-                var cs = ApplicationContext.Current.Services.ContentService;
-                cs.UnPublish(cs.GetByLevel(1).First());
+                cs.UnPublish(rootContent);
             } 
             catch (Exception e)
             {
                 LogHelper.Error<ChillinInitialConfiguration>("Error in ChillinInitialConfiguration.Undo: ", e);
                 ret = false;
             }
-            LogHelper.Info<ChillinInitialConfiguration>("ChillinInitialConfiguration Undo END");
+
             return ret;
         }
     }
