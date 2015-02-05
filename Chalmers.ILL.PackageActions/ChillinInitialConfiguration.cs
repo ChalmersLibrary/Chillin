@@ -48,6 +48,14 @@ namespace Chalmers.ILL.PackageActions
                 Access.ProtectPage(false, rootContent.Id, loginPage.Id, loginPage.Id);
                 Access.AddMembershipRoleToDocument(rootContent.Id, "Administrator");
                 Access.AddMembershipRoleToDocument(rootContent.Id, "Viewer");
+
+                umbraco.uQuery.SqlHelper.ExecuteNonQuery(
+                    string.Format("INSERT INTO umbracoRelationType ([dual], parentObjectType, childObjectType, name, alias) VALUES ({0}, '{1}', '{2}', '{3}', '{4}')",
+                        1,
+                        "39EB0F98-B348-42A1-8662-E7EB18487560",
+                        "C66BA18E-EAF3-4CFF-8A22-41B16D66A972",
+                        "Member Locked",
+                        "memberLocked"));
             }
             catch (Exception e)
             {
@@ -103,6 +111,8 @@ namespace Chalmers.ILL.PackageActions
                 }
 
                 cs.UnPublish(rootContent);
+
+                umbraco.uQuery.SqlHelper.ExecuteNonQuery(string.Format("DELETE FROM umbracoRelationType WHERE alias='{0}'", "memberLocked"));
             } 
             catch (Exception e)
             {
