@@ -13,4 +13,4 @@ This is the system that is used on Chalmers Library for handling incoming inter 
 8. Create a member and assign the proper roles.
 9. Close down Microsoft Web Matrix or corresponding and do "git checkout -- ." in the repository.
 
-
+You should now be able to open the solution file in Visual Studio and play around with the project. Be prepared though that the system needs some configuration in the Web.config file and its corresponding transformations before it will be able to function properly.
