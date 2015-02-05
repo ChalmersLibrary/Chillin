@@ -202,7 +202,7 @@ Chalmers.ILL/App_Code
 Chalmers.ILL/App_Data
 Chalmers.ILL/App_Plugins
 Chalmers.ILL/bower_components
-Chalmers.ILL/Config
+Chalmers.ILL/Config/*
 !Chalmers.ILL/Config/ExamineIndex.config
 !Chalmers.ILL/Config/ExamineSettings.config
 Chalmers.ILL/Install
