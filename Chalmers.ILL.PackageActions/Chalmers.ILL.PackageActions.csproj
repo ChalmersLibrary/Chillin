@@ -53,6 +53,9 @@
     <Reference Include="Umbraco.Core">
       <HintPath>..\..\Chalmers.ILL\Chalmers.ILL\bin\Umbraco.Core.dll</HintPath>
     </Reference>
+    <Reference Include="umbraco.DataLayer">
+      <HintPath>..\Chalmers.ILL\bin\umbraco.DataLayer.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChillinInitialConfiguration.cs" />
