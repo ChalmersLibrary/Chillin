@@ -11,10 +11,10 @@ This is the system that is used on Chalmers Library for handling incoming inter 
 2. Delete all files in the repository except the .git folder.
 3. Download Umbraco 6.1.6 and unzip it into the repository folder. https://our.umbraco.org/contribute/releases/616/
 4. Rename the unzipped folder to "Chalmers.ILL".
-5. Download the ChillinFoundation Umbraco package https://chalmersuniversity.box.com/s/pf9swnh2vgmf9gpn5lox7zmviyze81zr
+5. Download the ChillinFoundation Umbraco package https://chalmersuniversity.box.com/s/c2z3xmv27t2mipg0du9hrnmvsdcb7hil
 6. Setup Umbraco, for example by using Microsoft WebMatrix's "Open as a Web Site" capabilities.
 7. Install the ChillinFoundation Umbraco package into Umbraco.
 8. Create a member and assign the proper roles.
 9. Close down Microsoft Web Matrix or corresponding and do "git checkout -- ." in the repository.
 
-
+You should now be able to open the solution file in Visual Studio and play around with the project. Be prepared though that the system needs some configuration in the Web.config file and its corresponding transformations before it will be able to function properly.
