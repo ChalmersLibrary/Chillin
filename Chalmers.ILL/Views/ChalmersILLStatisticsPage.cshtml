@@ -3,7 +3,7 @@
     Layout = "ChalmersILL.cshtml";
 }
 
-<script src="/scripts/Chart.min.js" charset="utf-8"></script>
+<script src="/bower_components/Chart.js/Chart.min.js" charset="utf-8"></script>
 
 <h2>Statistik</h2>
 
@@ -143,8 +143,8 @@
         // Change how the legends are shown in the bar graph.
         Chart.defaults.global.multiTooltipTemplate = "<%= datasetLabel %> - <%= value %>";
 
-        $('.datetimepicker').datetimepicker({
-            language: 'sv'
+        $(".datetimepicker").datetimepicker({
+            locale: "sv"
         });
 
         // Load available filters and values on filters.
