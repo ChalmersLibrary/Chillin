@@ -96,13 +96,13 @@ namespace Chalmers.ILL.PackageActions
                     cs.UnPublish(rootContent);
                 }
 
-                var mga = MemberType.GetByAlias("Administrator");
+                var mga = MemberGroup.GetByName("Administrator");
                 if (mga != null)
                 {
                     mga.delete();
                 }
 
-                var mgv = MemberType.GetByAlias("Viewer");
+                var mgv = MemberGroup.GetByName("Viewer");
                 if (mgv != null)
                 {
                     mgv.delete();
