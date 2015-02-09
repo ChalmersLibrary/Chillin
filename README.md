@@ -12,7 +12,7 @@ This is the system that is used on Chalmers Library for handling incoming inter 
 2. Delete all files in the repository except the .git folder.
 3. Download Umbraco 6.1.6 and unzip it into the repository folder. https://our.umbraco.org/contribute/releases/616/
 4. Rename the unzipped folder to "Chalmers.ILL".
-5. Download the ChillinFoundation Umbraco package https://chalmersuniversity.box.com/s/c37ekyaqjqa6ryayezuxvih9jeermi7x
+5. Download the Chillin Initial Configuration Umbraco package https://chalmersuniversity.box.com/s/56qoexjn0uymqpexufyl2sxx6nwst8hc
 6. Setup Umbraco, for example by using Microsoft WebMatrix's "Open as a Web Site" capabilities.
 7. Install the ChillinFoundation Umbraco package into Umbraco.
 8. Create a member and assign the proper roles.
