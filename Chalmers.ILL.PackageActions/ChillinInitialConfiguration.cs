@@ -88,7 +88,7 @@ namespace Chalmers.ILL.PackageActions
 
                 var uh = new Umbraco.Web.UmbracoHelper(Umbraco.Web.UmbracoContext.Current);  
                 var rootContent = uh.ContentAtXPath("//ChalmersILL").FirstOrDefault();
-                if (rootContent != null)
+                if (rootContent != null && rootContent.Id != 0)
                 {
                     Access.RemoveMembershipRoleFromDocument(rootContent.Id, "Administrator");
                     Access.RemoveMembershipRoleFromDocument(rootContent.Id, "Viewer");
