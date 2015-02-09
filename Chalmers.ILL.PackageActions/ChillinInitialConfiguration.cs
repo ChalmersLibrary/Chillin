@@ -80,37 +80,39 @@ namespace Chalmers.ILL.PackageActions
             {
                 var ms = ApplicationContext.Current.Services.MediaService;
                 var cs = ApplicationContext.Current.Services.ContentService;
-                var oia = ms.GetChildren(-1).First(m => m.Name == "OrderItemAttachments");
+                var oia = ms.GetChildren(-1).FirstOrDefault(m => m.Name == "OrderItemAttachments");
                 if (oia != null)
                 {
                     ms.Delete(oia);
                 }
 
-                var uh = new Umbraco.Web.UmbracoHelper(Umbraco.Web.UmbracoContext.Current);
-                var rootContent = uh.ContentAtXPath("//ChalmersILL").First();
+                var uh = new Umbraco.Web.UmbracoHelper(Umbraco.Web.UmbracoContext.Current);  
+                var rootContent = uh.ContentAtXPath("//ChalmersILL").FirstOrDefault();
+                if (rootContent != null)
+                {
+                    Access.RemoveMembershipRoleFromDocument(rootContent.Id, "Administrator");
+                    Access.RemoveMembershipRoleFromDocument(rootContent.Id, "Viewer");
+                    Access.RemoveProtection(rootContent.Id);
+                    cs.UnPublish(rootContent);
+                }
+
                 var mga = MemberType.GetByAlias("Administrator");
                 if (mga != null)
                 {
-                    Access.RemoveMembershipRoleFromDocument(rootContent.Id, "Administrator");
                     mga.delete();
                 }
 
                 var mgv = MemberType.GetByAlias("Viewer");
                 if (mgv != null)
                 {
-                    Access.RemoveMembershipRoleFromDocument(rootContent.Id, "Viewer");
                     mgv.delete();
                 }
-
-                Access.RemoveProtection(rootContent.Id);
 
                 var mt = MemberType.GetByAlias("Standard");
                 if (mt != null)
                 {
                     mt.delete();
                 }
-
-                cs.UnPublish(rootContent);
 
                 umbraco.uQuery.SqlHelper.ExecuteNonQuery(string.Format("DELETE FROM umbracoRelationType WHERE alias='{0}'", "memberLocked"));
             } 
