@@ -488,7 +488,8 @@
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>
-    <PreBuildEvent>cd $(ProjectDir)
+    <PreBuildEvent>xcopy $(ProjectDir)\..\packages\UmbracoCms.6.1.6\UmbracoFiles $(ProjectDir) /y /d /e /exclude:$(ProjectDir)\xcopy-exclude-list.txt
+cd $(ProjectDir)
 bower install</PreBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
