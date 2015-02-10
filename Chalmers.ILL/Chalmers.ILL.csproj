@@ -489,6 +489,7 @@
   </ProjectExtensions>
   <PropertyGroup>
     <PreBuildEvent>xcopy $(ProjectDir)\..\packages\UmbracoCms.6.1.6\UmbracoFiles $(ProjectDir) /y /d /e /exclude:$(ProjectDir)\xcopy-exclude-list.txt
+xcopy $(ProjectDir)\..\packages\UmbracoCms.6.1.6\Content $(ProjectDir) /y /d /e /exclude:$(ProjectDir)\xcopy-exclude-list.txt
 cd $(ProjectDir)
 bower install</PreBuildEvent>
   </PropertyGroup>
