@@ -220,3 +220,8 @@ Chalmers.ILL/Web.ChalmersILL.config
 Chalmers.ILL/Web.ChillinTest.Debug.config
 Chalmers.ILL/Web.ChillinTest.Release.config
 Chalmers.ILL/Local.config
+Chalmers.ILL/Css
+Chalmers.ILL/MacroScripts
+Chalmers.ILL/Scripts/dummy.txt
+Chalmers.ILL/UserControls
+*.backup
