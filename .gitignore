@@ -205,6 +205,7 @@ Chalmers.ILL/bower_components
 Chalmers.ILL/Config/*
 !Chalmers.ILL/Config/ExamineIndex.config
 !Chalmers.ILL/Config/ExamineSettings.config
+!Chalmers.ILL/Config/umbracoSettings.config
 Chalmers.ILL/Install
 Chalmers.ILL/MasterPages
 Chalmers.ILL/Media
