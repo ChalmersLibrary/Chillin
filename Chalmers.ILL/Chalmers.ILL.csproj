@@ -125,7 +125,8 @@
       <HintPath>..\packages\MySql.Data.6.6.5\lib\net40\MySql.Data.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.4.5.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql">
       <HintPath>..\packages\Npgsql.2.0.14.3\lib\net45\Npgsql.dll</HintPath>
@@ -311,8 +312,7 @@
     </Content>
     <Content Include="Scripts\dummy.txt" />
     <Content Include="UserControls\dummy.txt" />
-    <Content Include="Views\Web.config" />
-    <Content Include="Views\Web.config.transform" />
+    <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />
     <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
     <Content Include="Views\ChalmersILLStartPage.cshtml" />
@@ -337,23 +337,11 @@
     <Content Include="Views\Partials\Chalmers.ILL.Action.Delivery.cshtml" />
     <Content Include="Views\ChalmersILLStatisticsPage.cshtml" />
     <Content Include="Xslt\dummy.txt" />
-    <Content Include="Xslt\Web.config" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.PatronData.cshtml" />
     <Content Include="Config\trees.config" />
     <Content Include="Config\applications.config" />
     <Content Include="bin\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
     <Content Include="bin\amd64\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
-    <None Include="Web.ChalmersILL.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
-    <None Include="Web.ChillinTest.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Web.ChillinTest.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Config\Splashes\booting.aspx" />
@@ -501,6 +489,10 @@ bower install</PreBuildEvent>
     <Error Condition="!Exists('..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets'))" />
   </Target>
   <Import Project="..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets" Condition="Exists('..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

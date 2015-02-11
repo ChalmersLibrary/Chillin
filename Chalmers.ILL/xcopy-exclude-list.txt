@@ -2,3 +2,4 @@ ExamineIndex.config\
 ExamineSettings.config\
 umbracoSettings.config\
 Web.config\
+.transform\
