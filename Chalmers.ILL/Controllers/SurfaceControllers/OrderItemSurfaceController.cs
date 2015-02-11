@@ -400,14 +400,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
         private List<UmbracoDropdownListNtextDataType> GetAvailableValues(string dataTypeName)
         {
-            // Connect to Umbraco DataTypeService
-            var ds = UmbracoContext.Application.Services.DataTypeService;
-
-            // Get the Definition Id
-            int dataTypeDefinitionId = ds.GetAllDataTypeDefinitions().First(x => x.Name == dataTypeName).Id;
-
             // Get a sorted list of all prevalues
-            SortedList typeTypes = PreValues.GetPreValues(dataTypeDefinitionId);
+            SortedList typeTypes = Helpers.GetPreValues(dataTypeName);
 
             // Get the datatype enumerator (to sort as in Backoffice)
             IDictionaryEnumerator i = typeTypes.GetEnumerator();

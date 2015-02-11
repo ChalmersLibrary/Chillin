@@ -46,14 +46,9 @@ namespace Chalmers.ILL.Utilities
         /// <returns>Prevalue Id</returns>
         public static int DataTypePrevalueId(string dataTypeName, string prevalue)
         {
-            // Connect to Umbraco DataTypeService
-            var ds = new Umbraco.Core.Services.DataTypeService();
+            int ret = -1;
 
-            // Get the Definition Id
-            int dataTypeDefinitionId = ds.GetAllDataTypeDefinitions().First(x => x.Name == dataTypeName).Id;
-
-            // Get a sorted list of all prevalues
-            SortedList statusTypes = PreValues.GetPreValues(dataTypeDefinitionId);
+            SortedList statusTypes = GetPreValues(dataTypeName);
 
             // Get the datatype enumerator (to sort as in Backoffice)
             IDictionaryEnumerator i = statusTypes.GetEnumerator();
@@ -67,11 +62,38 @@ namespace Chalmers.ILL.Utilities
                 // Check if it's the prevalue we want the id for
                 if (statusType.Value == prevalue)
                 {
-                    return statusType.Id;
+                    ret = statusType.Id;
                 }
             }
 
-            return -1;
+            return ret;
+        }
+
+        /// <summary>
+        /// Get all the prevalues for a given data type.
+        /// </summary>
+        /// <param name="dataTypeName">The name of the data type.</param>
+        /// <returns>A sorted list with the prevalues.</returns>
+        public static SortedList GetPreValues(string dataTypeName)
+        {
+            // Get a sorted list of all prevalues from the cache
+            var c = System.Web.HttpContext.Current.Cache;
+            SortedList statusTypes = c.Get(dataTypeName) as SortedList;
+
+            if (statusTypes == null)
+            {
+                // Connect to Umbraco DataTypeService
+                var ds = new Umbraco.Core.Services.DataTypeService();
+
+                // Get the Definition Id
+                int dataTypeDefinitionId = ds.GetAllDataTypeDefinitions().First(x => x.Name == dataTypeName).Id;
+
+                // Get a sorted list of all prevalues and store it in the cache
+                statusTypes = PreValues.GetPreValues(dataTypeDefinitionId);
+                c.Insert(dataTypeName, statusTypes);
+            }
+
+            return statusTypes;
         }
 
         public static string CalculateMD5Hash(string input)

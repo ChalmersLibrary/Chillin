@@ -48,7 +48,7 @@ namespace Chalmers.ILL.SignalR
             int chillinOrderStatusId = 0;
             var ds = new Umbraco.Core.Services.DataTypeService();
             PreValue iter;
-            foreach (DictionaryEntry pv in PreValues.GetPreValues(ds.GetAllDataTypeDefinitions().First(x => x.Name == ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"]).Id))
+            foreach (DictionaryEntry pv in Helpers.GetPreValues(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"]))
             {
                 iter = ((PreValue)pv.Value);
                 if (iter.Id == OrderStatusId)
