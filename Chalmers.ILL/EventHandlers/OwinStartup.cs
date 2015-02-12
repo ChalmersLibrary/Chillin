@@ -1,5 +1,7 @@
-﻿using Microsoft.Owin;
+﻿using Chalmers.ILL.Utilities;
+using Microsoft.Owin;
 using Owin;
+using Umbraco.Core.Logging;
 
 namespace Chalmers.ILL.EventHandlers
 {
@@ -7,6 +9,8 @@ namespace Chalmers.ILL.EventHandlers
     {
         public void Configuration(IAppBuilder app)
         {
+            Helpers.PopulateCacheWithDataTypePreValues();
+
             // Any connection or hub wire up and configuration should go here
             app.MapSignalR();
         }

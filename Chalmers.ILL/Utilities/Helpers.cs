@@ -96,6 +96,17 @@ namespace Chalmers.ILL.Utilities
             return statusTypes;
         }
 
+        public static void PopulateCacheWithDataTypePreValues()
+        {
+            var c = System.Web.HttpContext.Current.Cache;
+            var ds = new Umbraco.Core.Services.DataTypeService();
+
+            foreach (var dtd in ds.GetAllDataTypeDefinitions())
+            {
+                c.Insert(dtd.Name, PreValues.GetPreValues(dtd.Id));
+            }
+        }
+
         public static string CalculateMD5Hash(string input)
         {
             // step 1, calculate MD5 hash from input
