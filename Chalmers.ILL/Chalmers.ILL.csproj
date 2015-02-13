@@ -327,7 +327,6 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Scripts\dummy.txt" />
-    <Content Include="Unity.Mvc4.README.txt" />
     <Content Include="UserControls\dummy.txt" />
     <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />

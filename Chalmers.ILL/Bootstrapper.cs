@@ -29,8 +29,7 @@ namespace Chalmers.ILL
 
         public static void RegisterTypes(IUnityContainer container)
         {
-            container.RegisterType<IMemberInfoManager, MemberInfoManager>();
-
+            container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
             container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
         }
     }
