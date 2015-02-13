@@ -12,13 +12,23 @@ using Microsoft.Exchange.WebServices.Data;
 using System.Configuration;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemMailSurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+        IInternalDbLogger _internalDbLogger;
+
+        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        {
+            _orderItemManager = orderItemManager;
+            _internalDbLogger = internalDbLogger;
+        }
+
         /// <summary>
         /// Render the Partial View for sending mail to user from within the system
         /// </summary>
@@ -28,7 +38,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderMailAction(int nodeId)
         {
             // Get a new OrderItem populated with values for this node
-            var orderItem = OrderItem.GetOrderItem(nodeId);
+            var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Mail", orderItem);
@@ -53,8 +63,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var contentNode = contentService.GetById(m.nodeId);
 
                 // Read current values that can be affected
-                var currentPatronEmail = OrderItem.GetOrderItem(m.nodeId).PatronEmail;
-                var currentStatus = OrderItem.GetOrderItem(m.nodeId).StatusPrevalue;
+                var currentPatronEmail = _orderItemManager.GetOrderItem(m.nodeId).PatronEmail;
+                var currentStatus = _orderItemManager.GetOrderItem(m.nodeId).StatusPrevalue;
 
                 // Send mail to recipient
                 try
@@ -88,9 +98,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     }
                     string body = m.message + ConfigurationManager.AppSettings["chalmersILLMailSignature"].Replace("\\n", "\n");
                     ExchangeService service = ExchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
-                    ExchangeMailWebApi.SendMailMessage(service, OrderItem.GetOrderItem(m.nodeId).OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], m.recipientName, m.recipientEmail, attachments);
-                    Logging.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, false, false);
-                    Logging.WriteLogItemInternal(m.nodeId, "MAIL", m.message, false, false);
+                    ExchangeMailWebApi.SendMailMessage(service, _orderItemManager.GetOrderItem(m.nodeId).OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], m.recipientName, m.recipientEmail, attachments);
+                    _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, false, false);
+                    _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL", m.message, false, false);
                 }
                 catch (Exception)
                 {
@@ -101,29 +111,29 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 if (currentPatronEmail != m.recipientEmail)
                 {
                     contentNode.SetValue("patronEmail", m.recipientEmail);
-                    Logging.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "PatronEmail ändrad till " + m.recipientEmail, false, false);
+                    _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "PatronEmail ändrad till " + m.recipientEmail, false, false);
                 }
 
                 // Set FollowUpDate property if it differs from current
-                DateTime currentFollowUpDate = OrderItem.GetOrderItem(m.nodeId).FollowUpDate;
+                DateTime currentFollowUpDate = _orderItemManager.GetOrderItem(m.nodeId).FollowUpDate;
 
                 if (!String.IsNullOrEmpty(m.newFollowUpDate))
 	            {
                     DateTime parsedNewFollowUpDate = Convert.ToDateTime(m.newFollowUpDate);
                     if (currentFollowUpDate != parsedNewFollowUpDate)
                     {
-                        OrderItem.SetFollowUpDate(m.nodeId, parsedNewFollowUpDate, false, false);
-                        Logging.WriteLogItemInternal(m.nodeId, "DATE", "Följs upp senast " + m.newFollowUpDate, false, false);
+                        _orderItemManager.SetFollowUpDate(m.nodeId, parsedNewFollowUpDate, false, false);
+                        _internalDbLogger.WriteLogItemInternal(m.nodeId, "DATE", "Följs upp senast " + m.newFollowUpDate, false, false);
                     }
 	            }
 
                 // Set status property if it differs from newStatus
                 if (currentStatus != m.newStatus)
                 {
-                    OrderItemStatus.SetOrderItemStatusInternal(m.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], m.newStatus), false, false);
+                    _orderItemManager.SetOrderItemStatusInternal(m.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], m.newStatus), false, false);
                 }
 
-                contentService.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);
+                _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

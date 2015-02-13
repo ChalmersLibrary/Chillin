@@ -1,9 +1,12 @@
 using System.Web.Mvc;
 using Microsoft.Practices.Unity;
 using Unity.Mvc4;
-using Chalmers.ILL.Members;
 using System.Web.Http;
 using Umbraco.Web;
+using Chalmers.ILL.Members;
+using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.SignalR;
+using Chalmers.ILL.Logging;
 
 namespace Chalmers.ILL
 {
@@ -29,7 +32,18 @@ namespace Chalmers.ILL
 
         public static void RegisterTypes(IUnityContainer container)
         {
+            var notifier = new Notifier();
+            var internalDbLogger = new InternalDbLogger();
+            var orderItemManager = new OrderItemManager();
+            notifier.SetOrderItemManager(orderItemManager);
+            internalDbLogger.SetOrderItemManager(orderItemManager);
+            orderItemManager.SetNotifier(notifier);
+            orderItemManager.SetInternalDbLogger(internalDbLogger);
+
             container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
+            container.RegisterInstance(typeof(INotifier), notifier);
+            container.RegisterInstance(typeof(IInternalDbLogger), internalDbLogger);
+            container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
             container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
         }
     }

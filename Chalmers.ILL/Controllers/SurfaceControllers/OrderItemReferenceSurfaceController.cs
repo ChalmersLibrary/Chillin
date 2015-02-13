@@ -8,6 +8,8 @@ using umbraco.cms.businesslogic.member;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
+using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -15,12 +17,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemReferenceSurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+        IInternalDbLogger _internalDbLogger;
+
+        public OrderItemReferenceSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        {
+            _orderItemManager = orderItemManager;
+            _internalDbLogger = internalDbLogger;
+        }
 
         [HttpGet]
         public ActionResult RenderReferenceAction(int nodeId)
         {
             // Get a new OrderItem populated with values for this node
-            var orderItem = OrderItem.GetOrderItem(nodeId);
+            var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Reference", orderItem);
@@ -46,8 +56,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 if (currentReference != reference)
                 {
                     contentNode.SetValue("reference", reference);
-                    contentService.SaveWithoutEventsAndWithSynchronousReindexing(contentNode, false, false);
-                    Logging.WriteLogItemInternal(nodeId, "REF", "Referens ändrad");
+                    _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode, false, false);
+                    _internalDbLogger.WriteLogItemInternal(nodeId, "REF", "Referens ändrad");
                 }
 
                 // Construct JSON response for client (ie jQuery/getJSON)

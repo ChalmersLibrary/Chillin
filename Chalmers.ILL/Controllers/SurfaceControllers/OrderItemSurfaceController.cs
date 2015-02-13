@@ -8,6 +8,7 @@ using Umbraco.Web.Mvc;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
+using Chalmers.ILL.OrderItems;
 using umbraco.cms.businesslogic.member;
 using umbraco.cms.businesslogic.relation;
 using Umbraco.Core.Logging;
@@ -15,6 +16,7 @@ using Chalmers.ILL.Members;
 using Newtonsoft.Json;
 using System.Configuration;
 using umbraco.cms.businesslogic.datatype;
+using Chalmers.ILL.SignalR;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -23,10 +25,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemSurfaceController : SurfaceController
     {
         IMemberInfoManager _memberInfoManager;
+        IOrderItemManager _orderItemManager;
+        INotifier _notifier;
 
-        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager)
+        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager, IOrderItemManager orderItemManager, INotifier notifier)
         {
             _memberInfoManager = memberInfoManager;
+            _orderItemManager = orderItemManager;
+            _notifier = notifier;
         }
 
         public const string lockRelationType = "memberLocked";
@@ -43,7 +49,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
             // Get a new OrderItem populated with values for this node
-            var orderItem = OrderItem.GetOrderItem(nodeId);
+            var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
             // Get all relations with the given node ID and the correct relations type.
             var relType = RelationType.GetByAlias(lockRelationType);
@@ -92,7 +98,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
             // Get a new OrderItem populated with values for this node
-            var orderItem = OrderItem.GetOrderItem(nodeId);
+            var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
             // Get all relations with the given node ID and the correct relations type.
             var relType = RelationType.GetByAlias(lockRelationType);
@@ -183,7 +189,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Took over lock.";
 
                 // Notify SignalR clients of the update
-                SignalR.Notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
+                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
 
             }
             catch (Exception e)
@@ -253,7 +259,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
 
                 // Notify SignalR clients of the update
-                SignalR.Notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
+                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
 
             }
             catch (Exception e)
@@ -317,7 +323,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
 
                 // Notify SignalR clients of the update
-                SignalR.Notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
+                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
 
             }
             catch (Exception e)

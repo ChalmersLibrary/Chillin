@@ -10,12 +10,20 @@ using System.Web.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemDeliveryLibrarySurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+
+        public OrderItemDeliveryLibrarySurfaceController(IOrderItemManager orderItemManager)
+        {
+            _orderItemManager = orderItemManager;
+        }
+
         /// <summary>
         /// Set delivery library property for OrderItem
         /// </summary>
@@ -30,7 +38,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 // Use internal method to set status property and log the result
-                OrderItemDeliveryLibrary.SetOrderItemDeliveryLibraryInternal(orderNodeId, deliveryLibraryId);
+                _orderItemManager.SetOrderItemDeliveryLibraryInternal(orderNodeId, deliveryLibraryId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

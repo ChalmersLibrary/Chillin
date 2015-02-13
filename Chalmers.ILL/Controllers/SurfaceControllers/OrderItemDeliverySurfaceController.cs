@@ -10,6 +10,8 @@ using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
 using Microsoft.Exchange.WebServices.Data;
 using System.Configuration;
+using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -17,6 +19,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemDeliverySurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+        IInternalDbLogger _internalDbLogger;
+
+        public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        {
+            _orderItemManager = orderItemManager;
+            _internalDbLogger = internalDbLogger;
+        }
+
         /// <summary>
         /// Render the Partial View for sending mail to user from within the system
         /// </summary>
@@ -26,7 +37,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderDeliveryAction(int nodeId)
         {
             // Get a new OrderItem populated with values for this node
-            var orderItem = OrderItem.GetOrderItem(nodeId);
+            var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
             // The return format depends on the client's Accept-header
             // return PartialView("Chalmers.ILL.Action.Mail", orderItem);
@@ -53,17 +64,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var contentNode = contentService.GetById(nodeId);
 
                 // Log this action
-                Logging.WriteLogItemInternal(nodeId, "LEVERERAD", "Skickad med " + delivery, false, false);
+                _internalDbLogger.WriteLogItemInternal(nodeId, "LEVERERAD", "Skickad med " + delivery, false, false);
 
                 if (logEntry != "")
                 {
-                    Logging.WriteLogItemInternal(nodeId, "LOG", logEntry, false, false);
+                    _internalDbLogger.WriteLogItemInternal(nodeId, "LOG", logEntry, false, false);
                 }
 
                 // Set status = Levererad
                 try
                 {
-                    OrderItemStatus.SetOrderItemStatusInternal(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
+                    _orderItemManager.SetOrderItemStatusInternal(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
                 }
                 catch (Exception)
                 {
@@ -71,7 +82,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
 
                 // Save
-                contentService.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);
+                _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

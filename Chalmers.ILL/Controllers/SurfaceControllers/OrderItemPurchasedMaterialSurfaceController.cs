@@ -10,12 +10,20 @@ using System.Web.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemPurchasedMaterialSurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+
+        public OrderItemPurchasedMaterialSurfaceController(IOrderItemManager orderItemManager)
+        {
+            _orderItemManager = orderItemManager;
+        }
+
         /// <summary>
         /// Set purchased material property for OrderItem
         /// </summary>
@@ -30,7 +38,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 // Use internal method to set type property and log the result
-                OrderItemPurchasedMaterial.SetOrderItemPurchasedMaterialInternal(orderNodeId, purchasedMaterialId);
+                _orderItemManager.SetOrderItemPurchasedMaterialInternal(orderNodeId, purchasedMaterialId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

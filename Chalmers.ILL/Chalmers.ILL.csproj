@@ -393,8 +393,8 @@
     <Compile Include="Controllers\SurfaceControllers\SystemSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\StatisticsSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
-    <Compile Include="Extensions\ContentServiceExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
+    <Compile Include="Logging\IInternalDbLogger.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
     <Compile Include="Models\ChalmersILLLogoutPageModel.cs" />
     <Compile Include="Models\ChalmersILLModel.cs" />
@@ -418,8 +418,10 @@
     <Compile Include="Models\OrderItemModel.cs" />
     <Compile Include="Models\ResultResponse.cs" />
     <Compile Include="Models\SierraModel.cs" />
+    <Compile Include="OrderItems\IOrderItemManager.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SignalR\INotifier.cs" />
     <Compile Include="SignalR\NotificationHub.cs" />
     <Compile Include="SignalR\Notifier.cs" />
     <Compile Include="Statistics\DefaultStatCalc.cs" />
@@ -428,15 +430,8 @@
     <Compile Include="Statistics\IStatisticsManager.cs" />
     <Compile Include="Utilities\ExchangeMailWebApi.cs" />
     <Compile Include="Utilities\Helpers.cs" />
-    <Compile Include="Utilities\Logging.cs" />
-    <Compile Include="Utilities\OrderItem.cs" />
-    <Compile Include="Utilities\OrderItemAttachments.cs" />
-    <Compile Include="Utilities\OrderItemCancellationReason.cs" />
-    <Compile Include="Utilities\OrderItemDeliveryLibrary.cs" />
-    <Compile Include="Utilities\OrderItemDrm.cs" />
-    <Compile Include="Utilities\OrderItemPurchasedMaterial.cs" />
-    <Compile Include="Utilities\OrderItemStatus.cs" />
-    <Compile Include="Utilities\OrderItemType.cs" />
+    <Compile Include="Logging\InternalDbLogger.cs" />
+    <Compile Include="OrderItems\OrderItemManager.cs" />
     <Compile Include="Patron\Sierra.cs" />
     <Compile Include="Members\MemberInfoManager.cs" />
   </ItemGroup>

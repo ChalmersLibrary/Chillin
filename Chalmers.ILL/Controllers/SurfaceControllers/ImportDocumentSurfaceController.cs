@@ -19,12 +19,20 @@ using Umbraco.Core.Services;
 using Umbraco.Core.Models;
 using System.Text.RegularExpressions;
 using System.Configuration;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     [MemberAuthorize(AllowType = "Standard")]
     public class ImportDocumentSurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+
+        public ImportDocumentSurfaceController(IOrderItemManager orderItemManager)
+        {
+            _orderItemManager = orderItemManager;
+        }
+
         /// <summary>
         /// Import a document from a given URL and store it as a media item bound to the given order item.
         /// </summary>
@@ -90,7 +98,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // cleanup, memory stream not needed any longer
                             stream.Dispose();
 
-                            OrderItemAttachments.AddOrderItemAttachment(orderItem.Id, media.Id, name, media.GetValue("file").ToString());
+                            _orderItemManager.AddOrderItemAttachment(orderItem.Id, media.Id, name, media.GetValue("file").ToString());
 
                             json.Success = true;
                             json.Message = "Document imported successfully.";
@@ -160,7 +168,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // cleanup, memory stream not needed any longer
                             stream.Dispose();
 
-                            OrderItemAttachments.AddOrderItemAttachment(orderItem.Id, media.Id, filename, media.GetValue("file").ToString());
+                            _orderItemManager.AddOrderItemAttachment(orderItem.Id, media.Id, filename, media.GetValue("file").ToString());
 
                             json.Success = true;
                             json.Message = media.Id.ToString() + ";" + media.GetValue("file").ToString();

@@ -10,6 +10,7 @@ using System.Web.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -17,6 +18,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemStatusSurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+
+        public OrderItemStatusSurfaceController(IOrderItemManager orderItemManager)
+        {
+            _orderItemManager = orderItemManager;
+        }
+
         /// <summary>
         /// Set status property for OrderItem
         /// </summary>
@@ -31,7 +39,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try 
 	        {
                 // Use internal method to set status property and log the result
-                OrderItemStatus.SetOrderItemStatusInternal(orderNodeId, statusId);
+                _orderItemManager.SetOrderItemStatusInternal(orderNodeId, statusId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

@@ -18,19 +18,20 @@ using Umbraco.Core.Logging;
 using Chalmers.ILL.Extensions;
 using Newtonsoft.Json;
 using Umbraco.Core.Models;
+using Chalmers.ILL.OrderItems;
 
-namespace Chalmers.ILL.Utilities
+namespace Chalmers.ILL.Logging
 {
-    public class Logging
+    public class InternalDbLogger : IInternalDbLogger
     {
-        /// <summary>
-        /// Internal method for writing a LogItem for an OrderItem
-        /// </summary>
-        /// <param name="OrderItemNodeId">OrderItem</param>
-        /// <param name="Type">Type of logging</param>
-        /// <param name="Message">Log message</param>
-        /// <returns>true if LogItem was written</returns>
-        public static bool WriteLogItemInternal(int OrderItemNodeId, string Type, string Message, bool doReindex = true, bool doSignal = true)
+        IOrderItemManager _orderItemManager;
+
+        public void SetOrderItemManager(IOrderItemManager orderItemManager)
+        {
+            _orderItemManager = orderItemManager;
+        }
+
+        public bool WriteLogItemInternal(int OrderItemNodeId, string Type, string Message, bool doReindex = true, bool doSignal = true)
         {
             // Connect to the content service
             var cs = UmbracoContext.Current.Application.Services.ContentService;
@@ -72,17 +73,12 @@ namespace Chalmers.ILL.Utilities
 
             contentNode.SetValue("log", JsonConvert.SerializeObject(logItems));
 
-            cs.SaveWithoutEventsAndWithSynchronousReindexing(contentNode, doReindex, doSignal);
+            _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode, doReindex, doSignal);
 
             return true;
         }
 
-        /// <summary>
-        /// Internal method to get LogItems for an OrderItem
-        /// </summary>
-        /// <param name="nodeId">OrderItem</param>
-        /// <returns>List of LogItem</returns>
-        public static List<LogItem> GetLogItems(int nodeId)
+        public List<LogItem> GetLogItems(int nodeId)
         {
             // Connect to the content service
             var cs = UmbracoContext.Current.Application.Services.ContentService;
@@ -101,6 +97,20 @@ namespace Chalmers.ILL.Utilities
             }
             logItems.Reverse();
             return logItems;
+        }
+
+        public void WriteSierraDataToLog(int orderItemNodeId, SierraModel sm, bool doReindex = true, bool doSignal = true)
+        {
+            if (!string.IsNullOrEmpty(sm.id))
+            {
+                string logtext = "Firstname: " + sm.first_name + " Lastname: " + sm.last_name + "\n" +
+                                    "Barcode: " + sm.barcode + " Email: " + sm.email + " Ptyp: " + sm.ptype + "\n";
+                WriteLogItemInternal(orderItemNodeId, "SIERRA", logtext, doReindex, doSignal);
+            }
+            else
+            {
+                WriteLogItemInternal(orderItemNodeId, "SIERRA", "Låntagaren hittades inte.", doReindex, doSignal);
+            }
         }
     }
 }

@@ -14,16 +14,27 @@ using Chalmers.ILL.Patron;
 using System.Configuration;
 using System.Net;
 using System.IO;
+using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class OrderItemPatronDataSurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+        IInternalDbLogger _internalDbLogger;
+
+        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        {
+            _orderItemManager = orderItemManager;
+            _internalDbLogger = internalDbLogger;
+        }
+
         [HttpGet]
         public ActionResult RenderPatronDataView(int nodeId)
         {
             // Get a new OrderItem populated with values for this node
-            var orderItem = OrderItem.GetOrderItem(nodeId);
+            var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
             return PartialView("Chalmers.ILL.Action.PatronData", orderItem);
         }
@@ -87,9 +98,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                         content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
                         content.SetValue("pType", sm.ptype);
                         content.SetValue("homeLibrary", sm.home_library);
-                        cs.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                        _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                     }
-                    Sierra.WriteSierraDataToLog(orderItemNodeId, sm);
+                    _internalDbLogger.WriteSierraDataToLog(orderItemNodeId, sm);
                 }
 
                 json.Success = true;
@@ -131,9 +142,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                         content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
                         content.SetValue("pType", sm.ptype);
                         content.SetValue("homeLibrary", sm.home_library);
-                        cs.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                        _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                     }
-                    Sierra.WriteSierraDataToLog(orderItemNodeId, sm);
+                    _internalDbLogger.WriteSierraDataToLog(orderItemNodeId, sm);
                 }
 
                 json.Success = true;

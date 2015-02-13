@@ -86,20 +86,6 @@ namespace Chalmers.ILL.Patron
             }
         }
 
-        public static void WriteSierraDataToLog(int orderItemNodeId, SierraModel sm, bool doReindex = true, bool doSignal = true)
-        {
-            if (!string.IsNullOrEmpty(sm.id))
-            {
-                string logtext = "Firstname: " + sm.first_name + " Lastname: " + sm.last_name + "\n" +
-                                    "Barcode: " + sm.barcode + " Email: " + sm.email + " Ptyp: " + sm.ptype + "\n";
-                Logging.WriteLogItemInternal(orderItemNodeId, "SIERRA", logtext, doReindex, doSignal);
-            }
-            else
-            {
-                Logging.WriteLogItemInternal(orderItemNodeId, "SIERRA", "Låntagaren hittades inte.", doReindex, doSignal);
-            }
-        }
-
         private void PopulateBasicPatronInfoFromLibraryCardNumber(string barcode, SierraModel model)
         {
             using (NpgsqlCommand command = new NpgsqlCommand("SELECT pv.id, pv.barcode, pv.ptype_code, vv.field_content as email, first_name, last_name, home_library_code, mblock_code from sierra_view.patron_record_fullname fn, sierra_view.patron_view pv, sierra_view.varfield_view vv where pv.id=fn.patron_record_id and pv.id=vv.record_id and vv.varfield_type_code='z' and lower(pv.barcode)=:barcode", connection))

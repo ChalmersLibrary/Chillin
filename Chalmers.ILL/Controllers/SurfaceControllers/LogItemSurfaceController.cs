@@ -10,13 +10,23 @@ using Umbraco.Web.Mvc;
 using Chalmers.ILL.Models;
 using System.Globalization;
 using Chalmers.ILL.Utilities;
+using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-
     [MemberAuthorize(AllowType = "Standard")]
     public class LogItemSurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+        IInternalDbLogger _internalDbLogger;
+
+        public LogItemSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        {
+            _orderItemManager = orderItemManager;
+            _internalDbLogger = internalDbLogger;
+        }
+
         /// <summary>
         /// Render the Partial View for logging
         /// </summary>
@@ -25,7 +35,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         [HttpGet]
         public ActionResult RenderLogEntryAction(int nodeId)
         {
-            var orderItem = OrderItem.GetOrderItem(nodeId);
+            var orderItem = _orderItemManager.GetOrderItem(nodeId);
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.LogEntry", orderItem);
         }
@@ -39,7 +49,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult GetLogItemsAsPartial(int nodeId)
         {
             // Call internal method to return List of LogItems for this OrderItem nodeId
-            var logItems = Logging.GetLogItems(nodeId);
+            var logItems = _internalDbLogger.GetLogItems(nodeId);
 
             // Return Partial View for LogItems bound to Model with LogItems
             return PartialView("Chalmers.ILL.LogItem", logItems);
@@ -53,7 +63,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public JsonResult GetLogItems(int nodeId)
         {
             // The list of log entries to return binds to the model
-            var logItems = Logging.GetLogItems(nodeId);
+            var logItems = _internalDbLogger.GetLogItems(nodeId);
 
             // Return Json Result
             return Json(logItems, JsonRequestBehavior.AllowGet);
@@ -81,20 +91,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 // Set FollowUpDate property if it differs from current
-                DateTime currentFollowUpDate = OrderItem.GetOrderItem(nodeId).FollowUpDate;
+                DateTime currentFollowUpDate = _orderItemManager.GetOrderItem(nodeId).FollowUpDate;
 
                 if (!String.IsNullOrEmpty(newFollowUpDate))
                 {
                     DateTime parsedNewFollowUpDate = Convert.ToDateTime(newFollowUpDate);
                     if (currentFollowUpDate != parsedNewFollowUpDate)
                     {
-                        OrderItem.SetFollowUpDate(nodeId, parsedNewFollowUpDate, false, false);
-                        Logging.WriteLogItemInternal(nodeId, "DATE", "Följs upp senast " + newFollowUpDate, false, false);
+                        _orderItemManager.SetFollowUpDate(nodeId, parsedNewFollowUpDate, false, false);
+                        _internalDbLogger.WriteLogItemInternal(nodeId, "DATE", "Följs upp senast " + newFollowUpDate, false, false);
                     }
                 }
 
                 // Use internal method to set type property and log the result
-                Logging.WriteLogItemInternal(nodeId, Type, Message);
+                _internalDbLogger.WriteLogItemInternal(nodeId, Type, Message);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;
@@ -108,9 +118,5 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             return Json(json, JsonRequestBehavior.AllowGet);
         }
-
-        
-
-
     }
 }

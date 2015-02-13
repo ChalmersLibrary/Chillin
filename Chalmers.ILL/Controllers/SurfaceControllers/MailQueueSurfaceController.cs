@@ -29,11 +29,24 @@ using HtmlAgilityPack;
 using System.Text;
 using System.Text.RegularExpressions;
 using Chalmers.ILL.Patron;
+using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class MailQueueSurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+        INotifier _notifier;
+        IInternalDbLogger _internalDbLogger;
+
+        public MailQueueSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, IInternalDbLogger internalDbLogger)
+        {
+            _orderItemManager = orderItemManager;
+            _notifier = notifier;
+            _internalDbLogger = internalDbLogger;
+        }
+
         /// <summary>
         /// Basic method for reading from mail queue in Exchange
         /// </summary>
@@ -166,9 +179,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                         try
                         {
                             // Write a new OrderItem
-                            int orderItemNodeId = OrderItem.WriteOrderItem(item, false, false);
+                            int orderItemNodeId = _orderItemManager.CreateOrderItemInDbFromMailQueueModel(item, false, false);
 
-                            Sierra.WriteSierraDataToLog(orderItemNodeId, item.SierraPatronInfo);
+                            _internalDbLogger.WriteSierraDataToLog(orderItemNodeId, item.SierraPatronInfo);
 
                             // Archive the mail message to correct folder
                             if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
@@ -198,7 +211,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Set the OrderItem Status so it appears in lists
                             try
                             {
-                                OrderItemStatus.SetOrderItemStatusInternal(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "02:Åtgärda"), false, false);
+                                _orderItemManager.SetOrderItemStatusInternal(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "02:Åtgärda"), false, false);
                             }
                             catch (Exception es)
                             {
@@ -208,7 +221,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Set new FollowUpDate for the OrderItem
                             try
                             {
-                                OrderItem.SetFollowUpDate(item.OrderItemNodeId, DateTime.Now, false, false);
+                                _orderItemManager.SetFollowUpDate(item.OrderItemNodeId, DateTime.Now, false, false);
                             }
                             catch (Exception ef)
                             {
@@ -218,8 +231,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Write LogItem with the mail received and metadata
                             try
                             {
-                                Logging.WriteLogItemInternal(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), false, false);
-                                Logging.WriteLogItemInternal(item.OrderItemNodeId, "MAIL_NOTE", "Svar från " + item.Sender + " [" + item.From + "]");
+                                _internalDbLogger.WriteLogItemInternal(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), false, false);
+                                _internalDbLogger.WriteLogItemInternal(item.OrderItemNodeId, "MAIL_NOTE", "Svar från " + item.Sender + " [" + item.From + "]");
                             }
                             catch (Exception el)
                             {
@@ -243,7 +256,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Update item with some useful data
                             list[index].StatusResult = "Wrote LogItem type MAIL for this OrderId.";
 
-                            Notifier.UpdateOrderItemUpdate(item.OrderItemNodeId, "-1", "", true, true, true);
+                            _notifier.UpdateOrderItemUpdate(item.OrderItemNodeId, "-1", "", true, true, true);
                         }
                         catch (Exception e)
                         {
@@ -259,7 +272,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Set the OrderItem Status so it appears in lists
                             try
                             {
-                                OrderItemStatus.SetOrderItemStatusInternal(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "09:Mottagen"), false, false);
+                                _orderItemManager.SetOrderItemStatusInternal(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "09:Mottagen"), false, false);
                             }
                             catch (Exception es)
                             {
@@ -271,7 +284,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             {
                                 if (item.MessageBody.ToLower().Contains("drm"))
                                 {
-                                    OrderItemDrm.SetDrmWarning(item.OrderItemNodeId, true, false, false);
+                                    _orderItemManager.SetDrmWarning(item.OrderItemNodeId, true, false, false);
                                 }
                             }
                             catch (Exception es)
@@ -282,7 +295,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Set new FollowUpDate for the OrderItem
                             try
                             {
-                                OrderItem.SetFollowUpDate(item.OrderItemNodeId, DateTime.Now, false, false);
+                                _orderItemManager.SetFollowUpDate(item.OrderItemNodeId, DateTime.Now, false, false);
                             }
                             catch (Exception ef)
                             {
@@ -316,7 +329,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                                                 // cleanup, memory stream not needed any longer
                                                 attachment.Data.Dispose();
 
-                                                OrderItemAttachments.AddOrderItemAttachment(item.OrderItemNodeId, m.Id, attachment.Title, m.GetValue("file").ToString(), false, false);
+                                                _orderItemManager.AddOrderItemAttachment(item.OrderItemNodeId, m.Id, attachment.Title, m.GetValue("file").ToString(), false, false);
                                             }
                                         }
                                         catch (Exception)
@@ -338,8 +351,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Write LogItem with the mail received and metadata
                             try
                             {
-                                Logging.WriteLogItemInternal(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), false, false);
-                                Logging.WriteLogItemInternal(item.OrderItemNodeId, "MAIL_NOTE", "Leverans från " + item.Sender + " [" + item.From + "]");
+                                _internalDbLogger.WriteLogItemInternal(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), false, false);
+                                _internalDbLogger.WriteLogItemInternal(item.OrderItemNodeId, "MAIL_NOTE", "Leverans från " + item.Sender + " [" + item.From + "]");
                             }
                             catch (Exception el)
                             {
@@ -363,7 +376,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Update item with some useful data
                             list[index].StatusResult = "Wrote LogItem type MAIL for this OrderId.";
 
-                            Notifier.UpdateOrderItemUpdate(item.OrderItemNodeId, "-1", "", true, true, true);
+                            _notifier.UpdateOrderItemUpdate(item.OrderItemNodeId, "-1", "", true, true, true);
                         }
                         catch (Exception e)
                         {
@@ -432,7 +445,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     {
                         Convert.ToInt32(editedByStr);
                     }
-                    Notifier.UpdateOrderItemUpdate(item.Id, memberId.ToString(), "", true, true);
+                    _notifier.UpdateOrderItemUpdate(item.Id, memberId.ToString(), "", true, true);
                 }
             }
             catch (Exception e)

@@ -10,12 +10,20 @@ using System.Web.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemCancellationReasonSurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+
+        public OrderItemCancellationReasonSurfaceController(IOrderItemManager orderItemManager)
+        {
+            _orderItemManager = orderItemManager;
+        }
+
         /// <summary>
         /// Set cancellation reason property for OrderItem
         /// </summary>
@@ -30,7 +38,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 // Use internal method to set type property and log the result
-                OrderItemCancellationReason.SetOrderItemCancellationReasonInternal(orderNodeId, cancellationReasonId);
+                _orderItemManager.SetOrderItemCancellationReasonInternal(orderNodeId, cancellationReasonId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

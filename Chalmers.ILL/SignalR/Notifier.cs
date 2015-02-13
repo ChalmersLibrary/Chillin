@@ -8,18 +8,26 @@ using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Controllers.SurfaceControllers;
 using umbraco.cms.businesslogic.datatype;
 using System.Configuration;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.SignalR
 {
-    public class Notifier
+    public class Notifier : INotifier
     {
+        IOrderItemManager _orderItemManager;
+
+        public void SetOrderItemManager(IOrderItemManager orderItemManager)
+        {
+            _orderItemManager = orderItemManager;
+        }
+
         /*
          * This notifier is a simple helper, to send notifications to a SignalR hub
          * It takes a document as a parameter and then passes that data on to signalR
          * Which then sends it to all connected browsers.
          * Finally, in the browser, a javascript method is executed based on the data from the server
          */
-        public static void ReportNewOrderItemUpdate(IContent d)
+        public void ReportNewOrderItemUpdate(IContent d)
         {
             // get the NotificationHub
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
@@ -62,8 +70,8 @@ namespace Chalmers.ILL.SignalR
             var n = new OrderItemNotification
                         {
                             NodeId = d.Id,
-                            EditedBy = OrderItem.GetOrderItem(d.Id).EditedBy,
-                            EditedByMemberName = OrderItem.GetOrderItem(d.Id).EditedByMemberName,
+                            EditedBy = _orderItemManager.GetOrderItem(d.Id).EditedBy,
+                            EditedByMemberName = _orderItemManager.GetOrderItem(d.Id).EditedByMemberName,
                             SignificantUpdate = true,
                             IsPending = chillinOrderStatusId == 1 || chillinOrderStatusId == 2 || chillinOrderStatusId == 9 || (chillinOrderStatusId > 2 && chillinOrderStatusId < 5 && DateTime.Now > followUpDate),
                             UpdateFromMail = false
@@ -73,7 +81,7 @@ namespace Chalmers.ILL.SignalR
             context.Clients.All.updateStream(n);
         }
 
-        public static void UpdateOrderItemUpdate(int nodeId, string editedBy, string editedByMemberName, bool significant = false, bool isPending = false, bool updateFromMail = false)
+        public void UpdateOrderItemUpdate(int nodeId, string editedBy, string editedByMemberName, bool significant = false, bool isPending = false, bool updateFromMail = false)
         {
             // get the NotificationHub
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();

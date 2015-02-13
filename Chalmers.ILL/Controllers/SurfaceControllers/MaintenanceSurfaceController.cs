@@ -11,11 +11,19 @@ using Umbraco.Core.Logging;
 using Examine;
 using UmbracoExamine;
 using System.Configuration;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class MaintenanceSurfaceController : SurfaceController
     {
+        IOrderItemManager _orderItemManager;
+
+        public MaintenanceSurfaceController(IOrderItemManager orderItemManager)
+        {
+            _orderItemManager = orderItemManager;
+        }
+
         /// <summary>
         /// Method which will run different maintenance jobs.
         /// </summary>
@@ -62,7 +70,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             attachmentList.RemoveAll(i => i.MediaItemNodeId == m.Id);
                         }
                         c.SetValue("attachments", JsonConvert.SerializeObject(attachmentList));
-                        cs.SaveWithoutEventsAndWithSynchronousReindexing(c);
+                        _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(c);
                         ms.Delete(m);
                         removedMedia = true;
                     }
