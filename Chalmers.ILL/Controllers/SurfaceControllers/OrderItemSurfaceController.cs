@@ -11,7 +11,7 @@ using Chalmers.ILL.Extensions;
 using umbraco.cms.businesslogic.member;
 using umbraco.cms.businesslogic.relation;
 using Umbraco.Core.Logging;
-using Chalmers.ILL.Wrappers;
+using Chalmers.ILL.Members;
 using Newtonsoft.Json;
 using System.Configuration;
 using umbraco.cms.businesslogic.datatype;
@@ -22,6 +22,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemSurfaceController : SurfaceController
     {
+        IMemberInfoManager _memberInfoManager;
+
+        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager)
+        {
+            _memberInfoManager = memberInfoManager;
+        }
+
         public const string lockRelationType = "memberLocked";
 
         /// <summary>
@@ -33,7 +40,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderOrderItem(int nodeId)
         {
             // Get current member.
-            int memberId = MemberWrapper.GetCurrentMemberId(Request, Response);
+            int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
             // Get a new OrderItem populated with values for this node
             var orderItem = OrderItem.GetOrderItem(nodeId);
@@ -82,7 +89,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult GetOrderItem(int nodeId)
         {
             // Get current member.
-            int memberId = MemberWrapper.GetCurrentMemberId(Request, Response);
+            int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
             // Get a new OrderItem populated with values for this node
             var orderItem = OrderItem.GetOrderItem(nodeId);
@@ -99,7 +106,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 if (relations.First().Parent.Id == memberId)
                 {
                     orderItem.EditedBy = memberId.ToString();
-                    orderItem.EditedByMemberName = MemberWrapper.GetCurrentMemberLoginName(Request, Response);
+                    orderItem.EditedByMemberName = _memberInfoManager.GetCurrentMemberLoginName(Request, Response);
                     //orderItem.EditedByMemberName = Member.GetCurrentMember().LoginName;
                     orderItem.EditedByCurrentMember = true;
                 }
@@ -155,7 +162,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 // Get current member
-                int memberId = MemberWrapper.GetCurrentMemberId(Request, Response);
+                int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
                 // Get all relations with the given node ID and the correct relations type.
                 var relType = RelationType.GetByAlias(lockRelationType);
@@ -202,7 +209,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 // Get current member.
-                int memberId = MemberWrapper.GetCurrentMemberId(Request, Response);
+                int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
                 // Get all relations with the given node ID and the correct relations type.
                 var relType = RelationType.GetByAlias(lockRelationType);
@@ -272,7 +279,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 // Get current member.
-                int memberId = MemberWrapper.GetCurrentMemberId(Request, Response);
+                int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
                 // Get all relations with the given node ID and the correct relations type.
                 var relType = RelationType.GetByAlias(lockRelationType);
@@ -335,7 +342,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 // Get current member
-                int memberId = MemberWrapper.GetCurrentMemberId(Request, Response);
+                int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
                 // Get all lock relations.
                 var relType = RelationType.GetByAlias(lockRelationType);
@@ -343,7 +350,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 // Set response metadata.
                 json.MemberId = memberId;
-                json.MemberName = MemberWrapper.GetCurrentMemberText(Request, Response);
+                json.MemberName = _memberInfoManager.GetCurrentMemberText(Request, Response);
                 json.List = new List<Lock>();
 
                 // Lambda statement found any locked OrderItem nodes.
@@ -372,6 +379,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             return Json(json, JsonRequestBehavior.AllowGet);
         }
+
+        #region Private methods
 
         private List<UmbracoDropdownListNtextDataType> GetAvailableTypes()
         {
@@ -435,3 +444,5 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
     }
 }
+
+        #endregion

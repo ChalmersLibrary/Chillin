@@ -8,19 +8,26 @@ using Umbraco.Web.Mvc;
 using Umbraco.Web;
 using System.Security.Cryptography;
 using Chalmers.ILL.Models;
-using Chalmers.ILL.Wrappers;
+using Chalmers.ILL.Members;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class PasswordSurfaceController : SurfaceController
     {
+        IMemberInfoManager _memberInfoManager;
+
+        public PasswordSurfaceController(IMemberInfoManager memberInfoManager)
+        {
+            _memberInfoManager = memberInfoManager;
+        }
+
         [HttpPost]
         public ActionResult ChangePassword(Models.PasswordModel model)
         {
             if (ModelState.IsValid)
             {
                 // Get Member from LoginName and CurrentPassword provided in form/Model
-                var m = Member.GetMemberFromLoginNameAndPassword(MemberWrapper.GetCurrentMemberLoginName(Request, Response), model.CurrentPassword);
+                var m = Member.GetMemberFromLoginNameAndPassword(_memberInfoManager.GetCurrentMemberLoginName(Request, Response), model.CurrentPassword);
 
                 // If this computes to a real Member, change the password to NewPassword from form/Model
                 if (m != null)

@@ -1,9 +1,8 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.ChalmersILLOrderListPageModel>
 @using umbraco.cms.businesslogic.member;
 @using System.Web.Security;
 @using Examine;
 @using Chalmers.ILL.Controllers.SurfaceControllers;
-@using Chalmers.ILL.Wrappers;
 @using Chalmers.ILL.Extensions;
 @using Umbraco.Core.Logging;
 @using System.Globalization;
@@ -128,7 +127,7 @@
     </div>
 
     @{
-        int loggedInMember = MemberWrapper.GetCurrentMemberId(Request, Response);
+        int loggedInMember = Model.CurrentMemberId;
         if (!String.IsNullOrEmpty(Request.QueryString["query"]))
         {
             // Connect to an Examine Search Provider

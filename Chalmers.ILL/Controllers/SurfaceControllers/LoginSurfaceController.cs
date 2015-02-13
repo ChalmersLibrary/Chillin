@@ -6,13 +6,20 @@ using System.Web.Mvc;
 using umbraco.cms.businesslogic.member;
 using Umbraco.Web.Mvc;
 using Umbraco.Web;
-using Chalmers.ILL.Wrappers;
+using Chalmers.ILL.Members;
 using System.Configuration;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class LoginSurfaceController : SurfaceController
     {
+        IMemberInfoManager _memberInfoManager;
+
+        public LoginSurfaceController(IMemberInfoManager memberInfoManager)
+        {
+            _memberInfoManager = memberInfoManager;
+        }
+
         [HttpPost]
         public ActionResult HandleLogin(Models.LoginModel model)
         {
@@ -22,7 +29,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 if (m != null)
                 {
                     Member.AddMemberToCache(m);
-                    MemberWrapper.AddMemberToCache(Response, m);
+                    _memberInfoManager.AddMemberToCache(Response, m);
                     string redirectUrl = Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url + "?login=ok";
                     Response.Redirect(redirectUrl);
                 }
