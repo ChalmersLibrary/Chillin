@@ -114,11 +114,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <Fakes Include="Fakes\Chalmers.ILL.fakes" />
-    <Fakes Include="Fakes\Examine.fakes" />
-    <Fakes Include="Fakes\System.fakes" />
-    <Fakes Include="Fakes\mscorlib.fakes" />
-    <Fakes Include="Fakes\System.Core.fakes" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
