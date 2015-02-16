@@ -102,40 +102,50 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     string deliveryOrderId;
                     foreach (MailQueueModel item in list)
                     {
-                        var orderIdPattern = new Regex("[#+](cthb-.{8}-[0-9]+)");
-                        deliveryOrderId = getBoundOrder(item);
-                        // Bind the type of messages we have (NEW or REPLY)
-                        if (item.Subject.Contains("#new") || item.To.Contains("+new"))
+                        try
                         {
-                            item.Type = MailQueueType.NEW;
+                            var orderIdPattern = new Regex("[#+](cthb-.{8}-[0-9]+)");
+                            deliveryOrderId = getBoundOrder(item);
+                            // Bind the type of messages we have (NEW or REPLY)
+                            if (item.Subject.Contains("#new") || item.To.Contains("+new"))
+                            {
+                                item.Type = MailQueueType.NEW;
+                            }
+                            else if (item.Subject.Contains("#cthb-"))
+                            {
+                                item.OrderId = orderIdPattern.Match(item.Subject).Groups[1].Value;
+                                item.OrderItemNodeId = Convert.ToInt32(item.OrderId.Split('-').Last());
+                                item.Type = MailQueueType.REPLY;
+                            }
+                            else if (item.To.Contains("+cthb-"))
+                            {
+                                item.OrderId = orderIdPattern.Match(item.To).Groups[1].Value;
+                                item.OrderItemNodeId = Convert.ToInt32(item.OrderId.Split('-').Last());
+                                item.Type = MailQueueType.REPLY;
+                            }
+                            else if (deliveryOrderId != null)
+                            {
+                                item.OrderId = deliveryOrderId;
+                                item.OrderItemNodeId = Convert.ToInt32(deliveryOrderId.Split('-').Last());
+                                item.Type = MailQueueType.DELIVERY;
+                            }
+                            else
+                            {
+                                item.Type = MailQueueType.UNKNOWN;
+                            }
                         }
-                        else if (item.Subject.Contains("#cthb-"))
+                        catch (Exception e)
                         {
-                            item.OrderId = orderIdPattern.Match(item.Subject).Groups[1].Value;
-                            item.OrderItemNodeId = Convert.ToInt32(item.OrderId.Split('-').Last());
-                            item.Type = MailQueueType.REPLY;
+                            item.Type = MailQueueType.ERROR;
+                            LogHelper.Error<MailQueueSurfaceController>("Failed to process one E-mail, tagging it with ERROR.", e);
                         }
-                        else if (item.To.Contains("+cthb-"))
-                        {
-                            item.OrderId = orderIdPattern.Match(item.To).Groups[1].Value;
-                            item.OrderItemNodeId = Convert.ToInt32(item.OrderId.Split('-').Last());
-                            item.Type = MailQueueType.REPLY;
-                        }
-                        else if (deliveryOrderId != null)
-                        {
-                            item.OrderId = deliveryOrderId;
-                            item.OrderItemNodeId = Convert.ToInt32(deliveryOrderId.Split('-').Last());
-                            item.Type = MailQueueType.DELIVERY;
-                        }
-                        else
-                            item.Type = MailQueueType.UNKNOWN;
                     }
                 }
                 catch (Exception e)
                 {
                     json.Success = false;
                     json.Message = "Error when post processing E-mails: " + e.Message;
-                    LogHelper.Error<MailQueueSurfaceController>("Error when post processing E-mails", e);
+                    LogHelper.Error<MailQueueSurfaceController>("Error when post processing E-mails.", e);
                     return Json(json, JsonRequestBehavior.DenyGet);
                 }
 
@@ -385,9 +395,42 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             LogHelper.Error<MailQueueSurfaceController>("Error following up delivery on OrderItem", e);
                         }
                     }
+                    else if (item.Type == MailQueueType.ERROR)
+                    {
+                        try
+                        {
+                            // Forward failed mail to bug fixers.
+                            try
+                            {
+                                foreach (var addressWithPotentialWs in ConfigurationManager.AppSettings["bugFixersMailingList"].Split(','))
+                                {
+                                    var address = addressWithPotentialWs.Trim();
+                                    try
+                                    {
+                                        _exchangeMailWebApi.ForwardMailMessage(item.Id, address, false);
+                                    }
+                                    catch (Exception innerInnerExc)
+                                    {
+                                        LogHelper.Error<MailQueueSurfaceController>("Failed to forward message to " + address + ".", innerInnerExc);
+                                    }
+                                }
+                            }
+                            catch (Exception innerExc)
+                            {
+                                LogHelper.Error<MailQueueSurfaceController>("Failed to forward message to bug fixers.", innerExc);
+                            }
 
-                    // UNKNOWN, forward to mailbox configured in web.config
-                    else
+                            // Forward failed mail to manual handling.
+                            _exchangeMailWebApi.ForwardMailMessage(item.Id, ConfigurationManager.AppSettings["chalmersILLForwardingAddress"]);
+                            list[index].StatusResult = "This message has been forwarded to " + ConfigurationManager.AppSettings["chalmersILLForwardingAddress"];
+                        }
+                        catch (Exception e)
+                        {
+                            list[index].StatusResult = "Error forwarding mail: " + e.Message;
+                            LogHelper.Error<MailQueueSurfaceController>("Error forwarding mail", e);
+                        }
+                    }
+                    else // UNKNOWN, forward to mailbox configured in web.config
                     {
                         try
                         {

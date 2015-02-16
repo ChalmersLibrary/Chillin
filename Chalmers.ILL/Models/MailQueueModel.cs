@@ -11,7 +11,8 @@ namespace Chalmers.ILL.Models
         NEW,
         REPLY,
         UNKNOWN,
-        DELIVERY
+        DELIVERY,
+        ERROR
     }
 
     public class MailQueueModel

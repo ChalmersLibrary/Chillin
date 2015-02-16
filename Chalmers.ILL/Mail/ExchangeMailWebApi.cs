@@ -231,7 +231,7 @@ namespace Chalmers.ILL.Mail
         /// <param name="service">Exchange Web Service Object</param>
         /// <param name="Id">Mail Message ItemId</param>
         /// <param name="recipientAddress">Receiving address</param>
-        public void ForwardMailMessage(ItemId Id, string recipientAddress)
+        public void ForwardMailMessage(ItemId Id, string recipientAddress, bool delete = true)
         {
             // Bind the message to get properties
             EmailMessage message = EmailMessage.Bind(_service, Id, new PropertySet(BasePropertySet.FirstClassProperties));
@@ -246,8 +246,11 @@ namespace Chalmers.ILL.Mail
             // Send the forwarded message
             message.Forward(messageBodyPrefix, addresses);
 
-            // Delete the original message
-            message.Delete(DeleteMode.MoveToDeletedItems);
+            if (delete)
+            {
+                // Delete the original message
+                message.Delete(DeleteMode.MoveToDeletedItems);
+            }
         }
 
         /// <summary>
