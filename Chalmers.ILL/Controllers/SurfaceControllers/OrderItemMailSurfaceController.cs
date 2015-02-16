@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Logging;
+using Chalmers.ILL.Mail;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -22,11 +23,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         IOrderItemManager _orderItemManager;
         IInternalDbLogger _internalDbLogger;
+        IExchangeMailWebApi _exchangeMailWebApi;
 
-        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
+            IExchangeMailWebApi exchangeMailWebApi)
         {
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;
+            _exchangeMailWebApi = exchangeMailWebApi;
         }
 
         /// <summary>
@@ -97,8 +101,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                         }
                     }
                     string body = m.message + ConfigurationManager.AppSettings["chalmersILLMailSignature"].Replace("\\n", "\n");
-                    ExchangeService service = ExchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
-                    ExchangeMailWebApi.SendMailMessage(service, _orderItemManager.GetOrderItem(m.nodeId).OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], m.recipientName, m.recipientEmail, attachments);
+                    _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
+                    _exchangeMailWebApi.SendMailMessage(_orderItemManager.GetOrderItem(m.nodeId).OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], m.recipientName, m.recipientEmail, attachments);
                     _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, false, false);
                     _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL", m.message, false, false);
                 }
@@ -172,8 +176,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                         "<div id='PatronCardNo'>" + libraryCardNumber + "</div>\n" +
                         "<div id='Purchase'>False</div>\n" +
                     "</div>\n";
-                ExchangeService service = ExchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
-                ExchangeMailWebApi.SendPlainMailMessage(service, body, "New request from TEST #new", ConfigurationManager.AppSettings["chalmersIllSenderAddress"]);
+                _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
+                _exchangeMailWebApi.SendPlainMailMessage(body, "New request from TEST #new", ConfigurationManager.AppSettings["chalmersIllSenderAddress"]);
 
                 json.Success = true;
                 json.Message = "Sent mail for new order.";

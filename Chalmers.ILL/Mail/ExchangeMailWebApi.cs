@@ -16,24 +16,26 @@ using HtmlAgilityPack;
 using System.Configuration;
 using System.Diagnostics;
 using Npgsql;
+using Chalmers.ILL.Utilities;
 
-namespace Chalmers.ILL.Utilities
+namespace Chalmers.ILL.Mail
 {
-    public class ExchangeMailWebApi
+    public class ExchangeMailWebApi : IExchangeMailWebApi
     {
+        ExchangeService _service;
 
         /// <summary>
         /// Connect to Exchange Service with credentials
         /// </summary>
         /// <returns>The Service reference</returns>
-        public static ExchangeService ConnectToExchangeService(string username, string password)
+        public void ConnectToExchangeService(string username, string password)
         {
             ServicePointManager.ServerCertificateValidationCallback = CertificateValidationCallBack;
             System.Uri exchangeUrl = new System.Uri(ConfigurationManager.AppSettings["chalmersIllExhangeWebServiceUrl"]);
-            ExchangeService service = new ExchangeService(ExchangeVersion.Exchange2010_SP1);
+            _service = new ExchangeService(ExchangeVersion.Exchange2010_SP1);
 
             // The Credentials for the Service Account to connect to
-            service.Credentials = new WebCredentials(username, password);
+            _service.Credentials = new WebCredentials(username, password);
 
             // Debug flags
             // service.TraceEnabled = true;
@@ -42,18 +44,15 @@ namespace Chalmers.ILL.Utilities
             // Connect to the EWS surface or die trying
             try
             {
-                service.Url = exchangeUrl;
+                _service.Url = exchangeUrl;
             }
             catch (Exception)
             {
                 throw;
             }
-
-            // Return the service object
-            return service;
         }
 
-        public static List<MailQueueModel> ReadMailQueue(ExchangeService service)
+        public List<MailQueueModel> ReadMailQueue()
         {
             // Custom mail headers like this, whoah...
             // BUG/TODO: Doesn't work with custom headers like our X-CTHB, works with some headers...
@@ -87,7 +86,7 @@ namespace Chalmers.ILL.Utilities
             view.Traversal = ItemTraversal.Shallow;
 
             // Find each mail in special Folder and matching SearchFilter, return max 50
-            foreach (var mail in service.FindItems(WellKnownFolderName.Inbox, view))
+            foreach (var mail in _service.FindItems(WellKnownFolderName.Inbox, view))
             {
                 if (mail is EmailMessage)
                 {
@@ -95,7 +94,7 @@ namespace Chalmers.ILL.Utilities
                     var m = new MailQueueModel();
 
                     // Bind this mail.Id to full EmailMessage and specify additional Properties to read
-                    EmailMessage message = EmailMessage.Bind(service, mail.Id, new PropertySet(BasePropertySet.FirstClassProperties, MsgRefProperty));
+                    EmailMessage message = EmailMessage.Bind(_service, mail.Id, new PropertySet(BasePropertySet.FirstClassProperties, MsgRefProperty));
 
                     // Load Message Body as HTML with HtmlAgilityPack
                     HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
@@ -182,59 +181,38 @@ namespace Chalmers.ILL.Utilities
         }
 
         /// <summary>
-        /// Find Exchange FolderId based on DisplayName of folder, starting from root
-        /// </summary>
-        /// <param name="service">Exchange Service object</param>
-        /// <param name="folderDisplayName">The DisplayName to search for</param>
-        /// <returns>Id of first folder found</returns>
-        private static FolderId FindFolderId(ExchangeService service, FolderId baseFolder, string folderDisplayName)
-        {
-            FolderView view = new FolderView(100);
-            view.PropertySet = new PropertySet(BasePropertySet.IdOnly);
-            view.PropertySet.Add(FolderSchema.DisplayName);
-            view.Traversal = FolderTraversal.Shallow;
-            FindFoldersResults findFolderResults = service.FindFolders(baseFolder, view); // WellKnownFolderName.MsgFolderRoot
-            foreach (Folder f in findFolderResults)
-            {
-                if (f.DisplayName == folderDisplayName)
-                    return f.Id;
-            }
-            return null;
-        }
-
-        /// <summary>
         /// Archives a Mail Message to correct Year and Month Folder
         /// </summary>
         /// <param name="service">Exchange Web Service reference</param>
         /// <param name="Id">Mail Message Item Id</param>
-        public static FolderId ArchiveMailMessage(ExchangeService service, ItemId Id)
+        public FolderId ArchiveMailMessage(ItemId Id)
         {
             // Bind the message to get properties
-            EmailMessage message = EmailMessage.Bind(service, Id, new PropertySet(BasePropertySet.FirstClassProperties));
+            EmailMessage message = EmailMessage.Bind(_service, Id, new PropertySet(BasePropertySet.FirstClassProperties));
 
             // Find out Year and Month to archive on
             string year = message.DateTimeReceived.ToString("yyyy", CultureInfo.InvariantCulture);
             string month = message.DateTimeReceived.ToString("MM", CultureInfo.InvariantCulture);
 
             // Check if Year folder exists below Inbox
-            FolderId yearFolderId = FindFolderId(service, WellKnownFolderName.Inbox, year);
+            FolderId yearFolderId = FindFolderId(WellKnownFolderName.Inbox, year);
 
             // Create folder for Year if it wasn't found
             if (yearFolderId == null)
             {
-                Folder folder = new Folder(service);
+                Folder folder = new Folder(_service);
                 folder.DisplayName = year;
                 folder.Save(WellKnownFolderName.Inbox);
                 yearFolderId = folder.Id;
             }
 
             // Check if Month folder exists below Year folder
-            FolderId monthFolderId = FindFolderId(service, yearFolderId, month);
+            FolderId monthFolderId = FindFolderId(yearFolderId, month);
 
             // Create folder for Month if it wasn't found
             if (monthFolderId == null)
             {
-                Folder folder = new Folder(service);
+                Folder folder = new Folder(_service);
                 folder.DisplayName = month;
                 folder.Save(yearFolderId);
                 monthFolderId = folder.Id;
@@ -253,10 +231,10 @@ namespace Chalmers.ILL.Utilities
         /// <param name="service">Exchange Web Service Object</param>
         /// <param name="Id">Mail Message ItemId</param>
         /// <param name="recipientAddress">Receiving address</param>
-        public static void ForwardMailMessage(ExchangeService service, ItemId Id, string recipientAddress)
+        public void ForwardMailMessage(ItemId Id, string recipientAddress)
         {
             // Bind the message to get properties
-            EmailMessage message = EmailMessage.Bind(service, Id, new PropertySet(BasePropertySet.FirstClassProperties));
+            EmailMessage message = EmailMessage.Bind(_service, Id, new PropertySet(BasePropertySet.FirstClassProperties));
 
             // Create the prefixed content to add to the forwarded message body.
             string messageBodyPrefix = "Detta meddelande har vidarebefodrats av Chalmers.ILL för " + message.Sender.Name + " <" + message.Sender.Address + ">";
@@ -282,12 +260,12 @@ namespace Chalmers.ILL.Utilities
         /// <param name="recipientName">The name of the recipient.</param>
         /// <param name="recipientAddress">Recipient address.</param>
         /// <param name="attachments">The attachments which should be sent out with the mail.</param>
-        public static void SendMailMessage(ExchangeService service, string orderId, string body, string subject, string recipientName, string recipientAddress, IDictionary<string, byte[]> attachments)
+        public void SendMailMessage(string orderId, string body, string subject, string recipientName, string recipientAddress, IDictionary<string, byte[]> attachments)
         {
             string senderEmail = ConfigurationManager.AppSettings["chalmersIllSenderAddress"];
 
             // Create an email message and identify the Exchange service.
-            EmailMessage message = new EmailMessage(service);
+            EmailMessage message = new EmailMessage(_service);
 
             // Add properties to the email message.
             message.Subject = subject + " #" + orderId;
@@ -311,12 +289,12 @@ namespace Chalmers.ILL.Utilities
         /// <param name="body">Message body</param>
         /// <param name="subject">Message subject</param>
         /// <param name="recipientAddress">Recipient address</param>
-        public static void SendPlainMailMessage(ExchangeService service, string body, string subject, string recipientAddress)
+        public void SendPlainMailMessage(string body, string subject, string recipientAddress)
         {
             string senderEmail = ConfigurationManager.AppSettings["chalmersIllSenderAddress"];
 
             // Create an email message and identify the Exchange service.
-            EmailMessage message = new EmailMessage(service);
+            EmailMessage message = new EmailMessage(_service);
 
             // Add properties to the email message.
             message.Subject = subject;
@@ -329,10 +307,30 @@ namespace Chalmers.ILL.Utilities
         }
 
 
+        /// <summary>
+        /// Find Exchange FolderId based on DisplayName of folder, starting from root
+        /// </summary>
+        /// <param name="service">Exchange Service object</param>
+        /// <param name="folderDisplayName">The DisplayName to search for</param>
+        /// <returns>Id of first folder found</returns>
+        private FolderId FindFolderId(FolderId baseFolder, string folderDisplayName)
+        {
+            FolderView view = new FolderView(100);
+            view.PropertySet = new PropertySet(BasePropertySet.IdOnly);
+            view.PropertySet.Add(FolderSchema.DisplayName);
+            view.Traversal = FolderTraversal.Shallow;
+            FindFoldersResults findFolderResults = _service.FindFolders(baseFolder, view); // WellKnownFolderName.MsgFolderRoot
+            foreach (Folder f in findFolderResults)
+            {
+                if (f.DisplayName == folderDisplayName)
+                    return f.Id;
+            }
+            return null;
+        }
+
+
         // Internal methods used when connecting to Exchange Web Service EWWS
-
-
-        private static bool RedirectionUrlValidationCallback(string redirectionUrl)
+        private bool RedirectionUrlValidationCallback(string redirectionUrl)
         {
             // The default for the validation callback is to reject the URL.
             bool result = false;
@@ -349,7 +347,7 @@ namespace Chalmers.ILL.Utilities
             return result;
         }
 
-        private static bool CertificateValidationCallBack(object sender, System.Security.Cryptography.X509Certificates.X509Certificate certificate, System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
+        private bool CertificateValidationCallBack(object sender, System.Security.Cryptography.X509Certificates.X509Certificate certificate, System.Security.Cryptography.X509Certificates.X509Chain chain, System.Net.Security.SslPolicyErrors sslPolicyErrors)
         {
             // If the certificate is a valid, signed certificate, return true.
             if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
@@ -394,7 +392,7 @@ namespace Chalmers.ILL.Utilities
             }
         }
 
-        private static SecureString getPassword()
+        private SecureString getPassword()
         {
             SecureString pwd = new SecureString();
             while (true)
@@ -421,7 +419,7 @@ namespace Chalmers.ILL.Utilities
             return pwd;
         }
 
-        private static string convertToUNSecureString(SecureString secstrPassword)
+        private string convertToUNSecureString(SecureString secstrPassword)
         {
             IntPtr unmanagedString = IntPtr.Zero;
             try

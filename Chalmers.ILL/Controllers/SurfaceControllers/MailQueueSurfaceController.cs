@@ -31,6 +31,7 @@ using System.Text.RegularExpressions;
 using Chalmers.ILL.Patron;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Logging;
+using Chalmers.ILL.Mail;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -39,12 +40,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
         IInternalDbLogger _internalDbLogger;
+        IExchangeMailWebApi _exchangeMailWebApi;
 
-        public MailQueueSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, IInternalDbLogger internalDbLogger)
+        public MailQueueSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, 
+            IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;
             _internalDbLogger = internalDbLogger;
+            _exchangeMailWebApi = exchangeMailWebApi;
         }
 
         /// <summary>
@@ -61,16 +65,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // Possible result JSON when something goes wrong
             var json = new ResultResponse();
 
-            // Exchange Service
-            ExchangeService service = null;
-
             // List of read mails
             List<MailQueueModel> list = null;
 
             // Connect to Exchange Service
             try
             {
-                service = ExchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
+                _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
             }
             catch (Exception e)
             {
@@ -83,7 +84,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // Get a list of mails from Inbox folder
             try
             {
-                list = ExchangeMailWebApi.ReadMailQueue(service);
+                list = _exchangeMailWebApi.ReadMailQueue();
             }
             catch (Exception e)
             {
@@ -186,7 +187,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // Archive the mail message to correct folder
                             if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
                             {
-                                FolderId archiveFolderId = ExchangeMailWebApi.ArchiveMailMessage(service, item.Id);
+                                FolderId archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item.Id);
                                 list[index].ArchiveFolderId = archiveFolderId;
                             }
 
@@ -244,7 +245,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             {
                                 if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
                                 {
-                                    FolderId archiveFolderId = ExchangeMailWebApi.ArchiveMailMessage(service, item.Id);
+                                    FolderId archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item.Id);
                                     list[index].ArchiveFolderId = archiveFolderId;
                                 }
                             }
@@ -364,7 +365,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             {
                                 if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
                                 {
-                                    FolderId archiveFolderId = ExchangeMailWebApi.ArchiveMailMessage(service, item.Id);
+                                    FolderId archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item.Id);
                                     list[index].ArchiveFolderId = archiveFolderId;
                                 }
                             }
@@ -390,7 +391,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     {
                         try
                         {
-                            ExchangeMailWebApi.ForwardMailMessage(service, item.Id, ConfigurationManager.AppSettings["chalmersILLForwardingAddress"]);
+                            _exchangeMailWebApi.ForwardMailMessage(item.Id, ConfigurationManager.AppSettings["chalmersILLForwardingAddress"]);
                             list[index].StatusResult = "This message has been forwarded to " + ConfigurationManager.AppSettings["chalmersILLForwardingAddress"];
                         }
                         catch (Exception e)

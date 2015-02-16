@@ -395,6 +395,7 @@
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Logging\IInternalDbLogger.cs" />
+    <Compile Include="Mail\IExchangeMailWebApi.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
     <Compile Include="Models\ChalmersILLLogoutPageModel.cs" />
     <Compile Include="Models\ChalmersILLModel.cs" />
@@ -428,7 +429,7 @@
     <Compile Include="Statistics\DefaultStatMngr.cs" />
     <Compile Include="Statistics\IStatisticsCalculator.cs" />
     <Compile Include="Statistics\IStatisticsManager.cs" />
-    <Compile Include="Utilities\ExchangeMailWebApi.cs" />
+    <Compile Include="Mail\ExchangeMailWebApi.cs" />
     <Compile Include="Utilities\Helpers.cs" />
     <Compile Include="Logging\InternalDbLogger.cs" />
     <Compile Include="OrderItems\OrderItemManager.cs" />

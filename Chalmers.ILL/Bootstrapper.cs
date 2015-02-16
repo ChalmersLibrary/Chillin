@@ -7,6 +7,7 @@ using Chalmers.ILL.Members;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.SignalR;
 using Chalmers.ILL.Logging;
+using Chalmers.ILL.Mail;
 
 namespace Chalmers.ILL
 {
@@ -40,11 +41,12 @@ namespace Chalmers.ILL
             orderItemManager.SetNotifier(notifier);
             orderItemManager.SetInternalDbLogger(internalDbLogger);
 
+            container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
             container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
             container.RegisterInstance(typeof(INotifier), notifier);
             container.RegisterInstance(typeof(IInternalDbLogger), internalDbLogger);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
-            container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
+            container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
         }
     }
 }
