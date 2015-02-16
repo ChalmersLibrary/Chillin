@@ -107,11 +107,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             var orderIdPattern = new Regex("[#+](cthb-.{8}-[0-9]+)");
                             deliveryOrderId = getBoundOrder(item);
                             // Bind the type of messages we have (NEW or REPLY)
-                            if (item.Subject.Contains("#new") || item.To.Contains("+new"))
+                            if ((item.Subject != null && item.Subject.Contains("#new")) || item.To.Contains("+new"))
                             {
                                 item.Type = MailQueueType.NEW;
                             }
-                            else if (item.Subject.Contains("#cthb-"))
+                            else if ((item.Subject != null && item.Subject.Contains("#cthb-")))
                             {
                                 item.OrderId = orderIdPattern.Match(item.Subject).Groups[1].Value;
                                 item.OrderItemNodeId = Convert.ToInt32(item.OrderId.Split('-').Last());
@@ -540,10 +540,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                         }
                     }
 
-                    if (m.Subject.Contains(providerOrderId) ||
-                        m.MessageBody.Contains(providerOrderId) ||
-                        m.Subject.Contains(orderId) ||
-                        m.MessageBody.Contains(orderId) ||
+                    if ((m.Subject != null && m.Subject.Contains(providerOrderId)) ||
+                        (m.MessageBody != null && m.MessageBody.Contains(providerOrderId)) ||
+                        (m.Subject != null && m.Subject.Contains(orderId)) ||
+                        (m.MessageBody != null && m.MessageBody.Contains(orderId)) ||
                         attachmentIndicatingBinding)
                     {
                         ret = orderId;
