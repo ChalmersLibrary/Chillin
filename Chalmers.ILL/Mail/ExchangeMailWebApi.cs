@@ -231,13 +231,13 @@ namespace Chalmers.ILL.Mail
         /// <param name="service">Exchange Web Service Object</param>
         /// <param name="Id">Mail Message ItemId</param>
         /// <param name="recipientAddress">Receiving address</param>
-        public void ForwardMailMessage(ItemId Id, string recipientAddress, bool delete = true)
+        public void ForwardMailMessage(ItemId Id, string recipientAddress, string extraText = "", bool delete = true)
         {
             // Bind the message to get properties
             EmailMessage message = EmailMessage.Bind(_service, Id, new PropertySet(BasePropertySet.FirstClassProperties));
 
             // Create the prefixed content to add to the forwarded message body.
-            string messageBodyPrefix = "Detta meddelande har vidarebefodrats av Chalmers.ILL för " + message.Sender.Name + " <" + message.Sender.Address + ">";
+            string messageBodyPrefix = extraText == "" ? "Detta meddelande har vidarebefodrats av Chalmers.ILL för " + message.Sender.Name + " <" + message.Sender.Address + ">" : extraText;
 
             // Create the addresses that the forwarded email message is to be sent to.
             EmailAddress[] addresses = new EmailAddress[1];

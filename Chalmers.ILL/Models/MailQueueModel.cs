@@ -41,6 +41,7 @@ namespace Chalmers.ILL.Models
 
         public string Debug { get; set; }
         public string StatusResult { get; set; }
+        public string ParseErrorMessage { get; set; }
 
         public SierraModel SierraPatronInfo { get; set; }
 

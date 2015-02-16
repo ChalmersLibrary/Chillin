@@ -137,6 +137,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                         catch (Exception e)
                         {
                             item.Type = MailQueueType.ERROR;
+                            item.ParseErrorMessage = "Chillin failed to process E-mail. Reason: " + e.Message;
                             LogHelper.Error<MailQueueSurfaceController>("Failed to process one E-mail, tagging it with ERROR.", e);
                         }
                     }
@@ -407,7 +408,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                                     var address = addressWithPotentialWs.Trim();
                                     try
                                     {
-                                        _exchangeMailWebApi.ForwardMailMessage(item.Id, address, false);
+                                        _exchangeMailWebApi.ForwardMailMessage(item.Id, address, item.ParseErrorMessage, false);
                                     }
                                     catch (Exception innerInnerExc)
                                     {
