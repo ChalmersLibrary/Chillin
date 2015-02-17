@@ -7,7 +7,7 @@ using Umbraco.Core.Models;
 using Umbraco.Web;
 using Umbraco.Web.Models;
 
-namespace Chalmers.ILL.Models
+namespace Chalmers.ILL.Models.Page
 {
     public class ChalmersILLModel : RenderModel
     {

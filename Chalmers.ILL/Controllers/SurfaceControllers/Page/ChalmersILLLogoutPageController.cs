@@ -1,5 +1,5 @@
 ﻿using Chalmers.ILL.Members;
-using Chalmers.ILL.Models;
+using Chalmers.ILL.Models.Page;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ using umbraco.cms.businesslogic.member;
 using Umbraco.Web.Models;
 using Umbraco.Web.Mvc;
 
-namespace Chalmers.ILL.Controllers.SurfaceControllers
+namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
 {
     public class ChalmersILLLogoutPageController : RenderMvcController
     {

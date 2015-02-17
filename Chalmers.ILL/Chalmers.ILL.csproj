@@ -371,12 +371,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
-    <Compile Include="Controllers\SurfaceControllers\ChalmersILLController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\ChalmersILLLogoutPageController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\ChalmersILLOrderListPageController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\ChalmersILLSettingsPageController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\ChalmersILLStartPageController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\ChalmersILLStatisticsPageController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLLogoutPageController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLOrderListPageController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLSettingsPageController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLStartPageController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLStatisticsPageController.cs" />
     <Compile Include="Controllers\SurfaceControllers\GetMemberSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\LoginSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\LogItemSurfaceController.cs" />
@@ -400,13 +400,14 @@
     <Compile Include="Logging\IInternalDbLogger.cs" />
     <Compile Include="Mail\IExchangeMailWebApi.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
-    <Compile Include="Models\ChalmersILLLogoutPageModel.cs" />
-    <Compile Include="Models\ChalmersILLModel.cs" />
-    <Compile Include="Models\ChalmersILLOrderListPageModel.cs" />
-    <Compile Include="Models\ChalmersILLSettingsPageModel.cs" />
-    <Compile Include="Models\ChalmersILLStartPageModel.cs" />
-    <Compile Include="Models\ChalmersILLStatisticsPageModel.cs" />
+    <Compile Include="Models\Page\ChalmersILLLogoutPageModel.cs" />
+    <Compile Include="Models\Page\ChalmersILLModel.cs" />
+    <Compile Include="Models\Page\ChalmersILLOrderListPageModel.cs" />
+    <Compile Include="Models\Page\ChalmersILLSettingsPageModel.cs" />
+    <Compile Include="Models\Page\ChalmersILLStartPageModel.cs" />
+    <Compile Include="Models\Page\ChalmersILLStatisticsPageModel.cs" />
     <Compile Include="Models\KeyValue.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLActionLogEntryModel.cs" />
     <Compile Include="Models\StatisticsVariable.cs" />
     <Compile Include="Models\UmbracoDropdownListNtextDataType.cs" />
     <Compile Include="Models\MailAttachment.cs" />
@@ -436,6 +437,8 @@
     <Compile Include="Statistics\IStatisticsCalculator.cs" />
     <Compile Include="Statistics\IStatisticsManager.cs" />
     <Compile Include="Mail\ExchangeMailWebApi.cs" />
+    <Compile Include="UmbracoApi\DataTypes.cs" />
+    <Compile Include="UmbracoApi\IDataTypes.cs" />
     <Compile Include="Utilities\Helpers.cs" />
     <Compile Include="Logging\InternalDbLogger.cs" />
     <Compile Include="OrderItems\OrderItemManager.cs" />

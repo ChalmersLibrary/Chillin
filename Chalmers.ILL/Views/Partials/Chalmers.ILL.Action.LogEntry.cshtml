@@ -1,4 +1,4 @@
-﻿@model Chalmers.ILL.Models.OrderItemModel
+﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionLogEntryModel
 @using System.Globalization
 
 <div class="action-header">Skriv till loggen</div>
@@ -14,14 +14,100 @@
             <div class="form-group">
                 <label for="followUpDate">Följs upp</label>
                 <div class="input-group date datetimepicker">
-                    <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
+                    <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
                 </div>
             </div>
+            <div class="form-group">
+                <label>Ny status</label>
+                <!-- Status button -->
+                <div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            Ingen förändring <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
+                            @{
+                                var allowedStatusValues = new String[] { "Annullerad", "Åtgärda", "Överförd", "Inköpt", "Väntar" };
 
-            <button class="btn btn-success" onclick="writeLogItem(@Model.NodeId, this.form.message.value, 'LOG', this.form.followUpDate.value);">Spara</button>
+                                foreach (var status in Model.AvailableStatuses)
+                                {
+                                    if (allowedStatusValues.Contains(status.Value))
+                                    {
+                                        if (status.Value == "Annullerad")
+                                        {
+                                            <li class="dropdown-submenu">
+                                                @if (status.Id == Model.OrderItem.Status)
+                                                {
+                                                    <a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a>
+                                                }
+                                                else
+                                                {
+                                                    <a href="#">@status.Value</a>
+                                                }
+                                                <ul class="dropdown-menu">
+                                                    @foreach (var cancellationReason in Model.AvailableCancellationReasons)
+                                                    {
+                                                        if (status.Id == Model.OrderItem.Status && cancellationReason.Id == Model.OrderItem.CancellationReason)
+                                                        {
+                                                            <li><a href="#" class="disabled-link"><span class="current">@cancellationReason.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
+                                                        }
+                                                        else
+                                                        {
+                                                            <li><a href="#" onclick="event.preventDefault();">@cancellationReason.Value</a></li>
+                                                        }
+                                                    }
+                                                </ul>
+                                            </li>
+                                        }
+                                        else if (status.Value == "Inköpt")
+                                        {
+                                            <li class="dropdown-submenu">
+                                                @if (status.Id == Model.OrderItem.Status)
+                                                {
+                                                    <a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a>
+                                                }
+                                                else
+                                                {
+                                                    <a href="#">@status.Value</a>
+                                                }
+                                                <ul class="dropdown-menu">
+                                                    @foreach (var purchasedMaterial in Model.AvailablePurchasedMaterials)
+                                                    {
+                                                        if (status.Id == Model.OrderItem.Status && purchasedMaterial.Id == Model.OrderItem.PurchasedMaterial)
+                                                        {
+                                                            <li><a href="#" class="disabled-link"><span class="current">@purchasedMaterial.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
+                                                        }
+                                                        else
+                                                        {
+                                                            <li><a href="#" onclick="event.preventDefault();">@purchasedMaterial.Value</a></li>
+                                                        }
+                                                    }
+                                                </ul>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            if (status.Id == Model.OrderItem.Status)
+                                            {
+                                                <li><a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
+                                            }
+                                            else
+                                            {
+                                                <li><a href="#" onclick="event.preventDefault();">@status.Value</a></li>
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-success" onclick="writeLogItem(@Model.OrderItem.NodeId, this.form.message.value, 'LOG', this.form.followUpDate.value);">Spara</button>
         </div>
    </div>
     <script type="text/javascript">

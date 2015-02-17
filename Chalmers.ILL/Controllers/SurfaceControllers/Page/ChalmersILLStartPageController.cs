@@ -1,32 +1,31 @@
 ﻿using Chalmers.ILL.Members;
-using Chalmers.ILL.Models;
+using Chalmers.ILL.Models.Page;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using Umbraco.Web.Models;
 using Umbraco.Web.Mvc;
 
-namespace Chalmers.ILL.Controllers.SurfaceControllers
+namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
 {
-    public class ChalmersILLController : RenderMvcController
+    public class ChalmersILLStartPageController : RenderMvcController
     {
         IMemberInfoManager _memberInfoManager;
 
-        public ChalmersILLController(IMemberInfoManager memberInfoManager)
+        public ChalmersILLStartPageController(IMemberInfoManager memberInfoManager)
         {
             _memberInfoManager = memberInfoManager;
         }
 
         public override ActionResult Index(RenderModel model)
         {
-            var customModel = new ChalmersILLModel();
+            var customModel = new ChalmersILLStartPageModel();
 
-           _memberInfoManager.PopulateModelWithMemberData(Request, Response, customModel);
+            _memberInfoManager.PopulateModelWithMemberData(Request, Response, customModel);
 
             return CurrentTemplate(customModel);
         }

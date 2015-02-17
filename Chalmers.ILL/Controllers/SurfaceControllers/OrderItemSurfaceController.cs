@@ -17,6 +17,7 @@ using Newtonsoft.Json;
 using System.Configuration;
 using umbraco.cms.businesslogic.datatype;
 using Chalmers.ILL.SignalR;
+using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -27,12 +28,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IMemberInfoManager _memberInfoManager;
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
+        IDataTypes _dataTypes;
 
-        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager, IOrderItemManager orderItemManager, INotifier notifier)
+        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager, IOrderItemManager orderItemManager, INotifier notifier, IDataTypes dataTypes)
         {
             _memberInfoManager = memberInfoManager;
             _orderItemManager = orderItemManager;
             _notifier = notifier;
+            _dataTypes = dataTypes;
         }
 
         public const string lockRelationType = "memberLocked";
@@ -76,11 +79,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
             }
 
-            orderItem.AvailableTypes = GetAvailableTypes();
-            orderItem.AvailableStatuses = GetAvailableStatuses();
-            orderItem.AvailableDeliveryLibraries = GetAvailableDeliveryLibraries();
-            orderItem.AvailableCancellationReasons = GetAvailableCancellationReasons();
-            orderItem.AvailablePurchasedMaterials = GetAvailablePurchasedMaterials();
+            orderItem.AvailableTypes = _dataTypes.GetAvailableTypes();
+            orderItem.AvailableStatuses = _dataTypes.GetAvailableStatuses();
+            orderItem.AvailableDeliveryLibraries = _dataTypes.GetAvailableDeliveryLibraries();
+            orderItem.AvailableCancellationReasons = _dataTypes.GetAvailableCancellationReasons();
+            orderItem.AvailablePurchasedMaterials = _dataTypes.GetAvailablePurchasedMaterials();
 
             // Return Partial View to the client
             return PartialView("Chalmers.ILL.OrderItem", orderItem);
@@ -385,70 +388,5 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             return Json(json, JsonRequestBehavior.AllowGet);
         }
-
-        #region Private methods
-
-        private List<UmbracoDropdownListNtextDataType> GetAvailableTypes()
-        {
-            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"]);
-        }
-
-        private List<UmbracoDropdownListNtextDataType> GetAvailableStatuses()
-        {
-            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"]);
-        }
-
-        private List<UmbracoDropdownListNtextDataType> GetAvailableDeliveryLibraries()
-        {
-            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"]);
-        }
-
-        private List<UmbracoDropdownListNtextDataType> GetAvailableCancellationReasons()
-        {
-            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderCancellationReasonDataTypeDefinitionName"]);
-        }
-
-        private List<UmbracoDropdownListNtextDataType> GetAvailablePurchasedMaterials()
-        {
-            return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderPurchasedMaterialDataTypeDefinitionName"]);
-        }
-
-        private List<UmbracoDropdownListNtextDataType> GetAvailableValues(string dataTypeName)
-        {
-            // Get a sorted list of all prevalues
-            SortedList typeTypes = Helpers.GetPreValues(dataTypeName);
-
-            // Get the datatype enumerator (to sort as in Backoffice)
-            IDictionaryEnumerator i = typeTypes.GetEnumerator();
-
-            // Create the list which will hold the values
-            var ret = new List<UmbracoDropdownListNtextDataType>();
-
-            // Counter for sort order in return list
-            int sortOrder = 0;
-
-            // Move trough the enumerator
-            while (i.MoveNext())
-            {
-                // Get the prevalue (text) using umbraco.cms.businesslogic.datatype
-                PreValue statusType = (PreValue)i.Value;
-                var r = new UmbracoDropdownListNtextDataType();
-
-                // Add to the instanced model OrderItemStatusModel
-                r.Id = statusType.Id;
-                r.Order = sortOrder;
-
-                // If we have "08:Something" then just return last part
-                r.Value = statusType.Value.Split(':').Last();
-
-                // Add to our statusList
-                ret.Add(r);
-                sortOrder++;
-            }
-
-            return ret;
-        }
     }
 }
-
-        #endregion

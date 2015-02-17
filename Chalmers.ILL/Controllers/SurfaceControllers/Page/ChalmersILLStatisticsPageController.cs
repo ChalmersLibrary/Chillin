@@ -1,5 +1,5 @@
 ﻿using Chalmers.ILL.Members;
-using Chalmers.ILL.Models;
+using Chalmers.ILL.Models.Page;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,20 +10,20 @@ using System.Web.Mvc;
 using Umbraco.Web.Models;
 using Umbraco.Web.Mvc;
 
-namespace Chalmers.ILL.Controllers.SurfaceControllers
+namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
 {
-    public class ChalmersILLStartPageController : RenderMvcController
+    public class ChalmersILLStatisticsPageController : RenderMvcController
     {
         IMemberInfoManager _memberInfoManager;
 
-        public ChalmersILLStartPageController(IMemberInfoManager memberInfoManager)
+        public ChalmersILLStatisticsPageController(IMemberInfoManager memberInfoManager)
         {
             _memberInfoManager = memberInfoManager;
         }
 
         public override ActionResult Index(RenderModel model)
         {
-            var customModel = new ChalmersILLStartPageModel();
+            var customModel = new ChalmersILLStatisticsPageModel();
 
             _memberInfoManager.PopulateModelWithMemberData(Request, Response, customModel);
 

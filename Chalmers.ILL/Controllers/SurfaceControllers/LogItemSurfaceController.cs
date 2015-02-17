@@ -8,10 +8,12 @@ using umbraco.cms.businesslogic.member;
 using System.ComponentModel.DataAnnotations;
 using Umbraco.Web.Mvc;
 using Chalmers.ILL.Models;
+using Chalmers.ILL.Models.PartialPage;
 using System.Globalization;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Logging;
+using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -20,11 +22,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         IOrderItemManager _orderItemManager;
         IInternalDbLogger _internalDbLogger;
+        IDataTypes _dataTypes;
 
-        public LogItemSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        public LogItemSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger, IDataTypes dataTypes)
         {
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;
+            _dataTypes = dataTypes;
         }
 
         /// <summary>
@@ -35,9 +39,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         [HttpGet]
         public ActionResult RenderLogEntryAction(int nodeId)
         {
-            var orderItem = _orderItemManager.GetOrderItem(nodeId);
+            var pageModel = new ChalmersILLActionLogEntryModel(_orderItemManager.GetOrderItem(nodeId));
+
+            pageModel.AvailableTypes = _dataTypes.GetAvailableTypes();
+            pageModel.AvailableStatuses = _dataTypes.GetAvailableStatuses();
+            pageModel.AvailableDeliveryLibraries = _dataTypes.GetAvailableDeliveryLibraries();
+            pageModel.AvailableCancellationReasons = _dataTypes.GetAvailableCancellationReasons();
+            pageModel.AvailablePurchasedMaterials = _dataTypes.GetAvailablePurchasedMaterials();
+
             // The return format depends on the client's Accept-header
-            return PartialView("Chalmers.ILL.Action.LogEntry", orderItem);
+            return PartialView("Chalmers.ILL.Action.LogEntry", pageModel);
         }
 
         /// <summary>
