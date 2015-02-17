@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chalmers.ILL.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -78,6 +79,13 @@ namespace Chalmers.ILL.Members
             }
 
             return memberLoginName;
+        }
+
+        public void PopulateModelWithMemberData(HttpRequestBase request, HttpResponseBase response, ChalmersILLModel model)
+        {
+            model.CurrentMemberId = GetCurrentMemberId(request, response);
+            model.CurrentMemberText = GetCurrentMemberText(request, response);
+            model.CurrentMemberLoginName = GetCurrentMemberLoginName(request, response);
         }
 
         public void AddMemberToCache(HttpResponseBase response, Member member)

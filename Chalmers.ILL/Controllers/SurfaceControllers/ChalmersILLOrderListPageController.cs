@@ -14,15 +14,18 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class ChalmersILLOrderListPageController : RenderMvcController
     {
+        IMemberInfoManager _memberInfoManager;
+
+        public ChalmersILLOrderListPageController(IMemberInfoManager memberInfoManager)
+        {
+            _memberInfoManager = memberInfoManager;
+        }
+
         public override ActionResult Index(RenderModel model)
         {
             var customModel = new ChalmersILLOrderListPageModel();
 
-            var memberInfoManager = new MemberInfoManager();
-
-            customModel.CurrentMemberId = memberInfoManager.GetCurrentMemberId(Request, Response);
-            customModel.CurrentMemberText = memberInfoManager.GetCurrentMemberText(Request, Response);
-            customModel.CurrentMemberLoginName = memberInfoManager.GetCurrentMemberLoginName(Request, Response);
+            _memberInfoManager.PopulateModelWithMemberData(Request, Response, customModel);
 
             return CurrentTemplate(customModel);
         }

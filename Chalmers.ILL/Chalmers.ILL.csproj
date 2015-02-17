@@ -374,6 +374,9 @@
     <Compile Include="Controllers\SurfaceControllers\ChalmersILLController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ChalmersILLLogoutPageController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ChalmersILLOrderListPageController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\ChalmersILLSettingsPageController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\ChalmersILLStartPageController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\ChalmersILLStatisticsPageController.cs" />
     <Compile Include="Controllers\SurfaceControllers\GetMemberSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\LoginSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\LogItemSurfaceController.cs" />
@@ -400,6 +403,9 @@
     <Compile Include="Models\ChalmersILLLogoutPageModel.cs" />
     <Compile Include="Models\ChalmersILLModel.cs" />
     <Compile Include="Models\ChalmersILLOrderListPageModel.cs" />
+    <Compile Include="Models\ChalmersILLSettingsPageModel.cs" />
+    <Compile Include="Models\ChalmersILLStartPageModel.cs" />
+    <Compile Include="Models\ChalmersILLStatisticsPageModel.cs" />
     <Compile Include="Models\KeyValue.cs" />
     <Compile Include="Models\StatisticsVariable.cs" />
     <Compile Include="Models\UmbracoDropdownListNtextDataType.cs" />

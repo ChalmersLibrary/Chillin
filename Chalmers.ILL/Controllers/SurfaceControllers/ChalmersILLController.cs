@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using Umbraco.Web.Models;
@@ -14,15 +15,18 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class ChalmersILLController : RenderMvcController
     {
+        IMemberInfoManager _memberInfoManager;
+
+        public ChalmersILLController(IMemberInfoManager memberInfoManager)
+        {
+            _memberInfoManager = memberInfoManager;
+        }
+
         public override ActionResult Index(RenderModel model)
         {
             var customModel = new ChalmersILLModel();
 
-            var memberInfoManager = new MemberInfoManager();
-
-            customModel.CurrentMemberId = memberInfoManager.GetCurrentMemberId(Request, Response);
-            customModel.CurrentMemberText = memberInfoManager.GetCurrentMemberText(Request, Response);
-            customModel.CurrentMemberLoginName = memberInfoManager.GetCurrentMemberLoginName(Request, Response);
+           _memberInfoManager.PopulateModelWithMemberData(Request, Response, customModel);
 
             return CurrentTemplate(customModel);
         }

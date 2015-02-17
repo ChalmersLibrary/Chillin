@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chalmers.ILL.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -33,6 +34,14 @@ namespace Chalmers.ILL.Members
         /// <param name="response">The current HTTP response.</param>
         /// <returns>The member login name of the current logged on member.</returns>
         string GetCurrentMemberLoginName(HttpRequestBase request, HttpResponseBase response);
+
+        /// <summary>
+        /// Get all the member data and adds it to the ChalmersILLModel.
+        /// </summary>
+        /// <param name="request">The current HTTP request.</param>
+        /// <param name="response">The current HTTP response.</param>
+        /// <param name="model">The model which the data should be added to.</param>
+        void PopulateModelWithMemberData(HttpRequestBase request, HttpResponseBase response, ChalmersILLModel model);
 
         /// <summary>
         /// Adds the members Id, Text and LoginName to the cache.
