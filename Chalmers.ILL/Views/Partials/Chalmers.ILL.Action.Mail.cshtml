@@ -47,7 +47,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>Ny status</label>
+                <label>Ny status</label> <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-content="Här ska det stå information om hur man ska tänka när man sätter den här statusen!"></span>
                 <!-- Status button -->
                 <div>
                     <div class="btn-group">
@@ -105,6 +105,11 @@
         $(function () {
             $(".datetimepicker").datetimepicker({
                 locale: "sv"
+            });
+
+            $("[data-toggle='popover']").popover({
+                trigger: "hover",
+                placement: "top"
             });
         });
 
