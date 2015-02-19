@@ -12,6 +12,7 @@ using Microsoft.Exchange.WebServices.Data;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Logging;
+using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -21,11 +22,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         IOrderItemManager _orderItemManager;
         IInternalDbLogger _internalDbLogger;
+        IDataTypes _dataTypes;
 
-        public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
+            IDataTypes dataTypes)
         {
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;
+            _dataTypes = dataTypes;
         }
 
         /// <summary>

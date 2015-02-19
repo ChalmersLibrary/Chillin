@@ -753,19 +753,18 @@ function setOrderItemReference(nodeId, reference) {
     }).error(unlockScreen);
 }
 
-function sendDeliveryByEmail(nodeId, recipientEmail, recipientName, message, status, followUpDate, logEntry, attachments) {
+function sendDeliveryByEmail(mailData, logEntry) {
     lockScreen();
     if (message && recipientEmail) {
-        var postData = { nodeId: nodeId, recipientEmail: recipientEmail, recipientName: recipientName, message: message, newStatus: status, newFollowUpDate: followUpDate, attachments: attachments };
         $.ajax({
             type: "POST",
             url: "/umbraco/surface/OrderItemMailSurface/SendMail",
-            data: JSON.stringify(postData),
+            data: JSON.stringify(mailData),
             success: function (json) {
                 if (json.Success) {
                     $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetDelivery?nodeId=" + nodeId + "&logEntry=" + logEntry + "&delivery=email", function (json) {
                         if (json.Success) {
-                            loadOrderItemDetails(nodeId);
+                            loadOrderItemDetails(mailData.nodeId);
                         }
                         else {
                             alert(json.Message);
@@ -847,12 +846,12 @@ function sendMailForNewOrder(body, name, mail, libCardNr) {
 }
 
 /* Send mail to Patron */
-function sendMailToPatron(nodeId, recipientEmail, recipientName, message, status, followUpDate) {
+function sendMailToPatron(mailData) {
     lockScreen();
     if (message && recipientEmail) {
-        $.post("/umbraco/surface/OrderItemMailSurface/SendMail", { nodeId: nodeId, recipientEmail: recipientEmail, recipientName: recipientName, message: message, newStatus: status, newFollowUpDate: followUpDate }).done(function (json) {
+        $.post("/umbraco/surface/OrderItemMailSurface/SendMail", mailData).done(function (json) {
             if (json.Success) {
-                loadOrderItemDetails(nodeId);
+                loadOrderItemDetails(mailData.nodeId);
             }
             else {
                 alert(json.Message);

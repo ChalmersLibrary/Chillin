@@ -29,7 +29,7 @@
                             <span id="currently-selected-status" data-status-id="-1" data-cancellation-reason-id="-1" data-purchased-material-id="-1">Ingen förändring</span> <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
-                            <li><a href="#" onclick="updateSelectedStatus(-1, 'Ingen förändring', -1); event.preventDefault();">Ingen förändring</a></li>
+                            <li><a href="#" onclick="updateSelectedStatus(-1, 'Ingen förändring', -1, -1); event.preventDefault();">Ingen förändring</a></li>
                             @{
                                 var allowedStatusValues = new String[] { "Annullerad", "Åtgärda", "Överförd", "Inköpt", "Väntar" };
 
@@ -44,7 +44,7 @@
                                                 <ul class="dropdown-menu">
                                                     @foreach (var cancellationReason in Model.AvailableCancellationReasons)
                                                     {
-                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @cancellationReason.Value', @cancellationReason.Id); event.preventDefault();">@cancellationReason.Value</a></li>
+                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @cancellationReason.Value', @cancellationReason.Id, -1); event.preventDefault();">@cancellationReason.Value</a></li>
                                                     }
                                                 </ul>
                                             </li>
@@ -56,14 +56,14 @@
                                                 <ul class="dropdown-menu">
                                                     @foreach (var purchasedMaterial in Model.AvailablePurchasedMaterials)
                                                     {
-                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @purchasedMaterial.Value', @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
+                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @purchasedMaterial.Value', -1, @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
                                                     }
                                                 </ul>
                                             </li>
                                         }
                                         else
                                         {
-                                            <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value', -1); event.preventDefault();">@status.Value</a></li>
+                                            <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value', -1, -1); event.preventDefault();">@status.Value</a></li>
                                         }
                                     }
                                 }

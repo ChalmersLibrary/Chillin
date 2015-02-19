@@ -1,4 +1,4 @@
-﻿@model Chalmers.ILL.Models.OrderItemModel
+﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionDeliveryModel
 @using System.Globalization
 
 @{
@@ -12,11 +12,11 @@
     <!--
     <div class="form-group">
         <label for="originalOrder">Originalbeställning</label>
-        <textarea class="form-control" rows="3" id="originalOrder" name="originalOrder" disabled="disabled">@Model.OriginalOrder</textarea>
+        <textarea class="form-control" rows="3" id="originalOrder" name="originalOrder" disabled="disabled">@Model.OrderItem.OriginalOrder</textarea>
     </div>
     <div class="form-group">
         <label for="reference">Referens</label>
-        <textarea class="form-control" rows="3" id="reference" name="reference">@Model.Reference</textarea>
+        <textarea class="form-control" rows="3" id="reference" name="reference">@Model.OrderItem.Reference</textarea>
     </div>
     -->
     <div class="row">
@@ -49,7 +49,7 @@
         <div class="col-md-6">
             <div class="row">
                 @{
-                    if (@Model.SierraInfo.adress.Count == 0)
+                    if (@Model.OrderItem.SierraInfo.adress.Count == 0)
                     {
                         <div class="col-md-12">
                             <div class="well text-center">Inga adresser kunde hittas.</div>
@@ -57,13 +57,13 @@
                     }
                     else
                     {
-                        foreach (var address in @Model.SierraInfo.adress)
+                        foreach (var address in @Model.OrderItem.SierraInfo.adress)
                         {
                             <div class="col-md-4">
                                 <label for="address-box">Adress @address.addresscount</label>
                                 <div id="address-box" class="panel panel-default">
                                     <div class="panel-body">
-                                        @Model.SierraInfo.first_name @Model.SierraInfo.last_name<br />
+                                        @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name<br />
                                         @address.addr1@(String.IsNullOrEmpty(@address.addr1) ? Html.Raw("") : Html.Raw("<br />"))
                                         @address.addr2@(String.IsNullOrEmpty(@address.addr2) ? Html.Raw("") : Html.Raw("<br />"))
                                         @address.addr3@(String.IsNullOrEmpty(@address.addr3) ? Html.Raw("") : Html.Raw("<br />"))
@@ -85,7 +85,7 @@
                     <div id="attachments-group2">
                         <button class="btn btn-default" onclick="$('#hidden-file-upload').trigger('click');">Ladda upp</button>
                         @{
-                            foreach (var attachment in Model.AttachmentList)
+                            foreach (var attachment in Model.OrderItem.AttachmentList)
                             {
                                 <button type="button" class="btn btn-default btn-view-attachment @(drmWarning ? "btn-danger": "")" onclick="openDocument(this);" data-link="@attachment.Link" data-media-id="@attachment.MediaItemNodeId">@attachment.Title <span class="glyphicon glyphicon-search"></span></button>
                             }
@@ -132,11 +132,11 @@ Vänliga hälsningar / Regards
         <div class="col-md-6">
             <div class="form-group">
                 <label for="recipientName">Mottagarens namn</label>
-                <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.PatronName">
+                <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.OrderItem.PatronName">
             </div>
             <div class="form-group">
                 <label for="recipientEmail">Mottagande e-postadress</label>
-                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.PatronEmail">
+                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.OrderItem.PatronEmail">
             </div>
             <div class="row">
                 <div class="col-md-12 form-group">
@@ -145,7 +145,7 @@ Vänliga hälsningar / Regards
                         <button class="btn btn-default" onclick="$('#hidden-file-upload').trigger('click');">Ladda upp</button>
                         <input id="hidden-file-upload" type="file" name="hidden-file-upload" style="display: none;" />
                         @{
-                            foreach (var attachment in Model.AttachmentList)
+                            foreach (var attachment in Model.OrderItem.AttachmentList)
                             {
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-default btn-attach-attachment btn-info active" onclick="toggleDocumentSendStatus(this);" data-media-id="@attachment.MediaItemNodeId">@attachment.Title <span class="glyphicon glyphicon-paperclip"></span></button>
@@ -232,11 +232,21 @@ Vänliga hälsningar / Regards
                 attachmentIds.push($(this).data("media-id"));
             });
 
-            sendDeliveryByEmail(@Model.NodeId, $('#recipientEmail').attr('value').toString().trim(), $('#recipientName').attr('value'), $('#message').attr('value'), '05:Levererad', $('#followUpDate').attr('value'), $('#log-message').attr('value'), attachmentIds);
+            sendDeliveryByEmail({
+                nodeId: @Model.OrderItem.NodeId,
+                recipientEmail: $('#recipientEmail').attr('value').toString().trim(),
+                recipientName: $('#recipientName').attr('value'),
+                message: $('#message').attr('value'),
+                newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Levererad")).Id,
+                newCancellationReasonId: "-1",
+                newPurchasedMaterialId: "-1",
+                newFollowUpDate: $('#followUpDate').attr('value'),
+                attachments: attachmentIds
+            }, $('#log-message').attr('value'));
         }
         else
         {
-            setOrderItemDelivery(@Model.NodeId, $('#log-message').attr('value'), $('input:radio[name=deliveryOptions]:checked').val());
+            setOrderItemDelivery(@Model.OrderItem.NodeId, $('#log-message').attr('value'), $('input:radio[name=deliveryOptions]:checked').val());
         }
     }
 
@@ -244,7 +254,7 @@ Vänliga hälsningar / Regards
         if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
             alert('FileApi, som används för att ladda upp filer, stöds ej i denna webbläsare.');
             return;
-        }   
+        }
 
         var input = document.getElementById('hidden-file-upload');
         if (!input) {
@@ -254,13 +264,13 @@ Vänliga hälsningar / Regards
             alert("Denna webbläsare verkar inte stödja \"files\"-funktionen av FileApi.");
         }
         else if (!input.files[0]) {
-            alert("En fil måste väljas.");               
+            alert("En fil måste väljas.");
         }
         else {
             file = input.files[0];
             fr = new FileReader();
             fr.onload = function () {
-                uploadDocument(@Model.NodeId, file.name, fr.result);
+                uploadDocument(@Model.OrderItem.NodeId, file.name, fr.result);
             };
             fr.readAsDataURL(file);
         }

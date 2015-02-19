@@ -11,7 +11,9 @@ namespace Chalmers.ILL.Models
         public string recipientEmail { get; set; } 
         public string recipientName { get; set; } 
         public string message { get; set; }
-        public string newStatus { get; set; }
+        public int newStatusId { get; set; }
+        public int newCancellationReasonId { get; set; }
+        public int newPurchasedMaterialId { get; set; }
         public string newFollowUpDate { get; set; }
         public List<int> attachments { get; set; }
     }

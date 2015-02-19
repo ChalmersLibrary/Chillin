@@ -400,6 +400,7 @@
     <Compile Include="Logging\IInternalDbLogger.cs" />
     <Compile Include="Mail\IExchangeMailWebApi.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
+    <Compile Include="Models\OrderItemPageModelBase.cs" />
     <Compile Include="Models\Page\ChalmersILLLogoutPageModel.cs" />
     <Compile Include="Models\Page\ChalmersILLModel.cs" />
     <Compile Include="Models\Page\ChalmersILLOrderListPageModel.cs" />
@@ -407,7 +408,9 @@
     <Compile Include="Models\Page\ChalmersILLStartPageModel.cs" />
     <Compile Include="Models\Page\ChalmersILLStatisticsPageModel.cs" />
     <Compile Include="Models\KeyValue.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLActionDeliveryModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionLogEntryModel.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLActionMailModel.cs" />
     <Compile Include="Models\StatisticsVariable.cs" />
     <Compile Include="Models\UmbracoDropdownListNtextDataType.cs" />
     <Compile Include="Models\MailAttachment.cs" />

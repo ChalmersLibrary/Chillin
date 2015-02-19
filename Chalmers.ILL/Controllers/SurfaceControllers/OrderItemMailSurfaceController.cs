@@ -15,6 +15,8 @@ using System.Text.RegularExpressions;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
+using Chalmers.ILL.Models.PartialPage;
+using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -24,13 +26,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IOrderItemManager _orderItemManager;
         IInternalDbLogger _internalDbLogger;
         IExchangeMailWebApi _exchangeMailWebApi;
+        IDataTypes _dataTypes;
 
         public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
-            IExchangeMailWebApi exchangeMailWebApi)
+            IExchangeMailWebApi exchangeMailWebApi, IDataTypes dataTypes)
         {
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;
             _exchangeMailWebApi = exchangeMailWebApi;
+            _dataTypes = dataTypes;
         }
 
         /// <summary>
@@ -41,11 +45,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         [HttpGet]
         public ActionResult RenderMailAction(int nodeId)
         {
-            // Get a new OrderItem populated with values for this node
-            var orderItem = _orderItemManager.GetOrderItem(nodeId);
+            var model = new ChalmersILLActionMailModel(_orderItemManager.GetOrderItem(nodeId));
+
+            _dataTypes.PopulateModelWithAvailableValues(model);
 
             // The return format depends on the client's Accept-header
-            return PartialView("Chalmers.ILL.Action.Mail", orderItem);
+            return PartialView("Chalmers.ILL.Action.Mail", model);
         }
 
         /// <summary>
@@ -67,8 +72,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var contentNode = contentService.GetById(m.nodeId);
 
                 // Read current values that can be affected
-                var currentPatronEmail = _orderItemManager.GetOrderItem(m.nodeId).PatronEmail;
-                var currentStatus = _orderItemManager.GetOrderItem(m.nodeId).StatusPrevalue;
+                var orderItem = _orderItemManager.GetOrderItem(m.nodeId);
+                var currentPatronEmail = orderItem.PatronEmail;
+                var currentStatus = orderItem.StatusPrevalue;
 
                 // Send mail to recipient
                 try
@@ -102,7 +108,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     }
                     string body = m.message + ConfigurationManager.AppSettings["chalmersILLMailSignature"].Replace("\\n", "\n");
                     _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
-                    _exchangeMailWebApi.SendMailMessage(_orderItemManager.GetOrderItem(m.nodeId).OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], m.recipientName, m.recipientEmail, attachments);
+                    _exchangeMailWebApi.SendMailMessage(orderItem.OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], m.recipientName, m.recipientEmail, attachments);
                     _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, false, false);
                     _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL", m.message, false, false);
                 }
@@ -119,7 +125,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
 
                 // Set FollowUpDate property if it differs from current
-                DateTime currentFollowUpDate = _orderItemManager.GetOrderItem(m.nodeId).FollowUpDate;
+                DateTime currentFollowUpDate = orderItem.FollowUpDate;
 
                 if (!String.IsNullOrEmpty(m.newFollowUpDate))
 	            {
@@ -131,10 +137,22 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     }
 	            }
 
-                // Set status property if it differs from newStatus
-                if (currentStatus != m.newStatus)
+                // Set status property if it differs from newStatus and if it is not -1 (no change)
+                if (orderItem.Status != m.newStatusId && orderItem.Status != -1)
                 {
-                    _orderItemManager.SetOrderItemStatusInternal(m.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], m.newStatus), false, false);
+                    _orderItemManager.SetOrderItemStatusInternal(m.nodeId, m.newStatusId, false, false);
+                }
+
+                // Update cancellation reason if we have a value that is not -1 (no change)
+                if (orderItem.CancellationReason != m.newCancellationReasonId && m.newCancellationReasonId != -1)
+                {
+                    _orderItemManager.SetOrderItemCancellationReasonInternal(m.nodeId, m.newCancellationReasonId, false, false);
+                }
+
+                // Update purchased material if we have a value that is not -1 (no change)
+                if (orderItem.PurchasedMaterial != m.newPurchasedMaterialId && m.newPurchasedMaterialId != -1)
+                {
+                    _orderItemManager.SetOrderItemPurchasedMaterialInternal(m.nodeId, m.newPurchasedMaterialId, false, false);
                 }
 
                 _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);

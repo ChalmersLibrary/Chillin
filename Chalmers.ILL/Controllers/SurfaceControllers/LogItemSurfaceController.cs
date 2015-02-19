@@ -41,11 +41,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var pageModel = new ChalmersILLActionLogEntryModel(_orderItemManager.GetOrderItem(nodeId));
 
-            pageModel.AvailableTypes = _dataTypes.GetAvailableTypes();
-            pageModel.AvailableStatuses = _dataTypes.GetAvailableStatuses();
-            pageModel.AvailableDeliveryLibraries = _dataTypes.GetAvailableDeliveryLibraries();
-            pageModel.AvailableCancellationReasons = _dataTypes.GetAvailableCancellationReasons();
-            pageModel.AvailablePurchasedMaterials = _dataTypes.GetAvailablePurchasedMaterials();
+            _dataTypes.PopulateModelWithAvailableValues(pageModel);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.LogEntry", pageModel);

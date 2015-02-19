@@ -14,5 +14,7 @@ namespace Chalmers.ILL.UmbracoApi
         List<UmbracoDropdownListNtextDataType> GetAvailableDeliveryLibraries();
         List<UmbracoDropdownListNtextDataType> GetAvailableCancellationReasons();
         List<UmbracoDropdownListNtextDataType> GetAvailablePurchasedMaterials();
+
+        void PopulateModelWithAvailableValues(OrderItemPageModelBase model);
     }
 }

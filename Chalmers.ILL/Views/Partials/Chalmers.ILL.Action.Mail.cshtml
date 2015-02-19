@@ -1,4 +1,4 @@
-﻿@model Chalmers.ILL.Models.OrderItemModel
+﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionMailModel
 @using System.Globalization
 
 <div class="action-header">Skicka mail</div>
@@ -8,12 +8,12 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="message">Meddelande</label>
-                <textarea class="form-control" rows="11" id="message" name="message">
+                <textarea class="form-control" rows="12" id="message" name="message">
                     
                     @{
-                        if (Model.LogItemsList.Where(x => x.Type == "MAIL").Count() > 0)
+                        if (Model.OrderItem.LogItemsList.Where(x => x.Type == "MAIL").Count() > 0)
                         {
-                            foreach (var logItem in Model.LogItemsList.Where(x => x.Type == "MAIL"))
+                            foreach (var logItem in Model.OrderItem.LogItemsList.Where(x => x.Type == "MAIL"))
                             {
                                 @Html.Raw("\n---\n" + logItem.Message)
                                 //We just want the first log entry
@@ -22,7 +22,7 @@
                         }
                         else
                         {
-                           @Html.Raw("\n---\n" + Model.OriginalOrder)
+                           @Html.Raw("\n---\n" + Model.OrderItem.OriginalOrder)
                         }
                     }
                 </textarea>
@@ -31,22 +31,74 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="recipientName">Mottagarens namn</label>
-                <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.PatronName">
+                <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.OrderItem.PatronName">
             </div>
             <div class="form-group">
                 <label for="recipientEmail">Mottagande e-postadress</label>
-                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.PatronEmail">
+                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.OrderItem.PatronEmail">
             </div>
             <div class="form-group">
                 <label for="followUpDate">Följs upp</label>
                 <div class="input-group date datetimepicker">
-                    <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
+                    <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
                 </div>
             </div>
-            <button class="btn btn-success" onclick="sendMailToPatron(@Model.NodeId, this.form.recipientEmail.value.toString().trim(), this.form.recipientName.value, this.form.message.value, '04:Väntar', this.form.followUpDate.value);">Skicka e-post</button>
+            <div class="form-group">
+                <label>Ny status</label>
+                <!-- Status button -->
+                <div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span id="currently-selected-status" data-status-id="-10" data-cancellation-reason-id="-10" data-purchased-material-id="-10">Ej vald</span> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
+                            <li><a href="#" onclick="updateSelectedStatus(-1, 'Ingen förändring', -1, -1); event.preventDefault();">Ingen förändring</a></li>
+                            @{
+                                var allowedStatusValues = new String[] { "Annullerad", "Inköpt", "Väntar" };
+
+                                foreach (var status in Model.AvailableStatuses)
+                                {
+                                    if (allowedStatusValues.Contains(status.Value))
+                                    {
+                                        if (status.Value == "Annullerad")
+                                        {
+                                            <li class="dropdown-submenu">
+                                                <a>@status.Value</a>
+                                                <ul class="dropdown-menu">
+                                                    @foreach (var cancellationReason in Model.AvailableCancellationReasons)
+                                                    {
+                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @cancellationReason.Value', @cancellationReason.Id, -1); event.preventDefault();">@cancellationReason.Value</a></li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                        }
+                                        else if (status.Value == "Inköpt")
+                                        {
+                                            <li class="dropdown-submenu">
+                                                <a>@status.Value</a>
+                                                <ul class="dropdown-menu">
+                                                    @foreach (var purchasedMaterial in Model.AvailablePurchasedMaterials)
+                                                    {
+                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @purchasedMaterial.Value', -1, @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
+                                                    }
+                                                </ul>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value', -1, -1); event.preventDefault();">@status.Value</a></li>
+                                        }
+                                    }
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-success" onclick="submitMailDispatch(this); event.preventDefault();">Skicka e-post</button>
         </div>
    </div>
     <script type="text/javascript">
@@ -55,5 +107,39 @@
                 locale: "sv"
             });
         });
+
+        function updateSelectedStatus(newStatusId, newStatusText, cancellationReasonId, purchasedMaterialId) {
+            var currSelectedStatusObj = $("#currently-selected-status");
+            currSelectedStatusObj.data("status-id", newStatusId);
+            currSelectedStatusObj.data("cancellation-reason-id", cancellationReasonId);
+            currSelectedStatusObj.data("purchased-material-id", purchasedMaterialId);
+            currSelectedStatusObj.text(newStatusText);
+        }
+
+        function submitMailDispatch(obj) {
+            var newStatusObj = $("#currently-selected-status");
+            var newStatusId = newStatusObj.data("status-id");
+            var newStatusCancellationReasonId = newStatusObj.data("cancellation-reason-id");
+            var newStatusPurchasedMaterialId = newStatusObj.data("purchased-material-id");
+
+            if (newStatusId != -10) {
+                if (newStatusId == -1) {
+                    newStatusId = @Model.OrderItem.Status;
+                }
+
+                sendMailToPatron({
+                    nodeId: @Model.OrderItem.NodeId,
+                    recipientEmail: obj.form.recipientEmail.value.toString().trim(),
+                    recipientName: obj.form.recipientName.value,
+                    message: obj.form.message.value,
+                    newStatusId: newStatusId,
+                    newCancellationReasonId: newStatusCancellationReasonId,
+                    newPurchasedMaterialId: newStatusPurchasedMaterialId,
+                    newFollowUpDate: obj.form.followUpDate.value
+                });
+            } else {
+                alert("Du måste välja en status som skall sättas när mailet har skickats.");
+            }
+        }
     </script>
 </form>

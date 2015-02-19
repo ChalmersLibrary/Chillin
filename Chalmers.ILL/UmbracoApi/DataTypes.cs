@@ -37,6 +37,15 @@ namespace Chalmers.ILL.UmbracoApi
             return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderPurchasedMaterialDataTypeDefinitionName"]);
         }
 
+        public void PopulateModelWithAvailableValues(OrderItemPageModelBase model)
+        {
+            model.AvailableCancellationReasons = GetAvailableCancellationReasons();
+            model.AvailableDeliveryLibraries = GetAvailableDeliveryLibraries();
+            model.AvailablePurchasedMaterials = GetAvailablePurchasedMaterials();
+            model.AvailableStatuses = GetAvailableStatuses();
+            model.AvailableTypes = GetAvailableTypes();
+        }
+
         private List<UmbracoDropdownListNtextDataType> GetAvailableValues(string dataTypeName)
         {
             // Get a sorted list of all prevalues
