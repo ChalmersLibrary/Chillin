@@ -872,8 +872,9 @@ function sendMailToPatron(nodeId, recipientEmail, recipientName, message, status
 }
 
 /* Write Log Entry */
-function writeLogItem(nodeId, message, type, followUpDate) {
+function writeLogItem(nodeId, message, type, followUpDate, shouldUnlockScreen) {
     lockScreen();
+    shouldUnlockScreen = typeof unlockScreen !== "undefined" ? shouldUnlockScreen : true;
     if (message) {
         $.post("/umbraco/surface/LogItemSurface/WriteLogItem", { nodeId: nodeId, Message: message, Type: type, newFollowUpDate: followUpDate }).done(function (json) {
             if (json.Success) {
@@ -882,12 +883,14 @@ function writeLogItem(nodeId, message, type, followUpDate) {
             else {
                 alert(json.Message);
             }
-            unlockScreen();
-        }).error(unlockScreen);
+            if (shouldUnlockScreen) unlockScreen();
+        }).error(function () {
+            if (shouldUnlockScreen) unlockScreen();
+        });
     }
     else {
         alert("Du m\u00E5ste skriva n\u00E5got.");
-        unlockScreen();
+        if (shouldUnlockScreen) unlockScreen();
     }
 }
 
