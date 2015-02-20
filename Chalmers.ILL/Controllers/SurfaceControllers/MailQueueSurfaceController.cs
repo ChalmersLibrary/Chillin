@@ -32,6 +32,7 @@ using Chalmers.ILL.Patron;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
+using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -41,14 +42,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         INotifier _notifier;
         IInternalDbLogger _internalDbLogger;
         IExchangeMailWebApi _exchangeMailWebApi;
+        IDataTypes _dataTypes;
 
         public MailQueueSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, 
-            IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi)
+            IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi, IDataTypes dataTypes)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;
             _internalDbLogger = internalDbLogger;
             _exchangeMailWebApi = exchangeMailWebApi;
+            _dataTypes = dataTypes;
         }
 
         /// <summary>
@@ -60,6 +63,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         [HttpPost]
         public ActionResult ReadFromQueue(string username, string password)
         {
+            convertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus();
+
             signalExpiredFollowUpDates();
 
             // Possible result JSON when something goes wrong
@@ -476,26 +481,51 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 // Specify the query
                 var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
-                (Status:03\:Beställd OR 
-                 Status:04\:Väntar)");
+                    Status:03\:Beställd AND 
+                    FollowUpDate:[" + DateTime.Now.AddMinutes(-60).ToString("yyyyMMddHHmmssfff") + " TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]");
 
                 // Search for our items and signal the ones that have expired recently.
                 var results = searcher.Search(query);
-                foreach (var item in results.Where(x => (DateTime.ParseExact(x.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None) < DateTime.Now && DateTime.ParseExact(x.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None) > DateTime.Now.AddMinutes(-60))))
+                foreach (var item in results)
                 {
-                    var editedByStr = item.Fields.GetValueString("EditedBy");
                     // -1 means that we haven't checked edited by properly and should disregard it
                     var memberId = -1;
-                    if (editedByStr != "")
-                    {
-                        Convert.ToInt32(editedByStr);
-                    }
                     _notifier.UpdateOrderItemUpdate(item.Id, memberId.ToString(), "", true, true);
                 }
             }
             catch (Exception e)
             {
                 LogHelper.Error<MailQueueSurfaceController>("Failed to signal expired follow up dates.", e);
+            }
+        }
+
+        private void convertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus()
+        {
+            // Connect to an Examine Search Provider
+            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
+
+            // Specify Search Criteria
+            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+
+            // Specify the query
+            var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
+                Status:04\:Väntar AND 
+                FollowUpDate:[197501010000000 TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]");
+
+            // -1 means that we haven't checked edited by properly and should disregard it
+            var memberId = -1;
+
+            // Search for our items and signal the ones that have expired recently.
+            var ids = searcher.Search(query).Select(x => x.Id).ToList();
+            foreach (var id in ids)
+            {
+                _internalDbLogger.WriteLogItemInternal(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", true, true);
+
+                _orderItemManager.SetOrderItemStatusInternal(id,
+                    _dataTypes.GetAvailableStatuses().First(x => x.Value.Contains("Åtgärda")).Id,
+                    false, false);
+
+                _notifier.UpdateOrderItemUpdate(id, memberId.ToString(), "", true, true);
             }
         }
 
