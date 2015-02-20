@@ -167,12 +167,12 @@
                 (Status:01\:Ny OR 
                  Status:02\:Åtgärda OR
                  Status:09\:Mottagen OR 
-                 Status:03\:Beställd)"); // TODO: Should also do the range query here, but not playing nice...
+                 (Status:03\:Beställd AND FollowUpDate:[197501010000000 TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]))");
             
             // Search for our items
             var results = searcher.Search(query);
 
-            foreach (var result in results.Where(x => (x.Fields["Status"] != "03:Beställd" && x.Fields["Status"] != "04:Väntar") || DateTime.ParseExact(x.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None) < DateTime.Now).OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.Fields["FollowUpDate"]))
+            foreach (var result in results)
             {
                 DateTime convertDate = DateTime.ParseExact(result.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
                 @RenderOrderList(loggedInMember, result.Id, convertDate, result.Fields.GetValueString("PatronName"), result.Fields.GetValueString("DeliveryLibrary"), result.Fields.GetValueString("Status"), 
