@@ -172,7 +172,7 @@
             // Search for our items
             var results = searcher.Search(query);
 
-            foreach (var result in results)
+            foreach (var result in results.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.Fields["FollowUpDate"]))
             {
                 DateTime convertDate = DateTime.ParseExact(result.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
                 @RenderOrderList(loggedInMember, result.Id, convertDate, result.Fields.GetValueString("PatronName"), result.Fields.GetValueString("DeliveryLibrary"), result.Fields.GetValueString("Status"), 
