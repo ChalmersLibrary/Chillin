@@ -8,6 +8,7 @@ using System.Linq;
 using System.Web;
 using umbraco.cms.businesslogic.datatype;
 using umbraco.cms.businesslogic.relation;
+using Umbraco.Core.Logging;
 using Umbraco.Web;
 
 namespace Chalmers.ILL.UmbracoApi
@@ -24,6 +25,11 @@ namespace Chalmers.ILL.UmbracoApi
         public List<Relation> GetRelationsAsList(int nodeId)
         {
             return Relation.GetRelationsAsList(nodeId);
+        }
+
+        public Relation MakeNewRelation(int parentId, int childId, RelationType relationType, string comment)
+        {
+            return Relation.MakeNew(parentId, childId, relationType, comment);
         }
 
         public List<UmbracoDropdownListNtextDataType> GetAvailableTypes()
@@ -63,6 +69,11 @@ namespace Chalmers.ILL.UmbracoApi
         public IEnumerable<Umbraco.Core.Models.IPublishedContent> TypedContentAtXPath(string xpath)
         {
             return _umbraco.TypedContentAtXPath(xpath);
+        }
+
+        public void LogWarn<T>(string msg)
+        {
+            LogHelper.Warn<T>(msg);
         }
 
         #region Private methods

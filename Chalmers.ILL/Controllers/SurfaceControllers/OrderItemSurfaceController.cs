@@ -172,8 +172,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
                 // Get all relations with the given node ID and the correct relations type.
-                var relType = RelationType.GetByAlias(lockRelationType);
-                var relations = Relation.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
+                var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
+                var relations = _umbraco.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
                 var relationsCount = relations.Count();
 
                 // Remove relations
@@ -183,7 +183,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
 
                 // Lock node for current user
-                Relation.MakeNew(memberId, nodeId, relType, "Node with ID: " + nodeId + " has been locked by member with ID: " + memberId);
+                _umbraco.MakeNewRelation(memberId, nodeId, relType, "Node with ID: " + nodeId + " has been locked by member with ID: " + memberId);
 
                 // Return JSON to client
                 json.Success = true;
@@ -219,14 +219,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
                 // Get all relations with the given node ID and the correct relations type.
-                var relType = RelationType.GetByAlias(lockRelationType);
-                var relations = Relation.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
+                var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
+                var relations = _umbraco.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
                 var relationsCount = relations.Count();
 
                 if (relationsCount == 0)
                 {
                     // Node is unlocked, free for us to take it.
-                    Relation.MakeNew(memberId, nodeId, relType, "Node with ID: " + nodeId + " has been locked by member with ID: " + memberId);
+                    _umbraco.MakeNewRelation(memberId, nodeId, relType, "Node with ID: " + nodeId + " has been locked by member with ID: " + memberId);
                     json.Success = true;
                     json.Message = "Order item locked by current member.";
                 }
@@ -251,11 +251,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     // Should never happen.
 
-                    LogHelper.Warn<OrderItemSurfaceController>("Found more than one lock for the same content.");
+                    _umbraco.LogWarn<OrderItemSurfaceController>("Found more than one lock for the same content.");
                     
                     foreach (var rel in relations)
                     {
-                        LogHelper.Warn<OrderItemSurfaceController>("LOCK - Node ID: " + nodeId + ", Member ID: " + memberId);
+                        _umbraco.LogWarn<OrderItemSurfaceController>("LOCK - Node ID: " + nodeId + ", Member ID: " + memberId);
                     }
                 }
 
@@ -289,8 +289,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
                 // Get all relations with the given node ID and the correct relations type.
-                var relType = RelationType.GetByAlias(lockRelationType);
-                var relations = Relation.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
+                var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
+                var relations = _umbraco.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
                 var relationsCount = relations.Count();
                 
                 if (relationsCount == 0)
@@ -352,8 +352,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
                 // Get all lock relations.
-                var relType = RelationType.GetByAlias(lockRelationType);
-                var relations = Relation.GetRelationsAsList(memberId).Where(rel => rel.Parent.Id == memberId && rel.RelType.Id == relType.Id);
+                var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
+                var relations = _umbraco.GetRelationsAsList(memberId).Where(rel => rel.Parent.Id == memberId && rel.RelType.Id == relType.Id);
 
                 // Set response metadata.
                 json.MemberId = memberId;
