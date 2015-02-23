@@ -18,6 +18,8 @@ using System.Configuration;
 using umbraco.cms.businesslogic.datatype;
 using Chalmers.ILL.SignalR;
 using Chalmers.ILL.UmbracoApi;
+using Chalmers.ILL.Models.PartialPage;
+using Umbraco.Core.Services;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -28,14 +30,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IMemberInfoManager _memberInfoManager;
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
-        IDataTypes _dataTypes;
+        IUmbracoWrapper _umbraco;
+        IContentService _contentService;
 
-        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager, IOrderItemManager orderItemManager, INotifier notifier, IDataTypes dataTypes)
+        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager, IOrderItemManager orderItemManager, 
+            INotifier notifier, IUmbracoWrapper umbraco, IContentService contentService)
         {
             _memberInfoManager = memberInfoManager;
             _orderItemManager = orderItemManager;
             _notifier = notifier;
-            _dataTypes = dataTypes;
+            _umbraco = umbraco;
+            _contentService = contentService;
         }
 
         public const string lockRelationType = "memberLocked";
@@ -52,11 +57,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
             // Get a new OrderItem populated with values for this node
-            var orderItem = _orderItemManager.GetOrderItem(nodeId);
+            var pageModel = new ChalmersILLOrderItemModel(_orderItemManager.GetOrderItem(nodeId));
 
             // Get all relations with the given node ID and the correct relations type.
-            var relType = RelationType.GetByAlias(lockRelationType);
-            var relations = Relation.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
+            var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
+            var relations = _umbraco.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
             var relationsCount = relations.Count();
 
             // Is node locked?
@@ -65,28 +70,24 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Is node locked by us?
                 if (relations.First().Parent.Id == memberId)
                 {
-                    orderItem.EditedBy = memberId.ToString();
-                    orderItem.EditedByMemberName = Member.GetCurrentMember().LoginName;
-                    orderItem.UpdateDate = relations.First().CreateDate;
-                    orderItem.EditedByCurrentMember = true;
+                    pageModel.OrderItem.EditedBy = memberId.ToString();
+                    pageModel.OrderItem.EditedByMemberName = Member.GetCurrentMember().LoginName;
+                    pageModel.OrderItem.UpdateDate = relations.First().CreateDate;
+                    pageModel.OrderItem.EditedByCurrentMember = true;
                 }
                 else
                 {
                     int userId = relations.First().Parent.Id;
-                    orderItem.EditedBy = userId.ToString();
-                    orderItem.UpdateDate = relations.First().CreateDate;
-                    orderItem.EditedByMemberName = new Member(userId).Text; 
+                    pageModel.OrderItem.EditedBy = userId.ToString();
+                    pageModel.OrderItem.UpdateDate = relations.First().CreateDate;
+                    pageModel.OrderItem.EditedByMemberName = new Member(userId).Text; 
                 }
             }
 
-            orderItem.AvailableTypes = _dataTypes.GetAvailableTypes();
-            orderItem.AvailableStatuses = _dataTypes.GetAvailableStatuses();
-            orderItem.AvailableDeliveryLibraries = _dataTypes.GetAvailableDeliveryLibraries();
-            orderItem.AvailableCancellationReasons = _dataTypes.GetAvailableCancellationReasons();
-            orderItem.AvailablePurchasedMaterials = _dataTypes.GetAvailablePurchasedMaterials();
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
 
             // Return Partial View to the client
-            return PartialView("Chalmers.ILL.OrderItem", orderItem);
+            return PartialView("Chalmers.ILL.OrderItem", pageModel);
         }
 
         /// <summary>
@@ -104,8 +105,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
             // Get all relations with the given node ID and the correct relations type.
-            var relType = RelationType.GetByAlias(lockRelationType);
-            var relations = Relation.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
+            var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
+            var relations = _umbraco.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
             var relationsCount = relations.Count();
 
             // Is node locked?
@@ -138,18 +139,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var json = new OrderItemVersions();
             json.List = new List<OrderItemVersion>();
 
-            // Connect to Umbraco ContentService
-            var cs = Services.ContentService;
-
             // Get a new OrderItem populated with values for this node
-            var orderListNode = Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListContentDocumentType"]).First();
+            var orderListNode = _umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListContentDocumentType"]).First();
 
             // Give counter for versions for each node found
-            foreach (var node in cs.GetChildren(orderListNode.Id))
+            foreach (var node in _contentService.GetChildren(orderListNode.Id))
 	        {
                 var orderItemVersion = new OrderItemVersion();
                 orderItemVersion.NodeId = node.Id;
-                orderItemVersion.VersionCount = cs.GetVersions(node.Id).Count();
+                orderItemVersion.VersionCount = _contentService.GetVersions(node.Id).Count();
                 json.List.Add(orderItemVersion);
 	        }
 

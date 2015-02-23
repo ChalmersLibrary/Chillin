@@ -60,12 +60,6 @@ namespace Chalmers.ILL.Models
         public List<LogItem> LogItemsList { get; set; }
         public List<OrderAttachment> AttachmentList { get; set; }
         public SierraModel SierraInfo { get; set; }
-
-        public List<UmbracoDropdownListNtextDataType> AvailableTypes { get; set; }
-        public List<UmbracoDropdownListNtextDataType> AvailableStatuses { get; set; }
-        public List<UmbracoDropdownListNtextDataType> AvailableDeliveryLibraries { get; set; }
-        public List<UmbracoDropdownListNtextDataType> AvailableCancellationReasons { get; set; }
-        public List<UmbracoDropdownListNtextDataType> AvailablePurchasedMaterials { get; set; }
     }
 
     public class OrderItemVersions

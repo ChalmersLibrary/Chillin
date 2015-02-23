@@ -7,11 +7,25 @@ using System.Configuration;
 using System.Linq;
 using System.Web;
 using umbraco.cms.businesslogic.datatype;
+using umbraco.cms.businesslogic.relation;
+using Umbraco.Web;
 
 namespace Chalmers.ILL.UmbracoApi
 {
-    public class DataTypes : IDataTypes
+    public class UmbracoWrapper : IUmbracoWrapper
     {
+        UmbracoHelper _umbraco = new UmbracoHelper(UmbracoContext.Current);
+
+        public RelationType GetRelationTypeByAlias(string relationTypeStr)
+        {
+            return RelationType.GetByAlias(relationTypeStr);
+        }
+
+        public List<Relation> GetRelationsAsList(int nodeId)
+        {
+            return Relation.GetRelationsAsList(nodeId);
+        }
+
         public List<UmbracoDropdownListNtextDataType> GetAvailableTypes()
         {
             return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"]);
@@ -45,6 +59,13 @@ namespace Chalmers.ILL.UmbracoApi
             model.AvailableStatuses = GetAvailableStatuses();
             model.AvailableTypes = GetAvailableTypes();
         }
+
+        public IEnumerable<Umbraco.Core.Models.IPublishedContent> TypedContentAtXPath(string xpath)
+        {
+            return _umbraco.TypedContentAtXPath(xpath);
+        }
+
+        #region Private methods
 
         private List<UmbracoDropdownListNtextDataType> GetAvailableValues(string dataTypeName)
         {
@@ -81,5 +102,7 @@ namespace Chalmers.ILL.UmbracoApi
 
             return ret;
         }
+
+        #endregion
     }
 }

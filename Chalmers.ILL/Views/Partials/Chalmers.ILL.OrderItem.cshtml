@@ -1,26 +1,26 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.OrderItemModel>
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.PartialPage.ChalmersILLOrderItemModel>
 @using System.Globalization;
 
 <div class="col-sm-12 order-details">
 
     @{
-        if (Model.EditedBy != "" && Model.EditedByCurrentMember == false)
+        if (Model.OrderItem.EditedBy != "" && Model.OrderItem.EditedByCurrentMember == false)
         {
             <!-- Lock information and unlock button for this OrderItem -->
             <p>
                 <span class="label label-danger">
-                    Låst av @Model.EditedByMemberName sedan @Model.UpdateDate.ToString("yyyy-MM-dd HH:mm")
+                    Låst av @Model.OrderItem.EditedByMemberName sedan @Model.OrderItem.UpdateDate.ToString("yyyy-MM-dd HH:mm")
                 </span>
             </p>
-            <div id="unlock-buttons-@Model.NodeId" class="action-buttons">
-                <button type="button" class="btn btn-success" onclick="takeOverLockedOrderItem(@Model.NodeId);">Överta låset</button>
+            <div id="unlock-buttons-@Model.OrderItem.NodeId" class="action-buttons">
+                <button type="button" class="btn btn-success" onclick="takeOverLockedOrderItem(@Model.OrderItem.NodeId);">Överta låset</button>
             </div>
         }
         else
         {
             <!-- All action buttons for this OrderItem, lock attribute is set via jQuery below -->
-            <div id="action-buttons-@Model.NodeId" class="action-buttons" data-locked-by-memberid="">
-                @if (!String.IsNullOrEmpty(Model.SierraInfo.mblock) && Model.SierraInfo.mblock != "-")
+            <div id="action-buttons-@Model.OrderItem.NodeId" class="action-buttons" data-locked-by-memberid="">
+                @if (!String.IsNullOrEmpty(Model.OrderItem.SierraInfo.mblock) && Model.OrderItem.SierraInfo.mblock != "-")
                 {
                     <div class="panel panel-danger">
                         <div class="panel-heading">
@@ -37,18 +37,18 @@
                     <ul class="dropdown-menu" id="orderitem-typelist" role="menu">
                         @foreach (var type in Model.AvailableTypes)
                         {
-                            if (type.Id == Model.Type) 
+                            if (type.Id == Model.OrderItem.Type) 
                             {
                                 <li><a href="#" class="disabled-link"><span class="current">@type.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                             }
                             else
                             {
-                                <li><a href="#" onclick="setOrderItemType(@Model.NodeId, @type.Id); event.preventDefault();">@type.Value</a></li>
+                                <li><a href="#" onclick="setOrderItemType(@Model.OrderItem.NodeId, @type.Id); event.preventDefault();">@type.Value</a></li>
                             }
                         }
                     </ul>
                 </div>
-                @if (Model.Type > 0)
+                @if (Model.OrderItem.Type > 0)
                 {
                     <!-- Status button -->
                     <div class="btn-group">
@@ -66,7 +66,7 @@
                                         if (status.Value == "Annullerad")
                                         {
                                             <li class="dropdown-submenu">
-                                                @if (status.Id == Model.Status)
+                                                @if (status.Id == Model.OrderItem.Status)
                                                 {
                                                     <a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a>
                                                 }
@@ -77,13 +77,13 @@
                                                 <ul class="dropdown-menu">
                                                     @foreach (var cancellationReason in Model.AvailableCancellationReasons)
                                                     {
-                                                        if (status.Id == Model.Status && cancellationReason.Id == Model.CancellationReason)
+                                                        if (status.Id == Model.OrderItem.Status && cancellationReason.Id == Model.OrderItem.CancellationReason)
                                                         {
                                                             <li><a href="#" class="disabled-link"><span class="current">@cancellationReason.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                                         }
                                                         else
                                                         {
-                                                            <li><a href="#" onclick="setOrderItemStatusAndCancellationReason(@Model.NodeId, @status.Id, @cancellationReason.Id); event.preventDefault();">@cancellationReason.Value</a></li>
+                                                            <li><a href="#" onclick="setOrderItemStatusAndCancellationReason(@Model.OrderItem.NodeId, @status.Id, @cancellationReason.Id); event.preventDefault();">@cancellationReason.Value</a></li>
                                                         }
                                                     }
                                                 </ul>
@@ -92,7 +92,7 @@
                                         else if (status.Value == "Inköpt")
                                         {
                                             <li class="dropdown-submenu">
-                                                @if (status.Id == Model.Status)
+                                                @if (status.Id == Model.OrderItem.Status)
                                                 {
                                                     <a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a>
                                                 }
@@ -103,13 +103,13 @@
                                                 <ul class="dropdown-menu">
                                                     @foreach (var purchasedMaterial in Model.AvailablePurchasedMaterials)
                                                     {
-                                                        if (status.Id == Model.Status && purchasedMaterial.Id == Model.PurchasedMaterial)
+                                                        if (status.Id == Model.OrderItem.Status && purchasedMaterial.Id == Model.OrderItem.PurchasedMaterial)
                                                         {
                                                             <li><a href="#" class="disabled-link"><span class="current">@purchasedMaterial.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                                         }
                                                         else
                                                         {
-                                                            <li><a href="#" onclick="setOrderItemStatusAndPurchasedMaterial(@Model.NodeId, @status.Id, @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
+                                                            <li><a href="#" onclick="setOrderItemStatusAndPurchasedMaterial(@Model.OrderItem.NodeId, @status.Id, @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
                                                         }
                                                     }
                                                 </ul>
@@ -117,13 +117,13 @@
                                         }
                                         else
                                         {
-                                            if (status.Id == Model.Status)
+                                            if (status.Id == Model.OrderItem.Status)
                                             {
                                                 <li><a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                             }
                                             else
                                             {
-                                                <li><a href="#" onclick="setOrderItemStatus(@Model.NodeId, @status.Id); event.preventDefault();">@status.Value</a></li>
+                                                <li><a href="#" onclick="setOrderItemStatus(@Model.OrderItem.NodeId, @status.Id); event.preventDefault();">@status.Value</a></li>
                                             }
                                         }
                                     }
@@ -141,13 +141,13 @@
                             @{
                                 foreach (var library in Model.AvailableDeliveryLibraries)
                                 {
-                                    if (library.Id == Model.DeliveryLibrary) 
+                                    if (library.Id == Model.OrderItem.DeliveryLibrary) 
                                     {
                                         <li><a href="#" class="disabled-link"><span class="current">@library.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                     }
                                     else
                                     {
-                                        <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.NodeId, @library.Id); event.preventDefault();">@library.Value</a></li>
+                                        <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.OrderItem.NodeId, @library.Id); event.preventDefault();">@library.Value</a></li>
                                     }
                                 }
                             }
@@ -155,38 +155,38 @@
                     </div>                    
                 }
                     
-                @if (Model.Type > 0)
+                @if (Model.OrderItem.Type > 0)
                 {
                     <!-- Individual action buttons -->
-                    if (Model.TypePrevalue == "Artikel" || Model.TypePrevalue == "Inköpsförslag")
+                    if (Model.OrderItem.TypePrevalue == "Artikel" || Model.OrderItem.TypePrevalue == "Inköpsförslag")
                     {
-                        <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.NodeId);">Referens</button>
-                        <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.NodeId);">Beställardata</button>
-                        <button type="button" class="btn btn-primary" onclick="loadMailAction(@Model.NodeId);">Skicka mail</button>
-                        <button type="button" class="btn btn-primary" onclick="loadProviderAction(@Model.NodeId);">Beställ</button>
-                        <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.NodeId);">Logga</button>
+                        <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.OrderItem.NodeId);">Referens</button>
+                        <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.OrderItem.NodeId);">Beställardata</button>
+                        <button type="button" class="btn btn-primary" onclick="loadMailAction(@Model.OrderItem.NodeId);">Skicka mail</button>
+                        <button type="button" class="btn btn-primary" onclick="loadProviderAction(@Model.OrderItem.NodeId);">Beställ</button>
+                        <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.OrderItem.NodeId);">Logga</button>
                         <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Annullera</button> -->
-                        <button type="button" class="btn btn-primary" onclick="loadDeliveryAction(@Model.NodeId);">Leverans <span id="attachment-counter1" class="badge">@Model.AttachmentList.Count</span></button>
+                        <button type="button" class="btn btn-primary" onclick="loadDeliveryAction(@Model.OrderItem.NodeId);">Leverans <span id="attachment-counter1" class="badge">@Model.OrderItem.AttachmentList.Count</span></button>
                         <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Överför</button> -->
                     }
-                    else if (Model.TypePrevalue == "Bok")
+                    else if (Model.OrderItem.TypePrevalue == "Bok")
                     {
-                        <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.NodeId);">Referens</button>
-                        <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.NodeId);">Beställardata</button>
+                        <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.OrderItem.NodeId);">Referens</button>
+                        <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.OrderItem.NodeId);">Beställardata</button>
                         <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Överför</button> -->
                     }
                 }
             </div>
 
                 // Lock OrderItem and set attributes in DOM
-                if (Model.EditedBy == "")
+                if (Model.OrderItem.EditedBy == "")
                 {
                     <!-- Lock OrderItem to current Member -->
                     <script type="text/javascript">
-                        $.getJSON("/umbraco/surface/OrderItemSurface/LockOrderItem?nodeId=@Model.NodeId", function (json) {
+                        $.getJSON("/umbraco/surface/OrderItemSurface/LockOrderItem?nodeId=@Model.OrderItem.NodeId", function (json) {
                             if (json.Success) {
-                                $("#@Model.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
-                                $("#action-buttons-@Model.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
+                                $("#@Model.OrderItem.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
+                                $("#action-buttons-@Model.OrderItem.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
                             }
                             else {
                                 alert(json.Message);
@@ -195,11 +195,11 @@
                     </script>
                 }
 
-                if (Model.EditedByCurrentMember)
+                if (Model.OrderItem.EditedByCurrentMember)
                 {
                     <script type="text/javascript">
-                        $("#@Model.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
-                        $("#action-buttons-@Model.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
+                        $("#@Model.OrderItem.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
+                        $("#action-buttons-@Model.OrderItem.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
                     </script>
                 }
 
@@ -207,59 +207,59 @@
     }
 </div>
 <!-- Action Section -->
-<div id="action-@Model.NodeId" class="col-sm-12 order-details" style="display:none;"></div>
+<div id="action-@Model.OrderItem.NodeId" class="col-sm-12 order-details" style="display:none;"></div>
 <div id="loading-partial-view" hidden>Laddar...</div>
 
 <!-- Details about this OrderItem -->
 <div class="col-sm-4 order-details">
     <div>
-        <span class="label label-primary">OrderId:</span> @Model.OrderId
+        <span class="label label-primary">OrderId:</span> @Model.OrderItem.OrderId
     </div>
     <div>
-        <span class="label label-primary">Created:</span> @Model.CreateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+        <span class="label label-primary">Created:</span> @Model.OrderItem.CreateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
     <div>
-        <span class="label label-primary">Updated:</span> @Model.UpdateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+        <span class="label label-primary">Updated:</span> @Model.OrderItem.UpdateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
     <div>
-        <span class="label label-primary">FollowUp:</span> @Model.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
-    </div>
-</div>
-<div class="col-sm-4 order-details">
-    <div>
-        <span class="label label-primary">PatronName:</span> @Model.PatronName
-    </div>
-    <div>
-        <span class="label label-primary">PatronEmail:</span> @Model.PatronEmail
-    </div>
-    <div>
-        <span class="label label-primary">PatronIdentifier:</span> @Model.PatronCardNo
-    </div>
-    <div>
-        <span class="label label-primary">ProviderName:</span> @Model.ProviderName
-    </div>
-    <div>
-        <span class="label label-primary">ProviderOrderId:</span> @Model.ProviderOrderId
+        <span class="label label-primary">FollowUp:</span> @Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
 </div>
 <div class="col-sm-4 order-details">
     <div>
-        <span class="label label-primary">Name</span> @Model.SierraInfo.first_name @Model.SierraInfo.last_name
+        <span class="label label-primary">PatronName:</span> @Model.OrderItem.PatronName
     </div>
     <div>
-        <span class="label label-primary">Barcode</span> @Model.SierraInfo.barcode
+        <span class="label label-primary">PatronEmail:</span> @Model.OrderItem.PatronEmail
     </div>
     <div>
-        <span class="label label-primary">Ptyp</span> @(!String.IsNullOrEmpty(Model.SierraInfo.barcode) ? Model.SierraInfo.ptype.ToString() : "")
+        <span class="label label-primary">PatronIdentifier:</span> @Model.OrderItem.PatronCardNo
     </div>
     <div>
-        <span class="label label-primary">Email</span> @Model.SierraInfo.email
+        <span class="label label-primary">ProviderName:</span> @Model.OrderItem.ProviderName
     </div>
     <div>
-        <span class="label label-primary">Home Library</span> @Model.SierraInfo.home_library
+        <span class="label label-primary">ProviderOrderId:</span> @Model.OrderItem.ProviderOrderId
+    </div>
+</div>
+<div class="col-sm-4 order-details">
+    <div>
+        <span class="label label-primary">Name</span> @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name
     </div>
     <div>
-        <span class='label @((String.IsNullOrEmpty(Model.SierraInfo.mblock) || Model.SierraInfo.mblock=="-") ? "label-primary" : "label-danger")'>Mblock</span> @Model.SierraInfo.mblock
+        <span class="label label-primary">Barcode</span> @Model.OrderItem.SierraInfo.barcode
+    </div>
+    <div>
+        <span class="label label-primary">Ptyp</span> @(!String.IsNullOrEmpty(Model.OrderItem.SierraInfo.barcode) ? Model.OrderItem.SierraInfo.ptype.ToString() : "")
+    </div>
+    <div>
+        <span class="label label-primary">Email</span> @Model.OrderItem.SierraInfo.email
+    </div>
+    <div>
+        <span class="label label-primary">Home Library</span> @Model.OrderItem.SierraInfo.home_library
+    </div>
+    <div>
+        <span class='label @((String.IsNullOrEmpty(Model.OrderItem.SierraInfo.mblock) || Model.OrderItem.SierraInfo.mblock=="-") ? "label-primary" : "label-danger")'>Mblock</span> @Model.OrderItem.SierraInfo.mblock
     </div>
 </div>
 
@@ -267,8 +267,8 @@
 <div>
     <span class="label label-default">Händelser</span>
 </div>
-<div id="log-@Model.NodeId" class="col-sm-12 log-list">
-    @foreach (var logItem in Model.LogItemsList)
+<div id="log-@Model.OrderItem.NodeId" class="col-sm-12 log-list">
+    @foreach (var logItem in Model.OrderItem.LogItemsList)
     {
         <div class="row log-item @logItem.Type">
             <div class="col-sm-3">
@@ -284,8 +284,8 @@
         </div>
     }
     <script type="text/javascript">
-    $.each($("#log-@Model.NodeId .log-message:contains('http')"), function () {
-            $(this).html(addSaveDocumentButton(@Model.NodeId, replaceURLWithHTMLLinks($(this).text())));
+    $.each($("#log-@Model.OrderItem.NodeId .log-message:contains('http')"), function () {
+            $(this).html(addSaveDocumentButton(@Model.OrderItem.NodeId, replaceURLWithHTMLLinks($(this).text())));
         });
     </script>
 </div>

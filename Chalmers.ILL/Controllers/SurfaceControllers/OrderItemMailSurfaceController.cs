@@ -26,10 +26,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IOrderItemManager _orderItemManager;
         IInternalDbLogger _internalDbLogger;
         IExchangeMailWebApi _exchangeMailWebApi;
-        IDataTypes _dataTypes;
+        IUmbracoWrapper _dataTypes;
 
         public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
-            IExchangeMailWebApi exchangeMailWebApi, IDataTypes dataTypes)
+            IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes)
         {
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;

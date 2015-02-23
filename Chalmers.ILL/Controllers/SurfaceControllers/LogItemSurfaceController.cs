@@ -22,9 +22,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         IOrderItemManager _orderItemManager;
         IInternalDbLogger _internalDbLogger;
-        IDataTypes _dataTypes;
+        IUmbracoWrapper _dataTypes;
 
-        public LogItemSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger, IDataTypes dataTypes)
+        public LogItemSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger, IUmbracoWrapper dataTypes)
         {
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;

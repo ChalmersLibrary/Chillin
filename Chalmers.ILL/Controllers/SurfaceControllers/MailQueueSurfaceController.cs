@@ -42,10 +42,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         INotifier _notifier;
         IInternalDbLogger _internalDbLogger;
         IExchangeMailWebApi _exchangeMailWebApi;
-        IDataTypes _dataTypes;
+        IUmbracoWrapper _dataTypes;
 
         public MailQueueSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, 
-            IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi, IDataTypes dataTypes)
+            IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;

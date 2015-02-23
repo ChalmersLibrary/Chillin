@@ -9,6 +9,8 @@ using Chalmers.ILL.SignalR;
 using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.UmbracoApi;
+using Umbraco.Core;
+using Umbraco.Core.Services;
 
 namespace Chalmers.ILL
 {
@@ -44,10 +46,11 @@ namespace Chalmers.ILL
 
             container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
             container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
-            container.RegisterInstance(typeof(IDataTypes), new DataTypes());
+            container.RegisterInstance(typeof(IUmbracoWrapper), new UmbracoWrapper());
             container.RegisterInstance(typeof(INotifier), notifier);
             container.RegisterInstance(typeof(IInternalDbLogger), internalDbLogger);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
+            container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
         }
     }
