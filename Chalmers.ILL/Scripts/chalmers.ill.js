@@ -873,7 +873,7 @@ function sendMailToPatron(mailData) {
 /* Write Log Entry */
 function writeLogItem(nodeId, message, type, followUpDate, shouldUnlockScreen) {
     lockScreen();
-    shouldUnlockScreen = typeof unlockScreen !== "undefined" ? shouldUnlockScreen : true;
+    shouldUnlockScreen = typeof shouldUnlockScreen !== "undefined" ? shouldUnlockScreen : true;
     if (message) {
         $.post("/umbraco/surface/LogItemSurface/WriteLogItem", { nodeId: nodeId, Message: message, Type: type, newFollowUpDate: followUpDate }).done(function (json) {
             if (json.Success) {
