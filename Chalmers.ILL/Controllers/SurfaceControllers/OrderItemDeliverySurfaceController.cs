@@ -13,6 +13,7 @@ using System.Configuration;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Logging;
 using Chalmers.ILL.UmbracoApi;
+using Chalmers.ILL.Models.PartialPage;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -22,14 +23,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         IOrderItemManager _orderItemManager;
         IInternalDbLogger _internalDbLogger;
-        IUmbracoWrapper _dataTypes;
+        IUmbracoWrapper _umbraco;
 
         public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
-            IUmbracoWrapper dataTypes)
+            IUmbracoWrapper umbraco)
         {
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;
-            _dataTypes = dataTypes;
+            _umbraco = umbraco;
         }
 
         /// <summary>
@@ -40,12 +41,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         [HttpGet]
         public ActionResult RenderDeliveryAction(int nodeId)
         {
-            // Get a new OrderItem populated with values for this node
-            var orderItem = _orderItemManager.GetOrderItem(nodeId);
+            var pageModel = new ChalmersILLActionDeliveryModel(_orderItemManager.GetOrderItem(nodeId));
+
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
 
             // The return format depends on the client's Accept-header
             // return PartialView("Chalmers.ILL.Action.Mail", orderItem);
-            return PartialView("Chalmers.ILL.Action.Delivery", orderItem);
+            return PartialView("Chalmers.ILL.Action.Delivery", pageModel);
         }
 
         /// <summary>
