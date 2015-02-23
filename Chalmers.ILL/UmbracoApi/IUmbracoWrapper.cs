@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using umbraco.cms.businesslogic.member;
 using umbraco.cms.businesslogic.relation;
 
 namespace Chalmers.ILL.UmbracoApi
@@ -22,6 +23,8 @@ namespace Chalmers.ILL.UmbracoApi
         void PopulateModelWithAvailableValues(OrderItemPageModelBase model);
 
         IEnumerable<Umbraco.Core.Models.IPublishedContent> TypedContentAtXPath(string xpath);
+
+        Member GetMember(int id);
 
         void LogWarn<T>(string msg);
     }

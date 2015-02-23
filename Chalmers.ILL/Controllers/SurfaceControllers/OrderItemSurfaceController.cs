@@ -46,7 +46,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public const string lockRelationType = "memberLocked";
 
         /// <summary>
-        /// Get a partial view for an OrderItem, used when opening an OrderItem for editing
+        /// Get a partial view for an OrderItem, used when opening an OrderItem for editing.
+        /// Fetches the data for the order item and also fills in meta data for which member that has the lock on the order item.
         /// </summary>
         /// <param name="nodeId">The OrderItem Node Id</param>
         /// <returns>Partial View html data</returns>
@@ -71,7 +72,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 if (relations.First().Parent.Id == memberId)
                 {
                     pageModel.OrderItem.EditedBy = memberId.ToString();
-                    pageModel.OrderItem.EditedByMemberName = Member.GetCurrentMember().LoginName;
+                    pageModel.OrderItem.EditedByMemberName = _memberInfoManager.GetCurrentMemberLoginName(Request, Response);
                     pageModel.OrderItem.UpdateDate = relations.First().CreateDate;
                     pageModel.OrderItem.EditedByCurrentMember = true;
                 }
@@ -80,7 +81,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     int userId = relations.First().Parent.Id;
                     pageModel.OrderItem.EditedBy = userId.ToString();
                     pageModel.OrderItem.UpdateDate = relations.First().CreateDate;
-                    pageModel.OrderItem.EditedByMemberName = new Member(userId).Text; 
+                    pageModel.OrderItem.EditedByMemberName = _umbraco.GetMember(userId).Text;
+                    pageModel.OrderItem.EditedByCurrentMember = false;
                 }
             }
 
@@ -124,7 +126,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     int userId = relations.First().Parent.Id;
                     orderItem.EditedBy = userId.ToString();
-                    orderItem.EditedByMemberName = new Member(userId).Text;
+                    orderItem.EditedByMemberName = _umbraco.GetMember(userId).Text;
                 }
             }
 

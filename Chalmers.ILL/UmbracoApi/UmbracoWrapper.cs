@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Linq;
 using System.Web;
 using umbraco.cms.businesslogic.datatype;
+using umbraco.cms.businesslogic.member;
 using umbraco.cms.businesslogic.relation;
 using Umbraco.Core.Logging;
 using Umbraco.Web;
@@ -69,6 +70,11 @@ namespace Chalmers.ILL.UmbracoApi
         public IEnumerable<Umbraco.Core.Models.IPublishedContent> TypedContentAtXPath(string xpath)
         {
             return _umbraco.TypedContentAtXPath(xpath);
+        }
+
+        public Member GetMember(int id)
+        {
+            return new Member(id);
         }
 
         public void LogWarn<T>(string msg)

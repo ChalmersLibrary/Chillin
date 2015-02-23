@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using Microsoft.QualityTools.Testing.Fakes;
 using System.Collections;
 
-namespace Chalmers.ILL.Tests
+namespace Chalmers.ILL.Tests.Statistics
 {
     [TestClass]
     public class DefaultStatCalcTests
