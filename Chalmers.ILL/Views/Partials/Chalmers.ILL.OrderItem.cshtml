@@ -157,24 +157,14 @@
                     
                 @if (Model.OrderItem.Type > 0)
                 {
-                    <!-- Individual action buttons -->
-                    if (Model.OrderItem.TypePrevalue == "Artikel" || Model.OrderItem.TypePrevalue == "Inköpsförslag")
-                    {
-                        <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.OrderItem.NodeId);">Referens</button>
-                        <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.OrderItem.NodeId);">Beställardata</button>
-                        <button type="button" class="btn btn-primary" onclick="loadMailAction(@Model.OrderItem.NodeId);">Skicka mail</button>
-                        <button type="button" class="btn btn-primary" onclick="loadProviderAction(@Model.OrderItem.NodeId);">Beställ</button>
-                        <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.OrderItem.NodeId);">Logga</button>
-                        <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Annullera</button> -->
-                        <button type="button" class="btn btn-primary" onclick="loadDeliveryAction(@Model.OrderItem.NodeId);">Leverans <span id="attachment-counter1" class="badge">@Model.OrderItem.AttachmentList.Count</span></button>
-                        <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Överför</button> -->
-                    }
-                    else if (Model.OrderItem.TypePrevalue == "Bok")
-                    {
-                        <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.OrderItem.NodeId);">Referens</button>
-                        <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.OrderItem.NodeId);">Beställardata</button>
-                        <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Överför</button> -->
-                    }
+                    <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.OrderItem.NodeId);">Referens</button>
+                    <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.OrderItem.NodeId);">Beställardata</button>
+                    <button type="button" class="btn btn-primary" onclick="loadMailAction(@Model.OrderItem.NodeId);">Skicka mail</button>
+                    <button type="button" class="btn btn-primary" onclick="loadProviderAction(@Model.OrderItem.NodeId);">Beställ</button>
+                    <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.OrderItem.NodeId);">Logga</button>
+                    <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Annullera</button> -->
+                    <button type="button" class="btn btn-primary" onclick="loadDeliveryAction(@Model.OrderItem.NodeId);">Leverans <span id="attachment-counter1" class="badge">@Model.OrderItem.AttachmentList.Count</span></button>
+                    <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Överför</button> -->
                 }
             </div>
 
