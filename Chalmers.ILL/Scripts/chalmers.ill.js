@@ -229,6 +229,11 @@ $(function () {
             // Open up the edit-mode for the current id
             $("#" + id).after("<div id='edit-" + id + "' class='ajax-partial-view-content row editmode'>Du &ouml;ppnar upp redigeringsl&auml;ge f&ouml;r nodid " + id + "</div>");
             loadOrderItemDetails(id);
+            $('html, body').animate({
+                scrollTop: $('#' + id).offset().top - 50
+            }, 0, function () {
+                window.location.hash = id;
+            });
         }
         }
     });
