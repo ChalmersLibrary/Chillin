@@ -776,7 +776,7 @@ function sendDeliveryByEmail(mailData, logEntry) {
             data: JSON.stringify(mailData),
             success: function (json) {
                 if (json.Success) {
-                    $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetDelivery?nodeId=" + nodeId + "&logEntry=" + logEntry + "&delivery=email", function (json) {
+                    $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetDelivery?nodeId=" + mailData.nodeId + "&logEntry=" + logEntry + "&delivery=email", function (json) {
                         if (json.Success) {
                             loadOrderItemDetails(mailData.nodeId);
                         }
