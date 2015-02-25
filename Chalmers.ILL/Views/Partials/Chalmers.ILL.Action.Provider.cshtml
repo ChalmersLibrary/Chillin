@@ -11,7 +11,17 @@
             </div>
             <div class="form-group">
                 <label for="providerOrderId">Leverantörens order-id</label>
-                <input type="text" class="form-control" id="providerOrderId" name="providerOrderId" placeholder="Beställningsnummer" value="@Model.ProviderOrderId">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="providerOrderId" name="providerOrderId" placeholder="Beställningsnummer" value="@Model.ProviderOrderId">
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="caret"></span></button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#" onclick="$('#providerOrderId').val($(this).text()); event.preventDefault();">Test 1</a></li>
+                            <li><a href="#" onclick="$('#providerOrderId').val($(this).text()); event.preventDefault();">Test 2</a></li>
+                            <li><a href="#" onclick="$('#providerOrderId').val($(this).text()); event.preventDefault();">Test 3</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-md-6">
