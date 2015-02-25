@@ -191,6 +191,7 @@ $(function () {
 
     // Logged in Member clicks an OrderItem Summary row
     $(".illedit").click(function () {
+        $(".silly-filler").css("height", "");
         // Only trigger click if no text is selected.
         var sel = getSelection().toString();
         if (!sel) {
@@ -228,7 +229,18 @@ $(function () {
 
             // Open up the edit-mode for the current id
             $("#" + id).after("<div id='edit-" + id + "' class='ajax-partial-view-content row editmode'>Du &ouml;ppnar upp redigeringsl&auml;ge f&ouml;r nodid " + id + "</div>");
-            loadOrderItemDetails(id);
+            loadOrderItemDetails(id, function () {
+                // Scroll open item to top of browser window
+                var openOrderItemSummary = $(".illedit.open");
+                var openOrderItemDetails = $(".editmode");
+                var orderItemHeight = openOrderItemSummary.height() + openOrderItemDetails.height();
+                var freeBottomSpace = Math.max(0, $(".silly-filler").offset().top + parseInt($("body").css("margin-bottom"), 10) - (openOrderItemDetails.offset().top + openOrderItemDetails.height()));
+                var missingHeightAtBottom = Math.max(0, $(window).height() - 50 - orderItemHeight - freeBottomSpace);
+                $(".silly-filler").css("height", missingHeightAtBottom.toString() + "px");
+                $('html, body').animate({
+                    scrollTop: openOrderItemSummary.offset().top - 50
+                }, 0);
+            });
         }
         }
     });
@@ -368,13 +380,15 @@ function takeOverLockedOrderItem(id)
     });
 }
 
-function loadOrderItemDetails(id)
+function loadOrderItemDetails(id, cb)
 {
     $('#edit-' + id + '.ajax-partial-view-content').load("/umbraco/surface/OrderItemSurface/RenderOrderItem?nodeId=" + id,
         function (responseText, textStatus, req) {
             // req.status:403, req.statusText:Forbidden
             if (req.status != 200) {
                 alert("Status: " + req.status + ", reason: " + req.statusText + "\nYou don't have access to view this data or you are not logged in.");
+            } else {
+                if (cb) cb();
             }
         }
     );
@@ -762,7 +776,7 @@ function sendDeliveryByEmail(mailData, logEntry) {
             data: JSON.stringify(mailData),
             success: function (json) {
                 if (json.Success) {
-                    $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetDelivery?nodeId=" + nodeId + "&logEntry=" + logEntry + "&delivery=email", function (json) {
+                    $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetDelivery?nodeId=" + mailData.nodeId + "&logEntry=" + logEntry + "&delivery=email", function (json) {
                         if (json.Success) {
                             loadOrderItemDetails(mailData.nodeId);
                         }
