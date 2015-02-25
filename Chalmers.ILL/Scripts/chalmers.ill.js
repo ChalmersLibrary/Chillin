@@ -234,7 +234,10 @@ $(function () {
                 var orderListPageHeader = $(".order-list > .header");
                 var openOrderItemSummary = $(".illedit.open");
                 var openOrderItemDetails = $(".editmode");
-                $(".silly-filler").css("height", ($(window).height() - openOrderItemSummary.height() - openOrderItemDetails.height() - orderListPageHeader.offset().top - orderListPageHeader.height()).toString() + "px");
+                var orderItemHeight = openOrderItemSummary.height() + openOrderItemDetails.height();
+                var freeBottomSpace = $(document).height() - openOrderItemDetails.offset().top - openOrderItemDetails.height();
+                var missingHeightAtBottom = Math.max(0, $(window).height() - 50 - orderItemHeight - freeBottomSpace);
+                $(".silly-filler").css("height", missingHeightAtBottom.toString() + "px");
                 $('html, body').animate({
                     scrollTop: openOrderItemSummary.offset().top - 50
                 }, 0, function () {
