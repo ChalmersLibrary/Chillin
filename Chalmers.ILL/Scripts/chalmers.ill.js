@@ -231,18 +231,15 @@ $(function () {
             $("#" + id).after("<div id='edit-" + id + "' class='ajax-partial-view-content row editmode'>Du &ouml;ppnar upp redigeringsl&auml;ge f&ouml;r nodid " + id + "</div>");
             loadOrderItemDetails(id, function () {
                 // Scroll open item to top of browser window
-                var orderListPageHeader = $(".order-list > .header");
                 var openOrderItemSummary = $(".illedit.open");
                 var openOrderItemDetails = $(".editmode");
                 var orderItemHeight = openOrderItemSummary.height() + openOrderItemDetails.height();
-                var freeBottomSpace = $(document).height() - openOrderItemDetails.offset().top - openOrderItemDetails.height();
+                var freeBottomSpace = Math.max(0, $(".silly-filler").offset().top + parseInt($("body").css("margin-bottom"), 10) - (openOrderItemDetails.offset().top + openOrderItemDetails.height()));
                 var missingHeightAtBottom = Math.max(0, $(window).height() - 50 - orderItemHeight - freeBottomSpace);
                 $(".silly-filler").css("height", missingHeightAtBottom.toString() + "px");
                 $('html, body').animate({
                     scrollTop: openOrderItemSummary.offset().top - 50
-                }, 0, function () {
-                    window.location.hash = id;
-                });
+                }, 0);
             });
         }
         }
