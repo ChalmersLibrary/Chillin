@@ -232,8 +232,6 @@ Vänliga hälsningar / Regards
                 attachmentIds.push($(this).data("media-id"));
             });
 
-            console.log("TEST: " + $('#recipientEmail').attr('value').toString().trim() + " " + $('#message').attr('value'));
-
             sendDeliveryByEmail({
                 nodeId: @Model.OrderItem.NodeId,
                 recipientEmail: $('#recipientEmail').val().toString().trim(),
