@@ -96,17 +96,21 @@
         var newStatusId = newStatusObj.data("status-id");
         var newStatusCancellationReasonId = newStatusObj.data("cancellation-reason-id");
         var newStatusPurchasedMaterialId = newStatusObj.data("purchased-material-id");
-        if (newStatusId != -1) {
-            writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, 'LOG', obj.form.followUpDate.value, false);
-            if (newStatusCancellationReasonId != -1) {
-                setOrderItemStatusAndCancellationReason(@Model.OrderItem.NodeId, newStatusId, newStatusCancellationReasonId);
-            } else if(newStatusPurchasedMaterialId != -1) {
-                setOrderItemStatusAndPurchasedMaterial(@Model.OrderItem.NodeId, newStatusId, newStatusPurchasedMaterialId);
+        if (obj.form.message.value) {
+            if (newStatusId != -1) {
+                writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, 'LOG', obj.form.followUpDate.value, false);
+                if (newStatusCancellationReasonId != -1) {
+                    setOrderItemStatusAndCancellationReason(@Model.OrderItem.NodeId, newStatusId, newStatusCancellationReasonId);
+                } else if(newStatusPurchasedMaterialId != -1) {
+                    setOrderItemStatusAndPurchasedMaterial(@Model.OrderItem.NodeId, newStatusId, newStatusPurchasedMaterialId);
+                } else {
+                    setOrderItemStatus(@Model.OrderItem.NodeId, newStatusId);
+                }
             } else {
-                setOrderItemStatus(@Model.OrderItem.NodeId, newStatusId);
+                writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, 'LOG', obj.form.followUpDate.value);
             }
         } else {
-            writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, 'LOG', obj.form.followUpDate.value);
+            alert("Du m\u00E5ste skriva n\u00E5got.");
         }
     }
     </script>
