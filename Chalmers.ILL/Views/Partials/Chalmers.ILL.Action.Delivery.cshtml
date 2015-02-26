@@ -89,7 +89,7 @@
                             {
                                 <button type="button" class="btn btn-default btn-view-attachment @(drmWarning ? "btn-danger": "")" onclick="openDocument(this);" data-link="@attachment.Link" data-media-id="@attachment.MediaItemNodeId">@attachment.Title <span class="glyphicon glyphicon-search"></span></button>
                             }
-}
+                        }
                     </div>
                 </div>
                 @if (drmWarning)
@@ -171,8 +171,8 @@ Vänliga hälsningar / Regards
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
-                <label for="message">Skriv till logg (valfritt)</label>
-                <textarea class="form-control" rows="6" id="log-message" name="message"></textarea>
+                <label for="log-message">Skriv till logg (valfritt)</label>
+                <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
             </div>
         </div>
     </div>
@@ -232,21 +232,23 @@ Vänliga hälsningar / Regards
                 attachmentIds.push($(this).data("media-id"));
             });
 
+            console.log("TEST: " + $('#recipientEmail').attr('value').toString().trim() + " " + $('#message').attr('value'));
+
             sendDeliveryByEmail({
                 nodeId: @Model.OrderItem.NodeId,
-                recipientEmail: $('#recipientEmail').attr('value').toString().trim(),
-                recipientName: $('#recipientName').attr('value'),
-                message: $('#message').attr('value'),
+                recipientEmail: $('#recipientEmail').val().toString().trim(),
+                recipientName: $('#recipientName').val(),
+                message: $('#message').val(),
                 newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Levererad")).Id,
                 newCancellationReasonId: "-1",
                 newPurchasedMaterialId: "-1",
-                newFollowUpDate: $('#followUpDate').attr('value'),
+                newFollowUpDate: $('#followUpDate').val(),
                 attachments: attachmentIds
-            }, $('#log-message').attr('value'));
+            }, $('#log-message').val());
         }
         else
         {
-            setOrderItemDelivery(@Model.OrderItem.NodeId, $('#log-message').attr('value'), $('input:radio[name=deliveryOptions]:checked').val());
+            setOrderItemDelivery(@Model.OrderItem.NodeId, $('#log-message').val(), $('input:radio[name=deliveryOptions]:checked').val());
         }
     }
 
