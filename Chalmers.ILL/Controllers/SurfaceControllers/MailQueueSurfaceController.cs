@@ -519,11 +519,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var ids = searcher.Search(query).Select(x => x.Id).ToList();
             foreach (var id in ids)
             {
-                _internalDbLogger.WriteLogItemInternal(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", true, true);
+                _internalDbLogger.WriteLogItemInternal(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", false, false);
 
                 _orderItemManager.SetOrderItemStatusInternal(id,
                     _dataTypes.GetAvailableStatuses().First(x => x.Value.Contains("Åtgärda")).Id,
-                    false, false);
+                    true, true);
 
                 _notifier.UpdateOrderItemUpdate(id, memberId.ToString(), "", true, true);
             }
