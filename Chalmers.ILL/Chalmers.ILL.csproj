@@ -411,6 +411,7 @@
     <Compile Include="Models\PartialPage\ChalmersILLActionDeliveryModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionLogEntryModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionMailModel.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLActionProviderModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLOrderItemModel.cs" />
     <Compile Include="Models\StatisticsVariable.cs" />
     <Compile Include="Models\UmbracoDropdownListNtextDataType.cs" />

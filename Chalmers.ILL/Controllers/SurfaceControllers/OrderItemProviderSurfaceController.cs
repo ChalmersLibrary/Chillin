@@ -11,6 +11,8 @@ using Chalmers.ILL.Extensions;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Logging;
+using Chalmers.ILL.Models.PartialPage;
+using Examine;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -31,10 +33,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderProviderAction(int nodeId)
         {
             // Get a new OrderItem populated with values for this node
-            var orderItem = _orderItemManager.GetOrderItem(nodeId);
+            var pageModel = new ChalmersILLActionProviderModel(_orderItemManager.GetOrderItem(nodeId));
+
+            pageModel.Providers = FetchAndCreateListOfUsedProviders();
 
             // The return format depends on the client's Accept-header
-            return PartialView("Chalmers.ILL.Action.Provider", orderItem);
+            return PartialView("Chalmers.ILL.Action.Provider", pageModel);
         }
 
         [HttpGet]
@@ -108,5 +112,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return Json(json, JsonRequestBehavior.AllowGet);
         }
 
+        private List<String> FetchAndCreateListOfUsedProviders()
+        {
+            var res = new List<String>();
+
+            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
+            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+            var allOrders = searcher.Search(searchCriteria.RawQuery("nodeTypeAlias:ChalmersILLOrderItem"));
+
+            return allOrders.Where(x => x.Fields.ContainsKey("ProviderName") && x.Fields["ProviderName"] != "")
+                .Select(x => x.Fields["ProviderName"])
+                .GroupBy(x => x)
+                .OrderByDescending(x => x.Count())
+                .Select(x => x.Key)
+                .ToList();
+        }
     }
 }

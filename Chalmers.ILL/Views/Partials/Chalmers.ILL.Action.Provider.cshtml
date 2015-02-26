@@ -1,4 +1,4 @@
-﻿@model Chalmers.ILL.Models.OrderItemModel
+﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionProviderModel
 
 <div class="action-header">Lägg en beställning</div>
 
@@ -7,14 +7,21 @@
         <div class="col-md-6">
             <div class="form-group">
                 <label for="providerName">Leverantör</label>
-                <input type="text" class="form-control" id="providerName" name="providerName" placeholder="Leverantörens namn" value="@Model.ProviderName">
+                <input type="text" class="form-control" id="providerName" name="providerName" placeholder="Leverantörens namn" value="@Model.OrderItem.ProviderName">
+                <div id="provider-list" class="list-group" style="height: 220px; overflow: auto; background: #ebebeb;">
+                    @foreach (var providerName in Model.Providers)
+                    {
+                        <a href="#" onclick="$('#providerName').val($(this).text()); event.preventDefault();" class="list-group-item">@providerName</a>
+                    }
+                </div>
             </div>
-            <div class="form-group">
-                <label for="providerOrderId">Leverantörens order-id</label>
-                <input type="text" class="form-control" id="providerOrderId" name="providerOrderId" placeholder="Beställningsnummer" value="@Model.ProviderOrderId">
-            </div>
+            <button class="btn btn-success" onclick="setOrderItemProvider(@Model.OrderItem.NodeId, this.form.providerName.value, this.form.providerOrderId.value, this.form.followUpDate.value)">Spara beställning</button>
         </div>
         <div class="col-md-6">
+            <div class="form-group">
+                <label for="providerOrderId">Leverantörens order-id</label>
+                <input type="text" class="form-control" id="providerOrderId" name="providerOrderId" placeholder="Beställningsnummer" value="@Model.OrderItem.ProviderOrderId">
+            </div>
             <div class="form-group">
                 <label for="followUpDate">Följs upp</label>
                 <div class="input-group date datetimepicker">
@@ -24,13 +31,24 @@
                     </span>
                 </div>
             </div>
-            <button class="btn btn-success" onclick="setOrderItemProvider(@Model.NodeId, this.form.providerName.value, this.form.providerOrderId.value, this.form.followUpDate.value)">Spara beställning</button>
         </div>
     </div>   
     <script type="text/javascript">
         $(function () {
             $(".datetimepicker").datetimepicker({
                 locale: "sv"
+            });
+
+            $("#providerName").keyup(function () {
+                var providerNameInput = $(this);
+                var re = new RegExp(providerNameInput.val(), "i");
+                $("#provider-list > a").each(function () {
+                    $(this).toggle(re.test($(this).text()));
+
+                    if ($(this).text().toLowerCase() === providerNameInput.val().toLowerCase()) {
+                        providerNameInput.val($(this).text());
+                    }
+                });
             });
         });
     </script>
