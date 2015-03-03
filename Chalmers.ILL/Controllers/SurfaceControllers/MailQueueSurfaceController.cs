@@ -109,7 +109,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     {
                         try
                         {
-                            var orderIdPattern = new Regex("[#+](cthb-.{8}-[0-9]+)");
+                            var orderIdPattern = new Regex("#+(cthb-.{8}-[0-9]+)");
                             deliveryOrderId = getBoundOrder(item);
                             // Bind the type of messages we have (NEW or REPLY)
                             if ((item.Subject != null && item.Subject.Contains("#new")) || item.To.Contains("+new"))
