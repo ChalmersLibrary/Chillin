@@ -388,7 +388,6 @@
     <Compile Include="Controllers\SurfaceControllers\OrderItemReferenceSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemStatusSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemSurfaceController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\MailQueueSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemPurchasedMaterialSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemCancellationReasonSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemTypeSurfaceController.cs" />
@@ -398,6 +397,7 @@
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Logging\IInternalDbLogger.cs" />
+    <Compile Include="Mail\ChalmersOrderItemsMailSource.cs" />
     <Compile Include="Mail\IExchangeMailWebApi.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
     <Compile Include="Models\OrderItemPageModelBase.cs" />
@@ -431,7 +431,12 @@
     <Compile Include="Models\OrderItemModel.cs" />
     <Compile Include="Models\ResultResponse.cs" />
     <Compile Include="Models\SierraModel.cs" />
+    <Compile Include="OrderItems\ChalmersSourceFactory.cs" />
     <Compile Include="OrderItems\IOrderItemManager.cs" />
+    <Compile Include="OrderItems\ISource.cs" />
+    <Compile Include="OrderItems\ISourceFactory.cs" />
+    <Compile Include="OrderItems\SourcePollingException.cs" />
+    <Compile Include="OrderItems\SourcePollingResult.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SignalR\INotifier.cs" />

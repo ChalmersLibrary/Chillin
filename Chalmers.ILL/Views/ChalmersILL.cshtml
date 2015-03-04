@@ -38,7 +38,7 @@
         @{ 
             if (Convert.ToBoolean(ConfigurationManager.AppSettings["showManulMailFetchingTools"]))
             {
-                <text><img style="position:fixed; left:10px; bottom:10px;" src="~/images/chilli-plain.svg" onclick="lockScreen(); $.post('/umbraco/surface/MailQueueSurface/ReadFromQueue', {}, unlockScreen);" onerror="    onerror=null; this.src='~/images/chilli.png'" alt="Chilli"></text>
+                <text><img style="position:fixed; left:10px; bottom:10px;" src="~/images/chilli-plain.svg" onclick="lockScreen(); $.post('/umbraco/surface/SystemSurface/Update', {}, unlockScreen);" onerror="    onerror=null; this.src='~/images/chilli.png'" alt="Chilli"></text>
             }
         }
 

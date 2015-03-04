@@ -51,7 +51,9 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IInternalDbLogger), internalDbLogger);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
+            container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
+            container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
         }
     }
 }
