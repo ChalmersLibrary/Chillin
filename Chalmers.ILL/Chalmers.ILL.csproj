@@ -439,6 +439,7 @@
     <Compile Include="OrderItems\SourcePollingResult.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Providers\LibrisOrderItemsSource.cs" />
     <Compile Include="SignalR\INotifier.cs" />
     <Compile Include="SignalR\NotificationHub.cs" />
     <Compile Include="SignalR\Notifier.cs" />

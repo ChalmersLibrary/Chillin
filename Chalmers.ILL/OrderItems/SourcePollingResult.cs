@@ -7,8 +7,9 @@ namespace Chalmers.ILL.OrderItems
 {
     public class SourcePollingResult
     {
-        public SourcePollingResult()
+        public SourcePollingResult(string name)
         {
+            SourceName = name;
             Messages = new List<string>();
         }
 

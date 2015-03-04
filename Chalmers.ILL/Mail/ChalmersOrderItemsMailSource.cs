@@ -48,8 +48,7 @@ namespace Chalmers.ILL.Mail
 
         public SourcePollingResult Poll()
         {
-            var res = new SourcePollingResult();
-            res.SourceName = "Huvudpostlåda";
+            var res = new SourcePollingResult("Huvudpostlåda");
 
             // List of read mails
             List<MailQueueModel> list = null;

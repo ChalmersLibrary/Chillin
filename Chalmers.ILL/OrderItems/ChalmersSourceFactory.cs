@@ -1,5 +1,6 @@
 ﻿using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
+using Chalmers.ILL.Providers;
 using Chalmers.ILL.SignalR;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,7 @@ namespace Chalmers.ILL.OrderItems
         {
             var res = new List<ISource>();
             res.Add(new ChalmersOrderItemsMailSource(_exchangeMailWebApi, _orderItemManager, _internalDbLogger, _notifier, _mediaService));
+            res.Add(new LibrisOrderItemsSource());
             return res;
         }
     }

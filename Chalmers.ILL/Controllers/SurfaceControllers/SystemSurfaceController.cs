@@ -75,7 +75,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 foreach (var source in _sourceFactory.Sources())
                 {
-                    res.Add(source.Poll());
+                    try
+                    {
+                        res.Add(source.Poll());
+                    }
+                    catch (Exception e)
+                    {
+                        LogHelper.Error<SystemSurfaceController>("Error while polling source.", e);
+                    }
                 }
             }
             catch (Exception e)
