@@ -84,7 +84,8 @@ namespace Chalmers.ILL.Providers
                             seed.PatronName = req.user.full_name.Value;
                             seed.PatronCardNumber = req.user.library_card.Value;
                             seed.Message = "LIBRIS LÅNTAGARBESTÄLLNING" + "\n\n" +
-                                ConfigurationManager.AppSettings["librisApiBaseAddress"] + ConfigurationManager.AppSettings["librisApiUserRequestSuffix"] + "\n\n" +
+                                ConfigurationManager.AppSettings["librisApiBaseAddress"] + ConfigurationManager.AppSettings["librisApiUserRequestSuffix"] + 
+                                    req.request_id.Value + "\n\n" +
                                 "Författare: " + ReplaceWithNotAvailableIfEmptyString(req.author.Value) + "\n" +
                                 "Titel: " + ReplaceWithNotAvailableIfEmptyString(req.title.Value) + "\n" +
                                 "Utgivning: " + ReplaceWithNotAvailableIfEmptyString(req.imprint.Value) + "\n" +
