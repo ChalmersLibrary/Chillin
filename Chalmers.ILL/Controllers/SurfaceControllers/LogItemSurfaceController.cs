@@ -83,7 +83,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="Type"></param>
         /// <param name="Message"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost, ValidateInput(false)]
         public ActionResult WriteLogItem(int nodeId, string Type, string Message, string newFollowUpDate)
         {
             // Connect to Umbraco ContentService
