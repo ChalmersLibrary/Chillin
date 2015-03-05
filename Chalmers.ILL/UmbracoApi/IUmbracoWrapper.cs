@@ -26,6 +26,9 @@ namespace Chalmers.ILL.UmbracoApi
 
         Member GetMember(int id);
 
+        void LogError<T>(string msg, Exception e);
         void LogWarn<T>(string msg);
+        void LogInfo<T>(string msg);
+        void LogDebug<T>(string msg);
     }
 }

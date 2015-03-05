@@ -244,6 +244,66 @@ namespace Chalmers.ILL.OrderItems
             return content.Id;
         }
 
+        public int CreateOrderItemInDbFromOrderItemSeedModel(OrderItemSeedModel model, bool doReindex = true, bool doSignal = true)
+        {
+            IContentService cs = new Umbraco.Core.Services.ContentService();
+
+            // Temporary OrderId with MD5 Hash
+            var orderId = "cthb-" + Helpers.CalculateMD5Hash(DateTime.Now.Ticks.ToString());
+            var contentName = orderId;
+
+            // Create the OrderItem
+            var uh = new Umbraco.Web.UmbracoHelper(Umbraco.Web.UmbracoContext.Current);
+            IContent content = cs.CreateContent(contentName, uh.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListContentDocumentType"]).First().Id, "ChalmersILLOrderItem");
+
+            // Set properties
+            content.SetValue("originalOrder", model.Message);
+            content.SetValue("reference", model.Message);
+            content.SetValue("patronName", model.PatronName);
+            content.SetValue("patronEmail", model.PatronEmail);
+            content.SetValue("patronCardNo", model.PatronCardNumber);
+            content.SetValue("followUpDate", DateTime.Now);
+            content.SetValue("editedBy", "");
+            content.SetValue("status", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny"));
+            content.SetValue("pType", model.SierraPatronInfo.ptype);
+            content.SetValue("homeLibrary", model.SierraPatronInfo.home_library);
+            content.SetValue("log", JsonConvert.SerializeObject(new List<LogItem>()));
+            content.SetValue("attachments", JsonConvert.SerializeObject(new List<OrderAttachment>()));
+            content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
+
+            if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
+            {
+                if (model.SierraPatronInfo.home_library.ToLower() == "hbib")
+                {
+                    content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
+                }
+                else if (model.SierraPatronInfo.home_library.ToLower() == "abib")
+                {
+                    content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket"));
+                }
+                else if (model.SierraPatronInfo.home_library.ToLower() == "lbib")
+                {
+                    content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket"));
+                }
+                else
+                {
+                    content.SetValue("deliveryLibrary", "");
+                }
+            }
+
+            // Save the OrderItem to get an Id
+            SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+
+            // Shorten the OrderId and include the NodeId
+            content.SetValue("orderId", orderId.Substring(0, 13) + "-" + content.Id.ToString());
+            content.Name = orderId.Substring(0, 13) + "-" + content.Id.ToString();
+
+            // Save
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+
+            return content.Id;
+        }
+
         public void AddOrderItemAttachment(int orderNodeId, int mediaNodeId, string title, string link, bool doReindex = true, bool doSignal = true)
         {
             try

@@ -401,6 +401,7 @@
     <Compile Include="Mail\IExchangeMailWebApi.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
     <Compile Include="Models\OrderItemPageModelBase.cs" />
+    <Compile Include="Models\OrderItemSeedModel.cs" />
     <Compile Include="Models\Page\ChalmersILLLogoutPageModel.cs" />
     <Compile Include="Models\Page\ChalmersILLModel.cs" />
     <Compile Include="Models\Page\ChalmersILLOrderListPageModel.cs" />

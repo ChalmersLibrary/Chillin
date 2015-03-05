@@ -36,6 +36,15 @@ namespace Chalmers.ILL.Mail
         INotifier _notifier;
         IMediaService _mediaService;
 
+        private SourcePollingResult _result;
+        public SourcePollingResult Result
+        {
+            get
+            {
+                return _result;
+            }
+        }
+
         public ChalmersOrderItemsMailSource(IExchangeMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager,
             IInternalDbLogger internalDbLogger, INotifier notifier, IMediaService mediaService)
         {
@@ -48,7 +57,7 @@ namespace Chalmers.ILL.Mail
 
         public SourcePollingResult Poll()
         {
-            var res = new SourcePollingResult("Huvudpostlåda");
+            _result = new SourcePollingResult("Huvudpostlåda");
 
             // List of read mails
             List<MailQueueModel> list = null;
@@ -118,8 +127,8 @@ namespace Chalmers.ILL.Mail
                             item.Type = MailQueueType.ERROR;
                             item.ParseErrorMessage = "Chillin failed to process E-mail. Reason: " + e.Message;
                             LogHelper.Error<SystemSurfaceController>("Failed to process one E-mail, tagging it with ERROR.", e);
-                            res.Errors++;
-                            res.Messages.Add(item.ParseErrorMessage);
+                            _result.Errors++;
+                            _result.Messages.Add(item.ParseErrorMessage);
                         }
                     }
                 }
@@ -181,15 +190,15 @@ namespace Chalmers.ILL.Mail
                             list[index].OrderItemNodeId = orderItemNodeId;
                             list[index].StatusResult = "Created new OrderItem node.";
 
-                            res.NewOrders++;
+                            _result.NewOrders++;
                         }
                         catch (Exception e)
                         {
                             list[index].OrderItemNodeId = -1;
                             list[index].StatusResult = "Error creating new OrderItem node: " + e.Message;
                             LogHelper.Error<SystemSurfaceController>("Error creating new OrderItem node", e);
-                            res.Errors++;
-                            res.Messages.Add(list[index].StatusResult);
+                            _result.Errors++;
+                            _result.Messages.Add(list[index].StatusResult);
                         }
 
                     }
@@ -249,14 +258,14 @@ namespace Chalmers.ILL.Mail
 
                             _notifier.UpdateOrderItemUpdate(item.OrderItemNodeId, "-1", "", true, true, true);
 
-                            res.UpdatedOrders++;
+                            _result.UpdatedOrders++;
                         }
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error following up reply on OrderItem: " + e.Message;
                             LogHelper.Error<SystemSurfaceController>("Error following up reply on OrderItem", e);
-                            res.Errors++;
-                            res.Messages.Add(list[index].StatusResult);
+                            _result.Errors++;
+                            _result.Messages.Add(list[index].StatusResult);
                         }
                     }
 
@@ -372,14 +381,14 @@ namespace Chalmers.ILL.Mail
 
                             _notifier.UpdateOrderItemUpdate(item.OrderItemNodeId, "-1", "", true, true, true);
 
-                            res.UpdatedOrders++;
+                            _result.UpdatedOrders++;
                         }
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error following up delivery on OrderItem: " + e.Message;
                             LogHelper.Error<SystemSurfaceController>("Error following up delivery on OrderItem", e);
-                            res.Errors++;
-                            res.Messages.Add(list[index].StatusResult);
+                            _result.Errors++;
+                            _result.Messages.Add(list[index].StatusResult);
                         }
                     }
                     else if (item.Type == MailQueueType.ERROR)
@@ -410,15 +419,15 @@ namespace Chalmers.ILL.Mail
                             // Forward failed mail to manual handling.
                             _exchangeMailWebApi.ForwardMailMessage(item.Id, ConfigurationManager.AppSettings["chalmersILLForwardingAddress"]);
                             list[index].StatusResult = "This message has been forwarded to " + ConfigurationManager.AppSettings["chalmersILLForwardingAddress"];
-                            res.Errors++;
-                            res.Messages.Add(list[index].StatusResult);
+                            _result.Errors++;
+                            _result.Messages.Add(list[index].StatusResult);
                         }
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error forwarding mail: " + e.Message;
                             LogHelper.Error<SystemSurfaceController>("Error forwarding mail", e);
-                            res.Errors++;
-                            res.Messages.Add(list[index].StatusResult);
+                            _result.Errors++;
+                            _result.Messages.Add(list[index].StatusResult);
                         }
                     }
                     else // UNKNOWN, forward to mailbox configured in web.config
@@ -432,8 +441,8 @@ namespace Chalmers.ILL.Mail
                         {
                             list[index].StatusResult = "Error forwarding mail: " + e.Message;
                             LogHelper.Error<SystemSurfaceController>("Error forwarding mail", e);
-                            res.Errors++;
-                            res.Messages.Add(list[index].StatusResult);
+                            _result.Errors++;
+                            _result.Messages.Add(list[index].StatusResult);
                         }
                     }
 
@@ -443,7 +452,7 @@ namespace Chalmers.ILL.Mail
                 }
             }
 
-            return res;
+            return Result;
         }
 
         private string getBoundOrder(MailQueueModel m)

@@ -77,9 +77,24 @@ namespace Chalmers.ILL.UmbracoApi
             return new Member(id);
         }
 
+        public void LogError<T>(string msg, Exception e)
+        {
+            LogHelper.Error<T>(msg, e);
+        }
+
         public void LogWarn<T>(string msg)
         {
             LogHelper.Warn<T>(msg);
+        }
+
+        public void LogInfo<T>(string msg)
+        {
+            LogHelper.Info<T>(msg);
+        }
+
+        public void LogDebug<T>(string msg)
+        {
+            LogHelper.Debug<T>(msg);
         }
 
         #region Private methods
