@@ -3,6 +3,7 @@ using Chalmers.ILL.Models;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Patron;
 using Chalmers.ILL.UmbracoApi;
+using Examine;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -46,6 +47,8 @@ namespace Chalmers.ILL.Providers
             AddPatronInfoToSeeds();
 
             CreateNewOrdersFromSeeds();
+
+            UpdateExistingOrdersFromLibris();
 
             return Result;
         }
@@ -147,6 +150,40 @@ namespace Chalmers.ILL.Providers
             {
                 throw new SourcePollingException("Error when creating new orders from seeds.", e);
             }
+        }
+
+        private void UpdateExistingOrdersFromLibris()
+        {
+            try
+            {
+                var orders = GetSearchResultsForAllActiveOrders();
+
+                foreach (var order in orders)
+                {
+                    // TODO: Check for updates on all orders that have Libris as provider.
+                }
+            }
+            catch (Exception e)
+            {
+                throw new SourcePollingException("Error when updating existing orders from Libris.", e);
+            }
+        }
+
+        private ISearchResults GetSearchResultsForAllActiveOrders()
+        {
+            // TODO: Inject Examine or add this to OrderItemManager, which probably should be called something else.
+            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
+
+            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+
+            var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
+                (Status:01\:Ny OR 
+                 Status:02\:Åtgärda OR
+                 Status:03\:Beställd OR
+                 Status:04\:Väntar OR
+                 Status:09\:Mottagen)");
+
+            return searcher.Search(query);
         }
 
         private string ReplaceWithNotAvailableIfEmptyString(string val)
