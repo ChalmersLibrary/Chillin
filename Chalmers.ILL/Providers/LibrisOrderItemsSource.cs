@@ -59,40 +59,45 @@ namespace Chalmers.ILL.Providers
         {
             try
             {
-                var addressStr = ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/illse/api/userrequests/" + ConfigurationManager.AppSettings["librarySigel"];
+                var sigels = ConfigurationManager.AppSettings["librarySigel"].Split(',').Select(x => x.Trim()).ToList();
 
-                var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Add("api-key", ConfigurationManager.AppSettings["librisApiKey"]);
-                var task = httpClient.GetStringAsync(new Uri(addressStr));
-
-                task.Wait();
-
-                var userRequestsQueryResult = JsonConvert.DeserializeObject<dynamic>(task.Result);
-
-                var userRequests = userRequestsQueryResult.user_requests;
-                for (int index = 0; index < userRequestsQueryResult.count.Value; index++)
+                foreach (var sigel in sigels)
                 {
-                    try
+                    var addressStr = ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/illse/api/userrequests/" + sigel;
+
+                    var httpClient = new HttpClient();
+                    httpClient.DefaultRequestHeaders.Add("api-key", ConfigurationManager.AppSettings["librisApiKey"]);
+                    var task = httpClient.GetStringAsync(new Uri(addressStr));
+
+                    task.Wait();
+
+                    var userRequestsQueryResult = JsonConvert.DeserializeObject<dynamic>(task.Result);
+
+                    var userRequests = userRequestsQueryResult.user_requests;
+                    for (int index = 0; index < userRequestsQueryResult.count.Value; index++)
                     {
-                        var req = userRequests[index];
-                        var seed = new OrderItemSeedModel();
-                        seed.PatronEmail = req.user.email.Value;
-                        seed.PatronName = req.user.full_name.Value;
-                        seed.PatronCardNumber = req.user.library_card.Value;
-                        seed.Message = "LIBRIS LÅNTAGARBESTÄLLNING" + "\n\n" +
-                            ConfigurationManager.AppSettings["librisApiBaseAddress"] + ConfigurationManager.AppSettings["librisApiUserRequestSuffix"] + "\n\n" +
-                            "Författare: " + ReplaceWithNotAvailableIfEmptyString(req.author.Value) + "\n" +
-                            "Titel: " + ReplaceWithNotAvailableIfEmptyString(req.title.Value) + "\n" +
-                            "Utgivning: " + ReplaceWithNotAvailableIfEmptyString(req.imprint.Value) + "\n" +
-                            "ISBN/ISSN: " + ReplaceWithNotAvailableIfEmptyString(req.isxn.Value);
-                        _seeds.Add(seed);
-                    }
-                    catch (Exception e)
-                    {
-                        var msg = "Error when trying to add seed for a new user request. ";
-                        _result.Errors++;
-                        _result.Messages.Add(msg + e.Message);
-                        _umbraco.LogError<LibrisOrderItemsSource>(msg, e);
+                        try
+                        {
+                            var req = userRequests[index];
+                            var seed = new OrderItemSeedModel();
+                            seed.PatronEmail = req.user.email.Value;
+                            seed.PatronName = req.user.full_name.Value;
+                            seed.PatronCardNumber = req.user.library_card.Value;
+                            seed.Message = "LIBRIS LÅNTAGARBESTÄLLNING" + "\n\n" +
+                                ConfigurationManager.AppSettings["librisApiBaseAddress"] + ConfigurationManager.AppSettings["librisApiUserRequestSuffix"] + "\n\n" +
+                                "Författare: " + ReplaceWithNotAvailableIfEmptyString(req.author.Value) + "\n" +
+                                "Titel: " + ReplaceWithNotAvailableIfEmptyString(req.title.Value) + "\n" +
+                                "Utgivning: " + ReplaceWithNotAvailableIfEmptyString(req.imprint.Value) + "\n" +
+                                "ISBN/ISSN: " + ReplaceWithNotAvailableIfEmptyString(req.isxn.Value);
+                            _seeds.Add(seed);
+                        }
+                        catch (Exception e)
+                        {
+                            var msg = "Error when trying to add seed for a new user request. ";
+                            _result.Errors++;
+                            _result.Messages.Add(msg + e.Message);
+                            _umbraco.LogError<LibrisOrderItemsSource>(msg, e);
+                        }
                     }
                 }
             }
