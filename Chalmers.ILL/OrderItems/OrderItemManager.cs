@@ -271,7 +271,20 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("attachments", JsonConvert.SerializeObject(new List<OrderAttachment>()));
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
 
-            if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
+
+            if (model.DeliveryLibrarySigel == "Z")
+            {
+                content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
+            }
+            else if (model.DeliveryLibrarySigel == "ZL")
+            {
+                content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket"));
+            }
+            else if (model.DeliveryLibrarySigel == "ZA")
+            {
+                content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket"));
+            }
+            else if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
             {
                 if (model.SierraPatronInfo.home_library.ToLower() == "hbib")
                 {

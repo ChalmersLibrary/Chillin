@@ -83,6 +83,7 @@ namespace Chalmers.ILL.Providers
                             seed.PatronEmail = req.user.email.Value;
                             seed.PatronName = req.user.full_name.Value;
                             seed.PatronCardNumber = req.user.library_card.Value;
+                            seed.DeliveryLibrarySigel = sigel;
                             seed.Message = "LIBRIS LÅNTAGARBESTÄLLNING" + "\n\n" +
                                 ConfigurationManager.AppSettings["librisApiBaseAddress"] + ConfigurationManager.AppSettings["librisApiUserRequestSuffix"] + 
                                     req.request_id.Value + "\n\n" +
