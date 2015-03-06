@@ -7,6 +7,7 @@ namespace Chalmers.ILL.Models
 {
     public class OrderItemSeedModel
     {
+        public string Id { get; set; }
         public string PatronName { get; set; }
         public string PatronEmail { get; set; }
         public string PatronCardNumber { get; set; }

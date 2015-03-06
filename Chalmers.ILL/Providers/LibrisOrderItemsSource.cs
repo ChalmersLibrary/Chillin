@@ -63,7 +63,7 @@ namespace Chalmers.ILL.Providers
 
                 foreach (var sigel in sigels)
                 {
-                    var addressStr = ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/illse/api/userrequests/" + sigel;
+                    var addressStr = ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/api/userrequests/" + sigel;
 
                     var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Add("api-key", ConfigurationManager.AppSettings["librisApiKey"]);
@@ -80,18 +80,22 @@ namespace Chalmers.ILL.Providers
                         {
                             var req = userRequests[index];
                             var seed = new OrderItemSeedModel();
-                            seed.PatronEmail = req.user.email.Value;
-                            seed.PatronName = req.user.full_name.Value;
-                            seed.PatronCardNumber = req.user.library_card.Value;
-                            seed.DeliveryLibrarySigel = sigel;
-                            seed.Message = "LIBRIS LÅNTAGARBESTÄLLNING" + "\n\n" +
-                                ConfigurationManager.AppSettings["librisApiBaseAddress"] + ConfigurationManager.AppSettings["librisApiUserRequestSuffix"] + 
-                                    req.request_id.Value + "\n\n" +
-                                "Författare: " + ReplaceWithNotAvailableIfEmptyString(req.author.Value) + "\n" +
-                                "Titel: " + ReplaceWithNotAvailableIfEmptyString(req.title.Value) + "\n" +
-                                "Utgivning: " + ReplaceWithNotAvailableIfEmptyString(req.imprint.Value) + "\n" +
-                                "ISBN/ISSN: " + ReplaceWithNotAvailableIfEmptyString(req.isxn.Value);
-                            _seeds.Add(seed);
+                            seed.Id = "LIBRIS-LTB-" + req.request_id.Value;
+
+                            if (!OrderWithSeedIdAlreadyExists(seed.Id))
+                            {
+                                seed.PatronEmail = req.user.email.Value;
+                                seed.PatronName = req.user.full_name.Value;
+                                seed.PatronCardNumber = req.user.library_card.Value;
+                                seed.DeliveryLibrarySigel = sigel;
+                                seed.Message = "LIBRIS LÅNTAGARBESTÄLLNING" + "\n\n" +
+                                    ConfigurationManager.AppSettings["librisApiBaseAddress"] + ConfigurationManager.AppSettings["librisApiUserRequestSuffix"] + "\n\n" +
+                                    "Författare: " + ReplaceWithNotAvailableIfEmptyString(req.author.Value) + "\n" +
+                                    "Titel: " + ReplaceWithNotAvailableIfEmptyString(req.title.Value) + "\n" +
+                                    "Utgivning: " + ReplaceWithNotAvailableIfEmptyString(req.imprint.Value) + "\n" +
+                                    "ISBN/ISSN: " + ReplaceWithNotAvailableIfEmptyString(req.isxn.Value);
+                                _seeds.Add(seed);
+                            }
                         }
                         catch (Exception e)
                         {
@@ -174,6 +178,19 @@ namespace Chalmers.ILL.Providers
             {
                 throw new SourcePollingException("Error when updating existing orders from Libris.", e);
             }
+        }
+
+        private bool OrderWithSeedIdAlreadyExists(string seedId)
+        {
+            // TODO: Inject Examine or add this to OrderItemManager, which probably should be called something else.
+            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
+
+            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+
+            var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
+                SeedId:" + seedId);
+
+            return searcher.Search(query).Count() > 0;
         }
 
         private ISearchResults GetSearchResultsForAllActiveOrders()

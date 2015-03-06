@@ -270,6 +270,7 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("log", JsonConvert.SerializeObject(new List<LogItem>()));
             content.SetValue("attachments", JsonConvert.SerializeObject(new List<OrderAttachment>()));
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
+            content.SetValue("seedId", model.Id);
 
 
             if (model.DeliveryLibrarySigel == "Z")
