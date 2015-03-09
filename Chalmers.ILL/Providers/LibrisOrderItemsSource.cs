@@ -3,6 +3,7 @@ using Chalmers.ILL.Models;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Patron;
 using Chalmers.ILL.UmbracoApi;
+using Chalmers.ILL.Utilities;
 using Examine;
 using Newtonsoft.Json;
 using System;
@@ -194,7 +195,16 @@ namespace Chalmers.ILL.Providers
                         {
                             var req = illRequests[index];
 
-                            // TODO: Extract and apply the updates to the orders.
+                            if (order.Fields["Status"] == "03:Beställd" && req.status_code.Value == "6") // Status code 6 is "Negativt svar" in Libris
+                            {
+                                _orderItemManager.SetOrderItemStatusInternal(order.Id, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "02:Åtgärda"), false, false);
+                                _internalDbLogger.WriteLogItemInternal(order.Id, "LIBRIS", "Negativt svar. " + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=notfullfilled&id=" + req.request_id.Value);
+                            }
+                            else if (order.Fields["Status"] == "03:Beställd" && req.status_code.Value == "7") // Status code 7 is "Kan reserveras" in Libris
+                            {
+                                _orderItemManager.SetOrderItemStatusInternal(order.Id, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "02:Åtgärda"), false, false);
+                                _internalDbLogger.WriteLogItemInternal(order.Id, "LIBRIS", "Kan reserveras." + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=may_reserve&id=" + req.request_id.Value);
+                            }
                         }
                     }
                 }
