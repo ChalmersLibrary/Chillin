@@ -167,11 +167,36 @@ namespace Chalmers.ILL.Providers
         {
             try
             {
-                var orders = GetSearchResultsForAllActiveOrders();
+                var orders = GetSearchResultsForAllActiveOrdersThatAreOrderedFromLibris();
 
                 foreach (var order in orders)
                 {
-                    // TODO: Check for updates on all orders that have Libris as provider.
+                    var addressStr = ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/api/illrequests/Z/" + order.Fields["ProviderOrderId"].ToString();
+
+                    var httpClient = new HttpClient();
+                    httpClient.DefaultRequestHeaders.Add("api-key", ConfigurationManager.AppSettings["librisApiKey"]);
+                    var task = httpClient.GetStringAsync(new Uri(addressStr));
+
+                    task.Wait();
+
+                    var illRequestsQueryResult = JsonConvert.DeserializeObject<dynamic>(task.Result);
+
+                    var illRequests = illRequestsQueryResult.ill_requests;
+                    var illRequestsCount = illRequestsQueryResult.count.Value;
+                    if (illRequestsCount == 0)
+                    {
+                        _result.Errors++;
+                        _result.Messages.Add("Couldn't find any Libris ILL request with the ID: " + order.Fields["ProviderOrderId"].ToString());
+                    }
+                    else
+                    {
+                        for (int index = 0; index < illRequestsCount; index++)
+                        {
+                            var req = illRequests[index];
+
+                            // TODO: Extract and apply the updates to the orders.
+                        }
+                    }
                 }
             }
             catch (Exception e)
@@ -193,7 +218,7 @@ namespace Chalmers.ILL.Providers
             return searcher.Search(query).Count() > 0;
         }
 
-        private ISearchResults GetSearchResultsForAllActiveOrders()
+        private ISearchResults GetSearchResultsForAllActiveOrdersThatAreOrderedFromLibris()
         {
             // TODO: Inject Examine or add this to OrderItemManager, which probably should be called something else.
             var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
@@ -205,7 +230,8 @@ namespace Chalmers.ILL.Providers
                  Status:02\:Åtgärda OR
                  Status:03\:Beställd OR
                  Status:04\:Väntar OR
-                 Status:09\:Mottagen)");
+                 Status:09\:Mottagen) AND
+                 ProviderName:libris");
 
             return searcher.Search(query);
         }
