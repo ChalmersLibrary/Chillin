@@ -42,11 +42,16 @@
             $("#providerName").keyup(function () {
                 var providerNameInput = $(this);
                 var re = new RegExp(providerNameInput.val(), "i");
+
+                var updated = false;
                 $("#provider-list > a").each(function () {
+                    // Only show list elements if they match what is written in the text input.
                     $(this).toggle(re.test($(this).text()));
 
-                    if ($(this).text().toLowerCase() === providerNameInput.val().toLowerCase()) {
+                    // If we have written the same word as already exists but with different case, substitute it with the existing case.
+                    if (!updated && $(this).text().toLowerCase() === providerNameInput.val().toLowerCase()) {
                         providerNameInput.val($(this).text());
+                        updated = true;
                     }
                 });
             });
