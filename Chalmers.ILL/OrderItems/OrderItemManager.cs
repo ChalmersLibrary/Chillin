@@ -174,6 +174,8 @@ namespace Chalmers.ILL.OrderItems
             // FIXME: Always set to zero to avoid ContentService calls. Never used. Should be removed from model?
             orderItem.ContentVersionsCount = 0;
 
+            orderItem.DeliveryLibrarySameAsHomeLibrary = IsDeliveryLibrarySameAsHomeLibrary(orderItem);
+
             // Return the populated object
             return orderItem;
         }
@@ -629,5 +631,17 @@ namespace Chalmers.ILL.OrderItems
             // Indicate to the waiting thread that the index operation has completed.
             semLock.Release();
         }
+
+        #region Private methods
+
+        private bool IsDeliveryLibrarySameAsHomeLibrary(OrderItemModel orderItem)
+        {
+            return orderItem.SierraInfo.home_library == null || 
+                (orderItem.DeliveryLibraryPrevalue == "Huvudbiblioteket" && orderItem.SierraInfo.home_library.Contains("hbib")) ||
+                (orderItem.DeliveryLibraryPrevalue == "Lindholmenbiblioteket" && orderItem.SierraInfo.home_library.Contains("lbib")) ||
+                (orderItem.DeliveryLibraryPrevalue == "Arkitekturbiblioteket" && orderItem.SierraInfo.home_library.Contains("abib"));
+        }
+
+        #endregion
     }
 }

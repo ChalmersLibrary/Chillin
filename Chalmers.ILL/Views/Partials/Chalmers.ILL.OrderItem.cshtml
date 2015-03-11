@@ -28,6 +28,15 @@
                         </div>
                     </div>
                 }
+                
+                @if (Model.OrderItem.TypePrevalue == "Bok" && !Model.OrderItem.DeliveryLibrarySameAsHomeLibrary)
+                {
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Låntagarens hembibliotek stämmer ej överrens med leveransbibliotek!</h3>
+                        </div>
+                    </div>
+                }
 
                 <!-- Type button -->
                 <div class="btn-group">

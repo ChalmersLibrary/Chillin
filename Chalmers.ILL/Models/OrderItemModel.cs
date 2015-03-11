@@ -56,6 +56,7 @@ namespace Chalmers.ILL.Models
         public string SierraInfoStr { get; set; }
 
         public string DrmWarning { get; set; }
+        public bool DeliveryLibrarySameAsHomeLibrary { get; set; }
 
         public List<LogItem> LogItemsList { get; set; }
         public List<OrderAttachment> AttachmentList { get; set; }
@@ -72,7 +73,4 @@ namespace Chalmers.ILL.Models
         public int NodeId { get; set; }
         public int VersionCount { get; set; }
     }
-
-
-    
 }
