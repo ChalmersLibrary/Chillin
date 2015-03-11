@@ -170,10 +170,17 @@
                     <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.OrderItem.NodeId);">Beställardata</button>
                     <button type="button" class="btn btn-primary" onclick="loadMailAction(@Model.OrderItem.NodeId);">Skicka mail</button>
                     <button type="button" class="btn btn-primary" onclick="loadProviderAction(@Model.OrderItem.NodeId);">Beställ</button>
-                    <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.OrderItem.NodeId);">Logga</button>
+                }
+                <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.OrderItem.NodeId);">Logga</button>
+                @if (Model.OrderItem.Type > 0)
+                {
                     <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Annullera</button> -->
                     <button type="button" class="btn btn-primary" onclick="loadDeliveryAction(@Model.OrderItem.NodeId);">Leverans <span id="attachment-counter1" class="badge">@Model.OrderItem.AttachmentList.Count</span></button>
                     <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Överför</button> -->
+                }
+                @if (Model.OrderItem.TypePrevalue == "Bok")
+                {
+                    <button type="button" class="btn btn-primary" onclick="loadReturnAction(@Model.OrderItem.NodeId);">Retur</button>
                 }
             </div>
 

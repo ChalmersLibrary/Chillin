@@ -328,6 +328,7 @@
     </Content>
     <Content Include="Scripts\dummy.txt" />
     <Content Include="UserControls\dummy.txt" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.Return.cshtml" />
     <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />
     <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
@@ -371,6 +372,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemReturnSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLLogoutPageController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLOrderListPageController.cs" />
@@ -413,6 +415,7 @@
     <Compile Include="Models\PartialPage\ChalmersILLActionLogEntryModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionMailModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionProviderModel.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLActionReturnModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLOrderItemModel.cs" />
     <Compile Include="Models\StatisticsVariable.cs" />
     <Compile Include="Models\UmbracoDropdownListNtextDataType.cs" />

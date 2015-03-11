@@ -984,6 +984,15 @@ function loadDeliveryAction(id) {
     );
 }
 
+function loadReturnAction(id) {
+    $("#loading-partial-view").show();
+    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemReturnSurface/RenderReturnAction?nodeId=' + id,
+        function (responseText, textStatus, req) {
+            $("#loading-partial-view").hide();
+        }
+    );
+}
+
 function loadPatronDataView(id) {
     $("#loading-partial-view").show();
     $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemPatronDataSurface/RenderPatronDataView?nodeId=' + id,
