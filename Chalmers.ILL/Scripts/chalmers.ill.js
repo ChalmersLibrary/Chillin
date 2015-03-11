@@ -811,7 +811,6 @@ function sendDeliveryByEmail(mailData, logEntry) {
 }
 
 /* Set new property values for Delivery from form */
-
 function setOrderItemDelivery(nodeId, logEntry, delivery) {
     lockScreen();
     $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetDelivery?nodeId=" + nodeId + "&logEntry=" + logEntry + "&delivery=" + delivery, function (json) {
