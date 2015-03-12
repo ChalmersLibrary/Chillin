@@ -90,7 +90,7 @@ $(function () {
             }
             $("#sort-icon").remove();
             $(elem).html($(elem).html() + "<span id=\"sort-icon\" class=\"glyphicon glyphicon-chevron-down\"></span>");
-            $(".order-list > div:not(.header)").sort(sortFunc).each(function () {
+            $(".order-list > .illedit").sort(sortFunc).each(function () {
                 $(this).parent().append(this);
             });
         }
@@ -499,13 +499,15 @@ function applyLibraryListFilter(filter, animate)
 }
 function updateFilterButtonCounters()
 {
+    var numberOfStatuses = 10;
+
     // TODO: AAAAAHHHH!! MY EYES!!! Rewrite this method.
     if ($("#library01-button").hasClass("active")) {
         // hbib
         $("#order-list-title").text("Best\u00E4llningar - Huvudbiblioteket");
         setCounterOrHide($("#status00-counter"), $(".order-list").find(".illedit > .Huvudbiblioteket").length);
-        for (k = 1; k < 10; k++) {
-            setCounterOrHide($("#status0" + k + "-counter"), $(".order-list").find("div > div > .status-0" + k).filter(function (item) {
+        for (k = 1; k < (numberOfStatuses + 1); k++) {
+            setCounterOrHide($("#status" + zeroPadFromLeft(k, 2) + "-counter"), $(".order-list").find("div > div > .status-" + zeroPadFromLeft(k, 2)).filter(function (item) {
                 return $(this).parent().parent().find(".Huvudbiblioteket").length > 0;
             }).length);
         }
@@ -513,8 +515,8 @@ function updateFilterButtonCounters()
         // lbib
         $("#order-list-title").text("Best\u00E4llningar - Lindholmenbiblioteket");
         setCounterOrHide($("#status00-counter"), $(".order-list").find(".illedit > .Lindholmenbiblioteket").length);
-        for (k = 1; k < 10; k++) {
-        setCounterOrHide($("#status0" + k + "-counter"), $(".order-list").find("div > div > .status-0" +k).filter(function (item) {
+        for (k = 1; k < (numberOfStatuses + 1) ; k++) {
+            setCounterOrHide($("#status" + zeroPadFromLeft(k, 2) + "-counter"), $(".order-list").find("div > div > .status-" + zeroPadFromLeft(k, 2)).filter(function (item) {
                 return $(this).parent().parent().find(".Lindholmenbiblioteket").length > 0;
             }).length);
         }
@@ -522,8 +524,8 @@ function updateFilterButtonCounters()
         // abib
         $("#order-list-title").text("Best\u00E4llningar - Arkitekturbiblioteket");
         setCounterOrHide($("#status00-counter"), $(".order-list").find(".illedit > .Arkitekturbiblioteket").length);
-        for (k = 1; k < 10; k++) {
-            setCounterOrHide($("#status0" + k + "-counter"), $(".order-list").find("div > div > .status-0" + k).filter(function (item) {
+        for (k = 1; k < (numberOfStatuses + 1) ; k++) {
+            setCounterOrHide($("#status" + zeroPadFromLeft(k, 2) + "-counter"), $(".order-list").find("div > div > .status-" + zeroPadFromLeft(k, 2)).filter(function (item) {
                 return $(this).parent().parent().find(".Arkitekturbiblioteket").length > 0;
             }).length);
         }
@@ -531,8 +533,8 @@ function updateFilterButtonCounters()
         // all
         $("#order-list-title").text("Best\u00E4llningar - Alla bibliotek");
         setCounterOrHide($("#status00-counter"), $(".order-list").find(".order-item-status").length) ;
-        for (k = 1; k < 10; k++) {
-            setCounterOrHide($("#status0" + k + "-counter"), $(".order-list").find(".status-0" + k).length);
+        for (k = 1; k < (numberOfStatuses + 1) ; k++) {
+            setCounterOrHide($("#status" + zeroPadFromLeft(k, 2) + "-counter"), $(".order-list").find(".status-" + zeroPadFromLeft(k, 2)).length);
         }
     }
 }
@@ -596,7 +598,8 @@ function loadOrderItemSummary(id)
             else if (json.StatusPrevalue.indexOf("05") == 0 || 
                      json.StatusPrevalue.indexOf("06") == 0 || 
                      json.StatusPrevalue.indexOf("07") == 0 || 
-                     json.StatusPrevalue.indexOf("08") == 0) {
+                     json.StatusPrevalue.indexOf("08") == 0 ||
+                     json.StatusPrevalue.indexOf("10") == 0) {
                 $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-info status-" + json.StatusPrevalue.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
             else {
@@ -1077,3 +1080,10 @@ $.connection.hub.start()
     .fail(function () {
         alert("Could not Connect to signalR notification hub");
     });
+
+/* Small helper functions */
+
+function zeroPadFromLeft(num, size) {
+    var s = "000000000" + num;
+    return s.substr(s.length - size);
+}

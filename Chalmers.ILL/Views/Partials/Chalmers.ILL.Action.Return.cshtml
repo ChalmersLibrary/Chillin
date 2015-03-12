@@ -19,7 +19,7 @@
     
     <script type="text/javascript">
         function itemIsReturned() {
-            // NOP
+            setOrderItemStatus(@Model.OrderItem.NodeId, @Model.AvailableStatuses.Find(x => x.Value.Contains("Återsänd")).Id);
         }
     </script>
 </form>

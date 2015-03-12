@@ -105,6 +105,7 @@
         <button id="status06-button" type="button" value=".chillin-status-06" class="btn btn-default btn-info">Annullerad <span id="status06-counter" class="badge">0</span></button>
         <button id="status07-button" type="button" value=".chillin-status-07" class="btn btn-default btn-info">Överförd <span id="status07-counter" class="badge">0</span></button>
         <button id="status08-button" type="button" value=".chillin-status-08" class="btn btn-default btn-info">Inköpt <span id="status08-counter" class="badge">0</span></button>
+        <button id="status10-button" type="button" value=".chillin-status-10" class="btn btn-default btn-info">Återsänd <span id="status10-counter" class="badge">0</span></button>
     </div>
 </div>
 
@@ -233,7 +234,8 @@
             else if (status.ToString().StartsWith("05:") ||
                      status.ToString().StartsWith("06:") ||
                      status.ToString().StartsWith("07:") ||
-                     status.ToString().StartsWith("08:"))
+                     status.ToString().StartsWith("08:") ||
+                     status.ToString().StartsWith("10:"))
             {
                 <span class="order-item-status label label-info status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
             }
