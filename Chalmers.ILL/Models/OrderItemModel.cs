@@ -60,7 +60,7 @@ namespace Chalmers.ILL.Models
 
         public DateTime DueDate { get; set; }
         public string BookId { get; set; }
-        public string DeliveryInformation { get; set; }
+        public string ProviderInformation { get; set; }
 
         public List<LogItem> LogItemsList { get; set; }
         public List<OrderAttachment> AttachmentList { get; set; }

@@ -105,6 +105,7 @@ namespace Chalmers.ILL.OrderItems
 
                 orderItem.ProviderName = contentNode.Fields.GetValueString("ProviderName") != null ? contentNode.Fields.GetValueString("ProviderName") : "";
                 orderItem.ProviderOrderId = contentNode.Fields.GetValueString("ProviderOrderId") != null ? contentNode.Fields.GetValueString("ProviderOrderId") : "";
+                orderItem.ProviderInformation = contentNode.Fields.GetValueString("ProviderInformation") != null ? contentNode.Fields.GetValueString("ProviderInformation") : "";
 
                 // Parse out the integer of status and type
                 int OrderStatusId = Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], contentNode.Fields.GetValueString("Status"));
@@ -447,7 +448,7 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
-        public bool SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string deliveryInformation, bool doReindex = true, bool doSignal = true)
+        public bool SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string providerInformation, bool doReindex = true, bool doSignal = true)
         {
             var cs = new Umbraco.Core.Services.ContentService();
             bool infoChanged = false;
@@ -457,7 +458,7 @@ namespace Chalmers.ILL.OrderItems
                 var content = cs.GetById(orderNodeId);
 
                 string currentBookId = content.GetValue("bookId").ToString();
-                string currentDeliveryInformation = content.GetValue("deliveryInformation").ToString();
+                string currentProviderInformation = content.GetValue("providerInformation").ToString();
 
                 if (content.GetValue("dueDate").ToString() != "")
                 {
@@ -477,16 +478,16 @@ namespace Chalmers.ILL.OrderItems
                     infoChanged = true;
                 }
                
-                if (currentDeliveryInformation != deliveryInformation)
+                if (currentProviderInformation != providerInformation)
                 {
-                    content.SetValue("deliveryInformation", deliveryInformation);
+                    content.SetValue("providerInformation", providerInformation);
                     infoChanged = true;
                 }
 
                 if (infoChanged)
                 {
                     SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    _internalDbLogger.WriteLogItemInternal(orderNodeId, "BOKINFORMATION", "Bokinformation ändrat till bokid:"+bookId+" lånetid:"+dueDate+" leverantörsinformation:"+deliveryInformation, doReindex, doSignal);
+                    _internalDbLogger.WriteLogItemInternal(orderNodeId, "BOKINFORMATION", "Bokinformation ändrat till bokid:"+bookId+" lånetid:"+dueDate+" leverantörsinformation:"+providerInformation, doReindex, doSignal);
                 }
 
                 return true;
