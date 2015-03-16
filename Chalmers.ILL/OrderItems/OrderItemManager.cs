@@ -206,6 +206,9 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("log", JsonConvert.SerializeObject(new List<LogItem>()));
             content.SetValue("attachments", JsonConvert.SerializeObject(new List<OrderAttachment>()));
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
+            content.SetValue("dueDate", "");
+            content.SetValue("bookId", "");
+            content.SetValue("deliveryInformation", "");
 
             if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
             {
@@ -453,10 +456,19 @@ namespace Chalmers.ILL.OrderItems
             {
                 var content = cs.GetById(orderNodeId);
 
-                // Try and parse out the int of the Umbraco property, if it exists
                 string currentBookId = content.GetValue("bookId").ToString();
-                DateTime currentDueDate = Convert.ToDateTime(content.GetValue("dueDate"));
                 string currentDeliveryInformation = content.GetValue("deliveryInformation").ToString();
+
+                if (content.GetValue("dueDate").ToString() != "")
+                {
+                    DateTime currentDueDate = Convert.ToDateTime(content.GetValue("dueDate"));
+                    if (currentDueDate != dueDate)
+                    {
+                        content.SetValue("dueDate", dueDate);
+                        infoChanged = true;
+                    }
+                }
+
 
                 // Only make a change if the values differs from the current
                 if (currentBookId != bookId)
@@ -464,11 +476,7 @@ namespace Chalmers.ILL.OrderItems
                     content.SetValue("bookId", bookId);
                     infoChanged = true;
                 }
-                if (currentDueDate != dueDate)
-                {
-                    content.SetValue("dueDate", dueDate);
-                    infoChanged = true;
-                }
+               
                 if (currentDeliveryInformation != deliveryInformation)
                 {
                     content.SetValue("deliveryInformation", deliveryInformation);
