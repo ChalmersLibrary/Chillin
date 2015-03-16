@@ -444,6 +444,51 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
+        public bool SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string deliveryInformation, bool doReindex = true, bool doSignal = true)
+        {
+            var cs = new Umbraco.Core.Services.ContentService();
+            bool infoChanged = false;
+
+            try
+            {
+                var content = cs.GetById(orderNodeId);
+
+                // Try and parse out the int of the Umbraco property, if it exists
+                string currentBookId = content.GetValue("bookId").ToString();
+                DateTime currentDueDate = Convert.ToDateTime(content.GetValue("dueDate"));
+                string currentDeliveryInformation = content.GetValue("deliveryInformation").ToString();
+
+                // Only make a change if the values differs from the current
+                if (currentBookId != bookId)
+                {
+                    content.SetValue("bookId", bookId);
+                    infoChanged = true;
+                }
+                if (currentDueDate != dueDate)
+                {
+                    content.SetValue("dueDate", dueDate);
+                    infoChanged = true;
+                }
+                if (currentDeliveryInformation != deliveryInformation)
+                {
+                    content.SetValue("deliveryInformation", deliveryInformation);
+                    infoChanged = true;
+                }
+
+                if (infoChanged)
+                {
+                    SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                    _internalDbLogger.WriteLogItemInternal(orderNodeId, "BOKINFORMATION", "Bokinformation ändrat till bokid:"+bookId+" lånetid:"+dueDate+" leverantörsinformation:"+deliveryInformation, doReindex, doSignal);
+                }
+
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public bool SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true)
         {
             var cs = new Umbraco.Core.Services.ContentService();

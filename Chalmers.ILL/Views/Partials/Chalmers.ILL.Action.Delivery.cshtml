@@ -42,6 +42,12 @@
                         Internpost
                     </label>
                 </div>
+                <div class="radio">
+                    <label>
+                        <input type="radio" name="deliveryOptions" id="optionsRadios4" value="infodisken">
+                        Avhämtning i lånedisken
+                    </label>
+                </div>
             </div>
         </div>
     </div>
@@ -102,6 +108,58 @@
                         </div>
                     </div>
                 }
+            </div>
+        </div>
+    </div>
+    <div id="delivery-to-circulation" class="row" hidden>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="message">Meddelande</label>
+                <textarea class="form-control" rows="12" id="message" name="message">
+Hej / Hello
+
+Din beställning:
+@Model.OrderItem.OriginalOrder
+finns att hämta i lånedisken på Chalmers @Model.OrderItem.DeliveryLibraryPrevalue
+
+_______________________________________________________________________________________
+
+A book you have ordered is available for pickup at Chalmers @Model.OrderItem.DeliveryLibraryPrevalue.
+
+Vänliga hälsningar / Regards
+                </textarea>
+            </div>
+            <div class="form-group">
+                <label for="recipientName">Mottagarens namn</label>
+                <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.OrderItem.PatronName">
+            </div>
+            <div class="form-group">
+                <label for="recipientEmail">Mottagande e-postadress</label>
+                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.OrderItem.PatronEmail">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="bookId">Bokens streckkod/identifikator</label>
+                <input type="text" class="form-control" id="bookId" name="bookId" value="@Model.OrderItem.BookId">
+            </div>
+            <div class="form-group">
+                <label for="dueDate">Återlämningsdatum</label>
+                <div class="input-group date datetimepicker">
+                    <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.DueDate">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="deliveryInformation">Leverantörsinformation</label><br />
+                <textarea class="form-control" cols="80" rows="10" id="deliveryInformation" name="deliveryInformation">
+@Model.OrderItem.DeliveryInformation
+                </textarea>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-success" onclick="">Skriv ut bokslip</button>
             </div>
         </div>
     </div>
@@ -183,18 +241,32 @@ Vänliga hälsningar / Regards
         </div>
     </div>
     <script type="text/javascript">
+    $(function () {
+        $(".datetimepicker").datetimepicker({
+            locale: "sv"
+        });
+    });
+
     $(document).ready(function () {
         $("#optionsRadios1").click(function () {
-            $("#delivery-with-mail-view").show();
+            $("#delivery-to-circulation").hide();
             $("#delivery-with-post-or-internpost").hide();
+            $("#delivery-with-mail-view").show();
         });
         $("#optionsRadios2").click(function () {
             $("#delivery-with-mail-view").hide();
+            $("#delivery-to-circulation").hide();
             $("#delivery-with-post-or-internpost").show();
         });
         $("#optionsRadios3").click(function () {
             $("#delivery-with-mail-view").hide();
+            $("#delivery-to-circulation").hide();
             $("#delivery-with-post-or-internpost").show();
+        });
+        $("#optionsRadios4").click(function () {
+            $("#delivery-with-mail-view").hide();
+            $("#delivery-with-post-or-internpost").hide();
+            $("#delivery-to-circulation").show();
         });
     });
 
@@ -243,6 +315,21 @@ Vänliga hälsningar / Regards
                 newFollowUpDate: $('#followUpDate').val(),
                 attachments: attachmentIds
             }, $('#log-message').val());
+        }
+        else if($('input:radio[name=deliveryOptions]:checked').val() == "infodisken")
+        {
+            console.log("start func");
+            setOrderItemDeliveryReceived(@Model.OrderItem.NodeId, $('#bookId').val(), $('#dueDate').val(), $('#deliveryInformation').val(),
+                {
+                nodeId: @Model.OrderItem.NodeId,
+                recipientEmail: $('#recipientEmail').val().toString().trim(),
+                recipientName: $('#recipientName').val(),
+                message: $('#message').val(),
+                newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Vänthyllan")).Id,
+                newCancellationReasonId: -1,
+                newPurchasedMaterialId: -1,
+                newFollowUpDate: $('#dueDate').val()
+            });
         }
         else
         {

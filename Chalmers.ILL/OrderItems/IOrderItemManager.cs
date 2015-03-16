@@ -45,6 +45,7 @@ namespace Chalmers.ILL.OrderItems
         bool SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
         bool SetOrderItemCancellationReasonInternal(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true);
         bool SetOrderItemDeliveryLibraryInternal(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true);
+        bool SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string deliveryInformation, bool doReindex = true, bool doSignal = true);
         bool SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
         bool SetOrderItemPurchasedMaterialInternal(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true);
         bool SetOrderItemStatusInternal(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true);

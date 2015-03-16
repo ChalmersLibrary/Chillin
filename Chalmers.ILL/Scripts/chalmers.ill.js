@@ -499,7 +499,7 @@ function applyLibraryListFilter(filter, animate)
 }
 function updateFilterButtonCounters()
 {
-    var numberOfStatuses = 10;
+    var numberOfStatuses = 11;
 
     // TODO: AAAAAHHHH!! MY EYES!!! Rewrite this method.
     if ($("#library01-button").hasClass("active")) {
@@ -599,7 +599,8 @@ function loadOrderItemSummary(id)
                      json.StatusPrevalue.indexOf("06") == 0 || 
                      json.StatusPrevalue.indexOf("07") == 0 || 
                      json.StatusPrevalue.indexOf("08") == 0 ||
-                     json.StatusPrevalue.indexOf("10") == 0) {
+                     json.StatusPrevalue.indexOf("10") == 0 ||
+                     json.StatusPrevalue.indexOf("11") == 0) {
                 $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-info status-" + json.StatusPrevalue.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
             else {
@@ -724,6 +725,26 @@ function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
             loadOrderItemDetails(node);
         }
         else {
+            alert(json.Message);
+        }
+        unlockScreen();
+    }).error(unlockScreen);
+}
+
+function setOrderItemDeliveryReceived(node, bookId, dueDate, deliveryInformation, maildata) {
+    console.log("Start internal function!");
+    lockScreen();
+    console.log("Screen locked");
+    $.getJSON("/umbraco/surface/OrderItemDeliveryLibrarySurface/SetOrderItemDeliveryReceived?orderNodeId=" + node + "&bookId=" + bookId + "&dueDate=" + dueDate + "&deliveryInformation=" + deliveryInformation, function (json) {
+        if (json.Success) {
+            console.log("FAN!")
+            sendMailToPatron(maildata);
+            loadOrderItemDetails(node);
+        }
+        else {
+            console.log(bookId);
+            console.log(dueDate);
+            console.log(deliveryInformation);
             alert(json.Message);
         }
         unlockScreen();

@@ -58,6 +58,10 @@ namespace Chalmers.ILL.Models
         public string DrmWarning { get; set; }
         public bool DeliveryLibrarySameAsHomeLibrary { get; set; }
 
+        public DateTime DueDate { get; set; }
+        public string BookId { get; set; }
+        public string DeliveryInformation { get; set; }
+
         public List<LogItem> LogItemsList { get; set; }
         public List<OrderAttachment> AttachmentList { get; set; }
         public SierraModel SierraInfo { get; set; }
