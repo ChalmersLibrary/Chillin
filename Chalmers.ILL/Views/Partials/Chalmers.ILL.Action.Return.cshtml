@@ -3,12 +3,13 @@
 
 }
 
-<div class="action-header">Retur</div>
+<div class="action-header">Returnering till utlånande bibliotek</div>
 
 <form class="form" role="form" onsubmit="return false;">
     <div class="row">
         <div class="col-md-6">
-            <p>TODO: Visa information om utlånande bibliotek här.</p>
+            <h4>@Model.OrderItem.ProviderName</h4>
+            <p>@(String.IsNullOrEmpty(Model.OrderItem.DeliveryInformation) ? "Ingen leverantörsinformation tillgänglig." : @Model.OrderItem.DeliveryInformation)</p>
         </div>
     </div>
     <div class="row">
