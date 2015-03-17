@@ -135,6 +135,11 @@ namespace Chalmers.ILL.OrderItems
                 orderItem.PurchasedMaterial = OrderPurchasedMaterialId;
                 orderItem.PurchasedMaterialPrevalue = OrderPurchasedMaterialId != -1 ? umbraco.library.GetPreValueAsString(OrderPurchasedMaterialId) : "";
 
+                // Set due date 200 years into the future if we haven't got any due date.
+                orderItem.DueDate = contentNode.Fields.GetValueString("DueDate") == "" ? DateTime.Now.AddYears(200) : 
+                    DateTime.ParseExact(contentNode.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                orderItem.BookId = contentNode.Fields.GetValueString("BookId");
+
                 // List of LogItems bound to this OrderItem
                 //orderItem.LogItemsList = Logging.GetLogItems(nodeId);
                 if (!String.IsNullOrEmpty(contentNode.Fields.GetValueString("Log")))
