@@ -1,6 +1,55 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.Page.ChalmersILLSettingsPageModel>
 @{
     Layout = "ChalmersILL.cshtml";
 }
 
-@Umbraco.RenderMacro("Chalmers.ILL.Settings")
+@using Chalmers.ILL.Models
+
+<h2>Inställningar</h2>
+
+<div class="row">
+    <div class="col-lg-4">
+        <ul class="nav nav-pills setting-buttons-container">
+            <li role="presentation" class="active"><a href="#" onclick="showPasswordSettings(this); event.preventDefault();">Lösenord</a></li>
+            <li role="presentation"><a href="#" onclick="showTemplateSettings(this); event.preventDefault();">Mallar</a></li>
+        </ul>
+    </div>
+</div>
+
+<div id="loading-partial-settings-view" style="display: none;">
+    <p>Laddar vy...</p>
+</div>
+
+<div id="partial-settings-view" class="row">
+    @{
+        Html.RenderPartial("~/Views/Partials/Chalmers.ILL.ChangePassword.cshtml", new PasswordModel());
+    }
+</div>
+
+<script type="text/javascript">
+    function showPasswordSettings(btn) {
+        clearActiveSettingAndSetNewActiveButton(btn);
+
+        renderSettingsPartialView("/umbraco/surface/PasswordSurface/RenderChangePasswordAction");
+    }
+
+    function showTemplateSettings(btn) {
+        clearActiveSettingAndSetNewActiveButton(btn);
+
+        renderSettingsPartialView("/umbraco/surface/TemplatesSurface/RenderEditTemplatesAction");
+    }
+
+    function clearActiveSettingAndSetNewActiveButton(clickedButton) {
+        $(".setting-buttons-container > li").removeClass("active");
+        $(clickedButton).parent().addClass("active");
+    }
+
+    function renderSettingsPartialView(url) {
+        $("#loading-partial-settings-view").show();
+        $("#partial-settings-view").html("").show().load(url,
+            function (responseText, textStatus, req) {
+                $("#loading-partial-settings-view").hide();
+            }
+        );
+    }
+</script>

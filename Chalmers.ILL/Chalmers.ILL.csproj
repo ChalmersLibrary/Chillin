@@ -350,7 +350,6 @@
     <Content Include="Views\Partials\Chalmers.ILL.Action.Mail.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.ChangePassword.cshtml" />
     <Content Include="Views\ChalmersILLSettingsPage.cshtml" />
-    <Content Include="Views\MacroPartials\Chalmers.ILL.Settings.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.LogEntry.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.Delivery.cshtml" />
     <Content Include="Views\ChalmersILLStatisticsPage.cshtml" />
