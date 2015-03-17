@@ -731,11 +731,11 @@ function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
     }).error(unlockScreen);
 }
 
-function setOrderItemDeliveryReceived(node, bookId, dueDate, deliveryInformation, maildata) {
+function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata) {
     console.log("Start internal function!");
     lockScreen();
     console.log("Screen locked");
-    $.getJSON("/umbraco/surface/OrderItemDeliveryLibrarySurface/SetOrderItemDeliveryReceived?orderNodeId=" + node + "&bookId=" + bookId + "&dueDate=" + dueDate + "&deliveryInformation=" + deliveryInformation, function (json) {
+    $.getJSON("/umbraco/surface/OrderItemDeliveryLibrarySurface/SetOrderItemDeliveryReceived?orderNodeId=" + node + "&bookId=" + bookId + "&dueDate=" + dueDate + "&providerInformation=" + providerInformation, function (json) {
         if (json.Success) {
             console.log("FAN!")
             sendMailToPatron(maildata);
@@ -744,7 +744,7 @@ function setOrderItemDeliveryReceived(node, bookId, dueDate, deliveryInformation
         else {
             console.log(bookId);
             console.log(dueDate);
-            console.log(deliveryInformation);
+            console.log(providerInformation);
             alert(json.Message);
         }
         unlockScreen();

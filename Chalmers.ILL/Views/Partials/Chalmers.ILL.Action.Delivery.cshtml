@@ -153,8 +153,8 @@ Vänliga hälsningar / Regards
                 </div>
             </div>
             <div class="form-group">
-                <label for="deliveryInformation">Leverantörsinformation</label><br />
-                <textarea class="form-control" cols="80" rows="10" id="deliveryInformation" name="deliveryInformation">
+                <label for="providerInformation">Leverantörsinformation</label><br />
+                <textarea class="form-control" cols="80" rows="10" id="providerInformation" name="providerInformation">
 @Model.OrderItem.ProviderInformation
                 </textarea>
             </div>
@@ -319,7 +319,7 @@ Vänliga hälsningar / Regards
         else if($('input:radio[name=deliveryOptions]:checked').val() == "infodisken")
         {
             console.log("start func");
-            setOrderItemDeliveryReceived(@Model.OrderItem.NodeId, $('#bookId').val(), $('#dueDate').val(), $('#deliveryInformation').val(),
+            setOrderItemDeliveryReceived(@Model.OrderItem.NodeId, $('#bookId').val(), $('#dueDate').val(), $('#providerInformation').val(),
                 {
                 nodeId: @Model.OrderItem.NodeId,
                 recipientEmail: $('#recipientEmail').val().toString().trim(),

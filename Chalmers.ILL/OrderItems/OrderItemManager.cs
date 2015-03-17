@@ -209,7 +209,7 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
             content.SetValue("dueDate", "");
             content.SetValue("bookId", "");
-            content.SetValue("deliveryInformation", "");
+            content.SetValue("providerInformation", "");
 
             if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
             {
