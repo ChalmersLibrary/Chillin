@@ -417,7 +417,9 @@
     <Compile Include="Models\PartialPage\ChalmersILLActionMailModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionProviderModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionReturnModel.cs" />
-    <Compile Include="Models\TemplatesModel.cs" />
+    <Compile Include="Models\ResultResponseWithStringData.cs" />
+    <Compile Include="Models\Template.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLEditTemplatesModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLOrderItemModel.cs" />
     <Compile Include="Models\StatisticsVariable.cs" />
     <Compile Include="Models\UmbracoDropdownListNtextDataType.cs" />
@@ -454,6 +456,9 @@
     <Compile Include="Statistics\IStatisticsCalculator.cs" />
     <Compile Include="Statistics\IStatisticsManager.cs" />
     <Compile Include="Mail\ExchangeMailWebApi.cs" />
+    <Compile Include="Templates\ITemplateService.cs" />
+    <Compile Include="Templates\TemplateService.cs" />
+    <Compile Include="Templates\TemplateServiceException.cs" />
     <Compile Include="UmbracoApi\UmbracoWrapper.cs" />
     <Compile Include="UmbracoApi\IUmbracoWrapper.cs" />
     <Compile Include="Utilities\Helpers.cs" />
