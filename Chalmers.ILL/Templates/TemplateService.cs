@@ -19,6 +19,19 @@ namespace Chalmers.ILL.Templates
             _templateSearcher = templateSearcher;
         }
 
+        public string GetTemplateData(string nodeName)
+        {
+            var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+            var results = _templateSearcher.Search(searchCriteria.NodeName(nodeName).Compile());
+
+            if (results.Count() > 0)
+            {
+                return results.First().Fields["Data"];
+            }
+
+            throw new TemplateServiceException("Hittade ingen mall med nodnamn=" + nodeName + ".");
+        }
+
         public string GetTemplateData(int nodeId)
         {
             var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
