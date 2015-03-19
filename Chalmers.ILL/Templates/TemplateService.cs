@@ -81,6 +81,8 @@ namespace Chalmers.ILL.Templates
                 list.Add(template);
             }
 
+            list.Sort((x1, x2) => x1.Description.CompareTo(x2.Description)); 
+
             return list;
         }
     }
