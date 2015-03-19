@@ -28,6 +28,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var pageModel = new ChalmersILLEditTemplatesModel();
 
             _templateService.PopulateTemplateList(pageModel.Templates);
+            PopulateAvailableOrderItemProperties(pageModel.AvailableOrderItemProperties);
 
             return PartialView("Chalmers.ILL.EditTemplates", pageModel);
         }
@@ -72,5 +73,19 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             return Json(json, JsonRequestBehavior.AllowGet);
         }
+
+        #region Private methods.
+
+        private List<string> PopulateAvailableOrderItemProperties(List<string> list)
+        {
+            foreach (var property in typeof(OrderItemModel).GetProperties())
+            {
+                list.Add(property.Name);
+            }
+
+            return list;
+        }
+
+        #endregion
     }
 }

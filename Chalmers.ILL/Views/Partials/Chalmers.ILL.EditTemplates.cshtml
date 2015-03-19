@@ -24,6 +24,12 @@
 </div>
 <div class="col-md-6">
     <div class="form-group">
+    @foreach (var property in Model.AvailableOrderItemProperties)
+    {
+        <button class="btn btn-default btn-xs" onclick="addTextAtSelection('{{@property}}');">@property</button>
+    }
+    </div>
+    <div class="form-group">
         <textarea class="form-control" rows="24" id="template-data" name="template-data">@Model.Templates.First().Data</textarea>
     </div>
     <button class="btn btn-success" onclick="saveTemplate();">Spara ändringar</button>
@@ -41,6 +47,12 @@
                 alert(json.Message);
             }
         });
+    }
+
+    function addTextAtSelection(txt) {
+        var textBox = $("#template-data");
+        var cursorPos = textBox[0].selectionStart;
+        textBox.val(textBox.val().substring(0, cursorPos) + txt + textBox.val().substring(cursorPos));
     }
 
     function saveTemplate() {

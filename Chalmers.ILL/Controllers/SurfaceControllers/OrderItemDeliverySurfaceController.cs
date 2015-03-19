@@ -48,8 +48,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             _umbraco.PopulateModelWithAvailableValues(pageModel);
 
-            pageModel.ArticleDeliveryByMailTemplate = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate");
-            pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate");
+            pageModel.ArticleDeliveryByMailTemplate = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", pageModel.OrderItem);
+            pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate", pageModel.OrderItem);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Delivery", pageModel);
