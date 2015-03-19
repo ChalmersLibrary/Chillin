@@ -402,7 +402,9 @@
     <Compile Include="Controllers\SurfaceControllers\TemplatesSurfaceController.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Logging\IInternalDbLogger.cs" />
+    <Compile Include="Mail\AutomaticMailEngine.cs" />
     <Compile Include="Mail\ChalmersOrderItemsMailSource.cs" />
+    <Compile Include="Mail\IAutomaticMailEngine.cs" />
     <Compile Include="Mail\IExchangeMailWebApi.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
     <Compile Include="Models\OrderItemPageModelBase.cs" />
