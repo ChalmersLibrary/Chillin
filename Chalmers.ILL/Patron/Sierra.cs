@@ -12,25 +12,54 @@ namespace Chalmers.ILL.Patron
 {
     public class Sierra : IPatronDataProvider, IDisposable
     {
-        private NpgsqlConnection connection; 
+        private string _connectionString;
+        private NpgsqlConnection connection;
 
-        public void Connect(string connectionString) {
-            connection = new NpgsqlConnection(connectionString);
-            connection.Open();
+        public Sierra(string connectionString)
+        {
+            _connectionString = connectionString;
+            Connect();
         }
 
-        public void Disconnect()
+        public IPatronDataProvider Connect() {
+            connection = new NpgsqlConnection(_connectionString);
+            connection.Open();
+            return this; // For call chaining
+        }
+
+        public IPatronDataProvider Disconnect()
         {
             connection.Close();
+            return this; // For call chaining
         }
 
         public SierraModel GetPatronInfoFromLibraryCardNumber(string barcode)
         {
             SierraModel model = new SierraModel();
 
-            PopulateBasicPatronInfoFromLibraryCardNumber(barcode, model);
+            var runCount = 0;
+            var success = false;
 
-            PopulatePatronAddressInfoUsingExistingModel(model);
+            while (runCount < 2 && !success)
+            {
+                runCount++;
+
+                try
+                {
+                    PopulateBasicPatronInfoFromLibraryCardNumber(barcode, model);
+                    PopulatePatronAddressInfoUsingExistingModel(model);
+                    success = true;
+                }
+                catch (Exception)
+                {
+                    // If we fail the first time we reconnect and try to fetch the information one more time.
+                    if (runCount < 2)
+                    {
+                        Disconnect();
+                        Connect();
+                    }
+                }
+            }
 
             return model;
         }
@@ -38,32 +67,49 @@ namespace Chalmers.ILL.Patron
         public SierraModel GetPatronInfoFromLibraryCardNumberOrPersonnummer(string barcode, string pnr) 
         {
             SierraModel model = new SierraModel();
-            try
+
+            var runCount = 0;
+            var success = false;
+
+            while (runCount < 2 && !success)
             {
-                PopulateBasicPatronInfoFromPersonnummer(barcode, model);
-                if (String.IsNullOrEmpty(model.id))
+                runCount++;
+
+                try
                 {
-                    if (barcode.Contains("-"))
+                    PopulateBasicPatronInfoFromPersonnummer(barcode, model);
+                    if (String.IsNullOrEmpty(model.id))
                     {
-                        PopulateBasicPatronInfoFromPersonnummer(barcode.Replace("-", ""), model);
+                        if (barcode.Contains("-"))
+                        {
+                            PopulateBasicPatronInfoFromPersonnummer(barcode.Replace("-", ""), model);
+                        }
+                        else
+                        {
+                            string pnrdash = barcode.Substring(0, 6) + "-" + barcode.Substring(6, 4);
+                            // Check if we have got a "personnummer" instead of a library card number?
+                            PopulateBasicPatronInfoFromPersonnummer(pnrdash, model);
+                        }
                     }
-                    else
+
+                    if (!String.IsNullOrEmpty(model.id))
                     {
-                        string pnrdash = barcode.Substring(0, 6) + "-" + barcode.Substring(6, 4);
-                        // Check if we have got a "personnummer" instead of a library card number?
-                        PopulateBasicPatronInfoFromPersonnummer(pnrdash, model);
-                    }                    
+                        PopulatePatronAddressInfoUsingExistingModel(model);
+                    }
+
+                    success = true;
+                }
+                catch (Exception)
+                {
+                    // If we fail the first time we reconnect and try to fetch the information one more time.
+                    if (runCount < 2)
+                    {
+                        Disconnect();
+                        Connect();
+                    }
                 }
             }
-            catch (Exception)
-            {
-                // NOP
-            }
 
-            if (!String.IsNullOrEmpty(model.id))
-            {
-                PopulatePatronAddressInfoUsingExistingModel(model);
-            }
             return model;
         }
 
@@ -89,9 +135,9 @@ namespace Chalmers.ILL.Patron
         private void PopulateBasicPatronInfoFromLibraryCardNumber(string barcode, SierraModel model)
         {
             using (NpgsqlCommand command = new NpgsqlCommand("SELECT pv.id, pv.barcode, pv.ptype_code, vv.field_content as email, first_name, last_name, home_library_code, mblock_code from sierra_view.patron_record_fullname fn, sierra_view.patron_view pv, sierra_view.varfield_view vv where pv.id=fn.patron_record_id and pv.id=vv.record_id and vv.varfield_type_code='z' and lower(pv.barcode)=:barcode", connection))
-                {
-                    command.Parameters.Add(new NpgsqlParameter("barcode", NpgsqlTypes.NpgsqlDbType.Text));
-                    command.Parameters[0].Value = barcode.ToLower();
+            {
+                command.Parameters.Add(new NpgsqlParameter("barcode", NpgsqlTypes.NpgsqlDbType.Text));
+                command.Parameters[0].Value = barcode.ToLower();
 
                 using (NpgsqlDataReader dr = command.ExecuteReader())
                 {
@@ -112,7 +158,6 @@ namespace Chalmers.ILL.Patron
 
         private void PopulateBasicPatronInfoFromPersonnummer(string pnr, SierraModel model)
         {
-
             using (NpgsqlCommand command = new NpgsqlCommand("SELECT pv.id, pv.barcode, pv.ptype_code, vv.field_content as email, first_name, last_name, home_library_code, mblock_code from sierra_view.patron_record_fullname fn, sierra_view.patron_view pv, sierra_view.varfield_view vv where pv.id=fn.patron_record_id and pv.id=vv.record_id and vv.varfield_type_code='z' and pv.id=(select record_id from sierra_view.varfield_view vs where lower(vs.field_content)=:barcode)", connection))
             {
                 command.Parameters.Add(new NpgsqlParameter("barcode", NpgsqlTypes.NpgsqlDbType.Text));
@@ -120,7 +165,7 @@ namespace Chalmers.ILL.Patron
 
                 using (NpgsqlDataReader dr = command.ExecuteReader())
                 {
-                while (dr.Read())
+                    while (dr.Read())
                     {
                         model.id = dr["id"].ToString();
                         model.barcode = dr["barcode"].ToString();
@@ -137,32 +182,32 @@ namespace Chalmers.ILL.Patron
 
         private void PopulatePatronAddressInfoUsingExistingModel(SierraModel model)
         {
-                using (NpgsqlCommand newcommand = new NpgsqlCommand("SELECT patron_record_address_type_id, addr1, addr2, addr3, village, city, region, postal_code, country from sierra_view.patron_record_address where patron_record_id=:record_id order by patron_record_address_type_id", connection))
+            using (NpgsqlCommand newcommand = new NpgsqlCommand("SELECT patron_record_address_type_id, addr1, addr2, addr3, village, city, region, postal_code, country from sierra_view.patron_record_address where patron_record_id=:record_id order by patron_record_address_type_id", connection))
+            {
+                newcommand.Parameters.Add(new NpgsqlParameter("record_id", NpgsqlTypes.NpgsqlDbType.Bigint));
+                newcommand.Parameters[0].Value = model.id;
+
+                model.adress = new List<SierraAddressModel>();
+
+                using (NpgsqlDataReader adr = newcommand.ExecuteReader())
                 {
-                    newcommand.Parameters.Add(new NpgsqlParameter("record_id", NpgsqlTypes.NpgsqlDbType.Bigint));
-                    newcommand.Parameters[0].Value = model.id;
-
-                    model.adress = new List<SierraAddressModel>();
-
-                    using (NpgsqlDataReader adr = newcommand.ExecuteReader())
+                    while (adr.Read())
                     {
-                        while (adr.Read())
+                        model.adress.Add(new SierraAddressModel()
                         {
-                            model.adress.Add(new SierraAddressModel()
-                            {
-                                addresscount = adr["patron_record_address_type_id"].ToString(),
-                                addr1 = adr["addr1"].ToString(),
-                                addr2 = adr["addr2"].ToString(),
-                                addr3 = adr["addr3"].ToString(),
-                                village = adr["village"].ToString(),
-                                city = adr["city"].ToString(),
-                                region = adr["region"].ToString(),
-                                postal_code = adr["postal_code"].ToString(),
-                                country = adr["country"].ToString()
-                            });
-                        }
+                            addresscount = adr["patron_record_address_type_id"].ToString(),
+                            addr1 = adr["addr1"].ToString(),
+                            addr2 = adr["addr2"].ToString(),
+                            addr3 = adr["addr3"].ToString(),
+                            village = adr["village"].ToString(),
+                            city = adr["city"].ToString(),
+                            region = adr["region"].ToString(),
+                            postal_code = adr["postal_code"].ToString(),
+                            country = adr["country"].ToString()
+                        });
+                    }
+                }
             }
-        }
         }
     }
 }

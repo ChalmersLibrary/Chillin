@@ -35,6 +35,7 @@ namespace Chalmers.ILL.Mail
         IInternalDbLogger _internalDbLogger;
         INotifier _notifier;
         IMediaService _mediaService;
+        IPatronDataProvider _patronDataProvider;
 
         private SourcePollingResult _result;
         public SourcePollingResult Result
@@ -46,13 +47,14 @@ namespace Chalmers.ILL.Mail
         }
 
         public ChalmersOrderItemsMailSource(IExchangeMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager,
-            IInternalDbLogger internalDbLogger, INotifier notifier, IMediaService mediaService)
+            IInternalDbLogger internalDbLogger, INotifier notifier, IMediaService mediaService, IPatronDataProvider patronDataProvider)
         {
             _exchangeMailWebApi = exchangeMailWebApi;
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;
             _notifier = notifier;
             _mediaService = mediaService;
+            _patronDataProvider = patronDataProvider;
         }
 
         public SourcePollingResult Poll()
@@ -140,21 +142,17 @@ namespace Chalmers.ILL.Mail
                 // Get SierraInfo to the list
                 try
                 {
-                    using (Sierra s = new Sierra())
+                    int indexet = 0;
+
+                    foreach (MailQueueModel item in list)
                     {
-                        s.Connect(ConfigurationManager.AppSettings["sierraConnectionString"]);
-                        int indexet = 0;
-
-                        foreach (MailQueueModel item in list)
+                        // New order received from someone
+                        if (item.Type == MailQueueType.NEW)
                         {
-                            // New order received from someone
-                            if (item.Type == MailQueueType.NEW)
-                            {
-                                list[indexet].SierraPatronInfo = s.GetPatronInfoFromLibraryCardNumberOrPersonnummer(item.PatronCardNo, item.PatronCardNo);
-                            }
-
-                            indexet++;
+                            list[indexet].SierraPatronInfo = _patronDataProvider.GetPatronInfoFromLibraryCardNumberOrPersonnummer(item.PatronCardNo, item.PatronCardNo);
                         }
+
+                        indexet++;
                     }
                 }
                 catch (Exception e)

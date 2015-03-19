@@ -20,6 +20,7 @@ namespace Chalmers.ILL.Providers
         IUmbracoWrapper _umbraco;
         IOrderItemManager _orderItemManager;
         IInternalDbLogger _internalDbLogger;
+        IPatronDataProvider _patronDataProvider;
 
         private List<OrderItemSeedModel> _seeds;
         private SourcePollingResult _result;
@@ -31,11 +32,13 @@ namespace Chalmers.ILL.Providers
             }
         }
 
-        public LibrisOrderItemsSource(IUmbracoWrapper umbraco, IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        public LibrisOrderItemsSource(IUmbracoWrapper umbraco, IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
+            IPatronDataProvider patronDataProvider)
         {
             _umbraco = umbraco;
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;
+            _patronDataProvider = patronDataProvider;
         }
 
         public SourcePollingResult Poll()
@@ -118,15 +121,9 @@ namespace Chalmers.ILL.Providers
         {
             try
             {
-                // TODO: Inject Sierra resources instead.
-                using (Sierra s = new Sierra())
+                foreach (var seed in _seeds)
                 {
-                    s.Connect(ConfigurationManager.AppSettings["sierraConnectionString"]);
-
-                    foreach (var seed in _seeds)
-                    {
-                        seed.SierraPatronInfo = s.GetPatronInfoFromLibraryCardNumberOrPersonnummer(seed.PatronCardNumber, seed.PatronCardNumber);
-                    }
+                    seed.SierraPatronInfo = _patronDataProvider.GetPatronInfoFromLibraryCardNumberOrPersonnummer(seed.PatronCardNumber, seed.PatronCardNumber);
                 }
             }
             catch (Exception e)

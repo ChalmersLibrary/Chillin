@@ -13,6 +13,8 @@ using Umbraco.Core;
 using Umbraco.Core.Services;
 using Chalmers.ILL.Templates;
 using Examine;
+using Chalmers.ILL.Patron;
+using System.Configuration;
 
 namespace Chalmers.ILL
 {
@@ -62,6 +64,7 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
             container.RegisterInstance(typeof(ITemplateService), new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher));
             container.RegisterInstance(typeof(IAutomaticMailEngine), new AutomaticMailEngine(orderItemsSearcher));
+            container.RegisterInstance(typeof(IPatronDataProvider), new Sierra(ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
         }
