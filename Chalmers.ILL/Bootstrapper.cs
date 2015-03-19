@@ -49,6 +49,7 @@ namespace Chalmers.ILL
 
             // Fetch all needed Examine search providers.
             var templatesSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLTemplatesSearcher"];
+            var orderItemsSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
 
             // Hook up everything that is needed for us to function.
             container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
@@ -60,7 +61,7 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
             container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
             container.RegisterInstance(typeof(ITemplateService), new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher));
-            container.RegisterInstance(typeof(IAutomaticMailEngine), new AutomaticMailEngine());
+            container.RegisterInstance(typeof(IAutomaticMailEngine), new AutomaticMailEngine(orderItemsSearcher));
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
         }
