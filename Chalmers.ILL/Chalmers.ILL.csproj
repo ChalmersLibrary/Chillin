@@ -330,6 +330,7 @@
     <Content Include="UserControls\dummy.txt" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.Return.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.EditTemplates.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.Claim.cshtml" />
     <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />
     <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
@@ -372,6 +373,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemClaimSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemReturnSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLLogoutPageController.cs" />
@@ -412,6 +414,7 @@
     <Compile Include="Models\Page\ChalmersILLStartPageModel.cs" />
     <Compile Include="Models\Page\ChalmersILLStatisticsPageModel.cs" />
     <Compile Include="Models\KeyValue.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLActionClaimModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionDeliveryModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionLogEntryModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionMailModel.cs" />
