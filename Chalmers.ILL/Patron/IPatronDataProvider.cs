@@ -7,10 +7,12 @@ using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.Patron
 {
-    interface IPatronDataProvider
+    public interface IPatronDataProvider
     {
-        void Connect(string connectionString);
-        void Disconnect();
+        IPatronDataProvider Connect();
+        IPatronDataProvider Disconnect();
+
+        SierraModel GetPatronInfoFromLibraryCardNumber(string barcode);
         SierraModel GetPatronInfoFromLibraryCardNumberOrPersonnummer(string barcode, string pnr);
     }
 }

@@ -1007,6 +1007,33 @@ function loadDeliveryAction(id) {
     );
 }
 
+function loadClaimAction(id) {
+    $("#loading-partial-view").show();
+    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemClaimSurface/RenderClaimAction?nodeId=' + id,
+        function (responseText, textStatus, req) {
+            $("#loading-partial-view").hide();
+        }
+    );
+}
+
+function loadProviderReturnDateAction(id) {
+    $("#loading-partial-view").show();
+    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemProviderReturnDateSurface/RenderProviderReturnDateAction?nodeId=' + id,
+        function (responseText, textStatus, req) {
+            $("#loading-partial-view").hide();
+        }
+    );
+}
+
+function loadPatronReturnDateAction(id) {
+    $("#loading-partial-view").show();
+    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemPatronReturnDateSurface/RenderPatronReturnDateAction?nodeId=' + id,
+        function (responseText, textStatus, req) {
+            $("#loading-partial-view").hide();
+        }
+    );
+}
+
 function loadReturnAction(id) {
     $("#loading-partial-view").show();
     $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemReturnSurface/RenderReturnAction?nodeId=' + id,

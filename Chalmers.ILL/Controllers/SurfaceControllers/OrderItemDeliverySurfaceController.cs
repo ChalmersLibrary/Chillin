@@ -14,6 +14,7 @@ using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Logging;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Models.PartialPage;
+using Chalmers.ILL.Templates;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -24,13 +25,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IOrderItemManager _orderItemManager;
         IInternalDbLogger _internalDbLogger;
         IUmbracoWrapper _umbraco;
+        ITemplateService _templateService;
 
         public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
-            IUmbracoWrapper umbraco)
+            IUmbracoWrapper umbraco, ITemplateService templateService)
         {
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;
             _umbraco = umbraco;
+            _templateService = templateService;
         }
 
         /// <summary>
@@ -45,8 +48,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             _umbraco.PopulateModelWithAvailableValues(pageModel);
 
+            pageModel.ArticleDeliveryByMailTemplate = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", pageModel.OrderItem);
+            pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate", pageModel.OrderItem);
+
             // The return format depends on the client's Accept-header
-            // return PartialView("Chalmers.ILL.Action.Mail", orderItem);
             return PartialView("Chalmers.ILL.Action.Delivery", pageModel);
         }
 

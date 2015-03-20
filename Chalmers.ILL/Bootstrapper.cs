@@ -11,6 +11,10 @@ using Chalmers.ILL.Mail;
 using Chalmers.ILL.UmbracoApi;
 using Umbraco.Core;
 using Umbraco.Core.Services;
+using Chalmers.ILL.Templates;
+using Examine;
+using Chalmers.ILL.Patron;
+using System.Configuration;
 
 namespace Chalmers.ILL
 {
@@ -36,6 +40,7 @@ namespace Chalmers.ILL
 
         public static void RegisterTypes(IUnityContainer container)
         {
+            // Connect instances that depend on eachother
             var notifier = new Notifier();
             var internalDbLogger = new InternalDbLogger();
             var orderItemManager = new OrderItemManager();
@@ -44,6 +49,11 @@ namespace Chalmers.ILL
             orderItemManager.SetNotifier(notifier);
             orderItemManager.SetInternalDbLogger(internalDbLogger);
 
+            // Fetch all needed Examine search providers.
+            var templatesSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLTemplatesSearcher"];
+            var orderItemsSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
+
+            // Hook up everything that is needed for us to function.
             container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
             container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
             container.RegisterInstance(typeof(IUmbracoWrapper), new UmbracoWrapper());
@@ -52,6 +62,11 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
             container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
+            container.RegisterInstance(typeof(ITemplateService), new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher));
+            container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(orderItemsSearcher));
+            container.RegisterInstance(typeof(IPatronDataProvider), new Sierra(ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
+            container.RegisterInstance<ISearcher>("TemplatesSearcher", templatesSearcher);
+            container.RegisterInstance<ISearcher>("OrderItemsSearcher", orderItemsSearcher);
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
         }

@@ -329,6 +329,10 @@
     <Content Include="Scripts\dummy.txt" />
     <Content Include="UserControls\dummy.txt" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.Return.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.EditTemplates.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.Claim.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.ProviderReturnDate.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.PatronReturnDate.cshtml" />
     <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />
     <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
@@ -349,7 +353,6 @@
     <Content Include="Views\Partials\Chalmers.ILL.Action.Mail.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.ChangePassword.cshtml" />
     <Content Include="Views\ChalmersILLSettingsPage.cshtml" />
-    <Content Include="Views\MacroPartials\Chalmers.ILL.Settings.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.LogEntry.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.Delivery.cshtml" />
     <Content Include="Views\ChalmersILLStatisticsPage.cshtml" />
@@ -372,6 +375,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemClaimSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemPatronReturnDateSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemProviderReturnDateSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemReturnSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLLogoutPageController.cs" />
@@ -397,9 +403,12 @@
     <Compile Include="Controllers\SurfaceControllers\SystemSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\StatisticsSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\TemplatesSurfaceController.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Logging\IInternalDbLogger.cs" />
+    <Compile Include="Mail\AutomaticMailSendingEngine.cs" />
     <Compile Include="Mail\ChalmersOrderItemsMailSource.cs" />
+    <Compile Include="Mail\IAutomaticMailSendingEngine.cs" />
     <Compile Include="Mail\IExchangeMailWebApi.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
     <Compile Include="Models\OrderItemPageModelBase.cs" />
@@ -411,11 +420,17 @@
     <Compile Include="Models\Page\ChalmersILLStartPageModel.cs" />
     <Compile Include="Models\Page\ChalmersILLStatisticsPageModel.cs" />
     <Compile Include="Models\KeyValue.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLActionClaimModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionDeliveryModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionLogEntryModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionMailModel.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLActionPatronReturnDateModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionProviderModel.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLActionProviderReturnDateModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionReturnModel.cs" />
+    <Compile Include="Models\ResultResponseWithStringData.cs" />
+    <Compile Include="Models\Template.cs" />
+    <Compile Include="Models\PartialPage\ChalmersILLEditTemplatesModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLOrderItemModel.cs" />
     <Compile Include="Models\StatisticsVariable.cs" />
     <Compile Include="Models\UmbracoDropdownListNtextDataType.cs" />
@@ -452,6 +467,9 @@
     <Compile Include="Statistics\IStatisticsCalculator.cs" />
     <Compile Include="Statistics\IStatisticsManager.cs" />
     <Compile Include="Mail\ExchangeMailWebApi.cs" />
+    <Compile Include="Templates\ITemplateService.cs" />
+    <Compile Include="Templates\TemplateService.cs" />
+    <Compile Include="Templates\TemplateServiceException.cs" />
     <Compile Include="UmbracoApi\UmbracoWrapper.cs" />
     <Compile Include="UmbracoApi\IUmbracoWrapper.cs" />
     <Compile Include="Utilities\Helpers.cs" />

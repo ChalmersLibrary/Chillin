@@ -21,6 +21,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _memberInfoManager = memberInfoManager;
         }
 
+        [HttpGet]
+        public ActionResult RenderChangePasswordAction()
+        {
+            return PartialView("Chalmers.ILL.ChangePassword", new PasswordModel());
+        }
+
         [HttpPost]
         public ActionResult ChangePassword(Models.PasswordModel model)
         {

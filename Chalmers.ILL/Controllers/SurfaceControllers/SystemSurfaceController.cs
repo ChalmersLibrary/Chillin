@@ -12,6 +12,7 @@ using Chalmers.ILL.SignalR;
 using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.UmbracoApi;
+using Microsoft.Practices.Unity;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -21,7 +22,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public bool EnableLogging { get; set; }
     }
 
-    /* Get System Info */
     [MemberAuthorize(AllowType = "Standard")]
     public class SystemSurfaceController : SurfaceController
     {
@@ -31,10 +31,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IExchangeMailWebApi _exchangeMailWebApi;
         IUmbracoWrapper _dataTypes;
         ISourceFactory _sourceFactory;
+        ISearcher _orderItemsSearcher;
+        IAutomaticMailSendingEngine _automaticMailSendingEngine;
 
         public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, 
             IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes,
-            ISourceFactory sourceFactory)
+            ISourceFactory sourceFactory, [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher, 
+            IAutomaticMailSendingEngine automaticMailSendingEngine)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;
@@ -42,6 +45,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _exchangeMailWebApi = exchangeMailWebApi;
             _dataTypes = dataTypes;
             _sourceFactory = sourceFactory;
+            _orderItemsSearcher = orderItemsSearcher;
+            _automaticMailSendingEngine = automaticMailSendingEngine;
         }
         
         [HttpGet]
@@ -58,7 +63,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
         /// <summary>
         /// Updates the system.
-        /// Checks if statuses should be changed, if something should be notified, polls sources, etc.
+        /// Checks if statuses should be changed, if something should be notified, polls sources, sends out automatic mails, etc.
         /// </summary>
         /// <remarks>Should be called regularly.</remarks>
         /// <returns>Json</returns>
@@ -69,9 +74,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                convertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus();
+                _automaticMailSendingEngine.SendOutMailsThatAreDue();
 
-                signalExpiredFollowUpDates();
+                ConvertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus();
+
+                SignalExpiredFollowUpDates();
 
                 foreach (var source in _sourceFactory.Sources())
                 {
@@ -93,23 +100,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return Json(res, JsonRequestBehavior.DenyGet);
         }
 
-        private void signalExpiredFollowUpDates()
+        private void SignalExpiredFollowUpDates()
         {
             try
             {
-                // Connect to an Examine Search Provider
-                var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-
-                // Specify Search Criteria
-                var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-
-                // Specify the query
+                var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
                 var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
                     Status:03\:Beställd AND 
                     FollowUpDate:[" + DateTime.Now.AddMinutes(-60).ToString("yyyyMMddHHmmssfff") + " TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]");
 
                 // Search for our items and signal the ones that have expired recently.
-                var results = searcher.Search(query);
+                var results = _orderItemsSearcher.Search(query);
                 foreach (var item in results)
                 {
                     // -1 means that we haven't checked edited by properly and should disregard it
@@ -123,15 +124,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
         }
 
-        private void convertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus()
+        private void ConvertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus()
         {
-            // Connect to an Examine Search Provider
-            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-
-            // Specify Search Criteria
-            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-
-            // Specify the query
+            var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
             var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
                 Status:04\:Väntar AND 
                 FollowUpDate:[197501010000000 TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]");
@@ -140,7 +135,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var memberId = -1;
 
             // Search for our items and signal the ones that have expired recently.
-            var ids = searcher.Search(query).Select(x => x.Id).ToList();
+            var ids = _orderItemsSearcher.Search(query).Select(x => x.Id).ToList();
             foreach (var id in ids)
             {
                 _internalDbLogger.WriteLogItemInternal(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", false, false);

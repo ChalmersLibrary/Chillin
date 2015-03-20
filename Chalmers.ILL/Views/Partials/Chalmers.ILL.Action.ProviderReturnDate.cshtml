@@ -1,0 +1,32 @@
+﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionProviderReturnDateModel
+
+<div class="action-header">Ändra lånetid från leverantör</div>
+
+<form class="form" role="form" onsubmit="return false;">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="dueDate">Återlämningsdatum</label>
+                <div class="input-group date datetimepicker">
+                    <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.DueDate">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="message">Logginlägg</label>
+                <textarea class="form-control" rows="6" id="message" name="message"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <button class="btn btn-success" onclick="itemIsReturned()">Ändra</button>
+        </div>
+    </div>
+</form>
