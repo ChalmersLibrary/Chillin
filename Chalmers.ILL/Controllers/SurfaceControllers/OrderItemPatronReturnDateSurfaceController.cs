@@ -32,7 +32,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var pageModel = new ChalmersILLActionPatronReturnDateModel(_orderItemManager.GetOrderItem(nodeId));
 
-            pageModel.ReturnDateChangedMailTemplate = _templateService.GetTemplateData("ReturnDataChangeMailTemplate", pageModel.OrderItem);
+            pageModel.ReturnDateChangedMailTemplate = _templateService.GetTemplateData("ReturnDateChangedMailTemplate", pageModel.OrderItem);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.PatronReturnDate", pageModel);
