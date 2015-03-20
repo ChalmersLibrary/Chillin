@@ -12,20 +12,23 @@ using Examine;
 using UmbracoExamine;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Mail;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class MaintenanceSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
+        IAutomaticMailSendingEngine _automaticMailSendingEngine;
 
-        public MaintenanceSurfaceController(IOrderItemManager orderItemManager)
+        public MaintenanceSurfaceController(IOrderItemManager orderItemManager, IAutomaticMailSendingEngine automaticMailSendingEngine)
         {
             _orderItemManager = orderItemManager;
+            _automaticMailSendingEngine = automaticMailSendingEngine;
         }
 
         /// <summary>
-        /// Method which will run different maintenance jobs.
+        /// Method which will run different maintenance jobs and send out automatic e-mails that are due.
         /// </summary>
         /// <returns>Json</returns>
         [HttpPost]
@@ -38,6 +41,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             removeOldMediaItems(json);
 
             optimizeIndexes(json);
+
+            _automaticMailSendingEngine.SendOutMailsThatAreDue();
 
             if (json.Success)
             {
