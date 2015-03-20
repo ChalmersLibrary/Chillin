@@ -139,6 +139,8 @@ namespace Chalmers.ILL.OrderItems
                 orderItem.DueDate = contentNode.Fields.GetValueString("DueDate") == "" ? DateTime.Now.AddYears(200) :
                     DateTime.ParseExact(contentNode.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
                 orderItem.BookId = contentNode.Fields.GetValueString("BookId");
+                orderItem.ArrivedAtInfodiskDate = contentNode.Fields.GetValueString("ArrivedAtInfodiskDate") == "" ? DateTime.Now.AddYears(200) :
+                    DateTime.ParseExact(contentNode.Fields.GetValueString("ArrivedAtInfodiskDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
 
                 // List of LogItems bound to this OrderItem
                 //orderItem.LogItemsList = Logging.GetLogItems(nodeId);
@@ -213,6 +215,7 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("attachments", JsonConvert.SerializeObject(new List<OrderAttachment>()));
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
             content.SetValue("dueDate", Convert.ToDateTime(DateTime.Now.AddYears(200)));
+            content.SetValue("arrivedAtInfodiskDate", Convert.ToDateTime(DateTime.Now.AddYears(200)));
             content.SetValue("bookId", "");
             content.SetValue("providerInformation", "");
 

@@ -287,7 +287,6 @@
         }
         else if($('input:radio[name=deliveryOptions]:checked').val() == "infodisken")
         {
-            console.log("start func");
             setOrderItemDeliveryReceived(@Model.OrderItem.NodeId, $('#bookId').val(), $('#dueDate').val(), $('#providerInformation').val(),
                 {
                 nodeId: @Model.OrderItem.NodeId,

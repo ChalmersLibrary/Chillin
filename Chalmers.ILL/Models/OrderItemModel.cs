@@ -59,6 +59,7 @@ namespace Chalmers.ILL.Models
         public bool DeliveryLibrarySameAsHomeLibrary { get; set; }
 
         public DateTime DueDate { get; set; }
+        public DateTime ArrivedAtInfodiskDate { get; set; }
         public string BookId { get; set; }
         public string ProviderInformation { get; set; }
 
