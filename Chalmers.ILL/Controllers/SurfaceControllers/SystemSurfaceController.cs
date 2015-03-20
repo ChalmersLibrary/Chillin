@@ -34,10 +34,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         ISearcher _orderItemsSearcher;
         IAutomaticMailSendingEngine _automaticMailSendingEngine;
 
-        [Dependency("OrderItemsSearcher")]
         public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, 
             IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes,
-            ISourceFactory sourceFactory, ISearcher orderItemsSearcher, IAutomaticMailSendingEngine automaticMailSendingEngine)
+            ISourceFactory sourceFactory, [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher, 
+            IAutomaticMailSendingEngine automaticMailSendingEngine)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;
