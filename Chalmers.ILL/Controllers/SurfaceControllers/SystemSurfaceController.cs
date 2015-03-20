@@ -32,11 +32,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IUmbracoWrapper _dataTypes;
         ISourceFactory _sourceFactory;
         ISearcher _orderItemsSearcher;
+        IAutomaticMailSendingEngine _automaticMailSendingEngine;
 
         [Dependency("OrderItemsSearcher")]
         public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, 
             IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes,
-            ISourceFactory sourceFactory, ISearcher orderItemsSearcher)
+            ISourceFactory sourceFactory, ISearcher orderItemsSearcher, IAutomaticMailSendingEngine automaticMailSendingEngine)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;
@@ -45,6 +46,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _dataTypes = dataTypes;
             _sourceFactory = sourceFactory;
             _orderItemsSearcher = orderItemsSearcher;
+            _automaticMailSendingEngine = automaticMailSendingEngine;
         }
         
         [HttpGet]
@@ -72,9 +74,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                convertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus();
+                _automaticMailSendingEngine.SendOutMailsThatAreDue();
 
-                signalExpiredFollowUpDates();
+                ConvertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus();
+
+                SignalExpiredFollowUpDates();
 
                 foreach (var source in _sourceFactory.Sources())
                 {
@@ -96,7 +100,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return Json(res, JsonRequestBehavior.DenyGet);
         }
 
-        private void signalExpiredFollowUpDates()
+        private void SignalExpiredFollowUpDates()
         {
             try
             {
@@ -120,7 +124,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
         }
 
-        private void convertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus()
+        private void ConvertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus()
         {
             var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
             var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 

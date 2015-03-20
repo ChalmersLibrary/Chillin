@@ -15,8 +15,11 @@ namespace Chalmers.ILL.Mail
             _orderItemSearcher = orderItemSearcher;
         }
 
-        public void SendAll()
+        public void SendOutMailsThatAreDue()
         {
+            // Grab the date and use it for all e-mails during this run.
+            var now = DateTime.Now;
+
             var orderItems = GetOrderItemsThatAreRelevantForAutomaticMailSending();
 
             foreach (var orderItem in orderItems)

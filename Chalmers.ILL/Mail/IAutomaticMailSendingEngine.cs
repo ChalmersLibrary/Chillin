@@ -8,6 +8,6 @@ namespace Chalmers.ILL.Mail
 {
     public interface IAutomaticMailSendingEngine
     {
-        void SendAll();
+        void SendOutMailsThatAreDue();
     }
 }
