@@ -13,6 +13,7 @@ using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.UmbracoApi;
 using Microsoft.Practices.Unity;
+using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -32,10 +33,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IUmbracoWrapper _dataTypes;
         ISourceFactory _sourceFactory;
         ISearcher _orderItemsSearcher;
+        IAutomaticMailSendingEngine _automaticMailSendingEngine;
 
         public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, 
             IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes,
-            ISourceFactory sourceFactory, [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher)
+            ISourceFactory sourceFactory, [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher,
+            IAutomaticMailSendingEngine automaticMailSendingEngine)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;
@@ -44,6 +47,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _dataTypes = dataTypes;
             _sourceFactory = sourceFactory;
             _orderItemsSearcher = orderItemsSearcher;
+            _automaticMailSendingEngine = automaticMailSendingEngine;
         }
         
         [HttpGet]
@@ -95,6 +99,33 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return Json(res, JsonRequestBehavior.DenyGet);
         }
 
+        /// <summary>
+        /// Send out all the automatic e-mails that should be sent out.
+        /// </summary>
+        /// <remarks>Should be called once a day.</remarks>
+        /// <returns>Json</returns>
+        [HttpPost]
+        public ActionResult SendOutAutomaticMailsThatAreDue()
+        {
+            var res = new ResultResponse();
+
+            try
+            {
+                _automaticMailSendingEngine.SendOutMailsThatAreDue();
+                res.Success = true;
+                res.Message = "Successfully sent out all the mail that should be sent out.";
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = "Failed to send out mail: " + e.Message;
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
+        }
+
+        #region Private methods.
+
         private void SignalExpiredFollowUpDates()
         {
             try
@@ -142,5 +173,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _notifier.UpdateOrderItemUpdate(id, memberId.ToString(), "", true, true);
             }
         }
+
+        #endregion
     }
 }

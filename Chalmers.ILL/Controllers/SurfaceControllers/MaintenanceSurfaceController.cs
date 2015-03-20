@@ -19,16 +19,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class MaintenanceSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IAutomaticMailSendingEngine _automaticMailSendingEngine;
 
-        public MaintenanceSurfaceController(IOrderItemManager orderItemManager, IAutomaticMailSendingEngine automaticMailSendingEngine)
+        public MaintenanceSurfaceController(IOrderItemManager orderItemManager)
         {
             _orderItemManager = orderItemManager;
-            _automaticMailSendingEngine = automaticMailSendingEngine;
         }
 
         /// <summary>
-        /// Method which will run different maintenance jobs and send out automatic e-mails that are due.
+        /// Method which will run different maintenance jobs.
         /// </summary>
         /// <returns>Json</returns>
         [HttpPost]
@@ -41,8 +39,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             removeOldMediaItems(json);
 
             optimizeIndexes(json);
-
-            _automaticMailSendingEngine.SendOutMailsThatAreDue();
 
             if (json.Success)
             {
