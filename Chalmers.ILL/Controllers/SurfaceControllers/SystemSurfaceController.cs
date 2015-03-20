@@ -32,12 +32,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IUmbracoWrapper _dataTypes;
         ISourceFactory _sourceFactory;
         ISearcher _orderItemsSearcher;
-        IAutomaticMailSendingEngine _automaticMailSendingEngine;
 
         public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, 
             IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes,
-            ISourceFactory sourceFactory, [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher, 
-            IAutomaticMailSendingEngine automaticMailSendingEngine)
+            ISourceFactory sourceFactory, [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;
@@ -46,7 +44,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _dataTypes = dataTypes;
             _sourceFactory = sourceFactory;
             _orderItemsSearcher = orderItemsSearcher;
-            _automaticMailSendingEngine = automaticMailSendingEngine;
         }
         
         [HttpGet]
@@ -63,7 +60,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
         /// <summary>
         /// Updates the system.
-        /// Checks if statuses should be changed, if something should be notified, polls sources, sends out automatic mails, etc.
+        /// Checks if statuses should be changed, if something should be notified, polls sources, etc.
         /// </summary>
         /// <remarks>Should be called regularly.</remarks>
         /// <returns>Json</returns>
@@ -74,8 +71,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                _automaticMailSendingEngine.SendOutMailsThatAreDue();
-
                 ConvertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus();
 
                 SignalExpiredFollowUpDates();
