@@ -6,11 +6,11 @@ using System.Web;
 
 namespace Chalmers.ILL.Mail
 {
-    public class AutomaticMailEngine : IAutomaticMailEngine
+    public class AutomaticMailSendingEngine : IAutomaticMailSendingEngine
     {
         ISearcher _orderItemSearcher;
 
-        public AutomaticMailEngine(ISearcher orderItemSearcher)
+        public AutomaticMailSendingEngine(ISearcher orderItemSearcher)
         {
             _orderItemSearcher = orderItemSearcher;
         }

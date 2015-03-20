@@ -63,8 +63,10 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
             container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
             container.RegisterInstance(typeof(ITemplateService), new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher));
-            container.RegisterInstance(typeof(IAutomaticMailEngine), new AutomaticMailEngine(orderItemsSearcher));
+            container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(orderItemsSearcher));
             container.RegisterInstance(typeof(IPatronDataProvider), new Sierra(ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
+            container.RegisterInstance<ISearcher>("TemplatesSearcher", templatesSearcher);
+            container.RegisterInstance<ISearcher>("OrderItemsSearcher", orderItemsSearcher);
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
         }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Chalmers.ILL.Mail
 {
-    public interface IAutomaticMailEngine
+    public interface IAutomaticMailSendingEngine
     {
         void SendAll();
     }
