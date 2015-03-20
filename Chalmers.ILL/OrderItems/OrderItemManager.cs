@@ -136,7 +136,7 @@ namespace Chalmers.ILL.OrderItems
                 orderItem.PurchasedMaterialPrevalue = OrderPurchasedMaterialId != -1 ? umbraco.library.GetPreValueAsString(OrderPurchasedMaterialId) : "";
 
                 // Set due date 200 years into the future if we haven't got any due date.
-                orderItem.DueDate = contentNode.Fields.GetValueString("DueDate") == "" ? DateTime.Now.AddYears(200) : 
+                orderItem.DueDate = contentNode.Fields.GetValueString("DueDate") == "" ? DateTime.Now.AddYears(200) :
                     DateTime.ParseExact(contentNode.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
                 orderItem.BookId = contentNode.Fields.GetValueString("BookId");
 
@@ -212,7 +212,7 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("log", JsonConvert.SerializeObject(new List<LogItem>()));
             content.SetValue("attachments", JsonConvert.SerializeObject(new List<OrderAttachment>()));
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
-            content.SetValue("dueDate", "");
+            content.SetValue("dueDate", Convert.ToDateTime(DateTime.Now.AddYears(200)));
             content.SetValue("bookId", "");
             content.SetValue("providerInformation", "");
 
@@ -461,22 +461,29 @@ namespace Chalmers.ILL.OrderItems
             try
             {
                 var content = cs.GetById(orderNodeId);
+                string currentBookId = "";
+                string currentProviderInformation = "";
 
-                string currentBookId = content.GetValue("bookId").ToString();
-                string currentProviderInformation = content.GetValue("providerInformation").ToString();
-
-                if (content.GetValue("dueDate").ToString() != "")
+                if (content.HasProperty("bookId"))
                 {
-                    DateTime currentDueDate = Convert.ToDateTime(content.GetValue("dueDate"));
-                    if (currentDueDate != dueDate)
-                    {
-                        content.SetValue("dueDate", dueDate);
-                        infoChanged = true;
-                    }
+                    currentBookId = content.GetValue("bookId").ToString() == "" ? "" : content.GetValue("bookId").ToString();
                 }
-
+                else { currentBookId = ""; }
+                if (content.HasProperty("providerInformation"))
+                {
+                    currentProviderInformation = content.GetValue("providerInformation").ToString() == "" ? "" : content.GetValue("providerInformation").ToString();
+                } else { currentProviderInformation = "";}
+                DateTime currentDueDate = content.GetValue("dueDate") == "" ? DateTime.Now.AddYears(200) : Convert.ToDateTime(content.GetValue("dueDate").ToString());
+                //DateTime? currentDueDate = Convert.ToDateTime(content.GetValue("dueDate").ToString());
+                
 
                 // Only make a change if the values differs from the current
+                if (currentDueDate != dueDate)
+                {
+                    content.SetValue("dueDate", Convert.ToDateTime(dueDate));
+                    infoChanged = true;
+                }
+
                 if (currentBookId != bookId)
                 {
                     content.SetValue("bookId", bookId);
