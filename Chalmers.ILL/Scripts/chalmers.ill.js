@@ -310,11 +310,10 @@ function lockScreen() {
 
 function unlockScreen() {
     lockLevel--;
-    if (lockLevel <= 0) {
+    if (lockLevel == 0) {
         fullSiteBusyAnimationStop();
         $("#lockscreen").hide();
         $("#busylock").hide();
-        lockLevel = 0;
     }
 }
 
