@@ -410,7 +410,10 @@
     <Compile Include="Mail\ChalmersOrderItemsMailSource.cs" />
     <Compile Include="Mail\IAutomaticMailSendingEngine.cs" />
     <Compile Include="Mail\IExchangeMailWebApi.cs" />
+    <Compile Include="Mail\IMailService.cs" />
+    <Compile Include="Mail\MailService.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
+    <Compile Include="Models\Mail\OutgoingMailModel.cs" />
     <Compile Include="Models\OrderItemPageModelBase.cs" />
     <Compile Include="Models\OrderItemSeedModel.cs" />
     <Compile Include="Models\Page\ChalmersILLLogoutPageModel.cs" />
@@ -434,11 +437,11 @@
     <Compile Include="Models\PartialPage\ChalmersILLOrderItemModel.cs" />
     <Compile Include="Models\StatisticsVariable.cs" />
     <Compile Include="Models\UmbracoDropdownListNtextDataType.cs" />
-    <Compile Include="Models\MailAttachment.cs" />
+    <Compile Include="Models\Mail\MailAttachment.cs" />
     <Compile Include="Models\OrderAttachment.cs" />
     <Compile Include="Models\Lock.cs" />
-    <Compile Include="Models\MailQueueModel.cs" />
-    <Compile Include="Models\OutgoingMailModel.cs" />
+    <Compile Include="Models\Mail\MailQueueModel.cs" />
+    <Compile Include="Models\Mail\OutgoingMailPackageModel.cs" />
     <Compile Include="Models\PasswordModel.cs" />
     <Compile Include="Controllers\SurfaceControllers\PasswordSurfaceController.cs" />
     <Compile Include="EventHandlers\OwinStartup.cs" />

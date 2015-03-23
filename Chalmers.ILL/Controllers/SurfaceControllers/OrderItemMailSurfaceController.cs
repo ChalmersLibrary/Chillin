@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
+using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.UmbracoApi;
 
@@ -27,14 +28,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IInternalDbLogger _internalDbLogger;
         IExchangeMailWebApi _exchangeMailWebApi;
         IUmbracoWrapper _dataTypes;
+        IMailService _mailService;
 
         public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
-            IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes)
+            IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes, IMailService mailService)
         {
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;
             _exchangeMailWebApi = exchangeMailWebApi;
             _dataTypes = dataTypes;
+            _mailService = mailService;
         }
 
         /// <summary>
@@ -59,7 +62,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="m">The data for the outgoing mail.</param>
         /// <returns>JSON result</returns>
         [HttpPost, ValidateInput(false)]
-        public ActionResult SendMail(OutgoingMailModel m)
+        public ActionResult SendMail(OutgoingMailPackageModel m)
         {
             var json = new ResultResponse();
 
@@ -79,36 +82,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Send mail to recipient
                 try
                 {
-                    var attachments = new Dictionary<string, byte[]>();
-                    if (m.attachments != null)
-                    {
-                        var ms = UmbracoContext.Application.Services.MediaService;
-                        var originalFilenamePattern = new Regex(@"^cthb-[a-zA-Z0-9]+-[0-9]+-(.*\.(?:pdf|tif|tiff))", RegexOptions.IgnoreCase);
-                        foreach (var mediaId in m.attachments)
-                        {
-                            var c = ms.GetById(mediaId);
-                            if (c != null)
-                            {
-                                var data = System.IO.File.ReadAllBytes(Server.MapPath(c.GetValue("file").ToString()));
-                                var match = originalFilenamePattern.Match(c.Name);
-                                if (match.Groups.Count > 1)
-                                {
-                                    attachments.Add(match.Groups[1].Value, data);
-                                }
-                                else
-                                {
-                                    throw new Exception("Failed to extract file name for attachment " + c.Name + ". Can only send pdf, tif and tiff files.");
-                                }
-                            }
-                            else
-                            {
-                                throw new Exception("Failed to fetch media item for id " + mediaId + ".");
-                            }
-                        }
-                    }
-                    string body = m.message + ConfigurationManager.AppSettings["chalmersILLMailSignature"].Replace("\\n", "\n");
-                    _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
-                    _exchangeMailWebApi.SendMailMessage(orderItem.OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], m.recipientName, m.recipientEmail, attachments);
+                    _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, m));
+
                     _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, false, false);
                     _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL", m.message, false, false);
                 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 
-namespace Chalmers.ILL.Models
+namespace Chalmers.ILL.Models.Mail
 {
     public class MailAttachment
     {

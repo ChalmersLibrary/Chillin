@@ -7,7 +7,6 @@ using Umbraco.Web;
 using umbraco.cms.businesslogic.member;
 using umbraco.cms.businesslogic.datatype;
 using umbraco.cms;
-using Chalmers.ILL.Models;
 using System.Globalization;
 using Umbraco.Core;
 using UmbracoExamine;
@@ -23,6 +22,8 @@ using System.Threading;
 using Umbraco.Core.Services;
 using Chalmers.ILL.SignalR;
 using Chalmers.ILL.Logging;
+using Chalmers.ILL.Models.Mail;
+using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.OrderItems
 {

@@ -1,5 +1,4 @@
 ﻿using Chalmers.ILL.Controllers.SurfaceControllers;
-using Chalmers.ILL.Models;
 using Chalmers.ILL.OrderItems;
 using System;
 using System.Collections.Generic;
@@ -25,6 +24,7 @@ using Umbraco.Core.Services;
 using Umbraco.Core.Events;
 using Umbraco.Core.Models;
 using Chalmers.ILL.UmbracoApi;
+using Chalmers.ILL.Models.Mail;
 
 namespace Chalmers.ILL.Mail
 {

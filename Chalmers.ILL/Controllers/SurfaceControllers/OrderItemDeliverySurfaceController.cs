@@ -15,6 +15,9 @@ using Chalmers.ILL.Logging;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.Templates;
+using Chalmers.ILL.Mail;
+using Chalmers.ILL.Models.Mail;
+using Newtonsoft.Json;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -26,14 +29,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IInternalDbLogger _internalDbLogger;
         IUmbracoWrapper _umbraco;
         ITemplateService _templateService;
+        IMailService _mailService;
 
         public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
-            IUmbracoWrapper umbraco, ITemplateService templateService)
+            IUmbracoWrapper umbraco, ITemplateService templateService, IMailService mailService)
         {
             _orderItemManager = orderItemManager;
             _internalDbLogger = internalDbLogger;
             _umbraco = umbraco;
             _templateService = templateService;
+            _mailService = mailService;
         }
 
         /// <summary>
@@ -61,7 +66,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="nodeId">OrderItem Node Id</param>
         /// <param name="newStatus">Means of delivery</param>
         /// <returns>JSON result</returns>
-        [HttpGet]
+        [HttpPost]
         public ActionResult SetDelivery(int nodeId, string logEntry, string delivery)
         {
             var json = new ResultResponse();
@@ -116,19 +121,29 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="dueDate">Delivery Library Due Date</param>
         /// <param name="providerInformation">Information about the provider</param>
         /// <returns>MVC ActionResult with JSON</returns>
-        [HttpGet]
-        public ActionResult SetOrderItemDeliveryReceived(int orderNodeId, string bookId, DateTime dueDate, string providerInformation)
+        [HttpPost]
+        public ActionResult SetOrderItemDeliveryReceived(string packJson)
         {
             var json = new ResultResponse();
 
             try
             {
+                DeliveryReceivedPackage pack = JsonConvert.DeserializeObject<DeliveryReceivedPackage>(packJson);
+
+                var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
+
                 // Use internal method to set status property and log the result
-                _orderItemManager.SetOrderItemDeliveryReceivedInternal(orderNodeId, bookId, dueDate, providerInformation);
+                _orderItemManager.SetOrderItemDeliveryReceivedInternal(pack.orderNodeId, pack.bookId, pack.dueDate, pack.providerInformation, false, false);
+
+                _internalDbLogger.WriteLogItemInternal(pack.orderNodeId, "LOG", pack.logMsg, false, false);
+
+                _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
+                _internalDbLogger.WriteLogItemInternal(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
+                _internalDbLogger.WriteLogItemInternal(pack.orderNodeId, "MAIL", pack.mailData.message, true, true);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;
-                json.Message = "Changed delivery item information to bookid:" + bookId + " due date:+" + dueDate + " provider information:" + providerInformation;
+                json.Message = "Changed delivery item information to bookid:" + pack.bookId + " due date:+" + pack.dueDate + " provider information:" + pack.providerInformation;
             }
             catch (Exception e)
             {
@@ -137,6 +152,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        public class DeliveryReceivedPackage
+        {
+            public int orderNodeId { get; set; }
+            public string bookId { get; set; }
+            public DateTime dueDate { get; set; }
+            public string providerInformation { get; set; }
+            public OutgoingMailPackageModel mailData { get; set; }
+            public string logMsg { get; set; }
         }
     }
 

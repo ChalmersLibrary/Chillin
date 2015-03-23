@@ -10,13 +10,13 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Exchange.WebServices.Data;
 using System.Security;
 using System.Runtime.InteropServices;
-using Chalmers.ILL.Models;
 using System.Globalization;
 using HtmlAgilityPack;
 using System.Configuration;
 using System.Diagnostics;
 using Npgsql;
 using Chalmers.ILL.Utilities;
+using Chalmers.ILL.Models.Mail;
 
 namespace Chalmers.ILL.Mail
 {

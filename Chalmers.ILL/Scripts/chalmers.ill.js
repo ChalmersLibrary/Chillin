@@ -717,11 +717,19 @@ function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
     }).error(unlockScreen);
 }
 
-function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata) {
+function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetOrderItemDeliveryReceived?orderNodeId=" + node + "&bookId=" + bookId + "&dueDate=" + dueDate + "&providerInformation=" + providerInformation, function (json) {
+    $.post("/umbraco/surface/OrderItemDeliverySurface/SetOrderItemDeliveryReceived", {
+        packJson: JSON.stringify({
+            orderNodeId: node,
+            bookId: bookId,
+            dueDate: dueDate,
+            providerInformation: providerInformation,
+            mailData: maildata,
+            logMsg: logMsg
+        })
+    }, function (json) {
         if (json.Success) {
-            sendMailToPatron(maildata);
             loadOrderItemDetails(node);
         }
         else {
@@ -780,7 +788,11 @@ function sendDeliveryByEmail(mailData, logEntry) {
             data: JSON.stringify(mailData),
             success: function (json) {
                 if (json.Success) {
-                    $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetDelivery?nodeId=" + mailData.nodeId + "&logEntry=" + logEntry + "&delivery=email", function (json) {
+                    $.post("/umbraco/surface/OrderItemDeliverySurface/SetDelivery", {
+                        nodeId: mailData.nodeId,
+                        logEntry: logEntry,
+                        delivery: email
+                    }, function (json) {
                         if (json.Success) {
                             loadOrderItemDetails(mailData.nodeId);
                         }
@@ -817,7 +829,11 @@ function sendDeliveryByEmail(mailData, logEntry) {
 /* Set new property values for Delivery from form */
 function setOrderItemDelivery(nodeId, logEntry, delivery) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetDelivery?nodeId=" + nodeId + "&logEntry=" + logEntry + "&delivery=" + delivery, function (json) {
+    $.post("/umbraco/surface/OrderItemDeliverySurface/SetDelivery", {
+        nodeId: nodeId,
+        logEntry: logEntry,
+        delivery: delivery
+    }, function (json) {
         if (json.Success) {
             loadOrderItemDetails(nodeId);
         }

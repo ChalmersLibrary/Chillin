@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using Microsoft.Exchange.WebServices.Data;
 
-namespace Chalmers.ILL.Models
+namespace Chalmers.ILL.Models.Mail
 {
     public enum MailQueueType
     {

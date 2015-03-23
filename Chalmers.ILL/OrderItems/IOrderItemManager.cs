@@ -1,4 +1,5 @@
 ﻿using Chalmers.ILL.Models;
+using Chalmers.ILL.Models.Mail;
 using System;
 using System.Collections.Generic;
 using System.Linq;
