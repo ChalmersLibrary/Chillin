@@ -258,7 +258,6 @@ function fullSiteBusyAnimationStart()
 {
     timer && clearTimeout(timer);
     timer = setTimeout(function () {
-        lockScreen();
         $("#lockscreen").animate({
             opacity: 1
         }, {

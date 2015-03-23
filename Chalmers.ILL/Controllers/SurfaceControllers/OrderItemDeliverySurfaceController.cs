@@ -109,7 +109,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         /// <summary>
-        /// Set that the order item delivery is received.
+        /// Set that the order item is received and ready for the patron to fetch.
         /// </summary>
         /// <param name="orderNodeId">OrderItem Node Id</param>
         /// <param name="bookId">Delivery Library Book Id</param>

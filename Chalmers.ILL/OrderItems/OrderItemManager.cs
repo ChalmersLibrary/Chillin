@@ -135,11 +135,10 @@ namespace Chalmers.ILL.OrderItems
                 orderItem.PurchasedMaterial = OrderPurchasedMaterialId;
                 orderItem.PurchasedMaterialPrevalue = OrderPurchasedMaterialId != -1 ? umbraco.library.GetPreValueAsString(OrderPurchasedMaterialId) : "";
 
-                // Set due date 200 years into the future if we haven't got any due date.
-                orderItem.DueDate = contentNode.Fields.GetValueString("DueDate") == "" ? DateTime.Now.AddYears(200) :
+                orderItem.DueDate = contentNode.Fields.GetValueString("DueDate") == "" ? DateTime.Now :
                     DateTime.ParseExact(contentNode.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
                 orderItem.BookId = contentNode.Fields.GetValueString("BookId");
-                orderItem.ArrivedAtInfodiskDate = contentNode.Fields.GetValueString("ArrivedAtInfodiskDate") == "" ? DateTime.Now.AddYears(200) :
+                orderItem.ArrivedAtInfodiskDate = contentNode.Fields.GetValueString("ArrivedAtInfodiskDate") == "" ? new DateTime(1970, 1, 1) :
                     DateTime.ParseExact(contentNode.Fields.GetValueString("ArrivedAtInfodiskDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
 
                 // List of LogItems bound to this OrderItem
@@ -214,8 +213,8 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("log", JsonConvert.SerializeObject(new List<LogItem>()));
             content.SetValue("attachments", JsonConvert.SerializeObject(new List<OrderAttachment>()));
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
-            content.SetValue("dueDate", Convert.ToDateTime(DateTime.Now.AddYears(200)));
-            content.SetValue("arrivedAtInfodiskDate", Convert.ToDateTime(DateTime.Now.AddYears(200)));
+            content.SetValue("dueDate", DateTime.Now);
+            content.SetValue("arrivedAtInfodiskDate", new DateTime(1970, 1, 1));
             content.SetValue("bookId", "");
             content.SetValue("providerInformation", "");
 
@@ -476,9 +475,7 @@ namespace Chalmers.ILL.OrderItems
                 {
                     currentProviderInformation = content.GetValue("providerInformation").ToString() == "" ? "" : content.GetValue("providerInformation").ToString();
                 } else { currentProviderInformation = "";}
-                DateTime currentDueDate = content.GetValue("dueDate") == "" ? DateTime.Now.AddYears(200) : Convert.ToDateTime(content.GetValue("dueDate").ToString());
-                //DateTime? currentDueDate = Convert.ToDateTime(content.GetValue("dueDate").ToString());
-                
+                DateTime currentDueDate = content.GetValue("dueDate").ToString() == "" ? DateTime.Now : Convert.ToDateTime(content.GetValue("dueDate").ToString());
 
                 // Only make a change if the values differs from the current
                 if (currentDueDate != dueDate)
@@ -574,6 +571,14 @@ namespace Chalmers.ILL.OrderItems
                 // Only make a change if the new value differs from the current
                 if (currentStatus != statusId)
                 {
+                    var arrivedAtInfodiskDateStr = content.GetValue("arrivedAtInfodiskDate").ToString();
+                    var arrivedAtInfodiskDate = arrivedAtInfodiskDateStr == "" ? new DateTime(1970, 1, 1) : Convert.ToDateTime(arrivedAtInfodiskDateStr);
+                    if (arrivedAtInfodiskDate.Year == 1970 && umbraco.library.GetPreValueAsString(statusId).Split(':').Last().Contains("Infodisk"))
+                    {
+                        // Item has arrived, for the first time, at the infodisk. Time to set the arrived at Infodisk date.
+                        content.SetValue("arrivedAtInfodiskDate", DateTime.Now);
+                    }
+
                     content.SetValue("status", statusId);
                     SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                     _internalDbLogger.WriteLogItemInternal(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? umbraco.library.GetPreValueAsString(currentStatus).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(statusId).Split(':').Last(), doReindex, doSignal);
