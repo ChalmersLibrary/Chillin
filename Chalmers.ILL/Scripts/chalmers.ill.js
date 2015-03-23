@@ -298,16 +298,24 @@ function closeOrderItem(elem)
     }
 }
 
+var lockLevel = 0;
 function lockScreen() {
-    $("#lockscreen").show();
-    $("#busylock").show();
-    fullSiteBusyAnimationStart();
+    if (lockLevel == 0) {
+        $("#lockscreen").show();
+        $("#busylock").show();
+        fullSiteBusyAnimationStart();
+    }
+    lockLevel++;
 }
 
 function unlockScreen() {
-    fullSiteBusyAnimationStop();
-    $("#lockscreen").hide();
-    $("#busylock").hide();
+    lockLevel--;
+    if (lockLevel <= 0) {
+        fullSiteBusyAnimationStop();
+        $("#lockscreen").hide();
+        $("#busylock").hide();
+        lockLevel = 0;
+    }
 }
 
 function replaceURLWithHTMLLinks(text) {
