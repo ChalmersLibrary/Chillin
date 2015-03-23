@@ -741,7 +741,7 @@ function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
 
 function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemDeliveryLibrarySurface/SetOrderItemDeliveryReceived?orderNodeId=" + node + "&bookId=" + bookId + "&dueDate=" + dueDate + "&providerInformation=" + providerInformation, function (json) {
+    $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetOrderItemDeliveryReceived?orderNodeId=" + node + "&bookId=" + bookId + "&dueDate=" + dueDate + "&providerInformation=" + providerInformation, function (json) {
         if (json.Success) {
             sendMailToPatron(maildata);
             loadOrderItemDetails(node);
