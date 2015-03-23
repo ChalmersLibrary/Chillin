@@ -175,19 +175,9 @@ $(function () {
 
     });
 
-    //$("a.reflink").click(function (e) {
-    //    e.stopPropagation();
-    //    alert(this);
-    //});
-
     $(".illedit").on("click", ".reflink", function (event) {
         event.stopPropagation();
             });
-
-    //$("div[data-column='reference']").click(function (event) {
-    //    event.stopPropagation();
-    //    alert(this);
-    //});
 
     // Logged in Member clicks an OrderItem Summary row
     $(".illedit").click(function () {
@@ -251,7 +241,7 @@ $(function () {
     });
 });
 
-// Creaate object containing the DOM object from document and also a timer.
+// Create object containing the DOM object from document and also a timer.
 var $docTimer = $(document), timer;
 
 function fullSiteBusyAnimationStart()
@@ -503,6 +493,7 @@ function applyLibraryListFilter(filter, animate)
     }
     updateFilterButtonCounters();
 }
+
 function updateFilterButtonCounters()
 {
     var numberOfStatuses = 11;
@@ -555,11 +546,6 @@ function updateLibraryFilterButtonCounters()
 
 function setCounterOrHide(elem, count) {
     elem.text(count.toString());
-    /*if (count > 0) {
-        elem.parent().show();
-    } else {
-        elem.parent().hide();
-    }*/
 }
 
 // Load OrderItem Summary (first row in list)
@@ -612,12 +598,6 @@ function loadOrderItemSummary(id)
             else {
                 $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-danger status-" + json.StatusPrevalue.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
-
-            // Animate to catch their eye (TODO: this is missing from our CSS)
-            /*
-            $("#" + json.NodeId + " div[data-column='status']").css({ 'animation': 'myfirst 0.3s', '-webkit-animation': 'myfirst 0.3s' });
-            $("#" + json.NodeId + " div[data-column='status']").removeAttr("style");
-            */
 
             // Reference with links
             $("#" + json.NodeId + " div[data-column='reference']").html(replaceURLWithHTMLLinks(json.Reference));
