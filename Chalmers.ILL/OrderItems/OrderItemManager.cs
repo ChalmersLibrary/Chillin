@@ -21,7 +21,6 @@ using Chalmers.ILL.Utilities;
 using System.Threading;
 using Umbraco.Core.Services;
 using Chalmers.ILL.SignalR;
-using Chalmers.ILL.Logging;
 using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models;
 
@@ -30,16 +29,16 @@ namespace Chalmers.ILL.OrderItems
     public class OrderItemManager : IOrderItemManager
     {
         INotifier _notifier;
-        IInternalDbLogger _internalDbLogger;
+        IContentService _contentService;
 
         public void SetNotifier(INotifier notifier)
         {
             _notifier = notifier;
         }
 
-        public void SetInternalDbLogger(IInternalDbLogger internalDbLogger)
+        public void SetContentService(IContentService contentService)
         {
-            _internalDbLogger = internalDbLogger;
+            _contentService = contentService;
         }
 
         public OrderItemModel GetOrderItem(int nodeId)
@@ -260,15 +259,13 @@ namespace Chalmers.ILL.OrderItems
 
         public int CreateOrderItemInDbFromOrderItemSeedModel(OrderItemSeedModel model, bool doReindex = true, bool doSignal = true)
         {
-            IContentService cs = new Umbraco.Core.Services.ContentService();
-
             // Temporary OrderId with MD5 Hash
             var orderId = "cthb-" + Helpers.CalculateMD5Hash(DateTime.Now.Ticks.ToString());
             var contentName = orderId;
 
             // Create the OrderItem
             var uh = new Umbraco.Web.UmbracoHelper(Umbraco.Web.UmbracoContext.Current);
-            IContent content = cs.CreateContent(contentName, uh.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListContentDocumentType"]).First().Id, "ChalmersILLOrderItem");
+            IContent content = _contentService.CreateContent(contentName, uh.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListContentDocumentType"]).First().Id, "ChalmersILLOrderItem");
 
             // Set properties
             content.SetValue("originalOrder", model.Message);
@@ -361,7 +358,7 @@ namespace Chalmers.ILL.OrderItems
 
                     content.SetValue("attachments", JsonConvert.SerializeObject(attachmentList));
                     SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    _internalDbLogger.WriteLogItemInternal(orderNodeId, "ATTACHMENT", "Nytt dokument bundet till ordern.", doReindex, doSignal);
+                    WriteLogItemInternal(orderNodeId, "ATTACHMENT", "Nytt dokument bundet till ordern.", doReindex, doSignal);
                 }
             }
             catch (Exception)
@@ -370,19 +367,12 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
-        public bool SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
+        public void SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
-            // Connect to Umbraco ContentService
-            // var cs = new Umbraco.Core.Services.ContentService();
-            // var cs = ApplicationContext.Current.Services.ContentService;
-            var cs = UmbracoContext.Current.Application.Services.ContentService;
-
-            // Find OrderItem
-            var content = cs.GetById(nodeId);
+            var content = _contentService.GetById(nodeId);
 
             try
             {
-                // Set FollowUpDate
                 content.SetValue("followUpDate", date);
             }
             catch (Exception e)
@@ -398,231 +388,248 @@ namespace Chalmers.ILL.OrderItems
             {
                 throw new Exception("Save NodeId=" + content.Id + ", Published=" + content.Published + ", Status=" + content.Status + ", Trashed=" + content.Trashed + ", UpdateDate=" + content.UpdateDate + ": " + ep.Message);
             }
-
-            return true;
         }
 
-        public bool SetOrderItemCancellationReasonInternal(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true)
+        public void SetDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
-            var cs = new Umbraco.Core.Services.ContentService();
+            var content = _contentService.GetById(nodeId);
 
             try
             {
-                var content = cs.GetById(orderNodeId);
-
-                // Try and parse out the int of the Umbraco property, if it exists
-                int currentCancellationReason = Helpers.GetPropertyValueAsInteger(content.GetValue("cancellationReason"));
-
-                // Only make a change if the new value differs from the current
-                if (currentCancellationReason != cancellationReasonId)
-                {
-                    content.SetValue("cancellationReason", cancellationReasonId);
-                    SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    _internalDbLogger.WriteLogItemInternal(orderNodeId, "ANNULLERINGSORSAK", "Annulleringsorsak ändrad till " + umbraco.library.GetPreValueAsString(cancellationReasonId), doReindex, doSignal);
-                }
-
-                return true;
+                content.SetValue("dueDate", date);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception("Error when setting dueDate to " + date + ".", e);
             }
-        }
-
-        public bool SetOrderItemDeliveryLibraryInternal(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true)
-        {
-            var cs = new Umbraco.Core.Services.ContentService();
 
             try
             {
-                var content = cs.GetById(orderNodeId);
-
-                // Try and parse out the int of the Umbraco property, if it exists
-                int currentDeliveryLibrary = Helpers.GetPropertyValueAsInteger(content.GetValue("deliveryLibrary"));
-
-                // Only make a change if the new value differs from the current
-                if (currentDeliveryLibrary != deliveryLibraryId)
-                {
-                    content.SetValue("deliveryLibrary", deliveryLibraryId);
-                    SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    _internalDbLogger.WriteLogItemInternal(orderNodeId, "BIBLIOTEK", "Bibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), doReindex, doSignal);
-                }
-
-                return true;
+                SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw;
+                throw new Exception("Save NodeId=" + content.Id + ", Published=" + content.Published + ", Status=" + content.Status + ", Trashed=" + content.Trashed + ", UpdateDate=" + content.UpdateDate + ": " + e.Message);
             }
         }
 
-        public bool SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string providerInformation, bool doReindex = true, bool doSignal = true)
+        public void SetOrderItemCancellationReasonInternal(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true)
         {
-            var cs = new Umbraco.Core.Services.ContentService();
+            var content = _contentService.GetById(orderNodeId);
+
+            // Try and parse out the int of the Umbraco property, if it exists
+            int currentCancellationReason = Helpers.GetPropertyValueAsInteger(content.GetValue("cancellationReason"));
+
+            // Only make a change if the new value differs from the current
+            if (currentCancellationReason != cancellationReasonId)
+            {
+                content.SetValue("cancellationReason", cancellationReasonId);
+                SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                WriteLogItemInternal(orderNodeId, "ANNULLERINGSORSAK", "Annulleringsorsak ändrad till " + umbraco.library.GetPreValueAsString(cancellationReasonId), doReindex, doSignal);
+            }
+        }
+
+        public void SetOrderItemDeliveryLibraryInternal(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(orderNodeId);
+
+            // Try and parse out the int of the Umbraco property, if it exists
+            int currentDeliveryLibrary = Helpers.GetPropertyValueAsInteger(content.GetValue("deliveryLibrary"));
+
+            // Only make a change if the new value differs from the current
+            if (currentDeliveryLibrary != deliveryLibraryId)
+            {
+                content.SetValue("deliveryLibrary", deliveryLibraryId);
+                SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                WriteLogItemInternal(orderNodeId, "BIBLIOTEK", "Bibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), doReindex, doSignal);
+            }
+        }
+
+        public void SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string providerInformation, bool doReindex = true, bool doSignal = true)
+        {
             bool infoChanged = false;
 
-            try
+            var content = _contentService.GetById(orderNodeId);
+            string currentBookId = "";
+            string currentProviderInformation = "";
+
+            if (content.HasProperty("bookId"))
             {
-                var content = cs.GetById(orderNodeId);
-                string currentBookId = "";
-                string currentProviderInformation = "";
+                currentBookId = content.GetValue("bookId").ToString() == "" ? "" : content.GetValue("bookId").ToString();
+            }
+            else { currentBookId = ""; }
+            if (content.HasProperty("providerInformation"))
+            {
+                currentProviderInformation = content.GetValue("providerInformation").ToString() == "" ? "" : content.GetValue("providerInformation").ToString();
+            } else { currentProviderInformation = "";}
+            DateTime currentDueDate = content.GetValue("dueDate").ToString() == "" ? DateTime.Now : Convert.ToDateTime(content.GetValue("dueDate").ToString());
 
-                if (content.HasProperty("bookId"))
-                {
-                    currentBookId = content.GetValue("bookId").ToString() == "" ? "" : content.GetValue("bookId").ToString();
-                }
-                else { currentBookId = ""; }
-                if (content.HasProperty("providerInformation"))
-                {
-                    currentProviderInformation = content.GetValue("providerInformation").ToString() == "" ? "" : content.GetValue("providerInformation").ToString();
-                } else { currentProviderInformation = "";}
-                DateTime currentDueDate = content.GetValue("dueDate").ToString() == "" ? DateTime.Now : Convert.ToDateTime(content.GetValue("dueDate").ToString());
+            // Only make a change if the values differs from the current
+            if (currentDueDate != dueDate)
+            {
+                content.SetValue("dueDate", Convert.ToDateTime(dueDate));
+                infoChanged = true;
+            }
 
-                // Only make a change if the values differs from the current
-                if (currentDueDate != dueDate)
-                {
-                    content.SetValue("dueDate", Convert.ToDateTime(dueDate));
-                    infoChanged = true;
-                }
-
-                if (currentBookId != bookId)
-                {
-                    content.SetValue("bookId", bookId);
-                    infoChanged = true;
-                }
+            if (currentBookId != bookId)
+            {
+                content.SetValue("bookId", bookId);
+                infoChanged = true;
+            }
                
-                if (currentProviderInformation != providerInformation)
-                {
-                    content.SetValue("providerInformation", providerInformation);
-                    infoChanged = true;
-                }
-
-                if (infoChanged)
-                {
-                    SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    _internalDbLogger.WriteLogItemInternal(orderNodeId, "BOKINFORMATION", "Bokinformation ändrat till bokid:"+bookId+" lånetid:"+dueDate+" leverantörsinformation:"+providerInformation, doReindex, doSignal);
-                }
-
-                return true;
-            }
-            catch (Exception)
+            if (currentProviderInformation != providerInformation)
             {
-                throw;
+                content.SetValue("providerInformation", providerInformation);
+                infoChanged = true;
             }
-        }
 
-        public bool SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true)
-        {
-            var cs = new Umbraco.Core.Services.ContentService();
-
-            try
+            if (infoChanged)
             {
-                var content = cs.GetById(orderNodeId);
-                content.SetValue("drmWarning", status);
                 SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                _internalDbLogger.WriteLogItemInternal(orderNodeId, "DRM", "Kan innehålla drm-material!", doReindex, doSignal);
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
+                WriteLogItemInternal(orderNodeId, "BOKINFORMATION", "Bokinformation ändrat till bokid:"+bookId+" lånetid:"+dueDate+" leverantörsinformation:"+providerInformation, doReindex, doSignal);
             }
         }
 
-        public bool SetOrderItemPurchasedMaterialInternal(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true)
+        public void SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true)
         {
-            var cs = new Umbraco.Core.Services.ContentService();
+            var content = _contentService.GetById(orderNodeId);
+            content.SetValue("drmWarning", status);
+            SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+            WriteLogItemInternal(orderNodeId, "DRM", "Kan innehålla drm-material!", doReindex, doSignal);
+        }
 
-            try
+        public void SetOrderItemPurchasedMaterialInternal(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(orderNodeId);
+
+            // Try and parse out the int of the Umbraco property, if it exists
+            int currentPurchasedMaterial = Helpers.GetPropertyValueAsInteger(content.GetValue("purchasedMaterial"));
+
+            // Only make a change if the new value differs from the current
+            if (currentPurchasedMaterial != purchasedMaterialId)
             {
-                var content = cs.GetById(orderNodeId);
-
-                // Try and parse out the int of the Umbraco property, if it exists
-                int currentPurchasedMaterial = Helpers.GetPropertyValueAsInteger(content.GetValue("purchasedMaterial"));
-
-                // Only make a change if the new value differs from the current
-                if (currentPurchasedMaterial != purchasedMaterialId)
-                {
-                    content.SetValue("purchasedMaterial", purchasedMaterialId);
-                    SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    _internalDbLogger.WriteLogItemInternal(orderNodeId, "MATERIALINKÖP", "Inköpt material ändrat till " + umbraco.library.GetPreValueAsString(purchasedMaterialId), doReindex, doSignal);
-                }
-
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
+                content.SetValue("purchasedMaterial", purchasedMaterialId);
+                SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                WriteLogItemInternal(orderNodeId, "MATERIALINKÖP", "Inköpt material ändrat till " + umbraco.library.GetPreValueAsString(purchasedMaterialId), doReindex, doSignal);
             }
         }
 
-        public bool SetOrderItemStatusInternal(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true)
+        public void SetOrderItemStatusInternal(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true)
         {
-            try
+            // Get node for the order item
+            var content = _contentService.GetById(orderNodeId);
+
+            // Try and parse out the int of the Umbraco property, if it exists
+            int currentStatus = Helpers.GetPropertyValueAsInteger(content.GetValue("status"));
+
+            // Only make a change if the new value differs from the current
+            if (currentStatus != statusId)
             {
-                // Connect to the content service
-                var cs = new Umbraco.Core.Services.ContentService();
-
-                // Get node for the order item
-                var content = cs.GetById(orderNodeId);
-
-                // Try and parse out the int of the Umbraco property, if it exists
-                int currentStatus = Helpers.GetPropertyValueAsInteger(content.GetValue("status"));
-
-                // Only make a change if the new value differs from the current
-                if (currentStatus != statusId)
+                var arrivedAtInfodiskDateStr = content.GetValue("arrivedAtInfodiskDate").ToString();
+                var arrivedAtInfodiskDate = arrivedAtInfodiskDateStr == "" ? new DateTime(1970, 1, 1) : Convert.ToDateTime(arrivedAtInfodiskDateStr);
+                if (arrivedAtInfodiskDate.Year == 1970 && umbraco.library.GetPreValueAsString(statusId).Split(':').Last().Contains("Infodisk"))
                 {
-                    var arrivedAtInfodiskDateStr = content.GetValue("arrivedAtInfodiskDate").ToString();
-                    var arrivedAtInfodiskDate = arrivedAtInfodiskDateStr == "" ? new DateTime(1970, 1, 1) : Convert.ToDateTime(arrivedAtInfodiskDateStr);
-                    if (arrivedAtInfodiskDate.Year == 1970 && umbraco.library.GetPreValueAsString(statusId).Split(':').Last().Contains("Infodisk"))
-                    {
-                        // Item has arrived, for the first time, at the infodisk. Time to set the arrived at Infodisk date.
-                        content.SetValue("arrivedAtInfodiskDate", DateTime.Now);
-                    }
-
-                    content.SetValue("status", statusId);
-                    SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    _internalDbLogger.WriteLogItemInternal(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? umbraco.library.GetPreValueAsString(currentStatus).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(statusId).Split(':').Last(), doReindex, doSignal);
+                    // Item has arrived, for the first time, at the infodisk. Time to set the arrived at Infodisk date.
+                    content.SetValue("arrivedAtInfodiskDate", DateTime.Now);
                 }
 
-                return true;
-            }
-            catch (Exception)
-            {
-                throw;
+                content.SetValue("status", statusId);
+                SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                WriteLogItemInternal(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? umbraco.library.GetPreValueAsString(currentStatus).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(statusId).Split(':').Last(), doReindex, doSignal);
             }
         }
 
-        public bool SetOrderItemTypeInternal(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true)
+        public void SetOrderItemTypeInternal(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true)
         {
-            try
+            // Get node for the order item
+            var content = _contentService.GetById(orderNodeId);
+
+            // Try and parse out the int of the Umbraco property, if it exists
+            int currentType = Helpers.GetPropertyValueAsInteger(content.GetValue("type"));
+
+            // Only make a change if the new value differs from the current
+            if (currentType != typeId)
             {
-                // Connect to the content service
-                var cs = new Umbraco.Core.Services.ContentService();
-
-                // Get node for the order item
-                var content = cs.GetById(orderNodeId);
-
-                // Try and parse out the int of the Umbraco property, if it exists
-                int currentType = Helpers.GetPropertyValueAsInteger(content.GetValue("type"));
-
-                // Only make a change if the new value differs from the current
-                if (currentType != typeId)
+                content.SetValue("type", typeId);
+                if (typeId == Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Artikel"))
                 {
-                    content.SetValue("type", typeId);
-                    if (typeId == Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Artikel"))
-                    {
-                        content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
-                    }
-                    SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    _internalDbLogger.WriteLogItemInternal(orderNodeId, "TYP", "Typ ändrad till " + umbraco.library.GetPreValueAsString(typeId), doReindex, doSignal);
+                    content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
                 }
-
-                return true;
+                SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                WriteLogItemInternal(orderNodeId, "TYP", "Typ ändrad till " + umbraco.library.GetPreValueAsString(typeId), doReindex, doSignal);
             }
-            catch (Exception)
+        }
+
+        public void WriteLogItemInternal(int OrderItemNodeId, string Type, string Message, bool doReindex = true, bool doSignal = true)
+        {
+            // Get node for the order item
+            var contentNode = _contentService.GetById(OrderItemNodeId);
+
+            // Read previous log items
+            string oldLogItems;
+            List<LogItem> logItems = new List<LogItem>();
+
+            if (!String.IsNullOrEmpty(contentNode.GetValue("log").ToString()))
             {
-                throw;
+                oldLogItems = contentNode.GetValue("log").ToString();
+                logItems = JsonConvert.DeserializeObject<List<LogItem>>(oldLogItems);
+            }
+
+            // Set user to current user or system
+            string user;
+            if (Member.IsLoggedOn())
+            {
+                user = Member.GetCurrentMember().Text;
+            }
+            else
+            {
+                user = "System";
+            }
+
+            LogItem newLog = new LogItem
+            {
+                MemberName = user,
+                Type = Type,
+                Message = Message,
+                CreateDate = DateTime.Now
+            };
+
+            logItems.Add(newLog);
+
+            contentNode.SetValue("log", JsonConvert.SerializeObject(logItems));
+
+            SaveWithoutEventsAndWithSynchronousReindexing(contentNode, doReindex, doSignal);
+        }
+
+        public List<LogItem> GetLogItems(int nodeId)
+        {
+            // Get node for the order item
+            var contentNode = _contentService.GetById(nodeId);
+
+            // Read previous log items
+            string oldLogItems;
+            var logItems = new List<LogItem>();
+
+            if (!String.IsNullOrEmpty(contentNode.GetValue("log").ToString()))
+            {
+                oldLogItems = contentNode.GetValue("log").ToString();
+                logItems = JsonConvert.DeserializeObject<List<LogItem>>(oldLogItems);
+            }
+            logItems.Reverse();
+            return logItems;
+        }
+
+        public void WriteSierraDataToLog(int orderItemNodeId, SierraModel sm, bool doReindex = true, bool doSignal = true)
+        {
+            if (!string.IsNullOrEmpty(sm.id))
+            {
+                string logtext = "Firstname: " + sm.first_name + " Lastname: " + sm.last_name + "\n" +
+                                    "Barcode: " + sm.barcode + " Email: " + sm.email + " Ptyp: " + sm.ptype + "\n";
+                WriteLogItemInternal(orderItemNodeId, "SIERRA", logtext, doReindex, doSignal);
+            }
+            else
+            {
+                WriteLogItemInternal(orderItemNodeId, "SIERRA", "Låntagaren hittades inte.", doReindex, doSignal);
             }
         }
 

@@ -1,5 +1,4 @@
-﻿using Chalmers.ILL.Logging;
-using Chalmers.ILL.Mail;
+﻿using Chalmers.ILL.Mail;
 using Chalmers.ILL.Patron;
 using Chalmers.ILL.Providers;
 using Chalmers.ILL.SignalR;
@@ -16,19 +15,16 @@ namespace Chalmers.ILL.OrderItems
     {
         IExchangeMailWebApi _exchangeMailWebApi;
         IOrderItemManager _orderItemManager;
-        IInternalDbLogger _internalDbLogger;
         INotifier _notifier;
         IMediaService _mediaService;
         IUmbracoWrapper _umbraco;
         IPatronDataProvider _patronDataProvider;
 
-        public ChalmersSourceFactory(IExchangeMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager,
-            IInternalDbLogger internalDbLogger, INotifier notifier, IMediaService mediaService,
-            IUmbracoWrapper umbraco, IPatronDataProvider patronDataProvider)
+        public ChalmersSourceFactory(IExchangeMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager, INotifier notifier, 
+            IMediaService mediaService, IUmbracoWrapper umbraco, IPatronDataProvider patronDataProvider)
         {
             _exchangeMailWebApi = exchangeMailWebApi;
             _orderItemManager = orderItemManager;
-            _internalDbLogger = internalDbLogger;
             _notifier = notifier;
             _mediaService = mediaService;
             _umbraco = umbraco;
@@ -38,8 +34,8 @@ namespace Chalmers.ILL.OrderItems
         public List<ISource> Sources()
         {
             var res = new List<ISource>();
-            res.Add(new ChalmersOrderItemsMailSource(_exchangeMailWebApi, _orderItemManager, _internalDbLogger, _notifier, _mediaService, _patronDataProvider));
-            res.Add(new LibrisOrderItemsSource(_umbraco, _orderItemManager, _internalDbLogger, _patronDataProvider));
+            res.Add(new ChalmersOrderItemsMailSource(_exchangeMailWebApi, _orderItemManager, _notifier, _mediaService, _patronDataProvider));
+            res.Add(new LibrisOrderItemsSource(_umbraco, _orderItemManager, _patronDataProvider));
             return res;
         }
     }

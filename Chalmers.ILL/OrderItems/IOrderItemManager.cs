@@ -43,14 +43,33 @@ namespace Chalmers.ILL.OrderItems
         /// <returns>True if everything went ok</returns>
         void AddOrderItemAttachment(int orderNodeId, int mediaNodeId, string title, string link, bool doReindex = true, bool doSignal = true);
 
-        bool SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemCancellationReasonInternal(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemDeliveryLibraryInternal(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string providerInformation, bool doReindex = true, bool doSignal = true);
-        bool SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemPurchasedMaterialInternal(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemStatusInternal(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemTypeInternal(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true);
+        void SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
+        void SetDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
+        void SetOrderItemCancellationReasonInternal(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true);
+        void SetOrderItemDeliveryLibraryInternal(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true);
+        void SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string providerInformation, bool doReindex = true, bool doSignal = true);
+        void SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
+        void SetOrderItemPurchasedMaterialInternal(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true);
+        void SetOrderItemStatusInternal(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true);
+        void SetOrderItemTypeInternal(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true);
+
+        /// <summary>
+        /// Internal method for writing a LogItem for an OrderItem
+        /// </summary>
+        /// <param name="OrderItemNodeId">OrderItem</param>
+        /// <param name="Type">Type of logging</param>
+        /// <param name="Message">Log message</param>
+        /// <returns>true if LogItem was written</returns>
+        void WriteLogItemInternal(int OrderItemNodeId, string Type, string Message, bool doReindex = true, bool doSignal = true);
+
+        /// <summary>
+        /// Internal method to get LogItems for an OrderItem
+        /// </summary>
+        /// <param name="nodeId">OrderItem</param>
+        /// <returns>List of LogItem</returns>
+        List<LogItem> GetLogItems(int nodeId);
+
+        void WriteSierraDataToLog(int orderItemNodeId, SierraModel sm, bool doReindex = true, bool doSignal = true);
 
         /// <summary>
         /// Saves content without triggering events in Umbraco, then triggers redindexing of the 

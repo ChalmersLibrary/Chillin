@@ -9,7 +9,6 @@ using Chalmers.ILL.OrderItems;
 using Umbraco.Core.Logging;
 using Examine;
 using Chalmers.ILL.SignalR;
-using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.UmbracoApi;
 using Microsoft.Practices.Unity;
@@ -28,21 +27,18 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
-        IInternalDbLogger _internalDbLogger;
         IExchangeMailWebApi _exchangeMailWebApi;
         IUmbracoWrapper _dataTypes;
         ISourceFactory _sourceFactory;
         ISearcher _orderItemsSearcher;
         IAutomaticMailSendingEngine _automaticMailSendingEngine;
 
-        public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, 
-            IInternalDbLogger internalDbLogger, IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes,
-            ISourceFactory sourceFactory, [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher,
+        public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, IExchangeMailWebApi exchangeMailWebApi, 
+            IUmbracoWrapper dataTypes, ISourceFactory sourceFactory, [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher,
             IAutomaticMailSendingEngine automaticMailSendingEngine)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;
-            _internalDbLogger = internalDbLogger;
             _exchangeMailWebApi = exchangeMailWebApi;
             _dataTypes = dataTypes;
             _sourceFactory = sourceFactory;
@@ -164,7 +160,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var ids = _orderItemsSearcher.Search(query).Select(x => x.Id).ToList();
             foreach (var id in ids)
             {
-                _internalDbLogger.WriteLogItemInternal(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", false, false);
+                _orderItemManager.WriteLogItemInternal(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", false, false);
 
                 _orderItemManager.SetOrderItemStatusInternal(id,
                     _dataTypes.GetAvailableStatuses().First(x => x.Value.Contains("Åtgärda")).Id,

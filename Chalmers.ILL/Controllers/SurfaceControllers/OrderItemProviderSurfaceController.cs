@@ -10,7 +10,6 @@ using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.Logging;
 using Chalmers.ILL.Models.PartialPage;
 using Examine;
 
@@ -21,12 +20,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemProviderSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IInternalDbLogger _internalDbLogger;
 
-        public OrderItemProviderSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        public OrderItemProviderSurfaceController(IOrderItemManager orderItemManager)
         {
             _orderItemManager = orderItemManager;
-            _internalDbLogger = internalDbLogger;
         }
 
         [HttpGet]
@@ -65,12 +62,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Log this action
                 if (currentProviderName != providerName)
                 {
-                    _internalDbLogger.WriteLogItemInternal(nodeId, "ORDER", "Beställd från " + providerName, false, false);
+                    _orderItemManager.WriteLogItemInternal(nodeId, "ORDER", "Beställd från " + providerName, false, false);
                 }
 
                 if (currentProviderOrderId != providerOrderId)
                 {
-                    _internalDbLogger.WriteLogItemInternal(nodeId, "ORDER", "Beställningsnr: " + providerOrderId, false, false);
+                    _orderItemManager.WriteLogItemInternal(nodeId, "ORDER", "Beställningsnr: " + providerOrderId, false, false);
                 }
 
                 // Set status = Beställd
@@ -92,7 +89,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     if (currentFollowUpDate != parsedNewFollowUpDate)
                     {
                         _orderItemManager.SetFollowUpDate(nodeId, parsedNewFollowUpDate, false, false);
-                        _internalDbLogger.WriteLogItemInternal(nodeId, "DATE", "Följs upp senast " + newFollowUpDate, false, false);
+                        _orderItemManager.WriteLogItemInternal(nodeId, "DATE", "Följs upp senast " + newFollowUpDate, false, false);
                     }
                 }
 

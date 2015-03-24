@@ -11,7 +11,6 @@ using Chalmers.ILL.Extensions;
 using Microsoft.Exchange.WebServices.Data;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.Logging;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.Templates;
@@ -26,16 +25,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemDeliverySurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IInternalDbLogger _internalDbLogger;
         IUmbracoWrapper _umbraco;
         ITemplateService _templateService;
         IMailService _mailService;
 
-        public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
-            IUmbracoWrapper umbraco, ITemplateService templateService, IMailService mailService)
+        public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco, 
+            ITemplateService templateService, IMailService mailService)
         {
             _orderItemManager = orderItemManager;
-            _internalDbLogger = internalDbLogger;
             _umbraco = umbraco;
             _templateService = templateService;
             _mailService = mailService;
@@ -80,11 +77,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var contentNode = contentService.GetById(nodeId);
 
                 // Log this action
-                _internalDbLogger.WriteLogItemInternal(nodeId, "LEVERERAD", "Skickad med " + delivery, false, false);
+                _orderItemManager.WriteLogItemInternal(nodeId, "LEVERERAD", "Skickad med " + delivery, false, false);
 
                 if (logEntry != "")
                 {
-                    _internalDbLogger.WriteLogItemInternal(nodeId, "LOG", logEntry, false, false);
+                    _orderItemManager.WriteLogItemInternal(nodeId, "LOG", logEntry, false, false);
                 }
 
                 // Set status = Levererad
@@ -137,11 +134,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 _orderItemManager.SetOrderItemStatusInternal(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Infodisk"), false, false);
 
-                _internalDbLogger.WriteLogItemInternal(pack.orderNodeId, "LOG", pack.logMsg, false, false);
+                _orderItemManager.WriteLogItemInternal(pack.orderNodeId, "LOG", pack.logMsg, false, false);
 
                 _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
-                _internalDbLogger.WriteLogItemInternal(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
-                _internalDbLogger.WriteLogItemInternal(pack.orderNodeId, "MAIL", pack.mailData.message, true, true);
+                _orderItemManager.WriteLogItemInternal(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
+                _orderItemManager.WriteLogItemInternal(pack.orderNodeId, "MAIL", pack.mailData.message, true, true);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

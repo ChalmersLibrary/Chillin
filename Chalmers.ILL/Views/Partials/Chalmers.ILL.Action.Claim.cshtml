@@ -11,9 +11,15 @@
                 <textarea class="form-control" rows="12" id="message" name="message">@Model.ClaimBookMailTemplate</textarea>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-6">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="recipientName">Mottagarens namn</label>
+                <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.OrderItem.PatronName">
+            </div>
+            <div class="form-group">
+                <label for="recipientEmail">Mottagande e-postadress</label>
+                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.OrderItem.PatronEmail">
+            </div>
             <div class="form-group">
                 <label for="dueDate">Återlämningsdatum</label>
                 <div class="input-group date datetimepicker">
@@ -23,9 +29,7 @@
                     </span>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-12">
-            <button type="button" class="btn btn-success">Kräv</button>
+            <button type="button" class="btn btn-success" onclick="claim();">Kräv</button>
         </div>
     </div>
 </form>
@@ -36,4 +40,31 @@
             locale: "sv"
         });
     });
+
+    function claim() {
+        $.post("/umbraco/surface/OrderItemClaimSurface/ClaimItem", { 
+            packJson: JSON.stringify({ 
+                nodeId: @Model.OrderItem.NodeId, 
+                dueDate: $("#dueDate").val(),
+                mail: {  
+                    OrderId: "@Model.OrderItem.OrderId",
+                    recipientName: "@Model.OrderItem.PatronName",
+                    recipientEmail: "@Model.OrderItem.PatronEmail",
+                    message: $("#message").val(),
+                    attachments: []
+                }
+            })
+        }).done(function (json) {
+            if (json.Success) {
+                loadOrderItemDetails(nodeId);
+            }
+            else {
+                alert(json.Message);
+            }
+            unlockScreen();
+        }).fail(function (jqxhr, textStatus, error) {
+            alert("Error: " + textStatus + " " + error);
+            unlockScreen();
+        });
+    }
 </script>

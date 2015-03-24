@@ -13,7 +13,6 @@ using System.Configuration;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models.PartialPage;
@@ -25,16 +24,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemMailSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IInternalDbLogger _internalDbLogger;
         IExchangeMailWebApi _exchangeMailWebApi;
         IUmbracoWrapper _dataTypes;
         IMailService _mailService;
 
-        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
-            IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes, IMailService mailService)
+        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IExchangeMailWebApi exchangeMailWebApi, 
+            IUmbracoWrapper dataTypes, IMailService mailService)
         {
             _orderItemManager = orderItemManager;
-            _internalDbLogger = internalDbLogger;
             _exchangeMailWebApi = exchangeMailWebApi;
             _dataTypes = dataTypes;
             _mailService = mailService;
@@ -84,8 +81,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, m));
 
-                    _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, false, false);
-                    _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL", m.message, false, false);
+                    _orderItemManager.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, false, false);
+                    _orderItemManager.WriteLogItemInternal(m.nodeId, "MAIL", m.message, false, false);
                 }
                 catch (Exception)
                 {
@@ -96,7 +93,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 if (currentPatronEmail != m.recipientEmail)
                 {
                     contentNode.SetValue("patronEmail", m.recipientEmail);
-                    _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "PatronEmail ändrad till " + m.recipientEmail, false, false);
+                    _orderItemManager.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "PatronEmail ändrad till " + m.recipientEmail, false, false);
                 }
 
                 // Set FollowUpDate property if it differs from current
@@ -108,7 +105,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     if (currentFollowUpDate != parsedNewFollowUpDate)
                     {
                         _orderItemManager.SetFollowUpDate(m.nodeId, parsedNewFollowUpDate, false, false);
-                        _internalDbLogger.WriteLogItemInternal(m.nodeId, "DATE", "Följs upp senast " + m.newFollowUpDate, false, false);
+                        _orderItemManager.WriteLogItemInternal(m.nodeId, "DATE", "Följs upp senast " + m.newFollowUpDate, false, false);
                     }
 	            }
 
