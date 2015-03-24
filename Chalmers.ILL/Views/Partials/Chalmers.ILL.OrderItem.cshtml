@@ -174,9 +174,7 @@
                 <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.OrderItem.NodeId);">Logga</button>
                 @if (Model.OrderItem.Type > 0)
                 {
-                    <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Annullera</button> -->
                     <button type="button" class="btn btn-primary" onclick="loadDeliveryAction(@Model.OrderItem.NodeId);">Leverans <span id="attachment-counter1" class="badge">@Model.OrderItem.AttachmentList.Count</span></button>
-                    <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Överför</button> -->
                 }
                 @if (Model.OrderItem.TypePrevalue == "Bok")
                 {
@@ -228,55 +226,116 @@
 <div id="loading-partial-view" hidden>Laddar...</div>
 
 <!-- Details about this OrderItem -->
-<div class="col-sm-4 order-details">
+<div class="col-sm-2 order-details" align="right">
     <div>
-        <span class="label label-primary">OrderId:</span> @Model.OrderItem.OrderId
+        <span class="label label-primary">Order ID</span>
     </div>
     <div>
-        <span class="label label-primary">Created:</span> @Model.OrderItem.CreateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+        <span class="label label-primary">Skapad</span>
     </div>
     <div>
-        <span class="label label-primary">Updated:</span> @Model.OrderItem.UpdateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+        <span class="label label-primary">Senast uppdaterad</span>
     </div>
     <div>
-        <span class="label label-primary">FollowUp:</span> @Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
-    </div>
-</div>
-<div class="col-sm-4 order-details">
-    <div>
-        <span class="label label-primary">PatronName:</span> @Model.OrderItem.PatronName
+        <span class="label label-primary">Uppföljningsdatum</span>
     </div>
     <div>
-        <span class="label label-primary">PatronEmail:</span> @Model.OrderItem.PatronEmail
-    </div>
-    <div>
-        <span class="label label-primary">PatronIdentifier:</span> @Model.OrderItem.PatronCardNo
-    </div>
-    <div>
-        <span class="label label-primary">ProviderName:</span> @Model.OrderItem.ProviderName
-    </div>
-    <div>
-        <span class="label label-primary">ProviderOrderId:</span> @Model.OrderItem.ProviderOrderId
+        <span class="label label-primary">Återlämningsdatum</span>
     </div>
 </div>
-<div class="col-sm-4 order-details">
+<div class="col-sm-2 order-details">
     <div>
-        <span class="label label-primary">Name</span> @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name
+        @Model.OrderItem.OrderId
     </div>
     <div>
-        <span class="label label-primary">Barcode</span> @Model.OrderItem.SierraInfo.barcode
+        @Model.OrderItem.CreateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
     <div>
-        <span class="label label-primary">Ptyp</span> @(!String.IsNullOrEmpty(Model.OrderItem.SierraInfo.barcode) ? Model.OrderItem.SierraInfo.ptype.ToString() : "")
+        @Model.OrderItem.UpdateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
     <div>
-        <span class="label label-primary">Email</span> @Model.OrderItem.SierraInfo.email
+        @Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
     <div>
-        <span class="label label-primary">Home Library</span> @Model.OrderItem.SierraInfo.home_library
+        @Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+        @if (Model.OrderItem.DueDate != Model.OrderItem.ProviderDueDate)
+        {
+            <span class="glyphicon glyphicon-exclamation-sign" data-toggle="popover" data-content="Vår lånetid mot leverantören (@Model.OrderItem.ProviderDueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)) skiljer sig från den lånetid som låntagaren har mot oss (@Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture))."></span>
+        }
+    </div>
+</div>
+<div class="col-sm-2 order-details" align="right">
+    <div>
+        <span class="label label-primary">Låntagare - Namn</span>
     </div>
     <div>
-        <span class='label @((String.IsNullOrEmpty(Model.OrderItem.SierraInfo.mblock) || Model.OrderItem.SierraInfo.mblock=="-") ? "label-primary" : "label-danger")'>Mblock</span> @Model.OrderItem.SierraInfo.mblock
+        <span class="label label-primary">Låntagare - E-post</span>
+    </div>
+    <div>
+        <span class="label label-primary">Låntagare - Kortnr.</span>
+    </div>
+    <div>
+        <span class="label label-primary">Leverantör - Namn</span>
+    </div>
+    <div>
+        <span class="label label-primary">Leverantör - Order ID</span>
+    </div>
+</div>
+<div class="col-sm-2 order-details">
+    <div>
+        @Model.OrderItem.PatronName
+    </div>
+    <div>
+        @Model.OrderItem.PatronEmail
+    </div>
+    <div>
+        @Model.OrderItem.PatronCardNo
+    </div>
+    <div>
+        @Model.OrderItem.ProviderName
+    </div>
+    <div>
+        @Model.OrderItem.ProviderOrderId
+    </div>
+</div>
+<div class="col-sm-2 order-details" align="right">
+    <div>
+        <span class="label label-primary">Sierra - Namn</span>
+    </div>
+    <div>
+        <span class="label label-primary">Sierra - Kortnr.</span>
+    </div>
+    <div>
+        <span class="label label-primary">Sierra - P-typ</span>
+    </div>
+    <div>
+        <span class="label label-primary">Sierra - E-post</span>
+    </div>
+    <div>
+        <span class="label label-primary">Sierra - Hembibliotek</span>
+    </div>
+    <div>
+        <span class='label @((String.IsNullOrEmpty(Model.OrderItem.SierraInfo.mblock) || Model.OrderItem.SierraInfo.mblock=="-") ? "label-primary" : "label-danger")'>Sierra - M-block</span>
+    </div>
+</div>
+<div class="col-sm-2 order-details">
+    <div>
+        @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name
+    </div>
+    <div>
+        @Model.OrderItem.SierraInfo.barcode
+    </div>
+    <div>
+        @(!String.IsNullOrEmpty(Model.OrderItem.SierraInfo.barcode) ? Model.OrderItem.SierraInfo.ptype.ToString() : "")
+    </div>
+    <div>
+        @Model.OrderItem.SierraInfo.email
+    </div>
+    <div>
+        @Model.OrderItem.SierraInfo.home_library
+    </div>
+    <div>
+        @Model.OrderItem.SierraInfo.mblock
     </div>
 </div>
 
@@ -308,6 +367,13 @@
 </div>
 
 <script type="text/javascript">
+    $(function () {
+        $("[data-toggle='popover']").popover({
+            trigger: "hover",
+            placement: "top",
+            html: true
+        });
+    })
     // Open up an old mail
     $(".MAIL").click(function () {
         //debugger;
