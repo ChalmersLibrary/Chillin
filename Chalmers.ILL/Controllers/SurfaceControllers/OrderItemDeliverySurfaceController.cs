@@ -135,6 +135,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Use internal method to set status property and log the result
                 _orderItemManager.SetOrderItemDeliveryReceivedInternal(pack.orderNodeId, pack.bookId, pack.dueDate, pack.providerInformation, false, false);
 
+                _orderItemManager.SetOrderItemStatusInternal(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Infodisk"), false, false);
+
                 _internalDbLogger.WriteLogItemInternal(pack.orderNodeId, "LOG", pack.logMsg, false, false);
 
                 _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
