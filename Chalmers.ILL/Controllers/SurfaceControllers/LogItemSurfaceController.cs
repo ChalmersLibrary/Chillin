@@ -103,12 +103,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     if (currentFollowUpDate != parsedNewFollowUpDate)
                     {
                         _orderItemManager.SetFollowUpDate(nodeId, parsedNewFollowUpDate, false, false);
-                        _orderItemManager.WriteLogItemInternal(nodeId, "DATE", "Följs upp senast " + newFollowUpDate, false, false);
                     }
                 }
 
                 // Use internal method to set type property and log the result
-                _orderItemManager.WriteLogItemInternal(nodeId, Type, Message);
+                _orderItemManager.AddLogItem(nodeId, Type, Message);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

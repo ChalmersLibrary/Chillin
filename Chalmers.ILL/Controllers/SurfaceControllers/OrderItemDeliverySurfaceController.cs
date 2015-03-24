@@ -77,17 +77,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var contentNode = contentService.GetById(nodeId);
 
                 // Log this action
-                _orderItemManager.WriteLogItemInternal(nodeId, "LEVERERAD", "Skickad med " + delivery, false, false);
+                _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Skickad med " + delivery, false, false);
 
                 if (logEntry != "")
                 {
-                    _orderItemManager.WriteLogItemInternal(nodeId, "LOG", logEntry, false, false);
+                    _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, false, false);
                 }
 
                 // Set status = Levererad
                 try
                 {
-                    _orderItemManager.SetOrderItemStatusInternal(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
+                    _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
                 }
                 catch (Exception)
                 {
@@ -129,18 +129,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
 
-                // Use internal method to set status property and log the result
-                _orderItemManager.SetOrderItemDeliveryReceivedInternal(pack.orderNodeId, pack.bookId, pack.dueDate, pack.providerInformation, false, false);
-
-                _orderItemManager.SetOrderItemStatusInternal(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Infodisk"), false, false);
-
-                _orderItemManager.WriteLogItemInternal(pack.orderNodeId, "LOG", pack.logMsg, false, false);
+                _orderItemManager.SetDeliveryReceived(pack.orderNodeId, pack.bookId, pack.dueDate, pack.providerInformation, false, false);
+                _orderItemManager.SetStatus(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Infodisk"), false, false);
+                _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, false, false);
 
                 _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
-                _orderItemManager.WriteLogItemInternal(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
-                _orderItemManager.WriteLogItemInternal(pack.orderNodeId, "MAIL", pack.mailData.message, true, true);
+                _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
+                _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL", pack.mailData.message);
 
-                // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;
                 json.Message = "Changed delivery item information to bookid:" + pack.bookId + " due date:+" + pack.dueDate + " provider information:" + pack.providerInformation;
             }

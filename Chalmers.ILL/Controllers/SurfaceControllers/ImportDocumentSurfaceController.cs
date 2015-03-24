@@ -98,7 +98,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // cleanup, memory stream not needed any longer
                             stream.Dispose();
 
-                            _orderItemManager.AddOrderItemAttachment(orderItem.Id, media.Id, name, media.GetValue("file").ToString());
+                            _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.Id, media.Id, name, media.GetValue("file").ToString());
 
                             json.Success = true;
                             json.Message = "Document imported successfully.";
@@ -168,7 +168,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // cleanup, memory stream not needed any longer
                             stream.Dispose();
 
-                            _orderItemManager.AddOrderItemAttachment(orderItem.Id, media.Id, filename, media.GetValue("file").ToString());
+                            _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.Id, media.Id, filename, media.GetValue("file").ToString());
 
                             json.Success = true;
                             json.Message = media.Id.ToString() + ";" + media.GetValue("file").ToString();

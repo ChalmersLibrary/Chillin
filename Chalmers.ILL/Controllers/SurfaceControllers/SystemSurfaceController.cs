@@ -160,11 +160,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var ids = _orderItemsSearcher.Search(query).Select(x => x.Id).ToList();
             foreach (var id in ids)
             {
-                _orderItemManager.WriteLogItemInternal(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", false, false);
+                _orderItemManager.AddLogItem(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", false, false);
 
-                _orderItemManager.SetOrderItemStatusInternal(id,
-                    _dataTypes.GetAvailableStatuses().First(x => x.Value.Contains("Åtgärda")).Id,
-                    true, true);
+                _orderItemManager.SetStatus(id, _dataTypes.GetAvailableStatuses().First(x => x.Value.Contains("Åtgärda")).Id);
 
                 _notifier.UpdateOrderItemUpdate(id, memberId.ToString(), "", true, true);
             }

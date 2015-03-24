@@ -95,7 +95,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     content.SetValue("homeLibrary", sm.home_library);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 }
-                _orderItemManager.WriteSierraDataToLog(orderItemNodeId, sm);
+                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm);
 
                 json.Success = true;
                 json.Message = "Succcessfully loaded Sierra data from \"personnummer\" or library card number.";
@@ -134,7 +134,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     content.SetValue("homeLibrary", sm.home_library);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 }
-                _orderItemManager.WriteSierraDataToLog(orderItemNodeId, sm);
+                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm);
 
                 json.Success = true;
                 json.Message = "Succcessfully loaded Sierra data from library card number.";

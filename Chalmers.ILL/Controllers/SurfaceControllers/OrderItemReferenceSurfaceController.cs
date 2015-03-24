@@ -54,7 +54,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     contentNode.SetValue("reference", reference);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode, false, false);
-                    _orderItemManager.WriteLogItemInternal(nodeId, "REF", "Referens ändrad");
+                    _orderItemManager.AddLogItem(nodeId, "REF", "Referens ändrad");
                 }
 
                 // Construct JSON response for client (ie jQuery/getJSON)

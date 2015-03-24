@@ -62,18 +62,18 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Log this action
                 if (currentProviderName != providerName)
                 {
-                    _orderItemManager.WriteLogItemInternal(nodeId, "ORDER", "Beställd från " + providerName, false, false);
+                    _orderItemManager.AddLogItem(nodeId, "ORDER", "Beställd från " + providerName, false, false);
                 }
 
                 if (currentProviderOrderId != providerOrderId)
                 {
-                    _orderItemManager.WriteLogItemInternal(nodeId, "ORDER", "Beställningsnr: " + providerOrderId, false, false);
+                    _orderItemManager.AddLogItem(nodeId, "ORDER", "Beställningsnr: " + providerOrderId, false, false);
                 }
 
                 // Set status = Beställd
                 try
                 {
-                    _orderItemManager.SetOrderItemStatusInternal(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "03:Beställd"), false, false);
+                    _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "03:Beställd"), false, false);
                 }
                 catch (Exception)
                 {
@@ -89,7 +89,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     if (currentFollowUpDate != parsedNewFollowUpDate)
                     {
                         _orderItemManager.SetFollowUpDate(nodeId, parsedNewFollowUpDate, false, false);
-                        _orderItemManager.WriteLogItemInternal(nodeId, "DATE", "Följs upp senast " + newFollowUpDate, false, false);
                     }
                 }
 

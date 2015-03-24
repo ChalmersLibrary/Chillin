@@ -49,7 +49,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 if (pack.logMsg != "")
                 {
-                    _orderItemManager.WriteLogItemInternal(pack.nodeId, "LOG", pack.logMsg, false, false);
+                    _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logMsg, false, false);
                 }
 
                 _orderItemManager.SetProviderDueDate(pack.nodeId, pack.providerDueDate);
