@@ -45,13 +45,15 @@ namespace Chalmers.ILL.OrderItems
 
         void SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
         void SetDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
+        void SetProviderDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
         void SetOrderItemCancellationReasonInternal(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true);
         void SetOrderItemDeliveryLibraryInternal(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true);
-        void SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string providerInformation, bool doReindex = true, bool doSignal = true);
         void SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
         void SetOrderItemPurchasedMaterialInternal(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true);
         void SetOrderItemStatusInternal(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true);
         void SetOrderItemTypeInternal(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true);
+
+        void SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string providerInformation, bool doReindex = true, bool doSignal = true);
 
         /// <summary>
         /// Internal method for writing a LogItem for an OrderItem

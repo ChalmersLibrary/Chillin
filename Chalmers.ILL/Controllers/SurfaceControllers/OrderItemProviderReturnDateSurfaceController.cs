@@ -1,5 +1,9 @@
-﻿using Chalmers.ILL.Models.PartialPage;
+﻿using Chalmers.ILL.Mail;
+using Chalmers.ILL.Models;
+using Chalmers.ILL.Models.Mail;
+using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.OrderItems;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +17,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemProviderReturnDateSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
+        IMailService _mailService;
 
-        public OrderItemProviderReturnDateSurfaceController(IOrderItemManager orderItemManager)
+        public OrderItemProviderReturnDateSurfaceController(IOrderItemManager orderItemManager, IMailService mailService)
         {
             _orderItemManager = orderItemManager;
         }
@@ -31,6 +36,41 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.ProviderReturnDate", pageModel);
+        }
+
+        [HttpPost]
+        public ActionResult ChangeReturnDate(string packJson)
+        {
+            var json = new ResultResponse();
+
+            try
+            {
+                var pack = JsonConvert.DeserializeObject<ChangeReturnDatePackage>(packJson);
+
+                if (pack.logMsg != "")
+                {
+                    _orderItemManager.WriteLogItemInternal(pack.nodeId, "LOG", pack.logMsg, false, false);
+                }
+
+                _orderItemManager.SetProviderDueDate(pack.nodeId, pack.providerDueDate);
+
+                json.Success = true;
+                json.Message = "Återlämningsdatum mot låntagare ändrat.";
+            }
+            catch (Exception e)
+            {
+                json.Success = false;
+                json.Message = "Misslyckades med att ändra återlämningsdatum mot låntagare: " + e.Message;
+            }
+
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        public class ChangeReturnDatePackage
+        {
+            public int nodeId;
+            public string logMsg;
+            public DateTime providerDueDate;
         }
     }
 }

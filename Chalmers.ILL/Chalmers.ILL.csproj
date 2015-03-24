@@ -456,6 +456,7 @@
     <Compile Include="OrderItems\IOrderItemManager.cs" />
     <Compile Include="OrderItems\ISource.cs" />
     <Compile Include="OrderItems\ISourceFactory.cs" />
+    <Compile Include="OrderItems\SaveException.cs" />
     <Compile Include="OrderItems\SourcePollingException.cs" />
     <Compile Include="OrderItems\SourcePollingResult.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />

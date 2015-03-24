@@ -106,6 +106,8 @@ namespace Chalmers.ILL.OrderItems
                 orderItem.ProviderName = contentNode.Fields.GetValueString("ProviderName") != null ? contentNode.Fields.GetValueString("ProviderName") : "";
                 orderItem.ProviderOrderId = contentNode.Fields.GetValueString("ProviderOrderId") != null ? contentNode.Fields.GetValueString("ProviderOrderId") : "";
                 orderItem.ProviderInformation = contentNode.Fields.GetValueString("ProviderInformation") != null ? contentNode.Fields.GetValueString("ProviderInformation") : "";
+                orderItem.ProviderDueDate = contentNode.Fields.GetValueString("ProviderDueDate") == "" ? DateTime.Now :
+                    DateTime.ParseExact(contentNode.Fields.GetValueString("ProviderDueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
 
                 // Parse out the integer of status and type
                 int OrderStatusId = Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], contentNode.Fields.GetValueString("Status"));
@@ -214,6 +216,7 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("attachments", JsonConvert.SerializeObject(new List<OrderAttachment>()));
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
             content.SetValue("dueDate", DateTime.Now);
+            content.SetValue("providerDueDate", DateTime.Now);
             content.SetValue("arrivedAtInfodiskDate", new DateTime(1970, 1, 1));
             content.SetValue("bookId", "");
             content.SetValue("providerInformation", "");
@@ -331,86 +334,54 @@ namespace Chalmers.ILL.OrderItems
 
         public void AddOrderItemAttachment(int orderNodeId, int mediaNodeId, string title, string link, bool doReindex = true, bool doSignal = true)
         {
-            try
+            if (!String.IsNullOrEmpty(title) && !String.IsNullOrEmpty(link))
             {
-                if (!String.IsNullOrEmpty(title) && !String.IsNullOrEmpty(link))
+                var cs = new Umbraco.Core.Services.ContentService();
+
+                var content = cs.GetById(orderNodeId);
+
+                string attachmentsStr = Convert.ToString(content.GetValue("attachments"));
+                List<OrderAttachment> attachmentList;
+                if (!String.IsNullOrEmpty(attachmentsStr))
                 {
-                    var cs = new Umbraco.Core.Services.ContentService();
-
-                    var content = cs.GetById(orderNodeId);
-
-                    string attachmentsStr = Convert.ToString(content.GetValue("attachments"));
-                    List<OrderAttachment> attachmentList;
-                    if (!String.IsNullOrEmpty(attachmentsStr))
-                    {
-                        attachmentList = JsonConvert.DeserializeObject<List<OrderAttachment>>(attachmentsStr);
-                    }
-                    else
-                    {
-                        attachmentList = new List<OrderAttachment>();
-                    }
-
-                    var att = new OrderAttachment();
-                    att.Title = title;
-                    att.Link = link;
-                    att.MediaItemNodeId = mediaNodeId;
-                    attachmentList.Add(att);
-
-                    content.SetValue("attachments", JsonConvert.SerializeObject(attachmentList));
-                    SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    WriteLogItemInternal(orderNodeId, "ATTACHMENT", "Nytt dokument bundet till ordern.", doReindex, doSignal);
+                    attachmentList = JsonConvert.DeserializeObject<List<OrderAttachment>>(attachmentsStr);
                 }
-            }
-            catch (Exception)
-            {
-                throw;
+                else
+                {
+                    attachmentList = new List<OrderAttachment>();
+                }
+
+                var att = new OrderAttachment();
+                att.Title = title;
+                att.Link = link;
+                att.MediaItemNodeId = mediaNodeId;
+                attachmentList.Add(att);
+
+                content.SetValue("attachments", JsonConvert.SerializeObject(attachmentList));
+                SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                WriteLogItemInternal(orderNodeId, "ATTACHMENT", "Nytt dokument bundet till ordern.", doReindex, doSignal);
             }
         }
 
         public void SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
-
-            try
-            {
-                content.SetValue("followUpDate", date);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Setting followUpDate to " + date + ": " + e.Message);
-            }
-
-            try
-            {
-                SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
-            }
-            catch (Exception ep)
-            {
-                throw new Exception("Save NodeId=" + content.Id + ", Published=" + content.Published + ", Status=" + content.Status + ", Trashed=" + content.Trashed + ", UpdateDate=" + content.UpdateDate + ": " + ep.Message);
-            }
+            SetContentValue(content, "followUpDate", date);
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
         public void SetDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
+            SetContentValue(content, "dueDate", date);
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
 
-            try
-            {
-                content.SetValue("dueDate", date);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Error when setting dueDate to " + date + ".", e);
-            }
-
-            try
-            {
-                SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Save NodeId=" + content.Id + ", Published=" + content.Published + ", Status=" + content.Status + ", Trashed=" + content.Trashed + ", UpdateDate=" + content.UpdateDate + ": " + e.Message);
-            }
+        public void SetProviderDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            SetContentValue(content, "providerDueDate", date);
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
         public void SetOrderItemCancellationReasonInternal(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true)
@@ -423,7 +394,7 @@ namespace Chalmers.ILL.OrderItems
             // Only make a change if the new value differs from the current
             if (currentCancellationReason != cancellationReasonId)
             {
-                content.SetValue("cancellationReason", cancellationReasonId);
+                SetContentValue(content, "cancellationReason", cancellationReasonId);
                 SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 WriteLogItemInternal(orderNodeId, "ANNULLERINGSORSAK", "Annulleringsorsak ändrad till " + umbraco.library.GetPreValueAsString(cancellationReasonId), doReindex, doSignal);
             }
@@ -439,7 +410,7 @@ namespace Chalmers.ILL.OrderItems
             // Only make a change if the new value differs from the current
             if (currentDeliveryLibrary != deliveryLibraryId)
             {
-                content.SetValue("deliveryLibrary", deliveryLibraryId);
+                SetContentValue(content, "deliveryLibrary", deliveryLibraryId);
                 SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 WriteLogItemInternal(orderNodeId, "BIBLIOTEK", "Bibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), doReindex, doSignal);
             }
@@ -705,6 +676,8 @@ namespace Chalmers.ILL.OrderItems
             catch (Exception e)
             {
                 LogHelper.Error<OrderItemManager>("SaveWithoutEventsAndWithSynchronousReindexing: Error when saving content.", e);
+                throw new SaveException("Save NodeId=" + content.Id + ", Published=" + content.Published + ", Status=" + content.Status + ", Trashed=" + content.Trashed + ", UpdateDate=" + content.UpdateDate + ".", e);
+
             }
         }
 
@@ -722,6 +695,18 @@ namespace Chalmers.ILL.OrderItems
                 (orderItem.DeliveryLibraryPrevalue == "Huvudbiblioteket" && orderItem.SierraInfo.home_library.Contains("hbib")) ||
                 (orderItem.DeliveryLibraryPrevalue == "Lindholmenbiblioteket" && orderItem.SierraInfo.home_library.Contains("lbib")) ||
                 (orderItem.DeliveryLibraryPrevalue == "Arkitekturbiblioteket" && orderItem.SierraInfo.home_library.Contains("abib"));
+        }
+
+        private void SetContentValue(IContent content, string key, object value)
+        {
+            try
+            {
+                content.SetValue(key, value);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error when setting " + key + " to " + value.ToString() + ".", e);
+            }
         }
 
         #endregion

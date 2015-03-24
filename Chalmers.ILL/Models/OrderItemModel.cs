@@ -46,6 +46,8 @@ namespace Chalmers.ILL.Models
 
         public string ProviderName { get; set; }
         public string ProviderOrderId { get; set; }
+        public string ProviderInformation { get; set; }
+        public DateTime ProviderDueDate { get; set; }
 
         public string EditedBy { get; set; }
         public string EditedByMemberName { get; set; }
@@ -61,7 +63,6 @@ namespace Chalmers.ILL.Models
         public DateTime DueDate { get; set; }
         public DateTime ArrivedAtInfodiskDate { get; set; }
         public string BookId { get; set; }
-        public string ProviderInformation { get; set; }
 
         public List<LogItem> LogItemsList { get; set; }
         public List<OrderAttachment> AttachmentList { get; set; }
