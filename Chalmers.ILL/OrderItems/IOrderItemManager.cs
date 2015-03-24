@@ -25,11 +25,12 @@ namespace Chalmers.ILL.OrderItems
         void SetProviderDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
         void SetCancellationReason(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true);
         void SetDeliveryLibrary(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true);
-        void SetDeliveryReceived(int orderNodeId, string bookId, DateTime dueDate, string providerInformation, bool doReindex = true, bool doSignal = true);
         void SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
         void SetPurchasedMaterial(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true);
         void SetStatus(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true);
         void SetType(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true);
+        void SetBookId(int nodeId, string bookId, bool doReindex = true, bool doSignal = true);
+        void SetProviderInformation(int nodeId, string bookId, bool doReindex = true, bool doSignal = true);
 
         /// <summary>
         /// Creates a new OrderItem from a MailQueueModel

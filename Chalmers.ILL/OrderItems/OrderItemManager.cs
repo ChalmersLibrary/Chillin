@@ -342,52 +342,6 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
-        // TODO: Implement this complex setter somewhere else, probably in a controller.
-        public void SetDeliveryReceived(int orderNodeId, string bookId, DateTime dueDate, string providerInformation, bool doReindex = true, bool doSignal = true)
-        {
-            bool infoChanged = false;
-
-            var content = _contentService.GetById(orderNodeId);
-            string currentBookId = "";
-            string currentProviderInformation = "";
-
-            if (content.HasProperty("bookId"))
-            {
-                currentBookId = content.GetValue("bookId").ToString() == "" ? "" : content.GetValue("bookId").ToString();
-            }
-            else { currentBookId = ""; }
-            if (content.HasProperty("providerInformation"))
-            {
-                currentProviderInformation = content.GetValue("providerInformation").ToString() == "" ? "" : content.GetValue("providerInformation").ToString();
-            } else { currentProviderInformation = "";}
-            DateTime currentDueDate = content.GetValue("dueDate").ToString() == "" ? DateTime.Now : Convert.ToDateTime(content.GetValue("dueDate").ToString());
-
-            // Only make a change if the values differs from the current
-            if (currentDueDate != dueDate)
-            {
-                content.SetValue("dueDate", Convert.ToDateTime(dueDate));
-                infoChanged = true;
-            }
-
-            if (currentBookId != bookId)
-            {
-                content.SetValue("bookId", bookId);
-                infoChanged = true;
-            }
-               
-            if (currentProviderInformation != providerInformation)
-            {
-                content.SetValue("providerInformation", providerInformation);
-                infoChanged = true;
-            }
-
-            if (infoChanged)
-            {
-                SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                AddLogItem(orderNodeId, "BOKINFORMATION", "Bokinformation ändrat till bokid:"+bookId+" lånetid:"+dueDate+" leverantörsinformation:"+providerInformation, doReindex, doSignal);
-            }
-        }
-
         public void SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
@@ -436,6 +390,31 @@ namespace Chalmers.ILL.OrderItems
                 AddLogItem(orderNodeId, "TYP", "Typ ändrad till " + umbraco.library.GetPreValueAsString(typeId), doReindex, doSignal);
             }
         }
+
+        public void SetBookId(int nodeId, string bookId, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentBookId = content.GetValue<string>("bookId");
+            if (currentBookId != bookId)
+            {
+                content.SetValue("bookId", bookId);
+                SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                AddLogItem(nodeId, "BOKINFO", "Bok-ID ändrat till " + bookId + ".", doReindex, doSignal);
+            }
+        }
+
+        public void SetProviderInformation(int nodeId, string providerInformation, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentProviderInformation = content.GetValue<string>("bookId");
+            if (currentProviderInformation != providerInformation)
+            {
+                content.SetValue("providerInformation", providerInformation);
+                SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                AddLogItem(nodeId, "LEVERANTÖR", "Leverantörsinformation ändrad till \"" + providerInformation + "\".", doReindex, doSignal);
+            }
+        }
+
 
         public int CreateOrderItemInDbFromMailQueueModel(MailQueueModel model, bool doReindex = true, bool doSignal = true)
         {

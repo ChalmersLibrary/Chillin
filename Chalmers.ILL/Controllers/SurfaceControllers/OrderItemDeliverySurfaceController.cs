@@ -129,7 +129,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
 
-                _orderItemManager.SetDeliveryReceived(pack.orderNodeId, pack.bookId, pack.dueDate, pack.providerInformation, false, false);
+                _orderItemManager.SetDueDate(pack.orderNodeId, pack.dueDate, false, false);
+                _orderItemManager.SetProviderDueDate(pack.orderNodeId, pack.dueDate, false, false);
+                _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, false, false);
+                _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, false, false);
+
                 _orderItemManager.SetStatus(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Infodisk"), false, false);
                 _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, false, false);
 
@@ -138,7 +142,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL", pack.mailData.message);
 
                 json.Success = true;
-                json.Message = "Changed delivery item information to bookid:" + pack.bookId + " due date:+" + pack.dueDate + " provider information:" + pack.providerInformation;
+                json.Message = "Leverans till infodisk genomförd.";
             }
             catch (Exception e)
             {

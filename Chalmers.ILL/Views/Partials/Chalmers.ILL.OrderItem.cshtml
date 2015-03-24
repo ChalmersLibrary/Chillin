@@ -260,7 +260,7 @@
         @Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
         @if (Model.OrderItem.DueDate != Model.OrderItem.ProviderDueDate)
         {
-            <span class="glyphicon glyphicon-exclamation-sign" data-toggle="popover" data-content="Vår lånetid mot leverantören (@Model.OrderItem.ProviderDueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)) skiljer sig från den lånetid som låntagaren har mot oss (@Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture))."></span>
+            <span class="glyphicon glyphicon-exclamation-sign" data-toggle="popover" data-content="Vår lånetid mot leverantören <span class='label label-primary'>@Model.OrderItem.ProviderDueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)</span> skiljer sig från den lånetid som låntagaren har mot oss <span class='label label-primary'>@Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)</span>."></span>
         }
     </div>
 </div>

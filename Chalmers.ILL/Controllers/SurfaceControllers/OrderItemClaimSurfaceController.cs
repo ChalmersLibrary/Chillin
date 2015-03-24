@@ -50,6 +50,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var pack = JsonConvert.DeserializeObject<ClaimItemPackage>(packJson);
 
                 _orderItemManager.SetDueDate(pack.nodeId, pack.dueDate, false, false);
+                _orderItemManager.SetProviderDueDate(pack.nodeId, pack.dueDate, false, false);
                 _orderItemManager.SetStatus(pack.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "12:Krävd"), false, false);
 
                 _mailService.SendMail(pack.mail);
