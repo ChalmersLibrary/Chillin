@@ -42,6 +42,7 @@
     });
 
     function claim() {
+        lockScreen();
         $.post("/umbraco/surface/OrderItemClaimSurface/ClaimItem", {
             packJson: JSON.stringify({
                 nodeId: @Model.OrderItem.NodeId,
