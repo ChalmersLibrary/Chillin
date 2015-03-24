@@ -1,4 +1,5 @@
 ﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionClaimModel
+@using System.Globalization
 
 <div class="action-header">Kräv tillbaks bok</div>
 
@@ -16,7 +17,7 @@
             <div class="form-group">
                 <label for="dueDate">Återlämningsdatum</label>
                 <div class="input-group date datetimepicker">
-                    <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.DueDate">
+                    <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
