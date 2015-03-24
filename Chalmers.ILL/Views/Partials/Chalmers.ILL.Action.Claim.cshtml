@@ -42,11 +42,11 @@
     });
 
     function claim() {
-        $.post("/umbraco/surface/OrderItemClaimSurface/ClaimItem", { 
-            packJson: JSON.stringify({ 
-                nodeId: @Model.OrderItem.NodeId, 
+        $.post("/umbraco/surface/OrderItemClaimSurface/ClaimItem", {
+            packJson: JSON.stringify({
+                nodeId: @Model.OrderItem.NodeId,
                 dueDate: $("#dueDate").val(),
-                mail: {  
+                mail: {
                     OrderId: "@Model.OrderItem.OrderId",
                     recipientName: "@Model.OrderItem.PatronName",
                     recipientEmail: "@Model.OrderItem.PatronEmail",
@@ -56,7 +56,7 @@
             })
         }).done(function (json) {
             if (json.Success) {
-                loadOrderItemDetails(nodeId);
+                loadOrderItemDetails(@Model.OrderItem.NodeId);
             }
             else {
                 alert(json.Message);
