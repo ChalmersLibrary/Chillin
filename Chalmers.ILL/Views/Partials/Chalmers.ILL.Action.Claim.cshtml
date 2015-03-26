@@ -1,35 +1,26 @@
 ﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionClaimModel
 @using System.Globalization
 
+<textarea id="mail-message" hidden>@Model.ClaimBookMailTemplate</textarea>
+
 <div class="action-header">Kräv tillbaks bok</div>
 
 <form class="form" role="form" onsubmit="return false;">
     <div class="row">
-        <div class="col-lg-6">
-            <div class="form-group">
-                <label for="message">Meddelande</label>
-                <textarea class="form-control" rows="12" id="message" name="message">@Model.ClaimBookMailTemplate</textarea>
-            </div>
-        </div>
         <div class="col-md-6">
-            <div class="form-group">
-                <label for="recipientName">Mottagarens namn</label>
-                <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.OrderItem.PatronName">
-            </div>
-            <div class="form-group">
-                <label for="recipientEmail">Mottagande e-postadress</label>
-                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.OrderItem.PatronEmail">
-            </div>
             <div class="form-group">
                 <label for="dueDate">Återlämningsdatum</label>
                 <div class="input-group date datetimepicker">
-                    <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
+                    <input type="text" class="form-control" id="dueDate" name="dueDate" value="@DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture) 00:00">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
                 </div>
             </div>
-            <button type="button" class="btn btn-success" onclick="claim();">Kräv</button>
+            <div class="form-group">
+                <div class="alert alert-success" role="alert">Automatiskt mailutskick kommer att levereras till <span id="patron-email" class="content-editable" contenteditable>@Model.OrderItem.PatronEmail</span> <span class="glyphicon glyphicon-pencil"></span></div>
+                <button type="button" class="btn btn-success" onclick="claim();">Kräv</button>
+            </div>
         </div>
     </div>
 </form>
@@ -50,8 +41,8 @@
                 mail: {
                     OrderId: "@Model.OrderItem.OrderId",
                     recipientName: "@Model.OrderItem.PatronName",
-                    recipientEmail: "@Model.OrderItem.PatronEmail",
-                    message: $("#message").val(),
+                    recipientEmail: $("#patron-email").text().toString().trim(),
+                    message: $("#mail-message").val(),
                     attachments: []
                 }
             })

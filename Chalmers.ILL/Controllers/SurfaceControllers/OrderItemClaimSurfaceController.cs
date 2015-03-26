@@ -53,6 +53,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetProviderDueDate(pack.nodeId, pack.dueDate, false, false);
                 _orderItemManager.SetStatus(pack.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "12:Krävd"), false, false);
 
+                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail, false, false);
                 _mailService.SendMail(pack.mail);
                 _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);
                 _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message);
