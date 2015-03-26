@@ -403,6 +403,30 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
+        public void SetProviderName(int nodeId, string providerName, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentProviderName = content.GetValue<string>("providerName");
+            if (currentProviderName != providerName)
+            {
+                content.SetValue("providerName", providerName);
+                AddLogItem(nodeId, "ORDER", "Beställd från " + providerName, false, false);
+            }
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
+        public void SetProviderOrderId(int nodeId, string providerOrderId, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentProviderOrderId = content.GetValue<string>("providerOrderId");
+            if (currentProviderOrderId != providerOrderId)
+            {
+                content.SetValue("providerOrderId", providerOrderId);
+                AddLogItem(nodeId, "ORDER", "Beställningsnr ändrat till " + providerOrderId, false, false);
+            }
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
         public void SetProviderInformation(int nodeId, string providerInformation, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);

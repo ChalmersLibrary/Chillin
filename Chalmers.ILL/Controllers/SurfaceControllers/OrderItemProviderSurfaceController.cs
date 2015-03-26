@@ -39,65 +39,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
-        public ActionResult SetProvider(int nodeId, string providerName, string providerOrderId, string newFollowUpDate)
+        public ActionResult SetProvider(int nodeId, string providerName, string providerOrderId, string providerInformation, string newFollowUpDate)
         {
             var json = new ResultResponse();
 
             try
             {
-                // Connect to Umbraco ContentService
-                var contentService = UmbracoContext.Application.Services.ContentService;
+                _orderItemManager.SetFollowUpDate(nodeId, Convert.ToDateTime(newFollowUpDate), false, false);
+                _orderItemManager.SetProviderName(nodeId, providerName, false, false);
+                _orderItemManager.SetProviderOrderId(nodeId, providerOrderId, false, false);
+                _orderItemManager.SetProviderInformation(nodeId, providerInformation, false, false);
+                _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "03:Beställd"));
 
-                // Find OrderItem
-                var contentNode = contentService.GetById(nodeId);
-
-                // Read current values on provider
-                var currentProviderName = contentNode.GetValue("providerName") != null ? contentNode.GetValue("providerName").ToString() : "";
-                var currentProviderOrderId = contentNode.GetValue("providerOrderId") != null ? contentNode.GetValue("providerOrderId").ToString() : "";
-
-                // Set Provider properties
-                contentNode.SetValue("providerName", providerName);
-                contentNode.SetValue("providerOrderId", providerOrderId);
-
-                // Log this action
-                if (currentProviderName != providerName)
-                {
-                    _orderItemManager.AddLogItem(nodeId, "ORDER", "Beställd från " + providerName, false, false);
-                }
-
-                if (currentProviderOrderId != providerOrderId)
-                {
-                    _orderItemManager.AddLogItem(nodeId, "ORDER", "Beställningsnr: " + providerOrderId, false, false);
-                }
-
-                // Set status = Beställd
-                try
-                {
-                    _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "03:Beställd"), false, false);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-
-                // Set FollowUpDate property if it differs from current
-                var currentFollowUpDate = _orderItemManager.GetOrderItem(nodeId).FollowUpDate;
-
-                if (!String.IsNullOrEmpty(newFollowUpDate))
-                {
-                    DateTime parsedNewFollowUpDate = Convert.ToDateTime(newFollowUpDate);
-                    if (currentFollowUpDate != parsedNewFollowUpDate)
-                    {
-                        _orderItemManager.SetFollowUpDate(nodeId, parsedNewFollowUpDate, false, false);
-                    }
-                }
-
-                // Save
-                _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);
-
-                // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;
-                json.Message = "Saved provider data.";
+                json.Message = "Sparade data för beställning.";
             }
             catch (Exception e)
             {

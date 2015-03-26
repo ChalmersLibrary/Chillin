@@ -750,10 +750,16 @@ function loadLogItems(id)
 
 /* Set new property values for Provider from form */
 
-function setOrderItemProvider(nodeId, providerName, providerOrderId, followUpDate)
+function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInformation, followUpDate)
 {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider?nodeId=" + nodeId + "&providerName=" + providerName + "&providerOrderId=" + providerOrderId.trim() + "&newFollowUpDate=" + followUpDate, function (json) {
+    $.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider", {
+        nodeId: nodeId,
+        providerName: providerName,
+        providerOrderId: providerOrderId.trim(),
+        providerInformation: providerInformation,
+        newFollowUpDate: followUpDate
+    }).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(nodeId);
         }
@@ -761,7 +767,10 @@ function setOrderItemProvider(nodeId, providerName, providerOrderId, followUpDat
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 /* Set new property values for Reference from form */
