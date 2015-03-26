@@ -78,6 +78,6 @@
     });
 
     function deliver() {
-        // TODO: Implement this delivery.
+        setOrderItemDelivery(@Model.OrderItem.NodeId, $('#log-message').val(), $("#active-delivery-type").text());
     }
 </script>

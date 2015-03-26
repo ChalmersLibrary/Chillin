@@ -110,6 +110,6 @@
     });
 
     function deliver() {
-        setOrderItemDelivery(@Model.OrderItem.NodeId, $('#log-message').val(), $("#active-delivery-type").data("delivery-type"));
+        setOrderItemDelivery(@Model.OrderItem.NodeId, $('#log-message').val(), $("#active-delivery-type").text());
     }
 </script>

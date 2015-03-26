@@ -149,34 +149,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                // Connect to Umbraco ContentService
-                var contentService = UmbracoContext.Application.Services.ContentService;
+                _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Leveranstyp: " + delivery, false, false);
+                _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, false, false);
+                _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"));
 
-                // Find OrderItem
-                var contentNode = contentService.GetById(nodeId);
-
-                // Log this action
-                _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Skickad med " + delivery, false, false);
-
-                if (logEntry != "")
-                {
-                    _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, false, false);
-                }
-
-                // Set status = Levererad
-                try
-                {
-                    _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-
-                // Save
-                _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);
-
-                // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;
                 json.Message = "Saved provider data.";
             }
@@ -213,7 +189,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, false, false);
                 _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, false, false);
 
-                _orderItemManager.SetStatus(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Infodisk"), false, false);
+                _orderItemManager.SetStatus(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Utlånad"), false, false);
                 _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, false, false);
 
                 _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));

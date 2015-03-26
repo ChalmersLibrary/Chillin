@@ -791,7 +791,7 @@ function sendDeliveryByEmail(mailData, logEntry) {
                     $.post("/umbraco/surface/OrderItemDeliverySurface/SetDelivery", {
                         nodeId: mailData.nodeId,
                         logEntry: logEntry,
-                        delivery: email
+                        delivery: "Direktleverans via e-post"
                     }, function (json) {
                         if (json.Success) {
                             loadOrderItemDetails(mailData.nodeId);
