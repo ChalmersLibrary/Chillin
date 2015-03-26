@@ -336,6 +336,9 @@
     <Content Include="Views\Partials\DeliveryType\ArticleByEmail.cshtml" />
     <Content Include="Views\Partials\DeliveryType\BookInstantLoan.cshtml" />
     <Content Include="Views\Partials\DeliveryType\ArticleByMailOrInternalMail.cshtml" />
+    <Content Include="Views\Partials\DeliveryType\ArticleInTransit.cshtml" />
+    <Content Include="Views\Partials\DeliveryType\ArticleInInfodisk.cshtml" />
+    <Content Include="Views\Partials\DeliveryType\BookReadAtLibrary.cshtml" />
     <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />
     <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
@@ -435,7 +438,10 @@
     <Compile Include="Models\PartialPage\ChalmersILLActionReturnModel.cs" />
     <Compile Include="Models\PartialPage\DeliveryType\ArticleByEmail.cs" />
     <Compile Include="Models\PartialPage\DeliveryType\ArticleByMailOrInternalMail.cs" />
+    <Compile Include="Models\PartialPage\DeliveryType\ArticleInInfodisk.cs" />
+    <Compile Include="Models\PartialPage\DeliveryType\ArticleInTransit.cs" />
     <Compile Include="Models\PartialPage\DeliveryType\BookInstantLoan.cs" />
+    <Compile Include="Models\PartialPage\DeliveryType\BookReadAtLibrary.cs" />
     <Compile Include="Models\ResultResponseWithStringData.cs" />
     <Compile Include="Models\Template.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLEditTemplatesModel.cs" />

@@ -81,6 +81,34 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         /// <summary>
+        /// Render the Partial View for the article in infodisk delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderArticleInInfodiskDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.ArticleInInfodisk(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            return PartialView("DeliveryType/ArticleInInfodisk", pageModel);
+        }
+
+        /// <summary>
+        /// Render the Partial View for the article in transit delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderArticleInTransitDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.ArticleInTransit(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            return PartialView("DeliveryType/ArticleInTransit", pageModel);
+        }
+
+        /// <summary>
         /// Render the Partial View for the book instant loan delivery type.
         /// </summary>
         /// <param name="nodeId">OrderItem Node Id</param>
@@ -92,6 +120,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate", pageModel.OrderItem);
             return PartialView("DeliveryType/BookInstantLoan", pageModel);
+        }
+
+        /// <summary>
+        /// Render the Partial View for the book read at library delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderBookReadAtLibraryDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.BookReadAtLibrary(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.BookAvailableForReadingAtLibraryMailTemplate = _templateService.GetTemplateData("BookAvailableForReadingAtLibraryMailTemplate", pageModel.OrderItem);
+            return PartialView("DeliveryType/BookReadAtLibrary", pageModel);
         }
 
         /// <summary>

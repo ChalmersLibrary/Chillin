@@ -30,13 +30,35 @@
                             </a>
                         </li>
                         <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleByEmailDeliveryType" data-delivery-type="infodisk" onclick="selectDeliveryType(this); event.preventDefault();">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleInInfodiskDeliveryType" data-delivery-type="infodisk" onclick="selectDeliveryType(this); event.preventDefault();">
                                 Avhämtning i infodisk
                             </a>
                         </li>
                         <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleByEmailDeliveryType" data-delivery-type="intransit" onclick="selectDeliveryType(this); event.preventDefault();">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleInTransitDeliveryType" data-delivery-type="intransit" onclick="selectDeliveryType(this); event.preventDefault();">
                                 Internpost till filial
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            }
+            else if (Model.OrderItem.TypePrevalue == "Bok")
+            {
+                <label>Leveranssätt</label>
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="delivery-type-dropdown" data-toggle="dropdown" aria-expanded="true">
+                        <span id="active-delivery-type" data-delivery-type="infodisk">Avhämtning i infodisk</span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="delivery-type-dropdown">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderBookInstantLoanDeliveryType" data-delivery-type="infodisk" onclick="selectDeliveryType(this); event.preventDefault();">
+                                Avhämtning i infodisk
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderBookReadAtLibraryDeliveryType" data-delivery-type="lokalt" onclick="selectDeliveryType(this); event.preventDefault();">
+                                Ej hemlån
                             </a>
                         </li>
                     </ul>

@@ -1,39 +1,7 @@
-﻿@model Chalmers.ILL.Models.PartialPage.DeliveryType.ArticleByMailOrInternalMail
+﻿@model Chalmers.ILL.Models.PartialPage.DeliveryType.ArticleInInfodisk
 
-<div id="delivery-with-post-or-internpost" class="row">
+<div id="delivery-with-infodisk" class="row">
     <div class="col-md-6">
-        <div class="row">
-            @{
-                if (@Model.OrderItem.SierraInfo.adress.Count == 0)
-                {
-                    <div class="col-md-12">
-                        <div class="well text-center">Inga adresser kunde hittas.</div>
-                    </div>
-                }
-                else
-                {
-                    foreach (var address in @Model.OrderItem.SierraInfo.adress)
-                    {
-                        <div class="col-md-4">
-                            <label for="address-box">Adress @address.addresscount</label>
-                            <div id="address-box" class="panel panel-default">
-                                <div class="panel-body">
-                                    @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name<br />
-                                    @address.addr1@(String.IsNullOrEmpty(@address.addr1) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.addr2@(String.IsNullOrEmpty(@address.addr2) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.addr3@(String.IsNullOrEmpty(@address.addr3) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.postal_code@(String.IsNullOrEmpty(@address.postal_code) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.village@(String.IsNullOrEmpty(@address.village) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.city@(String.IsNullOrEmpty(@address.city) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.region@(String.IsNullOrEmpty(@address.region) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.country@(String.IsNullOrEmpty(@address.country) ? Html.Raw("") : Html.Raw("<br />"))
-                                </div>
-                            </div>
-                        </div>
-                    }
-                }
-            }
-        </div>
         <div class="row">
             <div class="col-md-12 form-group">
                 <label for="attachments-group2">Filer att leverera</label>
@@ -110,6 +78,6 @@
     });
 
     function deliver() {
-        setOrderItemDelivery(@Model.OrderItem.NodeId, $('#log-message').val(), $("#active-delivery-type").data("delivery-type"));
+        // TODO: Implement this delivery.
     }
 </script>
