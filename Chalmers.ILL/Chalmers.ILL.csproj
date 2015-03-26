@@ -311,9 +311,12 @@
     </Content>
     <Content Include="Config\UrlRewriting.config" />
     <Content Include="Config\xsltExtensions.config" />
+    <Content Include="Css\chalmers.ill.print.css" />
     <Content Include="Css\dummy.txt" />
+    <Content Include="images\cth_logo.png" />
     <Content Include="images\chilli-plain.svg" />
     <Content Include="images\chilli.png" />
+    <Content Include="images\cth_logo.svg" />
     <Content Include="images\help.png" />
     <Content Include="images\help.svg" />
     <Content Include="bower.json" />

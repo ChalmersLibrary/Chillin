@@ -145,7 +145,10 @@
                 <textarea class="form-control" cols="80" rows="10" id="providerInformation" name="providerInformation">@Model.OrderItem.ProviderInformation</textarea>
             </div>
             <div class="form-group">
-                <button class="btn btn-success" onclick="">Skriv ut bokslip</button>
+                <button class="btn btn-success" onclick="printBookSlip()">Skriv ut bokslip</button>
+            </div>
+            <div id="bookSlip" class="print">
+                @Html.Raw(Model.BookSlipTemplate)
             </div>
         </div>
     </div>
@@ -287,17 +290,25 @@
         }
         else if($('input:radio[name=deliveryOptions]:checked').val() == "infodisken")
         {
-            setOrderItemDeliveryReceived(@Model.OrderItem.NodeId, $('#bookId').val(), $('#dueDate').val(), $('#providerInformation').val(),
-                {
-                nodeId: @Model.OrderItem.NodeId,
-                recipientEmail: $('#recipientEmail').val().toString().trim(),
-                recipientName: $('#recipientName').val(),
-                message: $('#message').val(),
-                newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Infodisk")).Id,
-                newCancellationReasonId: -1,
-                newPurchasedMaterialId: -1,
-                newFollowUpDate: $('#dueDate').val()
-            }, $("#log-message").val());
+            $('#container #bookSlip').insertAfter('#container');
+            var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
+            $('.dueDatePlaceHolder').html(dueDate);
+            window.print();
+            var r = window.confirm("Skrevs bokslippen ut korrekt?");
+            if (r == true) {
+                setOrderItemDeliveryReceived(@Model.OrderItem.NodeId, $('#bookId').val(), $('#dueDate').val(), $('#providerInformation').val(),
+                    {
+                        nodeId: @Model.OrderItem.NodeId,
+                        recipientEmail: $('#recipientEmail').val().toString().trim(),
+                        recipientName: $('#recipientName').val(),
+                        message: $('#message').val(),
+                        newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Infodisk")).Id,
+                        newCancellationReasonId: -1,
+                        newPurchasedMaterialId: -1,
+                        newFollowUpDate: $('#dueDate').val()
+                    }, $("#log-message").val());
+            } else {
+            }
         }
         else
         {

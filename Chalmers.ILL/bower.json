@@ -10,6 +10,8 @@
         "Chart.js": "~1.0.1",
         "moment": "~2.9.0",
         "signalr": "~2.0.1",
+        "bootstrap-markdown": "~2.8.0",
+        "markdown":"~0.4.0",
         "eonasdan-bootstrap-datetimepicker": "~4.0.0"
     }
 }

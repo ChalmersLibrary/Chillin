@@ -55,6 +55,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             pageModel.ArticleDeliveryByMailTemplate = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", pageModel.OrderItem);
             pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate", pageModel.OrderItem);
+            pageModel.BookSlipTemplate = _templateService.GetTemplateData("BookSlipTemplate", pageModel.OrderItem);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Delivery", pageModel);
