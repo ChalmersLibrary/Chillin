@@ -4,6 +4,10 @@
     padding-top: 35px;
 }
 
+.print {
+    display:none;
+}
+
 div.header {
     border-bottom:solid 1px;
 }

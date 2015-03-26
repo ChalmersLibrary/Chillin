@@ -121,6 +121,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var pageModel = new Models.PartialPage.DeliveryType.BookInstantLoan(_orderItemManager.GetOrderItem(nodeId));
             _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate", pageModel.OrderItem);
+            pageModel.BookSlipTemplate = _templateService.GetTemplateData("BookSlipTemplate", pageModel.OrderItem);
             return PartialView("DeliveryType/BookInstantLoan", pageModel);
         }
 
