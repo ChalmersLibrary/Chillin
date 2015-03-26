@@ -26,7 +26,23 @@
             </div>
         }
         <div class="row">
-            <div class="form-group col-md-6">
+            <div class="form-group col-sm-12">
+                @if (String.IsNullOrWhiteSpace(Model.OrderItem.SierraInfo.home_library))
+                {
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Låntagardata för hembibliotek saknas!</h3>
+                        </div>
+                    </div>
+                }
+                else if (Model.OrderItem.SierraInfo.home_library.Contains("lbib") || Model.OrderItem.SierraInfo.home_library.Contains("abib"))
+                {
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Det ser ut som att denna artikel ska skickas med internpost till @Model.ArticleDeliveryLibrary.</h3>
+                        </div>
+                    </div>
+                }
                 <button class="btn btn-success" onclick="deliver()">Leverera!</button>
             </div>
         </div>

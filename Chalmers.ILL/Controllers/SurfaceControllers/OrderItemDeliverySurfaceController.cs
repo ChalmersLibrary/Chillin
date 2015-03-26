@@ -91,6 +91,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var pageModel = new Models.PartialPage.DeliveryType.ArticleInInfodisk(_orderItemManager.GetOrderItem(nodeId));
             _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            pageModel.ArticleDeliveryLibrary = GetArticleDeliveryLibrary(pageModel.OrderItem.SierraInfo.home_library);
             return PartialView("DeliveryType/ArticleInInfodisk", pageModel);
         }
 
@@ -105,6 +106,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var pageModel = new Models.PartialPage.DeliveryType.ArticleInTransit(_orderItemManager.GetOrderItem(nodeId));
             _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            pageModel.ArticleDeliveryLibrary = GetArticleDeliveryLibrary(pageModel.OrderItem.SierraInfo.home_library);
             return PartialView("DeliveryType/ArticleInTransit", pageModel);
         }
 
@@ -217,6 +219,23 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             public OutgoingMailPackageModel mailData { get; set; }
             public string logMsg { get; set; }
         }
-    }
 
+        private string GetArticleDeliveryLibrary(string sierraHomeLibrary)
+        {
+            var res = "Kunde ej avgöra lämpligt leveransbibliotek.";
+            if (sierraHomeLibrary != null && sierraHomeLibrary.Contains("hbib"))
+            {
+                res = "Huvudbiblioteket";
+            }
+            else if (sierraHomeLibrary != null && sierraHomeLibrary.Contains("lbib"))
+            {
+                res = "Lindholmenbiblioteket";
+            }
+            else if (sierraHomeLibrary != null && sierraHomeLibrary.Contains("abib"))
+            {
+                res = "Arkitekturbiblioteket";
+            }
+            return res;
+        }
+    }
 }
