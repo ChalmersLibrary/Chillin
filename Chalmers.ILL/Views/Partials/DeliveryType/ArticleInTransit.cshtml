@@ -2,45 +2,40 @@
 
 <div id="delivery-in-transit" class="row">
     <div class="col-md-6">
-        <div class="row">
-            <div class="col-md-12 form-group">
-                <label for="attachments-group2">Filer att leverera</label>
-                <div id="attachments-group2">
-                    <button class="btn btn-default" onclick="$('#hidden-file-upload').trigger('click');">Ladda upp</button>
-                    <input id="hidden-file-upload" type="file" name="hidden-file-upload" style="display: none;" />
-                    @{
-                        foreach (var attachment in Model.OrderItem.AttachmentList)
-                        {
-                            <button type="button" class="btn btn-default btn-view-attachment @(Model.DrmWarning ? "btn-danger": "")" onclick="openDocument(this);" data-link="@attachment.Link" data-media-id="@attachment.MediaItemNodeId">@attachment.Title <span class="glyphicon glyphicon-search"></span></button>
-                        }
+        <div class="form-group">
+            <label for="attachments-group2">Filer att leverera</label>
+            <div id="attachments-group2">
+                <button class="btn btn-default" onclick="$('#hidden-file-upload').trigger('click');">Ladda upp</button>
+                <input id="hidden-file-upload" type="file" name="hidden-file-upload" style="display: none;" />
+                @{
+                    foreach (var attachment in Model.OrderItem.AttachmentList)
+                    {
+                        <button type="button" class="btn btn-default btn-view-attachment @(Model.DrmWarning ? "btn-danger": "")" onclick="openDocument(this);" data-link="@attachment.Link" data-media-id="@attachment.MediaItemNodeId">@attachment.Title <span class="glyphicon glyphicon-search"></span></button>
                     }
-                </div>
+                }
             </div>
-            @if (Model.DrmWarning)
-            {
-                <div class="col-md-6 form-group drm-warning">
-                    <div class="panel panel-danger">
-                        <div class="panel-heading">
-                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Dokumenten kan vara DRM-skyddade!</h3>
-                        </div>
+        </div>
+        @if (Model.DrmWarning)
+        {
+            <div class="form-group drm-warning">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Dokumenten kan vara DRM-skyddade!</h3>
                     </div>
                 </div>
-            }
+            </div>
+        }
+        <div class="row">
+            <div class="form-group col-md-6">
+                <button class="btn btn-success" onclick="deliver()">Leverera!</button>
+            </div>
         </div>
     </div>
-</div>
-<div class="row">
     <div class="col-md-6">
         <div class="form-group">
             <label for="log-message">Skriv till logg (valfritt)</label>
             <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
         </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-6">
-        <button class="btn btn-success" onclick="deliver()">Leverera!</button>
     </div>
 </div>
 

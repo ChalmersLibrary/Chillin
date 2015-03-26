@@ -781,7 +781,7 @@ function setOrderItemReference(nodeId, reference) {
 
 function sendDeliveryByEmail(mailData, logEntry) {
     lockScreen();
-    if (message && recipientEmail) {
+    if (mailData.message && mailData.recipientEmail) {
         $.ajax({
             type: "POST",
             url: "/umbraco/surface/OrderItemMailSurface/SendMail",
@@ -816,10 +816,10 @@ function sendDeliveryByEmail(mailData, logEntry) {
         });
 }
     else {
-        if (message == "") {
+        if (mailData.message == "") {
             alert("Du m\u00E5ste skriva ett meddelande till mottagaren.");
         }
-        if (recipientEmail == "") {
+        if (mailData.recipientEmail == "") {
             alert("Du m\u00E5ste ange en mottagande e-postadress.");
         }
         unlockScreen();
