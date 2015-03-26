@@ -791,7 +791,7 @@ function sendDeliveryByEmail(mailData, logEntry) {
                     $.post("/umbraco/surface/OrderItemDeliverySurface/SetDelivery", {
                         nodeId: mailData.nodeId,
                         logEntry: logEntry,
-                        delivery: email
+                        delivery: "Direktleverans via e-post"
                     }, function (json) {
                         if (json.Success) {
                             loadOrderItemDetails(mailData.nodeId);
@@ -1130,4 +1130,15 @@ $.connection.hub.start()
 function zeroPadFromLeft(num, size) {
     var s = "000000000" + num;
     return s.substr(s.length - size);
+}
+
+function openDocument(btn) {
+    var win = window.open($(btn).data("link"), "_blank");
+    if (win) {
+        //Browser has allowed it to be opened
+        win.focus();
+    } else {
+        //Browser has blocked it
+        alert("Misslyckades med att öppna popup-fönster.");
+    }
 }

@@ -6,7 +6,6 @@ using Umbraco.Web;
 using Chalmers.ILL.Members;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.SignalR;
-using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.UmbracoApi;
 using Umbraco.Core;
@@ -51,21 +50,18 @@ namespace Chalmers.ILL
             var mailService = new MailService(ApplicationContext.Current.Services.MediaService, container.Resolve<IExchangeMailWebApi>());
             var templateService = new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher);
             var notifier = new Notifier();
-            var internalDbLogger = new InternalDbLogger();
             var orderItemManager = new OrderItemManager();
 
             // Connect instances that depend on eachother.
             notifier.SetOrderItemManager(orderItemManager);
-            internalDbLogger.SetOrderItemManager(orderItemManager);
             orderItemManager.SetNotifier(notifier);
-            orderItemManager.SetInternalDbLogger(internalDbLogger);
+            orderItemManager.SetContentService(ApplicationContext.Current.Services.ContentService);
 
             // Hook up everything that is needed for us to function.
             container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
             container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
             container.RegisterInstance(typeof(IUmbracoWrapper), new UmbracoWrapper());
             container.RegisterInstance(typeof(INotifier), notifier);
-            container.RegisterInstance(typeof(IInternalDbLogger), internalDbLogger);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
             container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);

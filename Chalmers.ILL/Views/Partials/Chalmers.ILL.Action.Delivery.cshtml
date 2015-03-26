@@ -1,345 +1,88 @@
 ﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionDeliveryModel
-@using System.Globalization
-
-@{
-    //Check DrmWarning
-    bool drmWarning = @Model.OrderItem.DrmWarning == "1" ? true : false;
-}
 
 <div class="action-header">Leverans</div>
 
-<form class="form" role="form" onsubmit="return false;">
-    <!--
-    <div class="form-group">
-        <label for="originalOrder">Originalbeställning</label>
-        <textarea class="form-control" rows="3" id="originalOrder" name="originalOrder" disabled="disabled">@Model.OrderItem.OriginalOrder</textarea>
-    </div>
-    <div class="form-group">
-        <label for="reference">Referens</label>
-        <textarea class="form-control" rows="3" id="reference" name="reference">@Model.OrderItem.Reference</textarea>
-    </div>
-    -->
-    <div class="row">
-        <div class="col-md-3">
-            <label for="radio">Ange leveranssätt</label>
-            <!-- <div class="alert alert-warning">-->
-            <div class="alert alert-warning" id="radio" style="background-color:white;opacity:0.8;padding:15px;">
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="deliveryOptions" id="optionsRadios1" value="email" checked="checked">
-                        E-mail
-                    </label>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            @if (Model.OrderItem.TypePrevalue == "Artikel")
+            {
+                <label>Leveranssätt</label>
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="delivery-type-dropdown" data-toggle="dropdown" aria-expanded="true">
+                        <span id="active-delivery-type" data-delivery-type="epost">Direktleverans via e-post</span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="delivery-type-dropdown">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleByEmailDeliveryType" data-delivery-type="epost" onclick="selectDeliveryType(this); event.preventDefault();">Direktleverans via e-post</a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleByMailOrInternalMailDeliveryType" data-delivery-type="post" onclick="selectDeliveryType(this); event.preventDefault();">Direktleverans via post</a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleByMailOrInternalMailDeliveryType" data-delivery-type="internpost" onclick="selectDeliveryType(this); event.preventDefault();">Direktleverans via internpost</a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleInInfodiskDeliveryType" data-delivery-type="infodisk" onclick="selectDeliveryType(this); event.preventDefault();">Avhämtning i infodisk</a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleInTransitDeliveryType" data-delivery-type="transport" onclick="selectDeliveryType(this); event.preventDefault();">Internpost till filial</a>
+                        </li>
+                    </ul>
                 </div>
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="deliveryOptions" id="optionsRadios2" value="post">
-                        Post
-                    </label>
-                </div>
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="deliveryOptions" id="optionsRadios3" value="internpost">
-                        Internpost
-                    </label>
-                </div>
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="deliveryOptions" id="optionsRadios4" value="infodisken">
-                        Avhämtning i lånedisken
-                    </label>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="delivery-with-post-or-internpost" class="row" hidden>
-        <div class="col-md-6">
-            <div class="row">
-                @{
-                    if (@Model.OrderItem.SierraInfo.adress.Count == 0)
-                    {
-                        <div class="col-md-12">
-                            <div class="well text-center">Inga adresser kunde hittas.</div>
-                        </div>
-                    }
-                    else
-                    {
-                        foreach (var address in @Model.OrderItem.SierraInfo.adress)
-                        {
-                            <div class="col-md-4">
-                                <label for="address-box">Adress @address.addresscount</label>
-                                <div id="address-box" class="panel panel-default">
-                                    <div class="panel-body">
-                                        @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name<br />
-                                        @address.addr1@(String.IsNullOrEmpty(@address.addr1) ? Html.Raw("") : Html.Raw("<br />"))
-                                        @address.addr2@(String.IsNullOrEmpty(@address.addr2) ? Html.Raw("") : Html.Raw("<br />"))
-                                        @address.addr3@(String.IsNullOrEmpty(@address.addr3) ? Html.Raw("") : Html.Raw("<br />"))
-                                        @address.postal_code@(String.IsNullOrEmpty(@address.postal_code) ? Html.Raw("") : Html.Raw("<br />"))
-                                        @address.village@(String.IsNullOrEmpty(@address.village) ? Html.Raw("") : Html.Raw("<br />"))
-                                        @address.city@(String.IsNullOrEmpty(@address.city) ? Html.Raw("") : Html.Raw("<br />"))
-                                        @address.region@(String.IsNullOrEmpty(@address.region) ? Html.Raw("") : Html.Raw("<br />"))
-                                        @address.country@(String.IsNullOrEmpty(@address.country) ? Html.Raw("") : Html.Raw("<br />"))
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    }
-                }
-            </div>
-            <div class="row">
-                <div class="col-md-12 form-group">
-                    <label for="attachments-group2">Filer att leverera</label>
-                    <div id="attachments-group2">
-                        <button class="btn btn-default" onclick="$('#hidden-file-upload').trigger('click');">Ladda upp</button>
-                        @{
-                            foreach (var attachment in Model.OrderItem.AttachmentList)
-                            {
-                                <button type="button" class="btn btn-default btn-view-attachment @(drmWarning ? "btn-danger": "")" onclick="openDocument(this);" data-link="@attachment.Link" data-media-id="@attachment.MediaItemNodeId">@attachment.Title <span class="glyphicon glyphicon-search"></span></button>
-                            }
-                        }
-                    </div>
-                </div>
-                @if (drmWarning)
-                {
-                    <div class="col-md-6 form-group drm-warning">
-                        <div class="panel panel-danger">
-                            <div class="panel-heading">
-                                <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Dokumenten kan vara DRM-skyddade!</h3>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-    <div id="delivery-to-circulation" class="row" hidden>
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="message">Meddelande</label>
-                <textarea class="form-control" rows="12" id="message" name="message">@Model.BookAvailableMailTemplate</textarea>
-            </div>
-            <div class="form-group">
-                <label for="recipientName">Mottagarens namn</label>
-                <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.OrderItem.PatronName">
-            </div>
-            <div class="form-group">
-                <label for="recipientEmail">Mottagande e-postadress</label>
-                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.OrderItem.PatronEmail">
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="bookId">Bokens streckkod/identifikator</label>
-                <input type="text" class="form-control" id="bookId" name="bookId" value="@Model.OrderItem.BookId">
-            </div>
-            <div class="form-group">
-                <label for="dueDate">Återlämningsdatum</label>
-                <div class="input-group date datetimepicker">
-                    <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.DueDate">
-                    <span class="input-group-addon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="providerInformation">Leverantörsinformation</label><br />
-                <textarea class="form-control" cols="80" rows="10" id="providerInformation" name="providerInformation">@Model.OrderItem.ProviderInformation</textarea>
-            </div>
-            <div class="form-group">
-                <button class="btn btn-success" onclick="printBookSlip()">Skriv ut bokslip</button>
-            </div>
-            <div id="bookSlip" class="print">
-                @Html.Raw(Model.BookSlipTemplate)
-            </div>
-        </div>
-    </div>
-    <div id="delivery-with-mail-view" class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="message">Meddelande</label>
-                <textarea class="form-control" rows="12" id="message" name="message">@Model.ArticleDeliveryByMailTemplate</textarea>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="recipientName">Mottagarens namn</label>
-                <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.OrderItem.PatronName">
-            </div>
-            <div class="form-group">
-                <label for="recipientEmail">Mottagande e-postadress</label>
-                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.OrderItem.PatronEmail">
-            </div>
-            <div class="row">
-                <div class="col-md-12 form-group">
-                    <label for="attachments-group">Filer att leverera</label>
-                    <div id="attachments-group">
-                        <button class="btn btn-default" onclick="$('#hidden-file-upload').trigger('click');">Ladda upp</button>
-                        <input id="hidden-file-upload" type="file" name="hidden-file-upload" style="display: none;" />
-                        @{
-                            foreach (var attachment in Model.OrderItem.AttachmentList)
-                            {
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-default btn-attach-attachment btn-info active" onclick="toggleDocumentSendStatus(this);" data-media-id="@attachment.MediaItemNodeId">@attachment.Title <span class="glyphicon glyphicon-paperclip"></span></button>
-                                    <button type="button" class="btn btn-default btn-view-attachment @(drmWarning ? "btn-danger": "")" onclick="openDocument(this);" data-link="@attachment.Link"><span class="glyphicon glyphicon-search"></span></button>
-                                </div>
-                            }
-                        }
-                    </div>
-                </div>
-                @if (drmWarning)
-                {
-                    <div class="col-md-6 form-group drm-warning">
-                        <div class="panel panel-danger">
-                            <div class="panel-heading">
-                                <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Dokumenten kan vara DRM-skyddade!</h3>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>        
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                <label for="log-message">Skriv till logg (valfritt)</label>
-                <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <button class="btn btn-success" onclick="deliver()">Leverera!</button>
-        </div>
-    </div>
-    <script type="text/javascript">
-    $(function () {
-        $(".datetimepicker").datetimepicker({
-            locale: "sv"
-        });
-    });
-
-    $(document).ready(function () {
-        $("#optionsRadios1").click(function () {
-            $("#delivery-to-circulation").hide();
-            $("#delivery-with-post-or-internpost").hide();
-            $("#delivery-with-mail-view").show();
-        });
-        $("#optionsRadios2").click(function () {
-            $("#delivery-with-mail-view").hide();
-            $("#delivery-to-circulation").hide();
-            $("#delivery-with-post-or-internpost").show();
-        });
-        $("#optionsRadios3").click(function () {
-            $("#delivery-with-mail-view").hide();
-            $("#delivery-to-circulation").hide();
-            $("#delivery-with-post-or-internpost").show();
-        });
-        $("#optionsRadios4").click(function () {
-            $("#delivery-with-mail-view").hide();
-            $("#delivery-with-post-or-internpost").hide();
-            $("#delivery-to-circulation").show();
-        });
-    });
-
-    function toggleDocumentSendStatus (btn) {
-        if ($(btn).hasClass("active"))
-        {
-            $(btn).removeClass("active");
-            $(btn).removeClass("btn-info");
-            $(btn).find("span").css("visibility", "hidden");
-        }
-        else
-        {
-            $(btn).addClass("active");
-            $(btn).addClass("btn-info");
-            $(btn).find("span").css("visibility", "visible");
-        }
-    }
-
-    function openDocument(btn) {
-        var win = window.open($(btn).data("link"), "_blank");
-        if (win) {
-            //Browser has allowed it to be opened
-            win.focus();
-        } else {
-            //Browser has blocked it
-            alert("Misslyckades med att öppna popup-fönster.");
-        }
-    }
-
-    function deliver() {
-        if ($('input:radio[name=deliveryOptions]:checked').val() == "email")
-        {
-            var attachmentIds = [];
-            $("#attachments-group .btn-attach-attachment[class~='active']").each(function () {
-                attachmentIds.push($(this).data("media-id"));
-            });
-
-            sendDeliveryByEmail({
-                nodeId: @Model.OrderItem.NodeId,
-                recipientEmail: $('#recipientEmail').val().toString().trim(),
-                recipientName: $('#recipientName').val(),
-                message: $('#message').val(),
-                newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Levererad")).Id,
-                newCancellationReasonId: "-1",
-                newPurchasedMaterialId: "-1",
-                newFollowUpDate: $('#followUpDate').val(),
-                attachments: attachmentIds
-            }, $('#log-message').val());
-        }
-        else if($('input:radio[name=deliveryOptions]:checked').val() == "infodisken")
-        {
-            $('#container #bookSlip').insertAfter('#container');
-            var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
-            $('.dueDatePlaceHolder').html(dueDate);
-            window.print();
-            var r = window.confirm("Skrevs bokslippen ut korrekt?");
-            if (r == true) {
-                setOrderItemDeliveryReceived(@Model.OrderItem.NodeId, $('#bookId').val(), $('#dueDate').val(), $('#providerInformation').val(),
-                    {
-                        nodeId: @Model.OrderItem.NodeId,
-                        recipientEmail: $('#recipientEmail').val().toString().trim(),
-                        recipientName: $('#recipientName').val(),
-                        message: $('#message').val(),
-                        newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Infodisk")).Id,
-                        newCancellationReasonId: -1,
-                        newPurchasedMaterialId: -1,
-                        newFollowUpDate: $('#dueDate').val()
-                    }, $("#log-message").val());
-            } else {
             }
+            else if (Model.OrderItem.TypePrevalue == "Bok")
+            {
+                <label>Leveranssätt</label>
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="delivery-type-dropdown" data-toggle="dropdown" aria-expanded="true">
+                        <span id="active-delivery-type" data-delivery-type="infodisk">Avhämtning i infodisk</span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="delivery-type-dropdown">
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderBookInstantLoanDeliveryType" data-delivery-type="infodisk" onclick="selectDeliveryType(this); event.preventDefault();">
+                                Avhämtning i infodisk
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderBookReadAtLibraryDeliveryType" data-delivery-type="infodisk (ej hemlån)" onclick="selectDeliveryType(this); event.preventDefault();">
+                                Ej hemlån
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div id="delivery-type-view"></div>
+<span id="loading-delivery-type-partial-view" style="height: 50px; line-height: 50px;">Laddar leveranssätt...</span>
+
+<script type="text/javascript">
+    $(function () {
+        if ("@Model.OrderItem.TypePrevalue" == "Bok")
+        {
+            renderDeliveryTypePartial("RenderBookInstantLoanDeliveryType");
         }
         else
         {
-            setOrderItemDelivery(@Model.OrderItem.NodeId, $('#log-message').val(), $('input:radio[name=deliveryOptions]:checked').val());
+            renderDeliveryTypePartial("RenderArticleByEmailDeliveryType");
         }
+    })
+
+    function selectDeliveryType(obj) {
+        renderDeliveryTypePartial($(obj).data("render-method"));
+        $("#active-delivery-type").html($(obj).html()).data("delivery-type", $(obj).data("delivery-type"));
     }
 
-    $("#hidden-file-upload").change(function () {
-        if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
-            alert('FileApi, som används för att ladda upp filer, stöds ej i denna webbläsare.');
-            return;
-        }
-
-        var input = document.getElementById('hidden-file-upload');
-        if (!input) {
-            alert("Kunde ej hitta \"FileInput\"-elementet.");
-        }
-        else if (!input.files) {
-            alert("Denna webbläsare verkar inte stödja \"files\"-funktionen av FileApi.");
-        }
-        else if (!input.files[0]) {
-            alert("En fil måste väljas.");
-        }
-        else {
-            file = input.files[0];
-            fr = new FileReader();
-            fr.onload = function () {
-                uploadDocument(@Model.OrderItem.NodeId, file.name, fr.result);
-            };
-            fr.readAsDataURL(file);
-        }
-    });
+    function renderDeliveryTypePartial(renderApiMethod) {
+        $("#loading-delivery-type-partial-view").show();
+        $("#delivery-type-view").html("").show().load("/umbraco/surface/OrderItemDeliverySurface/" + renderApiMethod + "?nodeId=" + @Model.OrderItem.NodeId,
+            function (responseText, textStatus, req) {
+                $("#loading-delivery-type-partial-view").hide();
+            }
+        );
+    }
 </script>
-</form>

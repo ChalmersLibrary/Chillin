@@ -39,7 +39,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try 
 	        {
                 // Use internal method to set status property and log the result
-                _orderItemManager.SetOrderItemStatusInternal(orderNodeId, statusId);
+                _orderItemManager.SetStatus(orderNodeId, statusId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

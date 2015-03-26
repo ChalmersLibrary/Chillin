@@ -15,7 +15,6 @@ using System.Text;
 using Chalmers.ILL.Extensions;
 using System.Text.RegularExpressions;
 using Chalmers.ILL.Patron;
-using Chalmers.ILL.Logging;
 using Microsoft.Exchange.WebServices.Data;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.SignalR;
@@ -32,7 +31,6 @@ namespace Chalmers.ILL.Mail
     {
         IExchangeMailWebApi _exchangeMailWebApi;
         IOrderItemManager _orderItemManager;
-        IInternalDbLogger _internalDbLogger;
         INotifier _notifier;
         IMediaService _mediaService;
         IPatronDataProvider _patronDataProvider;
@@ -47,11 +45,10 @@ namespace Chalmers.ILL.Mail
         }
 
         public ChalmersOrderItemsMailSource(IExchangeMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager,
-            IInternalDbLogger internalDbLogger, INotifier notifier, IMediaService mediaService, IPatronDataProvider patronDataProvider)
+            INotifier notifier, IMediaService mediaService, IPatronDataProvider patronDataProvider)
         {
             _exchangeMailWebApi = exchangeMailWebApi;
             _orderItemManager = orderItemManager;
-            _internalDbLogger = internalDbLogger;
             _notifier = notifier;
             _mediaService = mediaService;
             _patronDataProvider = patronDataProvider;
@@ -175,7 +172,7 @@ namespace Chalmers.ILL.Mail
                             // Write a new OrderItem
                             int orderItemNodeId = _orderItemManager.CreateOrderItemInDbFromMailQueueModel(item, false, false);
 
-                            _internalDbLogger.WriteSierraDataToLog(orderItemNodeId, item.SierraPatronInfo);
+                            _orderItemManager.AddSierraDataToLog(orderItemNodeId, item.SierraPatronInfo);
 
                             // Archive the mail message to correct folder
                             if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
@@ -209,7 +206,7 @@ namespace Chalmers.ILL.Mail
                             // Set the OrderItem Status so it appears in lists
                             try
                             {
-                                _orderItemManager.SetOrderItemStatusInternal(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "02:Åtgärda"), false, false);
+                                _orderItemManager.SetStatus(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "02:Åtgärda"), false, false);
                             }
                             catch (Exception es)
                             {
@@ -219,7 +216,7 @@ namespace Chalmers.ILL.Mail
                             // Set new FollowUpDate for the OrderItem
                             try
                             {
-                                _orderItemManager.SetFollowUpDate(item.OrderItemNodeId, DateTime.Now, false, false);
+                                _orderItemManager.SetFollowUpDateWithoutLogging(item.OrderItemNodeId, DateTime.Now, false, false);
                             }
                             catch (Exception ef)
                             {
@@ -229,8 +226,8 @@ namespace Chalmers.ILL.Mail
                             // Write LogItem with the mail received and metadata
                             try
                             {
-                                _internalDbLogger.WriteLogItemInternal(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), false, false);
-                                _internalDbLogger.WriteLogItemInternal(item.OrderItemNodeId, "MAIL_NOTE", "Svar från " + item.Sender + " [" + item.From + "]");
+                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), false, false);
+                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL_NOTE", "Svar från " + item.Sender + " [" + item.From + "]");
                             }
                             catch (Exception el)
                             {
@@ -274,7 +271,7 @@ namespace Chalmers.ILL.Mail
                             // Set the OrderItem Status so it appears in lists
                             try
                             {
-                                _orderItemManager.SetOrderItemStatusInternal(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "09:Mottagen"), false, false);
+                                _orderItemManager.SetStatus(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "09:Mottagen"), false, false);
                             }
                             catch (Exception es)
                             {
@@ -286,7 +283,7 @@ namespace Chalmers.ILL.Mail
                             {
                                 if (item.MessageBody.ToLower().Contains("drm"))
                                 {
-                                    _orderItemManager.SetDrmWarning(item.OrderItemNodeId, true, false, false);
+                                    _orderItemManager.SetDrmWarningWithoutLogging(item.OrderItemNodeId, true, false, false);
                                 }
                             }
                             catch (Exception es)
@@ -297,7 +294,7 @@ namespace Chalmers.ILL.Mail
                             // Set new FollowUpDate for the OrderItem
                             try
                             {
-                                _orderItemManager.SetFollowUpDate(item.OrderItemNodeId, DateTime.Now, false, false);
+                                _orderItemManager.SetFollowUpDateWithoutLogging(item.OrderItemNodeId, DateTime.Now, false, false);
                             }
                             catch (Exception ef)
                             {
@@ -330,7 +327,7 @@ namespace Chalmers.ILL.Mail
                                                 // cleanup, memory stream not needed any longer
                                                 attachment.Data.Dispose();
 
-                                                _orderItemManager.AddOrderItemAttachment(item.OrderItemNodeId, m.Id, attachment.Title, m.GetValue("file").ToString(), false, false);
+                                                _orderItemManager.AddExistingMediaItemAsAnAttachment(item.OrderItemNodeId, m.Id, attachment.Title, m.GetValue("file").ToString(), false, false);
                                             }
                                         }
                                         catch (Exception)
@@ -352,8 +349,8 @@ namespace Chalmers.ILL.Mail
                             // Write LogItem with the mail received and metadata
                             try
                             {
-                                _internalDbLogger.WriteLogItemInternal(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), false, false);
-                                _internalDbLogger.WriteLogItemInternal(item.OrderItemNodeId, "MAIL_NOTE", "Leverans från " + item.Sender + " [" + item.From + "]");
+                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), false, false);
+                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL_NOTE", "Leverans från " + item.Sender + " [" + item.From + "]");
                             }
                             catch (Exception el)
                             {

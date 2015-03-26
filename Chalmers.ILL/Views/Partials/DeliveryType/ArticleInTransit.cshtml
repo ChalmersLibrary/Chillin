@@ -1,0 +1,83 @@
+﻿@model Chalmers.ILL.Models.PartialPage.DeliveryType.ArticleInTransit
+
+<div id="delivery-in-transit" class="row">
+    <div class="col-md-6">
+        <div class="row">
+            <div class="col-md-12 form-group">
+                <label for="attachments-group2">Filer att leverera</label>
+                <div id="attachments-group2">
+                    <button class="btn btn-default" onclick="$('#hidden-file-upload').trigger('click');">Ladda upp</button>
+                    <input id="hidden-file-upload" type="file" name="hidden-file-upload" style="display: none;" />
+                    @{
+                        foreach (var attachment in Model.OrderItem.AttachmentList)
+                        {
+                            <button type="button" class="btn btn-default btn-view-attachment @(Model.DrmWarning ? "btn-danger": "")" onclick="openDocument(this);" data-link="@attachment.Link" data-media-id="@attachment.MediaItemNodeId">@attachment.Title <span class="glyphicon glyphicon-search"></span></button>
+                        }
+                    }
+                </div>
+            </div>
+            @if (Model.DrmWarning)
+            {
+                <div class="col-md-6 form-group drm-warning">
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Dokumenten kan vara DRM-skyddade!</h3>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="log-message">Skriv till logg (valfritt)</label>
+            <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <button class="btn btn-success" onclick="deliver()">Leverera!</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $(".datetimepicker").datetimepicker({
+            locale: "sv"
+        });
+
+        $("#hidden-file-upload").change(function () {
+            if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
+                alert('FileApi, som används för att ladda upp filer, stöds ej i denna webbläsare.');
+                return;
+            }
+
+            var input = document.getElementById('hidden-file-upload');
+            if (!input) {
+                alert("Kunde ej hitta \"FileInput\"-elementet.");
+            }
+            else if (!input.files) {
+                alert("Denna webbläsare verkar inte stödja \"files\"-funktionen av FileApi.");
+            }
+            else if (!input.files[0]) {
+                alert("En fil måste väljas.");
+            }
+            else {
+                file = input.files[0];
+                fr = new FileReader();
+                fr.onload = function () {
+                    uploadDocument(@Model.OrderItem.NodeId, file.name, fr.result);
+                };
+                fr.readAsDataURL(file);
+            }
+        });
+    });
+
+    function deliver() {
+        // TODO: Implement this delivery.
+    }
+</script>

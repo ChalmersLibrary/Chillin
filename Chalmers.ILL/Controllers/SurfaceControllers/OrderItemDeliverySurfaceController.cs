@@ -11,7 +11,6 @@ using Chalmers.ILL.Extensions;
 using Microsoft.Exchange.WebServices.Data;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.Logging;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.Templates;
@@ -26,23 +25,21 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemDeliverySurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IInternalDbLogger _internalDbLogger;
         IUmbracoWrapper _umbraco;
         ITemplateService _templateService;
         IMailService _mailService;
 
-        public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
-            IUmbracoWrapper umbraco, ITemplateService templateService, IMailService mailService)
+        public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco, 
+            ITemplateService templateService, IMailService mailService)
         {
             _orderItemManager = orderItemManager;
-            _internalDbLogger = internalDbLogger;
             _umbraco = umbraco;
             _templateService = templateService;
             _mailService = mailService;
         }
 
         /// <summary>
-        /// Render the Partial View for sending mail to user from within the system
+        /// Render the Partial View for the action of delivering an item.
         /// </summary>
         /// <param name="nodeId">OrderItem Node Id</param>
         /// <returns>Partial View</returns>
@@ -50,15 +47,94 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderDeliveryAction(int nodeId)
         {
             var pageModel = new ChalmersILLActionDeliveryModel(_orderItemManager.GetOrderItem(nodeId));
-
             _umbraco.PopulateModelWithAvailableValues(pageModel);
+            return PartialView("Chalmers.ILL.Action.Delivery", pageModel);
+        }
 
+        /// <summary>
+        /// Render the Partial View for the article by e-mail delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderArticleByEmailDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.ArticleByEmail(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.ArticleDeliveryByMailTemplate = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", pageModel.OrderItem);
+            pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            return PartialView("DeliveryType/ArticleByEmail", pageModel);
+        }
+
+        /// <summary>
+        /// Render the Partial View for the article by mail or internal mail delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderArticleByMailOrInternalMailDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.ArticleByMailOrInternalMail(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            return PartialView("DeliveryType/ArticleByMailOrInternalMail", pageModel);
+        }
+
+        /// <summary>
+        /// Render the Partial View for the article in infodisk delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderArticleInInfodiskDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.ArticleInInfodisk(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            return PartialView("DeliveryType/ArticleInInfodisk", pageModel);
+        }
+
+        /// <summary>
+        /// Render the Partial View for the article in transit delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderArticleInTransitDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.ArticleInTransit(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            return PartialView("DeliveryType/ArticleInTransit", pageModel);
+        }
+
+        /// <summary>
+        /// Render the Partial View for the book instant loan delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderBookInstantLoanDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.BookInstantLoan(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate", pageModel.OrderItem);
             pageModel.BookSlipTemplate = _templateService.GetTemplateData("BookSlipTemplate", pageModel.OrderItem);
+            return PartialView("DeliveryType/BookInstantLoan", pageModel);
+        }
 
-            // The return format depends on the client's Accept-header
-            return PartialView("Chalmers.ILL.Action.Delivery", pageModel);
+        /// <summary>
+        /// Render the Partial View for the book read at library delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderBookReadAtLibraryDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.BookReadAtLibrary(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.BookAvailableForReadingAtLibraryMailTemplate = _templateService.GetTemplateData("BookAvailableForReadingAtLibraryMailTemplate", pageModel.OrderItem);
+            return PartialView("DeliveryType/BookReadAtLibrary", pageModel);
         }
 
         /// <summary>
@@ -74,34 +150,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                // Connect to Umbraco ContentService
-                var contentService = UmbracoContext.Application.Services.ContentService;
+                _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Leveranstyp: " + delivery, false, false);
+                _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, false, false);
+                _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"));
 
-                // Find OrderItem
-                var contentNode = contentService.GetById(nodeId);
-
-                // Log this action
-                _internalDbLogger.WriteLogItemInternal(nodeId, "LEVERERAD", "Skickad med " + delivery, false, false);
-
-                if (logEntry != "")
-                {
-                    _internalDbLogger.WriteLogItemInternal(nodeId, "LOG", logEntry, false, false);
-                }
-
-                // Set status = Levererad
-                try
-                {
-                    _orderItemManager.SetOrderItemStatusInternal(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-
-                // Save
-                _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);
-
-                // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;
                 json.Message = "Saved provider data.";
             }
@@ -133,18 +185,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
 
-                // Use internal method to set status property and log the result
-                _orderItemManager.SetOrderItemDeliveryReceivedInternal(pack.orderNodeId, pack.bookId, pack.dueDate, pack.providerInformation, false, false);
+                _orderItemManager.SetDueDate(pack.orderNodeId, pack.dueDate, false, false);
+                _orderItemManager.SetProviderDueDate(pack.orderNodeId, pack.dueDate, false, false);
+                _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, false, false);
+                _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, false, false);
 
-                _internalDbLogger.WriteLogItemInternal(pack.orderNodeId, "LOG", pack.logMsg, false, false);
+                _orderItemManager.SetStatus(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Utlånad"), false, false);
+                _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, false, false);
 
                 _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
-                _internalDbLogger.WriteLogItemInternal(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
-                _internalDbLogger.WriteLogItemInternal(pack.orderNodeId, "MAIL", pack.mailData.message, true, true);
+                _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
+                _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL", pack.mailData.message);
 
-                // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;
-                json.Message = "Changed delivery item information to bookid:" + pack.bookId + " due date:+" + pack.dueDate + " provider information:" + pack.providerInformation;
+                json.Message = "Leverans till infodisk genomförd.";
             }
             catch (Exception e)
             {

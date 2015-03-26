@@ -11,12 +11,26 @@ namespace Chalmers.ILL.OrderItems
 {
     public interface IOrderItemManager
     {
-        /// <summary>
-        /// Return an OrderItem as a OrderItemModel for re-use in the application wherever needed
-        /// </summary>
-        /// <param name="nodeId">OrderItem Node Id</param>
-        /// <returns>OrderItemModel with populated properties</returns>
         OrderItemModel GetOrderItem(int nodeId);
+        List<LogItem> GetLogItems(int nodeId);
+
+        void AddExistingMediaItemAsAnAttachment(int orderNodeId, int mediaNodeId, string title, string link, bool doReindex = true, bool doSignal = true);
+        void AddLogItem(int OrderItemNodeId, string Type, string Message, bool doReindex = true, bool doSignal = true);
+        void AddSierraDataToLog(int orderItemNodeId, SierraModel sm, bool doReindex = true, bool doSignal = true);
+
+        void SetFollowUpDateWithoutLogging(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
+        void SetDrmWarningWithoutLogging(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
+        void SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
+        void SetDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
+        void SetProviderDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
+        void SetCancellationReason(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true);
+        void SetDeliveryLibrary(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true);
+        void SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
+        void SetPurchasedMaterial(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true);
+        void SetStatus(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true);
+        void SetType(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true);
+        void SetBookId(int nodeId, string bookId, bool doReindex = true, bool doSignal = true);
+        void SetProviderInformation(int nodeId, string bookId, bool doReindex = true, bool doSignal = true);
 
         /// <summary>
         /// Creates a new OrderItem from a MailQueueModel
@@ -33,24 +47,6 @@ namespace Chalmers.ILL.OrderItems
         /// <param name="doSignal">Should we signal other things about or save.</param>
         /// <returns>Created nodeId</returns>
         int CreateOrderItemInDbFromOrderItemSeedModel(OrderItemSeedModel model, bool doReindex = true, bool doSignal = true);
-
-        /// <summary>
-        /// Internal method to add a reference of an attachment to an order item.
-        /// </summary>
-        /// <param name="orderNodeId">OrderItem Node Id</param>
-        /// <param name="name">The name of </param>
-        /// <param name="link">Status to set using statusID</param>
-        /// <returns>True if everything went ok</returns>
-        void AddOrderItemAttachment(int orderNodeId, int mediaNodeId, string title, string link, bool doReindex = true, bool doSignal = true);
-
-        bool SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemCancellationReasonInternal(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemDeliveryLibraryInternal(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemDeliveryReceivedInternal(int orderNodeId, string bookId, DateTime dueDate, string providerInformation, bool doReindex = true, bool doSignal = true);
-        bool SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemPurchasedMaterialInternal(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemStatusInternal(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true);
-        bool SetOrderItemTypeInternal(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true);
 
         /// <summary>
         /// Saves content without triggering events in Umbraco, then triggers redindexing of the 

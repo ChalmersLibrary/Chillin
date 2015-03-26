@@ -1,8 +1,14 @@
-﻿using Chalmers.ILL.Models.PartialPage;
+﻿using Chalmers.ILL.Mail;
+using Chalmers.ILL.Models;
+using Chalmers.ILL.Models.Mail;
+using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Templates;
+using Chalmers.ILL.Utilities;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
@@ -15,11 +21,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         IOrderItemManager _orderItemManager;
         ITemplateService _templateService;
+        IMailService _mailService;
 
-        public OrderItemClaimSurfaceController(IOrderItemManager orderItemManager, ITemplateService templateService)
+        public OrderItemClaimSurfaceController(IOrderItemManager orderItemManager, ITemplateService templateService, IMailService mailService)
         {
             _orderItemManager = orderItemManager;
             _templateService = templateService;
+            _mailService = mailService;
         }
 
         [HttpGet]
@@ -30,6 +38,42 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             pageModel.ClaimBookMailTemplate = _templateService.GetTemplateData("ClaimBookMailTemplate", pageModel.OrderItem);
 
             return PartialView("Chalmers.ILL.Action.Claim", pageModel);
+        }
+
+        [HttpPost]
+        public ActionResult ClaimItem(string packJson)
+        {
+            var json = new ResultResponse();
+
+            try
+            {
+                var pack = JsonConvert.DeserializeObject<ClaimItemPackage>(packJson);
+
+                _orderItemManager.SetDueDate(pack.nodeId, pack.dueDate, false, false);
+                _orderItemManager.SetProviderDueDate(pack.nodeId, pack.dueDate, false, false);
+                _orderItemManager.SetStatus(pack.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "12:Krävd"), false, false);
+
+                _mailService.SendMail(pack.mail);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message);
+
+                json.Success = true;
+                json.Message = "Krav genomfört.";
+            }
+            catch (Exception e)
+            {
+                json.Success = false;
+                json.Message = "Misslyckades med att kräva: " + e.Message;
+            }
+
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        public class ClaimItemPackage
+        {
+            public int nodeId;
+            public DateTime dueDate;
+            public OutgoingMailModel mail;
         }
     }
 }

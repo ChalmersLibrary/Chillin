@@ -336,6 +336,12 @@
     <Content Include="Views\Partials\Chalmers.ILL.Action.Claim.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.ProviderReturnDate.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.PatronReturnDate.cshtml" />
+    <Content Include="Views\Partials\DeliveryType\ArticleByEmail.cshtml" />
+    <Content Include="Views\Partials\DeliveryType\BookInstantLoan.cshtml" />
+    <Content Include="Views\Partials\DeliveryType\ArticleByMailOrInternalMail.cshtml" />
+    <Content Include="Views\Partials\DeliveryType\ArticleInTransit.cshtml" />
+    <Content Include="Views\Partials\DeliveryType\ArticleInInfodisk.cshtml" />
+    <Content Include="Views\Partials\DeliveryType\BookReadAtLibrary.cshtml" />
     <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />
     <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
@@ -408,7 +414,6 @@
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\TemplatesSurfaceController.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
-    <Compile Include="Logging\IInternalDbLogger.cs" />
     <Compile Include="Mail\AutomaticMailSendingEngine.cs" />
     <Compile Include="Mail\ChalmersOrderItemsMailSource.cs" />
     <Compile Include="Mail\IAutomaticMailSendingEngine.cs" />
@@ -434,6 +439,12 @@
     <Compile Include="Models\PartialPage\ChalmersILLActionProviderModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionProviderReturnDateModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLActionReturnModel.cs" />
+    <Compile Include="Models\PartialPage\DeliveryType\ArticleByEmail.cs" />
+    <Compile Include="Models\PartialPage\DeliveryType\ArticleByMailOrInternalMail.cs" />
+    <Compile Include="Models\PartialPage\DeliveryType\ArticleInInfodisk.cs" />
+    <Compile Include="Models\PartialPage\DeliveryType\ArticleInTransit.cs" />
+    <Compile Include="Models\PartialPage\DeliveryType\BookInstantLoan.cs" />
+    <Compile Include="Models\PartialPage\DeliveryType\BookReadAtLibrary.cs" />
     <Compile Include="Models\ResultResponseWithStringData.cs" />
     <Compile Include="Models\Template.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLEditTemplatesModel.cs" />
@@ -460,6 +471,7 @@
     <Compile Include="OrderItems\IOrderItemManager.cs" />
     <Compile Include="OrderItems\ISource.cs" />
     <Compile Include="OrderItems\ISourceFactory.cs" />
+    <Compile Include="OrderItems\SaveException.cs" />
     <Compile Include="OrderItems\SourcePollingException.cs" />
     <Compile Include="OrderItems\SourcePollingResult.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />
@@ -479,7 +491,6 @@
     <Compile Include="UmbracoApi\UmbracoWrapper.cs" />
     <Compile Include="UmbracoApi\IUmbracoWrapper.cs" />
     <Compile Include="Utilities\Helpers.cs" />
-    <Compile Include="Logging\InternalDbLogger.cs" />
     <Compile Include="OrderItems\OrderItemManager.cs" />
     <Compile Include="Patron\Sierra.cs" />
     <Compile Include="Members\MemberInfoManager.cs" />

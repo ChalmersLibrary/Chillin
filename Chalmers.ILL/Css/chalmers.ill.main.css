@@ -336,3 +336,9 @@ tr:nth-child(odd) {
 .filter-setting {
     padding: 10px;
 }
+
+.order-item-var-label {
+    width: 110px;
+    display: inline-block;
+    text-align: left;
+}

@@ -15,21 +15,17 @@ using System.Configuration;
 using System.Net;
 using System.IO;
 using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class OrderItemPatronDataSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IInternalDbLogger _internalDbLogger;
         IPatronDataProvider _patronDataProvider;
 
-        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger, 
-            IPatronDataProvider patronDataProvider)
+        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProvider)
         {
             _orderItemManager = orderItemManager;
-            _internalDbLogger = internalDbLogger;
             _patronDataProvider = patronDataProvider;
         }
 
@@ -99,7 +95,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     content.SetValue("homeLibrary", sm.home_library);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 }
-                _internalDbLogger.WriteSierraDataToLog(orderItemNodeId, sm);
+                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm);
 
                 json.Success = true;
                 json.Message = "Succcessfully loaded Sierra data from \"personnummer\" or library card number.";
@@ -138,7 +134,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     content.SetValue("homeLibrary", sm.home_library);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 }
-                _internalDbLogger.WriteSierraDataToLog(orderItemNodeId, sm);
+                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm);
 
                 json.Success = true;
                 json.Message = "Succcessfully loaded Sierra data from library card number.";
