@@ -60,6 +60,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 _orderItemManager.SetDueDate(pack.nodeId, pack.dueDate, false, false);
 
+                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail, false, false);
                 _mailService.SendMail(pack.mail);
                 _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);
                 _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message);

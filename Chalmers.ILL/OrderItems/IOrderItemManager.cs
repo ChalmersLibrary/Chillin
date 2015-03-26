@@ -30,6 +30,7 @@ namespace Chalmers.ILL.OrderItems
         void SetStatus(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true);
         void SetType(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true);
         void SetBookId(int nodeId, string bookId, bool doReindex = true, bool doSignal = true);
+        void SetPatronEmail(int nodeId, string email, bool doReindex = true, bool doSignal = true);
         void SetProviderName(int nodeId, string providerName, bool doReindex = true, bool doSignal = true);
         void SetProviderOrderId(int nodeId, string providerOrderId, bool doReindex = true, bool doSignal = true);
         void SetProviderInformation(int nodeId, string providerInformation, bool doReindex = true, bool doSignal = true);
