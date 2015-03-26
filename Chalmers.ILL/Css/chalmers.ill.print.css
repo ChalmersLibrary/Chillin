@@ -1,0 +1,6 @@
+﻿#container > * {
+    display: none;
+}
+#bookSlip {
+    display: block;
+}
