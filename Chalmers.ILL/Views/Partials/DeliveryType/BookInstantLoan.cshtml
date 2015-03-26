@@ -78,6 +78,8 @@
                 newFollowUpDate: $('#dueDate').val()
             }, $("#log-message").val());
         } else {
+            alert("Sidan kommer laddas om, försök därefter igen.");
+            location.reload();
         }
     }
 </script>
