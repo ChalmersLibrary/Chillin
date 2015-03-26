@@ -39,7 +39,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         /// <summary>
-        /// Render the Partial View for sending mail to user from within the system
+        /// Render the Partial View for the action of delivering an item.
         /// </summary>
         /// <param name="nodeId">OrderItem Node Id</param>
         /// <returns>Partial View</returns>
@@ -47,14 +47,51 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderDeliveryAction(int nodeId)
         {
             var pageModel = new ChalmersILLActionDeliveryModel(_orderItemManager.GetOrderItem(nodeId));
-
             _umbraco.PopulateModelWithAvailableValues(pageModel);
-
-            pageModel.ArticleDeliveryByMailTemplate = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", pageModel.OrderItem);
-            pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate", pageModel.OrderItem);
-
-            // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Delivery", pageModel);
+        }
+
+        /// <summary>
+        /// Render the Partial View for the article by e-mail delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderArticleByEmailDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.ArticleByEmail(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.ArticleDeliveryByMailTemplate = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", pageModel.OrderItem);
+            pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            return PartialView("DeliveryType/ArticleByEmail", pageModel);
+        }
+
+        /// <summary>
+        /// Render the Partial View for the article by mail or internal mail delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderArticleByMailOrInternalMailDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.ArticleByMailOrInternalMail(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            return PartialView("DeliveryType/ArticleByMailOrInternalMail", pageModel);
+        }
+
+        /// <summary>
+        /// Render the Partial View for the book instant loan delivery type.
+        /// </summary>
+        /// <param name="nodeId">OrderItem Node Id</param>
+        /// <returns>Partial View</returns>
+        [HttpGet]
+        public ActionResult RenderBookInstantLoanDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.BookInstantLoan(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate", pageModel.OrderItem);
+            return PartialView("DeliveryType/BookInstantLoan", pageModel);
         }
 
         /// <summary>
