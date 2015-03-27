@@ -442,7 +442,7 @@ namespace Chalmers.ILL.OrderItems
         public void SetProviderInformation(int nodeId, string providerInformation, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
-            var currentProviderInformation = content.GetValue<string>("bookId");
+            var currentProviderInformation = content.GetValue<string>("providerInformation");
             if (currentProviderInformation != providerInformation)
             {
                 content.SetValue("providerInformation", providerInformation);
