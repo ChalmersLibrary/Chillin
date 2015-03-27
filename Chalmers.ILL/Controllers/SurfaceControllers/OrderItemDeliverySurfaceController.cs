@@ -195,6 +195,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetStatus(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Utlånad"), false, false);
                 _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, false, false);
 
+                _orderItemManager.SetPatronEmail(pack.orderNodeId, pack.mailData.recipientEmail);
                 _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
                 _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
                 _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL", pack.mailData.message);
