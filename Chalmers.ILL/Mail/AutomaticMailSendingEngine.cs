@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Chalmers.ILL.Extensions;
+using System.Globalization;
 
 namespace Chalmers.ILL.Mail
 {
@@ -24,18 +26,38 @@ namespace Chalmers.ILL.Mail
 
             foreach (var orderItem in orderItems)
             {
-                if (orderItem.Fields["Status"].Contains("Infodisk"))
+                var dueDate = orderItem.Fields.GetValueString("DueDate") == "" ? DateTime.Now :
+                    DateTime.ParseExact(orderItem.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
+
+                if (orderItem.Fields["Status"].Contains("Utlånad"))
                 {
-                    // TODO: Skicka en påminnelse om bok har legat för hämtning i en vecka och det är mer än en vecka kvar av lånetiden.
-                    // TODO: Skicka speciell påminnelse om bok har legat för hämtning i en vecka och det är mindre än en vecka kvar av lånetiden.
+                    if (now.Date == dueDate.AddDays(-5).Date)
+                    {
+                        // TODO: Skicka påminnelse när lånetiden snart slut.
+                    }
+                    else if (now.Date == dueDate.Date)
+                    {
+                        // TODO: Skicka påminnelse när lånetiden har tagit slut.
+                    }
+                    else if (now.Date == dueDate.AddDays(5).Date)
+                    {
+                        // TODO: Skicka arg påminnelse när lånetiden har tagit slut och några dagar har gått.
+                    }
+                    else if (now.Date == dueDate.AddDays(10).Date)
+                    {
+                        // TODO: Skicka jättearg påminnelse när lånetiden har tagit slut och många dagar har gått.
+                    }
                 }
-                else if (orderItem.Fields["Status"].Contains("Utlånad"))
+                else if (orderItem.Fields["Status"].Contains("Krävd"))
                 {
-                    // TODO: Skicka påminnelse varje vecka om lånetid har gått ut.
-                    // TODO: Skicka påminnelse när lånetiden snart slut.
-                    // TODO: Skicka påminnelse när lånetiden har tagit slut.
-                    // TODO: Skicka arg påminnelse när lånetiden har tagit slut och några dagar har gått.
-                    // TODO: Skicka jättearg påminnelse när lånetiden har tagit slut och många dagar har gått.
+                    if (now.Date == dueDate.AddDays(5).Date)
+                    {
+                        // TODO: Skicka arg påminnelse när boken är krävd och några dagar har gått efter att lånetiden tagit slut.
+                    }
+                    else if (now.Date == dueDate.AddDays(10).Date)
+                    {
+                        // TODO: Skicka jättearg påminnelse när boken är krävd och många dagar har gått efter att lånetiden tagit slut.
+                    }
                 }
             }
         }
@@ -45,7 +67,7 @@ namespace Chalmers.ILL.Mail
         private ISearchResults GetOrderItemsThatAreRelevantForAutomaticMailSending()
         {
             var searchCriteria = _orderItemSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-            return _orderItemSearcher.Search(searchCriteria.RawQuery("Type:Bok AND (Status:Infodisk OR Status:Utlånad)"));
+            return _orderItemSearcher.Search(searchCriteria.RawQuery("Type:Bok AND (Status:Utlånad OR Status:Krävd)"));
         }
 
         #endregion
