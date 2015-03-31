@@ -1,8 +1,32 @@
 ﻿@model Chalmers.ILL.Models.PartialPage.Settings.ModifyProviderData
 
 <div class="col-lg-12">
-    <h3>Modifiera leverantörsdata</h3>
+    <h3>Modifiera leverantörsdata på alla ordrar</h3>
 </div>
 <div class="col-md-6">
-    <h1>Under konstruktion</h1>
+    <div class="form-group">
+        <label for="providerName">Ändra från leverantörsnamn</label>
+        <input type="text" class="form-control" id="from-provider-name" name="from-provider-name" placeholder="Leverantörens namn" value="">
+        <div id="from-provider-list" class="list-group" style="height: 175px; overflow: auto; background: #ebebeb;">
+            @foreach (var providerName in Model.Providers)
+            {
+                <a href="#" onclick="$('#from-provider-name').val($(this).text()); event.preventDefault();" class="list-group-item">@providerName</a>
+            }
+        </div>
+    </div>
+</div>
+<div class="col-md-6">
+    <div class="form-group">
+        <label for="providerName">Ändra till leverantörsnamn</label>
+        <input type="text" class="form-control" id="to-provider-name" name="to-provider-name" placeholder="Leverantörens namn" value="">
+        <div id="provider-list" class="list-group" style="height: 175px; overflow: auto; background: #ebebeb;">
+            @foreach (var providerName in Model.Providers)
+            {
+                <a href="#" onclick="$('#to-provider-name').val($(this).text()); event.preventDefault();" class="list-group-item">@providerName</a>
+            }
+        </div>
+    </div>
+</div>
+<div class="col-md-6">
+    <button class="btn btn-success" onclick="">Ändra leverantörsnamn</button>
 </div>

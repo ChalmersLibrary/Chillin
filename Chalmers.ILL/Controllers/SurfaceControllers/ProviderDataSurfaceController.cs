@@ -1,4 +1,5 @@
-﻿using Chalmers.ILL.Templates;
+﻿using Chalmers.ILL.Providers;
+using Chalmers.ILL.Templates;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,16 +13,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class ProviderDataSurfaceController : SurfaceController
     {
         ITemplateService _templateService;
+        IProviderService _providerService;
 
-        public ProviderDataSurfaceController(ITemplateService templateService)
+        public ProviderDataSurfaceController(ITemplateService templateService, IProviderService providerService)
         {
             _templateService = templateService;
+            _providerService = providerService;
         }
 
         [HttpGet]
         public ActionResult RenderModifyProviderDataAction()
         {
             var pageModel = new Models.PartialPage.Settings.ModifyProviderData();
+
+            pageModel.Providers = _providerService.FetchAndCreateListOfUsedProviders();
 
             return PartialView("Settings/ModifyProviderData", pageModel);
         }

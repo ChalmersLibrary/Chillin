@@ -7,5 +7,6 @@ namespace Chalmers.ILL.Models.PartialPage.Settings
 {
     public class ModifyProviderData
     {
+        public List<String> Providers;
     }
 }

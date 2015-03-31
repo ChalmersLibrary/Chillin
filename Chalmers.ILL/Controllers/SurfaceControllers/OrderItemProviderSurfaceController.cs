@@ -12,6 +12,7 @@ using System.Configuration;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Models.PartialPage;
 using Examine;
+using Chalmers.ILL.Providers;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -20,10 +21,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemProviderSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
+        IProviderService _providerService;
 
-        public OrderItemProviderSurfaceController(IOrderItemManager orderItemManager)
+        public OrderItemProviderSurfaceController(IOrderItemManager orderItemManager, IProviderService providerService)
         {
             _orderItemManager = orderItemManager;
+            _providerService = providerService;
         }
 
         [HttpGet]
@@ -32,7 +35,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // Get a new OrderItem populated with values for this node
             var pageModel = new ChalmersILLActionProviderModel(_orderItemManager.GetOrderItem(nodeId));
 
-            pageModel.Providers = FetchAndCreateListOfUsedProviders();
+            pageModel.Providers = _providerService.FetchAndCreateListOfUsedProviders();
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Provider", pageModel);
@@ -61,22 +64,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);
-        }
-
-        private List<String> FetchAndCreateListOfUsedProviders()
-        {
-            var res = new List<String>();
-
-            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-            var allOrders = searcher.Search(searchCriteria.RawQuery("nodeTypeAlias:ChalmersILLOrderItem"));
-
-            return allOrders.Where(x => x.Fields.ContainsKey("ProviderName") && x.Fields["ProviderName"] != "")
-                .Select(x => x.Fields["ProviderName"])
-                .GroupBy(x => x)
-                .OrderByDescending(x => x.Count())
-                .Select(x => x.Key)
-                .ToList();
         }
     }
 }
