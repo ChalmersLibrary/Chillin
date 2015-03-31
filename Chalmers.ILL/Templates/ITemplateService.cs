@@ -9,8 +9,9 @@ namespace Chalmers.ILL.Templates
 {
     public interface ITemplateService
     {
-        string GetTemplateData(string nodeName, OrderItemModel orderItem);
         string GetTemplateData(int nodeId);
+        string GetTemplateData(string nodeName);
+        string GetTemplateData(string nodeName, OrderItemModel orderItem);
         void SetTemplateData(int nodeId, string data);
         List<Template> PopulateTemplateList(List<Template> list);
     }

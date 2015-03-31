@@ -5,16 +5,23 @@ using System.Linq;
 using System.Web;
 using Chalmers.ILL.Extensions;
 using System.Globalization;
+using Chalmers.ILL.Templates;
+using Chalmers.ILL.Models.Mail;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Mail
 {
     public class AutomaticMailSendingEngine : IAutomaticMailSendingEngine
     {
         ISearcher _orderItemSearcher;
+        ITemplateService _templateService;
+        IOrderItemManager _orderItemManager;
 
-        public AutomaticMailSendingEngine(ISearcher orderItemSearcher)
+        public AutomaticMailSendingEngine(ISearcher orderItemSearcher, ITemplateService templateService, IOrderItemManager orderItemManager)
         {
             _orderItemSearcher = orderItemSearcher;
+            _templateService = templateService;
+            _orderItemManager = orderItemManager;
         }
 
         public void SendOutMailsThatAreDue()
@@ -29,35 +36,34 @@ namespace Chalmers.ILL.Mail
                 var dueDate = orderItem.Fields.GetValueString("DueDate") == "" ? DateTime.Now :
                     DateTime.ParseExact(orderItem.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
 
-                if (orderItem.Fields["Status"].Contains("Utlånad"))
+                var mail = new OutgoingMailModel();
+                mail.OrderId = orderItem.Fields.GetValueString("OrderId");
+                mail.recipientName = orderItem.Fields.GetValueString("PatronName");
+                mail.recipientEmail = orderItem.Fields.GetValueString("PatronEmail");
+
+                if (now.Date == dueDate.AddDays(-5).Date)
                 {
-                    if (now.Date == dueDate.AddDays(-5).Date)
-                    {
-                        // TODO: Skicka påminnelse när lånetiden snart slut.
-                    }
-                    else if (now.Date == dueDate.Date)
-                    {
-                        // TODO: Skicka påminnelse när lånetiden har tagit slut.
-                    }
-                    else if (now.Date == dueDate.AddDays(5).Date)
-                    {
-                        // TODO: Skicka arg påminnelse när lånetiden har tagit slut och några dagar har gått.
-                    }
-                    else if (now.Date == dueDate.AddDays(10).Date)
-                    {
-                        // TODO: Skicka jättearg påminnelse när lånetiden har tagit slut och många dagar har gått.
-                    }
+                    mail.message = _templateService.GetTemplateData("CourtesyNoticeMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt \"courtesy notice\" till " + mail.recipientEmail, false, false);
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message, true, true);
                 }
-                else if (orderItem.Fields["Status"].Contains("Krävd"))
+                else if (now.Date == dueDate.AddDays(1).Date)
                 {
-                    if (now.Date == dueDate.AddDays(5).Date)
-                    {
-                        // TODO: Skicka arg påminnelse när boken är krävd och några dagar har gått efter att lånetiden tagit slut.
-                    }
-                    else if (now.Date == dueDate.AddDays(10).Date)
-                    {
-                        // TODO: Skicka jättearg påminnelse när boken är krävd och många dagar har gått efter att lånetiden tagit slut.
-                    }
+                    mail.message = _templateService.GetTemplateData("LoanPeriodOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer ett till " + mail.recipientEmail, false, false);
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message, true, true);
+                }
+                else if (now.Date == dueDate.AddDays(5).Date)
+                {
+                    mail.message = _templateService.GetTemplateData("LoanPeriodReallyOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer två till " + mail.recipientEmail, false, false);
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message, true, true);
+                }
+                else if (now.Date == dueDate.AddDays(10).Date)
+                {
+                    mail.message = _templateService.GetTemplateData("LoanPeriodReallyReallyOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer tre till " + mail.recipientEmail, false, false);
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message, true, true);
                 }
             }
         }
