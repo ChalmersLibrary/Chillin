@@ -59,6 +59,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
 
                 _orderItemManager.SetDueDate(pack.nodeId, pack.dueDate, false, false);
+                _orderItemManager.SetProviderDueDate(pack.nodeId, pack.dueDate, false, false);
 
                 _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail, false, false);
                 _mailService.SendMail(pack.mail);
