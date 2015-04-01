@@ -140,10 +140,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         /// <summary>
-        /// Send mail to user from within the system, possibly change status and log means of delivery
+        /// Log message, set delivered status and log delivery type.
         /// </summary>
         /// <param name="nodeId">OrderItem Node Id</param>
-        /// <param name="newStatus">Means of delivery</param>
+        /// <param name="logEntry">Log message</param>
+        /// <param name="delivery">Type of delivery</param>
         /// <returns>JSON result</returns>
         [HttpPost]
         public ActionResult SetDelivery(int nodeId, string logEntry, string delivery)
@@ -166,6 +167,46 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Log message, set delivered status, log delivery type and send mail to user.
+        /// </summary>
+        /// <param name="packJson">The serialized object of type DeliveryByMailPackage.</param>
+        /// <returns>JSON result</returns>
+        [HttpPost]
+        public ActionResult DeliverByMail(string packJson)
+        {
+            var res = new ResultResponse();
+
+            try
+            {
+                var pack = JsonConvert.DeserializeObject<DeliverByMailPackage>(packJson);
+
+                _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: Direktleverans via e-post.", false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, false, false);
+                _orderItemManager.SetStatus(pack.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
+
+                // We save everything here first so that we get the new values injected into the message by the template service.
+                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail);
+
+                // Overwrite the message with message from template service so that we get the new values injected.
+                pack.mail.message = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", _orderItemManager.GetOrderItem(pack.nodeId));
+
+                _mailService.SendMail(pack.mail);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message);
+
+                res.Success = true;
+                res.Message = "Lyckades leverera via mail.";
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = "Fel vid leveransförsök via mail: " + e.Message;
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
         }
 
         /// <summary>
@@ -195,7 +236,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetStatus(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Utlånad"), false, false);
                 _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, false, false);
 
+                // We save everything here first so that we get the new values injected into the message by the template service.
                 _orderItemManager.SetPatronEmail(pack.orderNodeId, pack.mailData.recipientEmail);
+
+                // Overwrite the message with message from template service so that we get the new values injected.
+                pack.mailData.message = _templateService.GetTemplateData("BookAvailableForReadingAtLibraryMailTemplate", _orderItemManager.GetOrderItem(pack.orderNodeId));
+
                 _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
                 _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
                 _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL", pack.mailData.message);
@@ -210,6 +256,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        public class DeliverByMailPackage
+        {
+            public int nodeId { get; set; }
+            public string logEntry { get; set; }
+            public OutgoingMailModel mail { get; set; }
         }
 
         public class DeliveryReceivedPackage

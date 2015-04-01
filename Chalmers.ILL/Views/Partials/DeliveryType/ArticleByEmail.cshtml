@@ -91,17 +91,31 @@
             attachmentIds.push($(this).data("media-id"));
         });
 
-        sendDeliveryByEmail({
-            nodeId: @Model.OrderItem.NodeId,
-            recipientEmail: $("#patron-email").text().toString().trim(),
-            recipientName: "@Model.OrderItem.PatronName",
-            message: $("#mail-message").val(),
-            newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Levererad")).Id,
-            newCancellationReasonId: "-1",
-            newPurchasedMaterialId: "-1",
-            newFollowUpDate: $('#followUpDate').val(),
-            attachments: attachmentIds
-        }, $('#log-message').val());
+        lockScreen();
+        $.post("/umbraco/surface/OrderItemDeliverySurface/DeliverByMail", {
+            packJson: JSON.stringify({
+                nodeId: @Model.OrderItem.NodeId,
+                logEntry: $('#log-message').val(),
+                mail: {
+                    OrderId: "@Model.OrderItem.OrderId",
+                    recipientEmail: $("#patron-email").text().toString().trim(),
+                    recipientName: "@Model.OrderItem.PatronName",
+                    message: "", // The message doesn't matter, it is overwritten using correct template on server.
+                    attachments: attachmentIds
+                }
+            })
+        }).done(function (json) {
+            if (json.Success) {
+                loadOrderItemDetails(@Model.OrderItem.NodeId);
+            }
+            else {
+                alert(json.Message);
+            }
+            unlockScreen();
+        }).fail(function (jqxhr, textStatus, error) {
+            alert("Fel vid leverans med mail: " + textStatus + " " + error);
+            unlockScreen();
+        });
     }
 
     function toggleDocumentSendStatus (btn) {

@@ -788,53 +788,6 @@ function setOrderItemReference(nodeId, reference) {
     }).error(unlockScreen);
 }
 
-function sendDeliveryByEmail(mailData, logEntry) {
-    lockScreen();
-    if (mailData.message && mailData.recipientEmail) {
-        $.ajax({
-            type: "POST",
-            url: "/umbraco/surface/OrderItemMailSurface/SendMail",
-            data: JSON.stringify(mailData),
-            success: function (json) {
-                if (json.Success) {
-                    $.post("/umbraco/surface/OrderItemDeliverySurface/SetDelivery", {
-                        nodeId: mailData.nodeId,
-                        logEntry: logEntry,
-                        delivery: "Direktleverans via e-post"
-                    }, function (json) {
-                        if (json.Success) {
-                            loadOrderItemDetails(mailData.nodeId);
-                        }
-                        else {
-                            alert(json.Message);
-                        }
-                        unlockScreen();
-                    }).error(unlockScreen);
-                }
-                else
-                {
-                    alert(json.Message);
-                    unlockScreen();
-                }
-            },
-            error: function (jqxhr, textStatus, errorThrown) {
-                alert(textStatus + "\n" + errorThrown);
-                unlockScreen();
-            },
-            contentType: "application/json"
-        });
-}
-    else {
-        if (mailData.message == "") {
-            alert("Du m\u00E5ste skriva ett meddelande till mottagaren.");
-        }
-        if (mailData.recipientEmail == "") {
-            alert("Du m\u00E5ste ange en mottagande e-postadress.");
-        }
-        unlockScreen();
-    }
-}
-
 /* Set new property values for Delivery from form */
 function setOrderItemDelivery(nodeId, logEntry, delivery) {
     lockScreen();
