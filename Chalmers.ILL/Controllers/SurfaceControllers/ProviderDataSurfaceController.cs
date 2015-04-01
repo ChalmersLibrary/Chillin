@@ -49,9 +49,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-                ids = _orderItemsSearcher.Search(searchCriteria.RawQuery("ProviderName:\"" + providerName + "\"")).Select(x => x.Id).ToList();
+                ids = _orderItemsSearcher.Search(searchCriteria.RawQuery("ProviderName:\"" + providerName + "\""))
+                    .Where(x => x.Fields["ProviderName"].ToString() == providerName)
+                    .Select(x => x.Id)
+                    .ToList();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // NOP. Just return empty list if we fail, this should be enough indication that something is wrong and needs investigation.
             }
@@ -74,7 +77,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             catch (Exception e)
             {
                 res.Success = false;
-                res.Message = "Misslyckades med att ändra leverantörsnamn på order.";
+                res.Message = "Misslyckades med att ändra leverantörsnamn på order: " + e.Message;
             }
 
             return Json(res, JsonRequestBehavior.AllowGet);
