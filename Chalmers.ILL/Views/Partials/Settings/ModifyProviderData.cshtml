@@ -37,7 +37,7 @@
         var toProviderName = $('#to-provider-name').val().trim();
 
         if (fromProviderName && toProviderName) {
-            var res = window.confirm('Detta kommer nu att ändra ALLA ordrar som har leverantörsnamn \"' + fromProviderName + '\" så att de istället har leverantörsnamn \"' + toProviderName + '\".\n\nDessa ändringar går ej att ångra och är det många ordrar som ändringen berör kan det ta en stund och det kan påverka Chillins prestanda.\n\nÄr du säker på att du vill fortsätta?');
+            var res = window.confirm('Detta kommer nu att ändra max 20 ordrar som har leverantörsnamn \"' + fromProviderName + '\" så att de istället har leverantörsnamn \"' + toProviderName + '\".\n\nDessa ändringar går ej att ångra och är det många ordrar som ändringen berör kan det ta en stund och det kan påverka Chillins prestanda.\n\nÄr du säker på att du vill fortsätta?');
             if (res) {
                 lockScreen();
                 $.post("/umbraco/surface/ProviderDataSurface/ModifyProviderDataHistory", {

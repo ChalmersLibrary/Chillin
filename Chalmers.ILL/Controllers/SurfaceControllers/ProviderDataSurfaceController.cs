@@ -51,9 +51,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
                 var ids = _orderItemsSearcher.Search(searchCriteria.RawQuery("ProviderName:\"" + from + "\"")).Select(x => x.Id).ToList();
 
+                var maxCount = 20;
+                var count = 0;
                 foreach (var id in ids)
                 {
                     _orderItemManager.SetProviderName(id, to);
+
+                    count++;
+                    if (count >= maxCount)
+                    {
+                        break;
+                    }
                 }
 
                 res.Success = true;
