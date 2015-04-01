@@ -717,7 +717,7 @@ function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
     }).error(unlockScreen);
 }
 
-function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg) {
+function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
     lockScreen();
     $.post("/umbraco/surface/OrderItemDeliverySurface/SetOrderItemDeliveryReceived", {
         packJson: JSON.stringify({
@@ -726,7 +726,8 @@ function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation
             dueDate: dueDate,
             providerInformation: providerInformation,
             mailData: maildata,
-            logMsg: logMsg
+            logMsg: logMsg,
+            readOnlyAtLibrary: readOnlyAtLibrary
         })
     }, function (json) {
         if (json.Success) {

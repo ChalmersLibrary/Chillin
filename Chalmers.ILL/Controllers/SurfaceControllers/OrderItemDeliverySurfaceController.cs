@@ -228,6 +228,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
 
+                if (pack.readOnlyAtLibrary)
+                {
+                    _orderItemManager.AddLogItem(pack.orderNodeId, "LEVERERAD", "Leveranstyp: Ej hemlån.", false, false);
+                }
+                else
+                {
+                    _orderItemManager.AddLogItem(pack.orderNodeId, "LEVERERAD", "Leveranstyp: Avhämtning i infodisk.", false, false);
+                }
                 _orderItemManager.SetDueDate(pack.orderNodeId, pack.dueDate, false, false);
                 _orderItemManager.SetProviderDueDate(pack.orderNodeId, pack.dueDate, false, false);
                 _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, false, false);
@@ -240,7 +248,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetPatronEmail(pack.orderNodeId, pack.mailData.recipientEmail);
 
                 // Overwrite the message with message from template service so that we get the new values injected.
-                pack.mailData.message = _templateService.GetTemplateData("BookAvailableForReadingAtLibraryMailTemplate", _orderItemManager.GetOrderItem(pack.orderNodeId));
+                if (pack.readOnlyAtLibrary)
+                {
+                    pack.mailData.message = _templateService.GetTemplateData("BookAvailableForReadingAtLibraryMailTemplate", _orderItemManager.GetOrderItem(pack.orderNodeId));
+                }
+                else
+                {
+                    pack.mailData.message = _templateService.GetTemplateData("BookAvailableMailTemplate", _orderItemManager.GetOrderItem(pack.orderNodeId));
+                }
 
                 _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
                 _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
@@ -273,6 +288,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             public string providerInformation { get; set; }
             public OutgoingMailPackageModel mailData { get; set; }
             public string logMsg { get; set; }
+            public bool readOnlyAtLibrary { get; set; }
         }
 
         private string GetArticleDeliveryLibrary(string sierraHomeLibrary)
