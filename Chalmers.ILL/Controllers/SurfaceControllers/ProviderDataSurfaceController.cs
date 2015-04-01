@@ -49,11 +49,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-                var results = _orderItemsSearcher.Search(searchCriteria.RawQuery("ProviderName:\"" + from + "\"")).Select(x => x.Id);
+                var ids = _orderItemsSearcher.Search(searchCriteria.RawQuery("ProviderName:\"" + from + "\"")).Select(x => x.Id).ToList();
 
-                foreach (var result in results)
+                foreach (var id in ids)
                 {
-                    _orderItemManager.SetProviderName(result, to);
+                    _orderItemManager.SetProviderName(id, to);
                 }
 
                 res.Success = true;
