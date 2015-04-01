@@ -20,6 +20,7 @@ namespace Chalmers.ILL.OrderItems
 
         void SetFollowUpDateWithoutLogging(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
         void SetDrmWarningWithoutLogging(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
+        void SetProviderNameWithoutLogging(int nodeId, string providerName, bool doReindex = true, bool doSignal = true);
         void SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
         void SetDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
         void SetProviderDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);

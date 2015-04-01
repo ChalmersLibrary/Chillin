@@ -41,36 +41,40 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return PartialView("Settings/ModifyProviderData", pageModel);
         }
 
-        [HttpPost]
-        public ActionResult ModifyProviderDataHistory(string from, string to)
+        [HttpGet]
+        public ActionResult GetNodeIdsForOrderItemsWithGivenProviderName(string providerName)
         {
-            var res = new ResultResponse();
-            
+            var ids = new List<int>();
+
             try
             {
                 var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-                var ids = _orderItemsSearcher.Search(searchCriteria.RawQuery("ProviderName:\"" + from + "\"")).Select(x => x.Id).ToList();
+                ids = _orderItemsSearcher.Search(searchCriteria.RawQuery("ProviderName:\"" + providerName + "\"")).Select(x => x.Id).ToList();
+            }
+            catch (Exception e)
+            {
+                // NOP. Just return empty list if we fail, this should be enough indication that something is wrong and needs investigation.
+            }
 
-                var maxCount = 20;
-                var count = 0;
-                foreach (var id in ids)
-                {
-                    _orderItemManager.SetProviderName(id, to);
+            return Json(ids, JsonRequestBehavior.AllowGet);
+        }
 
-                    count++;
-                    if (count >= maxCount)
-                    {
-                        break;
-                    }
-                }
+        [HttpPost]
+        public ActionResult SetProviderName(int nodeId, string providerName)
+        {
+            var res = new ResultResponse();
+
+            try
+            {
+                _orderItemManager.SetProviderNameWithoutLogging(nodeId, providerName, true, false);
 
                 res.Success = true;
-                res.Message = "Ändrade " + ids.Count() + " ordrar med leverantörsnamn \"" + from + "\" till att ha leverantörsnamn \"" + to + "\".";
+                res.Message = "Genomförde ändring av leverantörsnamn på order.";
             }
             catch (Exception e)
             {
                 res.Success = false;
-                res.Message = "Misslyckades med att ändra alla ordrar med leverantörsnamn \"" + from + "\" till att ha leverantörsnamn \"" + to + "\": " + e.Message;
+                res.Message = "Misslyckades med att ändra leverantörsnamn på order.";
             }
 
             return Json(res, JsonRequestBehavior.AllowGet);

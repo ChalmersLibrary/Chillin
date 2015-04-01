@@ -25,6 +25,20 @@ div.header {
     margin: 0 auto;
 }
 
+.popup-center {
+    position: absolute;
+    top: 20%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 100000;
+    display: none;
+}
+
+.popup-center p {
+    font-size: 3em;
+}
+
 #lockscreen {
     position: fixed;
     left: 0px;

@@ -30,29 +30,77 @@
 <div class="col-md-6">
     <button class="btn btn-success" onclick="changeProviderNameOnAllOrderItems();">Ändra leverantörsnamn</button>
 </div>
+<div id="provider-name-update-status" class="popup-center">
+    <p></p>
+    <button class="btn btn-danger btn-lg" type="button" onclick="abortBatchProviderNameChange();">Stoppa</button>
+</div>
 
 <script type="text/javascript">
+    var abortMision = false;
     function changeProviderNameOnAllOrderItems() {
         var fromProviderName = $('#from-provider-name').val().trim();
         var toProviderName = $('#to-provider-name').val().trim();
 
         if (fromProviderName && toProviderName) {
-            var res = window.confirm('Detta kommer nu att ändra max 20 ordrar som har leverantörsnamn \"' + fromProviderName + '\" så att de istället har leverantörsnamn \"' + toProviderName + '\".\n\nDessa ändringar går ej att ångra och är det många ordrar som ändringen berör kan det ta en stund och det kan påverka Chillins prestanda.\n\nÄr du säker på att du vill fortsätta?');
-            if (res) {
-                lockScreen();
-                $.post("/umbraco/surface/ProviderDataSurface/ModifyProviderDataHistory", {
-                    from: fromProviderName,
-                    to: toProviderName
-                }).done(function (json) {
-                    alert(json.Message);
+            lockScreen();
+            $.get("/umbraco/surface/ProviderDataSurface/GetNodeIdsForOrderItemsWithGivenProviderName", {
+                providerName: fromProviderName
+            }).done(function (ids) {
+                var estimatedTime = Math.floor(ids.length * 2 / 60);
+                var estimatedTimeStr = "ca " + estimatedTime.toString() + " minuter";
+                if (estimatedTime < 1) {
+                    estimatedTimeStr = "mindre än en minut";
+                } else if (estimatedTime == 1) {
+                    estimatedTimeStr = "ca en minut";
+                }
+                var res = window.confirm("Detta kommer nu att ändra " + ids.length + " ordrar som har leverantörsnamn \"" + fromProviderName + "\" så att de istället har leverantörsnamn \"" + toProviderName + "\".\n\nDessa ändringar går ej att ångra och är det många ordrar som ändringen berör kan det ta en stund och det kan påverka Chillins prestanda.\n\nUppskattad tid är " + estimatedTimeStr + ".\n\nÄr du säker på att du vill fortsätta?");
+                if (res) {
+                    $("#provider-name-update-status").show();
+                    $("#provider-name-update-status p").text("0/" + ids.length);
+                    abortMission = false;
+                    changeProviderName(ids, 0, toProviderName);
+                } else {
                     unlockScreen();
-                    $("#provider-settings-link").click();
-                }).fail(function (jqxhr, textStatus, error) {
-                    alert("Error: " + textStatus + " " + error);
-                    unlockScreen();
-                });
-            }
+                }
+            }).fail(function (jqxhr, textStatus, error) {
+                alert("Error: " + textStatus + " " + error);
+                unlockScreen();
+            });
         }
+    }
+
+    function abortBatchProviderNameChange() {
+        abortMission = true;
+    }
+
+    function changeProviderName(ids, index, providerName) {
+        $.post("/umbraco/surface/ProviderDataSurface/SetProviderName", {
+            nodeId: ids[index],
+            providerName: providerName
+        }).done(function (res) {
+            if (!res.Success) {
+                unlockScreen();
+                alert(res.Message);
+                $("#provider-settings-link").click();
+            } else if (index >= ids.length - 1) {
+                $("#provider-name-update-status").hide();
+                unlockScreen();
+                alert("Ändrade namn på " + ids.length + " ordrar.");
+                $("#provider-settings-link").click();
+            } else if (abortMission) {
+                $("#provider-name-update-status").hide();
+                unlockScreen();
+                alert("Körning stoppades innan den var färdig.");
+                $("#provider-settings-link").click();
+            } else {
+                $("#provider-name-update-status p").text((index+1) + "/" + ids.length);
+                changeProviderName(ids, ++index, providerName);
+            }
+        }).fail(function (jqxhr, textStatus, error) {
+            alert("Error: " + textStatus + " " + error);
+            unlockScreen();
+            $("#provider-settings-link").click();
+        });
     }
 
     $("#from-provider-name").keyup(function () {

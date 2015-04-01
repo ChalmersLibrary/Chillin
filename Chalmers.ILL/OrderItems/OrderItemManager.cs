@@ -285,6 +285,17 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
+        public void SetProviderNameWithoutLogging(int nodeId, string providerName, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentProviderName = content.GetValue<string>("providerName");
+            if (currentProviderName != providerName)
+            {
+                content.SetValue("providerName", providerName);
+            }
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
         public void SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
