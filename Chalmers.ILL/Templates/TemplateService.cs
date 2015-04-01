@@ -58,7 +58,16 @@ namespace Chalmers.ILL.Templates
             foreach (Match match in matches)
             {
                 var property = match.Groups[1].Value;
-                template.Replace("{{" + property + "}}", orderItem.GetType().GetProperty(property).GetValue(orderItem).ToString());
+                var value = orderItem.GetType().GetProperty(property).GetValue(orderItem);
+
+                if (value is DateTime)
+                {
+                    template.Replace("{{" + property + "}}", ((DateTime) value).ToString("yyyy-MM-dd"));
+                }
+                else
+                {
+                    template.Replace("{{" + property + "}}", value.ToString());
+                }
             }
 
             return template.ToString();
