@@ -88,12 +88,12 @@ namespace Chalmers.ILL.Providers
                                 seed.PatronName = req.user.full_name.Value;
                                 seed.PatronCardNumber = req.user.library_card.Value;
                                 seed.DeliveryLibrarySigel = sigel;
-                                seed.Message = "LIBRIS LÅNTAGARBESTÄLLNING" + "\n\n" +
-                                    ConfigurationManager.AppSettings["librisApiBaseAddress"] + ConfigurationManager.AppSettings["librisApiUserRequestSuffix"] + "\n\n" +
-                                    "Författare: " + ReplaceWithNotAvailableIfEmptyString(req.author.Value) + "\n" +
+                                seed.Message = "Författare: " + ReplaceWithNotAvailableIfEmptyString(req.author.Value) + "\n" +
                                     "Titel: " + ReplaceWithNotAvailableIfEmptyString(req.title.Value) + "\n" +
                                     "Utgivning: " + ReplaceWithNotAvailableIfEmptyString(req.imprint.Value) + "\n" +
                                     "ISBN/ISSN: " + ReplaceWithNotAvailableIfEmptyString(req.isxn.Value);
+                                seed.MessagePrefix = "LIBRIS LÅNTAGARBESTÄLLNING" + "\n\n" +
+                                    ConfigurationManager.AppSettings["librisApiBaseAddress"] + ConfigurationManager.AppSettings["librisApiUserRequestSuffix"] + "\n\n";
                                 _seeds.Add(seed);
                             }
                         }

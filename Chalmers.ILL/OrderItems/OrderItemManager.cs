@@ -546,7 +546,7 @@ namespace Chalmers.ILL.OrderItems
 
             // Set properties
             content.SetValue("originalOrder", model.Message);
-            content.SetValue("reference", model.Message);
+            content.SetValue("reference", model.MessagePrefix + model.Message);
             content.SetValue("patronName", model.PatronName);
             content.SetValue("patronEmail", model.PatronEmail);
             content.SetValue("patronCardNo", model.PatronCardNumber);
