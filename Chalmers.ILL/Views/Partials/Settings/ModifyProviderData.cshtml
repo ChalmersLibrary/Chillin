@@ -19,7 +19,7 @@
     <div class="form-group">
         <label for="providerName">Ändra till leverantörsnamn</label>
         <input type="text" class="form-control" id="to-provider-name" name="to-provider-name" placeholder="Leverantörens namn" value="">
-        <div id="provider-list" class="list-group" style="height: 175px; overflow: auto; background: #ebebeb;">
+        <div id="to-provider-list" class="list-group" style="height: 175px; overflow: auto; background: #ebebeb;">
             @foreach (var providerName in Model.Providers)
             {
                 <a href="#" onclick="$('#to-provider-name').val($(this).text()); event.preventDefault();" class="list-group-item">@providerName</a>
@@ -54,4 +54,38 @@
             }
         }
     }
+
+    $("#from-provider-name").keyup(function () {
+        var providerNameInput = $(this);
+        var re = new RegExp(providerNameInput.val(), "i");
+
+        var updated = false;
+        $("#from-provider-list > a").each(function () {
+            // Only show list elements if they match what is written in the text input.
+            $(this).toggle(re.test($(this).text()));
+
+            // If we have written the same word as already exists but with different case, substitute it with the existing case.
+            if (!updated && $(this).text().toLowerCase() === providerNameInput.val().toLowerCase()) {
+                providerNameInput.val($(this).text());
+                updated = true;
+            }
+        });
+    });
+
+    $("#to-provider-name").keyup(function () {
+        var providerNameInput = $(this);
+        var re = new RegExp(providerNameInput.val(), "i");
+
+        var updated = false;
+        $("#to-provider-list > a").each(function () {
+            // Only show list elements if they match what is written in the text input.
+            $(this).toggle(re.test($(this).text()));
+
+            // If we have written the same word as already exists but with different case, substitute it with the existing case.
+            if (!updated && $(this).text().toLowerCase() === providerNameInput.val().toLowerCase()) {
+                providerNameInput.val($(this).text());
+                updated = true;
+            }
+        });
+    });
 </script>
