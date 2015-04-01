@@ -36,6 +36,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var pageModel = new ChalmersILLActionClaimModel(_orderItemManager.GetOrderItem(nodeId));
 
             pageModel.ClaimBookMailTemplate = _templateService.GetTemplateData("ClaimBookMailTemplate", pageModel.OrderItem);
+            pageModel.ClaimDueDate = DateTime.Now > pageModel.OrderItem.DueDate ? pageModel.OrderItem.DueDate : DateTime.Now;
 
             return PartialView("Chalmers.ILL.Action.Claim", pageModel);
         }
