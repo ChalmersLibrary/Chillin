@@ -57,7 +57,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
 
                 res.Success = true;
-                res.Message = "Ändrade " + results.Count() + " ordrar med leverantörsnamn \"" + from + "\" till att ha leverantörsnamn \"" + to + "\".";
+                res.Message = "Ändrade " + ids.Count() + " ordrar med leverantörsnamn \"" + from + "\" till att ha leverantörsnamn \"" + to + "\".";
             }
             catch (Exception e)
             {
