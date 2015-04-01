@@ -33,6 +33,7 @@ namespace Chalmers.ILL.Providers
         public LibrisOrderItemsSource(IUmbracoWrapper umbraco, IOrderItemManager orderItemManager, IPatronDataProvider patronDataProvider)
         {
             _umbraco = umbraco;
+            _orderItemManager = orderItemManager;
             _patronDataProvider = patronDataProvider;
         }
 
