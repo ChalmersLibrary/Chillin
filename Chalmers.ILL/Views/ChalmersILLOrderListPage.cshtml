@@ -59,7 +59,16 @@
     /// <returns>An index reflecting the sort order.</returns>
     int GetSortOrderFromOrderItemSearchResult(SearchResult item)
     {
-        var status = item.Fields["Status"];
+        var status = "";
+        try
+        {
+            status = item.Fields["Status"];
+        }
+        catch (Exception)
+        {
+            // NOP
+        }
+
         var i = Convert.ToInt32(status == "" ? "0" : status.Split(':').First());
 
         // Fix the fact that the status indexes does not always decide the sorting order
