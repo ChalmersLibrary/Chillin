@@ -38,10 +38,10 @@
 <script type="text/javascript">
     var abortMision = false;
     function changeProviderNameOnAllOrderItems() {
-        var fromProviderName = $('#from-provider-name').val().trim();
-        var toProviderName = $('#to-provider-name').val().trim();
+        var fromProviderName = $('#from-provider-name').val();
+        var toProviderName = $('#to-provider-name').val();
 
-        if (fromProviderName && toProviderName) {
+        if (fromProviderName.trim() && toProviderName.trim()) {
             lockScreen();
             $.get("/umbraco/surface/ProviderDataSurface/GetNodeIdsForOrderItemsWithGivenProviderName", {
                 providerName: fromProviderName
