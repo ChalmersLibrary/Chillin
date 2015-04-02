@@ -1110,3 +1110,11 @@ function openDocument(btn) {
         alert("Misslyckades med att öppna popup-fönster.");
     }
 }
+
+function getDateStringWithHoursAndMinutes(date) {
+    return "" + date.getFullYear() + "-" +
+        ("00" + (date.getMonth() + 1)).substr(-2) + "-" +
+        ("00" + date.getDate()).substr(-2) + " " +
+        ("00" + date.getHours()).substr(-2) + ":" +
+        ("00" + date.getMinutes()).substr(-2);
+}

@@ -11,7 +11,7 @@
                 <div id="provider-list" class="list-group" style="height: 175px; overflow: auto; background: #ebebeb;">
                     @foreach (var providerName in Model.Providers)
                     {
-                        <a href="#" onclick="$('#providerName').val($(this).text()); event.preventDefault();" class="list-group-item">@providerName</a>
+                        <a href="#" onclick="$('#providerName').val($(this).text()); updateFollowUpDate($(this).text()); event.preventDefault();" class="list-group-item">@providerName</a>
                     }
                 </div>
             </div>
@@ -28,7 +28,7 @@
             <div class="form-group">
                 <label for="followUpDate">Följs upp</label>
                 <div class="input-group date datetimepicker">
-                    <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@(DateTime.Now.AddDays(1).ToString("yyyy-MM-dd HH:mm"))">
+                    <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.EstimatedDeliveryCurrentProvider.ToString("yyyy-MM-dd HH:mm"))">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-calendar"></span>
                     </span>
@@ -66,5 +66,17 @@
                 });
             });
         });
+
+        function updateFollowUpDate(providerName) {
+            $.get("/umbraco/surface/ProviderDataSurface/GetDeliveryTimeInHoursForProvider", {
+                providerName: providerName
+            }).done(function (suggestedDeliveryTimeInHours) {
+                var date = new Date("@DateTime.Now.ToString("yyyy-MM-dd HH:mm")");
+                date.setTime(date.getTime() + (suggestedDeliveryTimeInHours * 60 * 60 * 1000));
+                $("#followUpDate").val(getDateStringWithHoursAndMinutes(date));
+            }).fail(function (jqxhr, textStatus, error) {
+                alert("Error: " + textStatus + " " + error);
+            });
+        }
     </script>
 </form>

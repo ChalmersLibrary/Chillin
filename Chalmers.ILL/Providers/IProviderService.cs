@@ -9,5 +9,6 @@ namespace Chalmers.ILL.Providers
     public interface IProviderService
     {
         List<String> FetchAndCreateListOfUsedProviders();
+        int GetSuggestedDeliveryTimeInHoursForProvider(string providerName);
     }
 }

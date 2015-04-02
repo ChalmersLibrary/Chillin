@@ -62,6 +62,23 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return Json(ids, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
+        public ActionResult GetDeliveryTimeInHoursForProvider(string providerName)
+        {
+            int time = 0;
+
+            try
+            {
+                time = _providerService.GetSuggestedDeliveryTimeInHoursForProvider(providerName);
+            }
+            catch (Exception)
+            {
+                // NOP, fail silently and return zero delivery time.
+            }
+
+            return Json(time, JsonRequestBehavior.AllowGet);
+        }
+
         [HttpPost]
         public ActionResult SetProviderName(int nodeId, string providerName)
         {
