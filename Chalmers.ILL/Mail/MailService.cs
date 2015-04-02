@@ -53,7 +53,7 @@ namespace Chalmers.ILL.Mail
                         }
                     }
                 }
-                string body = mailModel.message + ConfigurationManager.AppSettings["chalmersILLMailSignature"].Replace("\\n", "\n");
+                string body = mailModel.message;
                 _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
                 _exchangeMailWebApi.SendMailMessage(mailModel.OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], mailModel.recipientName, mailModel.recipientEmail, attachments);
             }
