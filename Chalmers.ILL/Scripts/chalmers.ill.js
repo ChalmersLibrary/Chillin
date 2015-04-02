@@ -867,25 +867,30 @@ function sendMailToPatron(mailData) {
 }
 
 /* Write Log Entry */
-function writeLogItem(nodeId, message, type, followUpDate, shouldUnlockScreen) {
+function writeLogItem(nodeId, message, type, followUpDate, cb) {
     lockScreen();
-    shouldUnlockScreen = typeof shouldUnlockScreen !== "undefined" ? shouldUnlockScreen : true;
     if (message) {
         $.post("/umbraco/surface/LogItemSurface/WriteLogItem", { nodeId: nodeId, Message: message, Type: type, newFollowUpDate: followUpDate }).done(function (json) {
             if (json.Success) {
-                loadOrderItemDetails(nodeId);
+                if (cb) {
+                    cb();
+                } else {
+                    loadOrderItemDetails(nodeId);
+                }
             }
             else {
                 alert(json.Message);
             }
-            if (shouldUnlockScreen) unlockScreen();
+            unlockScreen();
         }).error(function () {
-            if (shouldUnlockScreen) unlockScreen();
+            unlockScreen();
         });
+        return true;
     }
     else {
         alert("Du m\u00E5ste skriva n\u00E5got.");
-        if (shouldUnlockScreen) unlockScreen();
+        unlockScreen();
+        return false;
     }
 }
 
