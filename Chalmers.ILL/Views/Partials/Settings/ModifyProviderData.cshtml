@@ -46,7 +46,7 @@
             $.get("/umbraco/surface/ProviderDataSurface/GetNodeIdsForOrderItemsWithGivenProviderName", {
                 providerName: fromProviderName
             }).done(function (ids) {
-                var estimatedTime = Math.floor(ids.length * 2 / 60);
+                var estimatedTime = Math.floor(ids.length * 4 / 60);
                 var estimatedTimeStr = "ca " + estimatedTime.toString() + " minuter";
                 if (estimatedTime < 1) {
                     estimatedTimeStr = "mindre än en minut";
@@ -93,8 +93,9 @@
                 alert("Körning stoppades innan den var färdig.");
                 $("#provider-settings-link").click();
             } else {
-                $("#provider-name-update-status p").text((index+1) + "/" + ids.length);
-                changeProviderName(ids, ++index, providerName);
+                $("#provider-name-update-status p").text((index + 1) + "/" + ids.length);
+                // Wait 2 seconds after each item so that we don't kill the server.
+                setTimeout(function () { changeProviderName(ids, ++index, providerName); }, 2000);
             }
         }).fail(function (jqxhr, textStatus, error) {
             alert("Error: " + textStatus + " " + error);
