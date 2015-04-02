@@ -25,7 +25,7 @@
                 <label for="providerInformation">Leverantörsinformation</label><br />
                 <textarea class="form-control" cols="80" rows="10" id="providerInformation" name="providerInformation">@Model.OrderItem.ProviderInformation</textarea>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="display: none;">
                 <label for="followUpDate">Följs upp</label>
                 <div class="input-group date datetimepicker">
                     <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.EstimatedDeliveryCurrentProvider.ToString("yyyy-MM-dd HH:mm"))">
