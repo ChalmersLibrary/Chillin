@@ -36,46 +36,14 @@ namespace Chalmers.ILL.Providers
 
         public int GetSuggestedDeliveryTimeInHoursForProvider(string providerName)
         {
-            Int64 totalTime = 0;
-            int count = 0;
+            int res = 168;
 
-            if (!String.IsNullOrWhiteSpace(providerName))
+            if (!String.IsNullOrWhiteSpace(providerName) && providerName.ToLower().Contains("subito"))
             {
-                var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-                // NOTE: Should probably only fetch orders that are not too old, to keep the numbers down and to keep the data relevant.
-                var orders = _orderItemsSearcher.Search(searchCriteria.RawQuery("ProviderName:\"" + providerName + "\""));
-
-                foreach (var order in orders)
-                {
-                    DateTime latestDeliveryStatus;
-                    DateTime latestOrderedStatus;
-                    foreach (var logItem in JsonConvert.DeserializeObject<List<LogItem>>(order.Fields.GetValueString("Log")))
-                    {
-                        latestDeliveryStatus = new DateTime(1970, 1, 1);
-                        latestOrderedStatus = new DateTime(1970, 1, 1);
-
-                        if (logItem.Type == "STATUS" && logItem.Message.Contains("till Beställd"))
-                        {
-                            latestOrderedStatus = logItem.CreateDate;
-                        }
-                        else if (logItem.Type == "STATUS" && (logItem.Message.Contains("till Levererad") || logItem.Message.Contains("till Utlånad")))
-                        {
-                            latestDeliveryStatus = logItem.CreateDate;
-                        }
-
-                        var diff = (latestDeliveryStatus - latestOrderedStatus).Hours;
-                        if (diff > 0)
-                        {
-                            count++;
-                        }
-                        totalTime += diff;
-                    }
-                }
+                res = 24;
             }
 
-            count = count > 0 ? count : 1;
-
-            return Convert.ToInt32(Math.Ceiling(Convert.ToDouble(totalTime / count)));
+            return res;
         }
     }
 }
