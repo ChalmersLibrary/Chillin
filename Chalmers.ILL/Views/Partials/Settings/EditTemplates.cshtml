@@ -28,6 +28,7 @@
 </div>
 <div class="col-md-6">
     <div class="form-group">
+        <button class="btn btn-default btn-xs" onclick="addTextAtSelection('{{T:Signature}}');">T:Signature</button>
     @foreach (var property in Model.AvailableOrderItemProperties)
     {
         <button class="btn btn-default btn-xs" onclick="addTextAtSelection('{{@property}}');">@property</button>

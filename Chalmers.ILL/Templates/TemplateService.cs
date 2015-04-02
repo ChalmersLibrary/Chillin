@@ -52,21 +52,37 @@ namespace Chalmers.ILL.Templates
             var template = new StringBuilder(GetTemplateData(nodeName));
 
             // Search for double moustaches in the template and replace these with the correct order item property value.
-            var moustachePattern = new Regex("{{([a-zA-Z0-9]+)}}");
+            var moustachePattern = new Regex("{{([a-zA-Z0-9:]+)}}");
             var matches = moustachePattern.Matches(template.ToString());
 
             foreach (Match match in matches)
             {
                 var property = match.Groups[1].Value;
-                var value = orderItem.GetType().GetProperty(property).GetValue(orderItem);
 
-                if (value is DateTime)
+                if (property.StartsWith("T:")) // Other templates that should be injected.
                 {
-                    template.Replace("{{" + property + "}}", ((DateTime) value).ToString("yyyy-MM-dd"));
+                    var templateName = property.Split(':').Last() + "Template";
+                    if (templateName == nodeName) // Do not allow injection of template into itself.
+                    {
+                        template.Replace("{{" + property + "}}", "{{Injection of template into itself is not allowed}}");
+                    }
+                    else
+                    {
+                        template.Replace("{{" + property + "}}", GetTemplateData(templateName, orderItem));
+                    }
                 }
                 else
                 {
-                    template.Replace("{{" + property + "}}", value.ToString());
+                    var value = orderItem.GetType().GetProperty(property).GetValue(orderItem);
+
+                    if (value is DateTime)
+                    {
+                        template.Replace("{{" + property + "}}", ((DateTime)value).ToString("yyyy-MM-dd"));
+                    }
+                    else
+                    {
+                        template.Replace("{{" + property + "}}", value.ToString());
+                    }
                 }
             }
 
