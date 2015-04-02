@@ -37,14 +37,13 @@ namespace Chalmers.ILL.Providers
         public int GetSuggestedDeliveryTimeInHoursForProvider(string providerName)
         {
             Int64 totalTime = 0;
-            int count = 1;
+            int count = 0;
 
             if (!String.IsNullOrWhiteSpace(providerName))
             {
                 var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
                 // NOTE: Should probably only fetch orders that are not too old, to keep the numbers down and to keep the data relevant.
                 var orders = _orderItemsSearcher.Search(searchCriteria.RawQuery("ProviderName:\"" + providerName + "\""));
-                count = orders.Count() > 0 ? orders.Count() : 1;
 
                 foreach (var order in orders)
                 {
@@ -64,10 +63,17 @@ namespace Chalmers.ILL.Providers
                             latestDeliveryStatus = logItem.CreateDate;
                         }
 
-                        totalTime += (latestDeliveryStatus - latestOrderedStatus).Hours;
+                        var diff = (latestDeliveryStatus - latestOrderedStatus).Hours;
+                        if (diff > 0)
+                        {
+                            count++;
+                        }
+                        totalTime += diff;
                     }
                 }
             }
+
+            count = count > 0 ? count : 1;
 
             return Convert.ToInt32(Math.Ceiling(Convert.ToDouble(totalTime / count)));
         }
