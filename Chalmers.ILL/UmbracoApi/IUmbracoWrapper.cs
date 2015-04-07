@@ -21,6 +21,8 @@ namespace Chalmers.ILL.UmbracoApi
         List<UmbracoDropdownListNtextDataType> GetAvailableDeliveryLibraries();
         List<UmbracoDropdownListNtextDataType> GetAvailableCancellationReasons();
         List<UmbracoDropdownListNtextDataType> GetAvailablePurchasedMaterials();
+        int GetPropertyValueAsInteger(object property);
+        int DataTypePrevalueId(string dataTypeName, string prevalue);
         SortedList GetPreValues(string dataTypeName);
         void PopulateModelWithAvailableValues(OrderItemPageModelBase model);
 

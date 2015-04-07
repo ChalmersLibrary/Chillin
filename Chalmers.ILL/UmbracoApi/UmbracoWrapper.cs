@@ -63,6 +63,46 @@ namespace Chalmers.ILL.UmbracoApi
             return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderPurchasedMaterialDataTypeDefinitionName"]);
         }
 
+        public int GetPropertyValueAsInteger(object property)
+        {
+            int returnValue = -1;
+
+            if (property != null)
+            {
+                if (!Int32.TryParse(property.ToString(), out returnValue))
+                {
+                    returnValue = -1;
+                }
+            }
+
+            return returnValue;
+        }
+
+        public int DataTypePrevalueId(string dataTypeName, string prevalue)
+        {
+            int ret = -1;
+
+            SortedList statusTypes = GetPreValues(dataTypeName);
+
+            // Get the datatype enumerator (to sort as in Backoffice)
+            IDictionaryEnumerator i = statusTypes.GetEnumerator();
+
+            // Move trough the enumerator
+            while (i.MoveNext())
+            {
+                // Get the prevalue (text) using umbraco.cms.businesslogic.datatype
+                PreValue statusType = (PreValue)i.Value;
+
+                // Check if it's the prevalue we want the id for
+                if (statusType.Value == prevalue)
+                {
+                    ret = statusType.Id;
+                }
+            }
+
+            return ret;
+        }
+
         /// <summary>
         /// Get all the prevalues for a given data type.
         /// </summary>

@@ -15,6 +15,8 @@ using System.Configuration;
 using System.Net;
 using System.IO;
 using Chalmers.ILL.OrderItems;
+using Umbraco.Core.Models;
+using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -22,11 +24,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         IOrderItemManager _orderItemManager;
         IPatronDataProvider _patronDataProvider;
+        IUmbracoWrapper _umbraco;
 
-        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProvider)
+        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProvider, IUmbracoWrapper umbraco)
         {
             _orderItemManager = orderItemManager;
             _patronDataProvider = patronDataProvider;
+            _umbraco = umbraco;
         }
 
         [HttpGet]
@@ -93,6 +97,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
                     content.SetValue("pType", sm.ptype);
                     content.SetValue("homeLibrary", sm.home_library);
+                    UpdateDeliveryLibraryIfNeeded(content.Id, sm);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 }
                 _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm);
@@ -132,6 +137,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
                     content.SetValue("pType", sm.ptype);
                     content.SetValue("homeLibrary", sm.home_library);
+                    UpdateDeliveryLibraryIfNeeded(content.Id, sm);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 }
                 _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm);
@@ -147,5 +153,30 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             return Json(json, JsonRequestBehavior.AllowGet);
         }
+
+        #region Private methods
+
+        private void UpdateDeliveryLibraryIfNeeded(int nodeId, SierraModel sierraModel)
+        {
+            var orderItem = _orderItemManager.GetOrderItem(nodeId);
+
+            if (orderItem.TypePrevalue.Contains("Bok"))
+            {
+                if (sierraModel.home_library != null && sierraModel.home_library.Contains("hbib"))
+                {
+                    _orderItemManager.SetDeliveryLibrary(nodeId, "Huvudbiblioteket", false, false);
+                }
+                else if (sierraModel.home_library != null && sierraModel.home_library.Contains("abib"))
+                {
+                    _orderItemManager.SetDeliveryLibrary(nodeId, "Arkitekturbiblioteket", false, false);
+                }
+                else if (sierraModel.home_library != null && sierraModel.home_library.Contains("lbib"))
+                {
+                    _orderItemManager.SetDeliveryLibrary(nodeId, "Lindholmenbiblioteket", false, false);
+                }
+            }
+        }
+
+        #endregion
     }
 }
