@@ -51,18 +51,19 @@ namespace Chalmers.ILL
             var mailService = new MailService(ApplicationContext.Current.Services.MediaService, container.Resolve<IExchangeMailWebApi>());
             var templateService = new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher);
             var notifier = new Notifier();
-            var orderItemManager = new OrderItemManager();
+            var umbraco = new UmbracoWrapper();
+            var orderItemManager = new OrderItemManager(umbraco);
             var providerService = new ProviderService(orderItemsSearcher);
 
             // Connect instances that depend on eachother.
-            notifier.SetOrderItemManager(orderItemManager);
+            notifier.SetOrderItemManager(orderItemManager, umbraco);
             orderItemManager.SetNotifier(notifier);
             orderItemManager.SetContentService(ApplicationContext.Current.Services.ContentService);
 
             // Hook up everything that is needed for us to function.
             container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
             container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
-            container.RegisterInstance(typeof(IUmbracoWrapper), new UmbracoWrapper());
+            container.RegisterInstance(typeof(IUmbracoWrapper), umbraco);
             container.RegisterInstance(typeof(INotifier), notifier);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);

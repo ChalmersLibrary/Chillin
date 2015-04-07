@@ -1,5 +1,6 @@
 ﻿using Chalmers.ILL.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,7 @@ namespace Chalmers.ILL.UmbracoApi
         List<UmbracoDropdownListNtextDataType> GetAvailableDeliveryLibraries();
         List<UmbracoDropdownListNtextDataType> GetAvailableCancellationReasons();
         List<UmbracoDropdownListNtextDataType> GetAvailablePurchasedMaterials();
+        SortedList GetPreValues(string dataTypeName);
         void PopulateModelWithAvailableValues(OrderItemPageModelBase model);
 
         IEnumerable<Umbraco.Core.Models.IPublishedContent> TypedContentAtXPath(string xpath);

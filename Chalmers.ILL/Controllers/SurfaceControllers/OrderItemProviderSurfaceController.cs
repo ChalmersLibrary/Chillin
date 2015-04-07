@@ -54,7 +54,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetProviderName(nodeId, providerName, false, false);
                 _orderItemManager.SetProviderOrderId(nodeId, providerOrderId, false, false);
                 _orderItemManager.SetProviderInformation(nodeId, providerInformation, false, false);
-                _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "03:Beställd"));
+                _orderItemManager.SetStatus(nodeId, "03:Beställd");
 
                 json.Success = true;
                 json.Message = "Sparade data för beställning.";

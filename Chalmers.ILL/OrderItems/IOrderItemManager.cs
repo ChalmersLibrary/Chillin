@@ -29,6 +29,7 @@ namespace Chalmers.ILL.OrderItems
         void SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
         void SetPurchasedMaterial(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true);
         void SetStatus(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true);
+        void SetStatus(int orderNodeId, string statusPrevalue, bool doReindex = true, bool doSignal = true);
         void SetType(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true);
         void SetBookId(int nodeId, string bookId, bool doReindex = true, bool doSignal = true);
         void SetPatronEmail(int nodeId, string email, bool doReindex = true, bool doSignal = true);

@@ -74,6 +74,11 @@ namespace Chalmers.ILL.Mail
                     _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer tre till " + mail.recipientEmail, false, false);
                     _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message);
                 }
+                else if (now.Date >= dueDate.AddDays(17).Date)
+                {
+                    _orderItemManager.SetStatus(orderItem.Id, "02:Åtgärda", false, false);
+                    _orderItemManager.AddLogItem(orderItem.Id, "LOG", "Bok mycket försenad.");
+                }
             }
         }
 

@@ -155,7 +155,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Leveranstyp: " + delivery, false, false);
                 _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, false, false);
-                _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"));
+                _orderItemManager.SetStatus(nodeId, "05:Levererad");
 
                 json.Success = true;
                 json.Message = "Saved provider data.";
@@ -185,7 +185,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: Direktleverans via e-post.", false, false);
                 _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, false, false);
-                _orderItemManager.SetStatus(pack.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
+                _orderItemManager.SetStatus(pack.nodeId, "05:Levererad", false, false);
 
                 // We save everything here first so that we get the new values injected into the message by the template service.
                 _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail);
@@ -241,7 +241,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, false, false);
                 _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, false, false);
 
-                _orderItemManager.SetStatus(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Utlånad"), false, false);
+                _orderItemManager.SetStatus(pack.orderNodeId, "11:Utlånad", false, false);
                 _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, false, false);
 
                 // We save everything here first so that we get the new values injected into the message by the template service.

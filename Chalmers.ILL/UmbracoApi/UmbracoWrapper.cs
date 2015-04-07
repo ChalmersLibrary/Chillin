@@ -18,6 +18,11 @@ namespace Chalmers.ILL.UmbracoApi
     {
         UmbracoHelper _umbraco = new UmbracoHelper(UmbracoContext.Current);
 
+        public UmbracoWrapper()
+        {
+            PopulateCacheWithDataTypePreValues();
+        }
+
         public RelationType GetRelationTypeByAlias(string relationTypeStr)
         {
             return RelationType.GetByAlias(relationTypeStr);
@@ -56,6 +61,33 @@ namespace Chalmers.ILL.UmbracoApi
         public List<UmbracoDropdownListNtextDataType> GetAvailablePurchasedMaterials()
         {
             return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderPurchasedMaterialDataTypeDefinitionName"]);
+        }
+
+        /// <summary>
+        /// Get all the prevalues for a given data type.
+        /// </summary>
+        /// <param name="dataTypeName">The name of the data type.</param>
+        /// <returns>A sorted list with the prevalues.</returns>
+        public SortedList GetPreValues(string dataTypeName)
+        {
+            // Get a sorted list of all prevalues from the cache
+            var c = System.Web.HttpContext.Current.Cache;
+            SortedList statusTypes = c.Get(dataTypeName) as SortedList;
+
+            if (statusTypes == null)
+            {
+                // Connect to Umbraco DataTypeService
+                var ds = new Umbraco.Core.Services.DataTypeService();
+
+                // Get the Definition Id
+                int dataTypeDefinitionId = ds.GetAllDataTypeDefinitions().First(x => x.Name == dataTypeName).Id;
+
+                // Get a sorted list of all prevalues and store it in the cache
+                statusTypes = PreValues.GetPreValues(dataTypeDefinitionId);
+                c.Insert(dataTypeName, statusTypes);
+            }
+
+            return statusTypes;
         }
 
         public void PopulateModelWithAvailableValues(OrderItemPageModelBase model)
@@ -99,10 +131,21 @@ namespace Chalmers.ILL.UmbracoApi
 
         #region Private methods
 
+        private void PopulateCacheWithDataTypePreValues()
+        {
+            var c = System.Web.HttpContext.Current.Cache;
+            var ds = new Umbraco.Core.Services.DataTypeService();
+
+            foreach (var dtd in ds.GetAllDataTypeDefinitions())
+            {
+                c.Insert(dtd.Name, PreValues.GetPreValues(dtd.Id));
+            }
+        }
+
         private List<UmbracoDropdownListNtextDataType> GetAvailableValues(string dataTypeName)
         {
             // Get a sorted list of all prevalues
-            SortedList typeTypes = Helpers.GetPreValues(dataTypeName);
+            SortedList typeTypes = GetPreValues(dataTypeName);
 
             // Get the datatype enumerator (to sort as in Backoffice)
             IDictionaryEnumerator i = typeTypes.GetEnumerator();
