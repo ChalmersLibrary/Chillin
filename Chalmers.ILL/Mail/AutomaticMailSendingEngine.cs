@@ -49,28 +49,28 @@ namespace Chalmers.ILL.Mail
                     mail.message = _templateService.GetTemplateData("CourtesyNoticeMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
                     _mailService.SendMail(mail);
                     _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt \"courtesy notice\" till " + mail.recipientEmail, false, false);
-                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message, true, true);
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message);
                 }
                 else if (now.Date == dueDate.AddDays(1).Date)
                 {
                     mail.message = _templateService.GetTemplateData("LoanPeriodOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
                     _mailService.SendMail(mail);
                     _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer ett till " + mail.recipientEmail, false, false);
-                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message, true, true);
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message);
                 }
                 else if (now.Date == dueDate.AddDays(5).Date)
                 {
                     mail.message = _templateService.GetTemplateData("LoanPeriodReallyOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
                     _mailService.SendMail(mail);
                     _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer två till " + mail.recipientEmail, false, false);
-                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message, true, true);
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message);
                 }
                 else if (now.Date == dueDate.AddDays(10).Date)
                 {
                     mail.message = _templateService.GetTemplateData("LoanPeriodReallyReallyOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
                     _mailService.SendMail(mail);
                     _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer tre till " + mail.recipientEmail, false, false);
-                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message, true, true);
+                    _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message);
                 }
             }
         }
