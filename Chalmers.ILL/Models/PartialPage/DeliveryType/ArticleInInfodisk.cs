@@ -9,6 +9,7 @@ namespace Chalmers.ILL.Models.PartialPage.DeliveryType
     {
         public bool DrmWarning { get; set; }
         public string ArticleDeliveryLibrary { get; set; }
+        public string ArticleAvailableInInfodiskMailTemplate { get; set; }
 
         public ArticleInInfodisk(OrderItemModel orderItemModel) : base(orderItemModel) { }
     }
