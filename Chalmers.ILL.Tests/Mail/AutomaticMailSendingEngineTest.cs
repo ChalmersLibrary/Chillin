@@ -38,7 +38,7 @@ namespace Chalmers.ILL.Tests.Mail
             };
         }
 
-        private IAutomaticMailSendingEngine SetupAutomaticMailSendingEngine(DateTime dueDate, AutomaticMailSendTestResult result)
+        private IAutomaticMailSendingEngine SetupAutomaticMailSendingEngine(string status, DateTime dueDate, AutomaticMailSendTestResult result)
         {
             var fakeSearchResults = new Examine.Fakes.StubISearchResults()
             {
@@ -51,6 +51,7 @@ namespace Chalmers.ILL.Tests.Mail
                         FieldsGet = () =>
                         {
                             var val = new Dictionary<string, string>();
+                            val.Add("Status", status);
                             val.Add("OrderId", "cth-123");
                             val.Add("PatronName", "John Doe");
                             val.Add("PatronEmail", "john@doe.com");
@@ -114,13 +115,13 @@ namespace Chalmers.ILL.Tests.Mail
         }
 
         [TestMethod]
-        public void SendOutMailsThatAreDue_DueDateIsInFiveDays_CourtesyNoticeIsSentOut()
+        public void SendOutMailsThatAreDue_OnLoanDueDateIsInFiveDays_CourtesyNoticeIsSentOut()
         {
             using (ShimsContext.Create())
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine(DateTime.Now.AddDays(5), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(5), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -130,13 +131,13 @@ namespace Chalmers.ILL.Tests.Mail
         }
 
         [TestMethod]
-        public void SendOutMailsThatAreDue_DueDateWasYesterday_LoanPeriodOverMailIsSentOut()
+        public void SendOutMailsThatAreDue_OnLoanDueDateWasYesterday_LoanPeriodOverMailIsSentOut()
         {
             using (ShimsContext.Create())
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine(DateTime.Now.AddDays(-1), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -146,13 +147,13 @@ namespace Chalmers.ILL.Tests.Mail
         }
 
         [TestMethod]
-        public void SendOutMailsThatAreDue_DueDateWasFiveDaysAgo_LoanPeriodReallyOverMailIsSentOut()
+        public void SendOutMailsThatAreDue_OnLoanDueDateWasFiveDaysAgo_LoanPeriodReallyOverMailIsSentOut()
         {
             using (ShimsContext.Create())
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine(DateTime.Now.AddDays(-5), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-5), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -162,13 +163,13 @@ namespace Chalmers.ILL.Tests.Mail
         }
 
         [TestMethod]
-        public void SendOutMailsThatAreDue_DueDateWasTenDaysAgo_LoanPeriodReallyReallyOverMailIsSentOut()
+        public void SendOutMailsThatAreDue_OnLoanDueDateWasTenDaysAgo_LoanPeriodReallyReallyOverMailIsSentOut()
         {
             using (ShimsContext.Create())
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine(DateTime.Now.AddDays(-10), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-10), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -178,13 +179,13 @@ namespace Chalmers.ILL.Tests.Mail
         }
 
         [TestMethod]
-        public void SendOutMailsThatAreDue_DueDateIsToday_NothingHappens()
+        public void SendOutMailsThatAreDue_OnLoanDueDateIsToday_NothingHappens()
         {
             using (ShimsContext.Create())
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine(DateTime.Now, result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now, result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -194,13 +195,13 @@ namespace Chalmers.ILL.Tests.Mail
         }
 
         [TestMethod]
-        public void SendOutMailsThatAreDue_DueDateIsFarIntoTheFuture_NothingHappens()
+        public void SendOutMailsThatAreDue_OnLoanDueDateIsFarIntoTheFuture_NothingHappens()
         {
             using (ShimsContext.Create())
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine(DateTime.Now.AddDays(24), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(24), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -210,13 +211,125 @@ namespace Chalmers.ILL.Tests.Mail
         }
 
         [TestMethod]
-        public void SendOutMailsThatAreDue_DueDateHasPassedLongAgo_NothingHappens()
+        public void SendOutMailsThatAreDue_OnLoanDueDateHasPassedLongAgo_NothingHappens()
         {
             using (ShimsContext.Create())
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine(DateTime.Now.AddDays(-24), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-24), result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(0, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual(null, result.MailTemplate, "The fetched template was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_ClaimedDueDateIsInFiveDays_NothingHappens()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(5), result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(0, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual(null, result.MailTemplate, "The fetched template was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_ClaimedDueDateWasYesterday_NothingHappens()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-1), result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(0, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual(null, result.MailTemplate, "The fetched template was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_ClaimedDueDateWasFiveDaysAgo_LoanPeriodReallyOverMailIsSentOut()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-5), result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(1, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual("LoanPeriodReallyOverMailTemplate", result.MailTemplate, "The fetched template was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_ClaimedDueDateWasTenDaysAgo_LoanPeriodReallyReallyOverMailIsSentOut()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-10), result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(1, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual("LoanPeriodReallyReallyOverMailTemplate", result.MailTemplate, "The fetched template was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_ClaimedDueDateIsToday_NothingHappens()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now, result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(0, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual(null, result.MailTemplate, "The fetched template was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_ClaimedDueDateIsFarIntoTheFuture_NothingHappens()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(24), result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(0, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual(null, result.MailTemplate, "The fetched template was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_ClaimedDueDateHasPassedLongAgo_NothingHappens()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-24), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
