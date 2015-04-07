@@ -119,6 +119,7 @@ namespace Chalmers.ILL.OrderItems
 
                 // Parse out the integer of status and type
                 int OrderStatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], contentNode.Fields.GetValueString("Status"));
+                int OrderPreviousStatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], contentNode.Fields.GetValueString("PreviousStatus"));
                 int OrderTypeId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], contentNode.Fields.GetValueString("Type"));
                 int OrderDeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], contentNode.Fields.GetValueString("DeliveryLibrary"));
                 int OrderCancellationReasonId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderCancellationReasonDataTypeDefinitionName"], contentNode.Fields.GetValueString("CancellationReason"));
@@ -128,6 +129,11 @@ namespace Chalmers.ILL.OrderItems
                 orderItem.Status = OrderStatusId;
                 orderItem.StatusString = OrderStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderStatusId).Split(':').Last() : "";
                 orderItem.StatusPrevalue = OrderStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderStatusId) : "";
+
+                // Previous status (id, whole prevalue "xx:yyyy" and just string "yyyy")
+                orderItem.PreviousStatus = OrderPreviousStatusId;
+                orderItem.PreviousStatusString = OrderPreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderPreviousStatusId).Split(':').Last() : "";
+                orderItem.PreviousStatusPrevalue = OrderPreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderPreviousStatusId) : "";
 
                 // Type (id and prevalue)
                 orderItem.Type = OrderTypeId;
@@ -396,6 +402,7 @@ namespace Chalmers.ILL.OrderItems
             int currentStatus = _umbraco.GetPropertyValueAsInteger(content.GetValue("status"));
             if (currentStatus != statusId)
             {
+                content.SetValue("previousStatus", content.GetValue("status"));
                 content.SetValue("status", statusId);
                 OnStatusChanged(content, statusId);
                 AddLogItem(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? umbraco.library.GetPreValueAsString(currentStatus).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(statusId).Split(':').Last(), false, false);

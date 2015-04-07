@@ -66,7 +66,12 @@
                         </button>
                         <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
                             @{
-                                var allowedStatusValues = new String[]{"Annullerad", "Åtgärda", "Överförd", "Inköpt"};
+                                var allowedStatusValues = new List<String>(){"Annullerad", "Åtgärda", "Överförd", "Inköpt"};
+
+                                if (Model.OrderItem.StatusString.Contains("Åtgärda") && !Model.OrderItem.PreviousStatusString.Contains("Vänta"))
+                                {
+                                    allowedStatusValues.Add(Model.OrderItem.PreviousStatusString);
+                                }
                                 
                                 foreach (var status in Model.AvailableStatuses)
                                 {
