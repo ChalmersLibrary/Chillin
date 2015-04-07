@@ -4,3 +4,8 @@
 #bookSlip {
     display: block;
 }
+.pb{
+    clear: all;
+    display: block;
+    page-break-after: always;
+}
