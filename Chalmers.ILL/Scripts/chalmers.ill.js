@@ -717,6 +717,25 @@ function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
     }).error(unlockScreen);
 }
 
+function setOrderItemArticleAvailableForPickup(node, maildata, logMsg) {
+    lockScreen();
+    $.post("/umbraco/surface/OrderItemDeliverySurface/SetArticleAvailableForPickup", {
+        packJson: JSON.stringify({
+            nodeId: node,
+            logMsg: logMsg,
+            mail: maildata
+        })
+    }, function (json) {
+        if (json.Success) {
+            loadOrderItemDetails(node);
+        }
+        else {
+            alert(json.Message);
+        }
+        unlockScreen();
+    }).error(unlockScreen);
+}
+
 function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
     lockScreen();
     $.post("/umbraco/surface/OrderItemDeliverySurface/SetOrderItemDeliveryReceived", {
@@ -793,6 +812,24 @@ function setOrderItemReference(nodeId, reference) {
 function setOrderItemDelivery(nodeId, logEntry, delivery) {
     lockScreen();
     $.post("/umbraco/surface/OrderItemDeliverySurface/SetDelivery", {
+        nodeId: nodeId,
+        logEntry: logEntry,
+        delivery: delivery
+    }, function (json) {
+        if (json.Success) {
+            loadOrderItemDetails(nodeId);
+        }
+        else {
+            alert(json.Message);
+        }
+        unlockScreen();
+    }).error(unlockScreen);
+}
+
+/* Set new property values for Delivery from form */
+function setOrderItemTransport(nodeId, logEntry, delivery) {
+    lockScreen();
+    $.post("/umbraco/surface/OrderItemDeliverySurface/SetTransport", {
         nodeId: nodeId,
         logEntry: logEntry,
         delivery: delivery

@@ -30,9 +30,9 @@
             <label for="providerInformation">Leverantörsinformation</label><br />
             <textarea class="form-control" cols="80" rows="10" id="providerInformation" name="providerInformation">@Model.OrderItem.ProviderInformation</textarea>
         </div>
-        <div id="bookSlip" class="print">
+        <div id="printDiv" class="print">
             <h3 style="float:right" class="dueDatePlaceHolder"></h3><br />
-            <strong style="font-size:1.5em">@Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name</strong><br />
+            <strong style="font-size:1.5em">@Model.OrderItem.SierraInfo.last_name @Model.OrderItem.SierraInfo.first_name</strong><br />
             <strong style="font-size:1.5em">EJ HEMLÅN</strong><br />
             <br />
             <br />
@@ -98,7 +98,7 @@
     });
 
     function deliver() {
-        $('#container #bookSlip').insertAfter('#container');
+        $('#container #printDiv').insertAfter('#container');
         var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
         $('.dueDatePlaceHolder').html(dueDate);
         window.print();
@@ -115,10 +115,10 @@
                 newPurchasedMaterialId: -1,
                 newFollowUpDate: $('#dueDate').val(),
             }, $("#log-message").val(), true);
-            $("#bookSlip").remove();
+            $("#printDiv").remove();
         } else {
             alert("Leveransfunktionen kommer laddas om, försök därefter igen.");
-            $("#bookSlip").remove();
+            $("#printDiv").remove();
             loadDeliveryAction(@Model.OrderItem.NodeId);
         }
     }
