@@ -38,7 +38,7 @@ namespace Chalmers.ILL.Tests.Mail
             };
         }
 
-        private IAutomaticMailSendingEngine SetupAutomaticMailSendingEngine(string status, DateTime dueDate, AutomaticMailSendTestResult result)
+        private IAutomaticMailSendingEngine SetupAutomaticMailSendingEngine(string status, DateTime dueDate, DateTime deliveryDate, AutomaticMailSendTestResult result)
         {
             var fakeSearchResults = new Examine.Fakes.StubISearchResults()
             {
@@ -56,6 +56,7 @@ namespace Chalmers.ILL.Tests.Mail
                             val.Add("PatronName", "John Doe");
                             val.Add("PatronEmail", "john@doe.com");
                             val.Add("DueDate", dueDate.ToString("yyyyMMddHHmmssfff"));
+                            val.Add("DeliveryDate", deliveryDate.ToString("yyyyMMddHHmmssfff"));
                             return val;
                         }
                     });
@@ -79,6 +80,16 @@ namespace Chalmers.ILL.Tests.Mail
                 SetStatusInt32StringBooleanBoolean = (nodeId, statusPrevalue, doReindex, doSignal) =>
                 {
                     result.NewStatus = statusPrevalue;
+
+                    if (doReindex)
+                    {
+                        result.NumberOfReindexes++;
+                    }
+
+                    if (doSignal)
+                    {
+                        result.NumberOfSignals++;
+                    }
                 },
                 AddLogItemInt32StringStringBooleanBoolean = (nodeId, type, msg, doReindex, doSignal) =>
                 {
@@ -126,7 +137,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(5), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(5), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -143,7 +154,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-1), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-1), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -160,7 +171,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-5), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-5), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -177,7 +188,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-10), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-10), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -194,7 +205,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now, result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now, new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -211,7 +222,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(24), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(24), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -228,7 +239,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-24), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("11:Utlånad", DateTime.Now.AddDays(-24), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(1, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -245,7 +256,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(5), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(5), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -262,7 +273,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-1), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-1), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -279,7 +290,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-5), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-5), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -296,7 +307,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-10), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-10), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(2, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -313,7 +324,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now, result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now, new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -330,7 +341,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(24), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(24), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
@@ -347,13 +358,47 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 var result = new AutomaticMailSendTestResult();
 
-                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-24), result).SendOutMailsThatAreDue();
+                SetupAutomaticMailSendingEngine("12:Krävd", DateTime.Now.AddDays(-24), new DateTime(1970, 1, 1), result).SendOutMailsThatAreDue();
 
                 Assert.AreEqual(1, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
                 Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
                 Assert.AreEqual(1, result.NumberOfSignals, "Number of signals was not as expected.");
                 Assert.AreEqual(null, result.MailTemplate, "The fetched template was not as expected.");
                 Assert.AreEqual("02:Åtgärda", result.NewStatus, "The new status was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_InTransitDeliveryDateMoreThanTwoDaysAgo_StatusDelivered()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("13:Transport", new DateTime(1970, 1, 1), DateTime.Now.AddDays(-3), result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(3, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(1, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual("ArticleAvailableInInfodiskMailTemplate", result.MailTemplate, "The fetched template was not as expected.");
+                Assert.AreEqual("05:Levererad", result.NewStatus, "The new status was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_InTransitDeliveryDateLessThanTwoDaysAgo_StatusDelivered()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("13:Transport", new DateTime(1970, 1, 1), DateTime.Now.AddDays(-1), result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(0, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual(null, result.MailTemplate, "The fetched template was not as expected.");
+                Assert.AreEqual(null, result.NewStatus, "The new status was not as expected.");
             }
         }
     }

@@ -154,8 +154,8 @@ namespace Chalmers.ILL.OrderItems
                 orderItem.DueDate = contentNode.Fields.GetValueString("DueDate") == "" ? DateTime.Now :
                     DateTime.ParseExact(contentNode.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
                 orderItem.BookId = contentNode.Fields.GetValueString("BookId");
-                orderItem.ArrivedAtInfodiskDate = contentNode.Fields.GetValueString("ArrivedAtInfodiskDate") == "" ? new DateTime(1970, 1, 1) :
-                    DateTime.ParseExact(contentNode.Fields.GetValueString("ArrivedAtInfodiskDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                orderItem.DeliveryDate = contentNode.Fields.GetValueString("DeliveryDate") == "" ? new DateTime(1970, 1, 1) :
+                    DateTime.ParseExact(contentNode.Fields.GetValueString("DeliveryDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
 
                 // List of LogItems bound to this OrderItem
                 //orderItem.LogItemsList = Logging.GetLogItems(nodeId);
@@ -518,7 +518,7 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
             content.SetValue("dueDate", DateTime.Now);
             content.SetValue("providerDueDate", DateTime.Now);
-            content.SetValue("arrivedAtInfodiskDate", new DateTime(1970, 1, 1));
+            content.SetValue("deliveryDate", new DateTime(1970, 1, 1));
             content.SetValue("bookId", "");
             content.SetValue("providerInformation", "");
 
@@ -782,7 +782,7 @@ namespace Chalmers.ILL.OrderItems
 
         private void OnStatusChanged(IContent content, int newStatusId)
         {
-            UpdateArrivedAtInfodiskDateWhenProper(content, newStatusId);
+            UpdateDeliveryDateWhenProper(content, newStatusId);
         }
 
         private void OnTypeChanged(IContent content, int newTypeId)
@@ -790,13 +790,14 @@ namespace Chalmers.ILL.OrderItems
             SetDeliveryLibraryIfNewTypeIsArtikel(content, newTypeId);
         }
 
-        private void UpdateArrivedAtInfodiskDateWhenProper(IContent content, int newStatusId)
+        private void UpdateDeliveryDateWhenProper(IContent content, int newStatusId)
         {
-            var arrivedAtInfodiskDateStr = content.GetValue("arrivedAtInfodiskDate").ToString();
-            var arrivedAtInfodiskDate = arrivedAtInfodiskDateStr == "" ? new DateTime(1970, 1, 1) : Convert.ToDateTime(arrivedAtInfodiskDateStr);
-            if (arrivedAtInfodiskDate.Year == 1970 && umbraco.library.GetPreValueAsString(newStatusId).Split(':').Last().Contains("Infodisk"))
+            var deliveryDateStr = content.GetValue("deliveryDate").ToString();
+            var deliveryDate = deliveryDateStr == "" ? new DateTime(1970, 1, 1) : Convert.ToDateTime(deliveryDateStr);
+            var statusStr = umbraco.library.GetPreValueAsString(newStatusId).Split(':').Last();
+            if (deliveryDate.Year == 1970 && (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport")))
             {
-                content.SetValue("arrivedAtInfodiskDate", DateTime.Now);
+                content.SetValue("deliveryDate", DateTime.Now);
             }
         }
 
