@@ -190,12 +190,12 @@ namespace Chalmers.ILL.Providers
 
                             if (order.Fields["Status"] == "03:Beställd" && req.status_code.Value == "6") // Status code 6 is "Negativt svar" in Libris
                             {
-                                _orderItemManager.SetStatus(order.Id, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "02:Åtgärda"), false, false);
+                                _orderItemManager.SetStatus(order.Id, "02:Åtgärda", false, false);
                                 _orderItemManager.AddLogItem(order.Id, "LIBRIS", "Negativt svar. " + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=notfullfilled&id=" + req.request_id.Value);
                             }
                             else if (order.Fields["Status"] == "03:Beställd" && req.status_code.Value == "7") // Status code 7 is "Kan reserveras" in Libris
                             {
-                                _orderItemManager.SetStatus(order.Id, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "02:Åtgärda"), false, false);
+                                _orderItemManager.SetStatus(order.Id, "02:Åtgärda", false, false);
                                 _orderItemManager.AddLogItem(order.Id, "LIBRIS", "Kan reserveras." + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=may_reserve&id=" + req.request_id.Value);
                             }
                         }

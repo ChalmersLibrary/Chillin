@@ -39,19 +39,21 @@ namespace Chalmers.ILL.Mail
                 var dueDate = orderItem.Fields.GetValueString("DueDate") == "" ? DateTime.Now :
                     DateTime.ParseExact(orderItem.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
 
+                var status = orderItem.Fields.GetValueString("Status");
+
                 var mail = new OutgoingMailModel();
                 mail.OrderId = orderItem.Fields.GetValueString("OrderId");
                 mail.recipientName = orderItem.Fields.GetValueString("PatronName");
                 mail.recipientEmail = orderItem.Fields.GetValueString("PatronEmail");
 
-                if (now.Date == dueDate.AddDays(-5).Date)
+                if (status.Contains("Utlånad") && now.Date == dueDate.AddDays(-5).Date)
                 {
                     mail.message = _templateService.GetTemplateData("CourtesyNoticeMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
                     _mailService.SendMail(mail);
                     _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt \"courtesy notice\" till " + mail.recipientEmail, false, false);
                     _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message);
                 }
-                else if (now.Date == dueDate.AddDays(1).Date)
+                else if (status.Contains("Utlånad") && now.Date == dueDate.AddDays(1).Date)
                 {
                     mail.message = _templateService.GetTemplateData("LoanPeriodOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
                     _mailService.SendMail(mail);
@@ -71,6 +73,11 @@ namespace Chalmers.ILL.Mail
                     _mailService.SendMail(mail);
                     _orderItemManager.AddLogItem(orderItem.Id, "MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer tre till " + mail.recipientEmail, false, false);
                     _orderItemManager.AddLogItem(orderItem.Id, "MAIL", mail.message);
+                }
+                else if (now.Date >= dueDate.AddDays(17).Date)
+                {
+                    _orderItemManager.SetStatus(orderItem.Id, "02:Åtgärda", false, false);
+                    _orderItemManager.AddLogItem(orderItem.Id, "LOG", "Bok mycket försenad.");
                 }
             }
         }

@@ -23,6 +23,8 @@ using Umbraco.Core.Services;
 using Chalmers.ILL.SignalR;
 using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models;
+using System.Collections;
+using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.OrderItems
 {
@@ -30,6 +32,12 @@ namespace Chalmers.ILL.OrderItems
     {
         INotifier _notifier;
         IContentService _contentService;
+        IUmbracoWrapper _umbraco;
+
+        public OrderItemManager(IUmbracoWrapper umbraco)
+        {
+            _umbraco = umbraco;
+        }
 
         public void SetNotifier(INotifier notifier)
         {
@@ -110,16 +118,22 @@ namespace Chalmers.ILL.OrderItems
                     DateTime.ParseExact(contentNode.Fields.GetValueString("ProviderDueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
 
                 // Parse out the integer of status and type
-                int OrderStatusId = Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], contentNode.Fields.GetValueString("Status"));
-                int OrderTypeId = Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], contentNode.Fields.GetValueString("Type"));
-                int OrderDeliveryLibraryId = Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], contentNode.Fields.GetValueString("DeliveryLibrary"));
-                int OrderCancellationReasonId = Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderCancellationReasonDataTypeDefinitionName"], contentNode.Fields.GetValueString("CancellationReason"));
-                int OrderPurchasedMaterialId = Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderPurchasedMaterialDataTypeDefinitionName"], contentNode.Fields.GetValueString("PurchasedMaterial"));
+                int OrderStatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], contentNode.Fields.GetValueString("Status"));
+                int OrderPreviousStatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], contentNode.Fields.GetValueString("PreviousStatus"));
+                int OrderTypeId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], contentNode.Fields.GetValueString("Type"));
+                int OrderDeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], contentNode.Fields.GetValueString("DeliveryLibrary"));
+                int OrderCancellationReasonId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderCancellationReasonDataTypeDefinitionName"], contentNode.Fields.GetValueString("CancellationReason"));
+                int OrderPurchasedMaterialId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderPurchasedMaterialDataTypeDefinitionName"], contentNode.Fields.GetValueString("PurchasedMaterial"));
 
                 // Status (id, whole prevalue "xx:yyyy" and just string "yyyy")
                 orderItem.Status = OrderStatusId;
                 orderItem.StatusString = OrderStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderStatusId).Split(':').Last() : "";
                 orderItem.StatusPrevalue = OrderStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderStatusId) : "";
+
+                // Previous status (id, whole prevalue "xx:yyyy" and just string "yyyy")
+                orderItem.PreviousStatus = OrderPreviousStatusId;
+                orderItem.PreviousStatusString = OrderPreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderPreviousStatusId).Split(':').Last() : "";
+                orderItem.PreviousStatusPrevalue = OrderPreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderPreviousStatusId) : "";
 
                 // Type (id and prevalue)
                 orderItem.Type = OrderTypeId;
@@ -332,8 +346,8 @@ namespace Chalmers.ILL.OrderItems
         public void SetCancellationReason(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
-            int currentCancellationReason = Helpers.GetPropertyValueAsInteger(content.GetValue("cancellationReason"));
-            if (Helpers.GetPropertyValueAsInteger(content.GetValue("cancellationReason")) != cancellationReasonId)
+            int currentCancellationReason = _umbraco.GetPropertyValueAsInteger(content.GetValue("cancellationReason"));
+            if (_umbraco.GetPropertyValueAsInteger(content.GetValue("cancellationReason")) != cancellationReasonId)
             {
                 SetContentValue(content, "cancellationReason", cancellationReasonId);
                 AddLogItem(orderNodeId, "ANNULLERINGSORSAK", "Annulleringsorsak ändrad till " + umbraco.library.GetPreValueAsString(cancellationReasonId), false, false);
@@ -344,13 +358,19 @@ namespace Chalmers.ILL.OrderItems
         public void SetDeliveryLibrary(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
-            int currentDeliveryLibrary = Helpers.GetPropertyValueAsInteger(content.GetValue("deliveryLibrary"));
+            int currentDeliveryLibrary = _umbraco.GetPropertyValueAsInteger(content.GetValue("deliveryLibrary"));
             if (currentDeliveryLibrary != deliveryLibraryId)
             {
                 SetContentValue(content, "deliveryLibrary", deliveryLibraryId);
                 AddLogItem(orderNodeId, "BIBLIOTEK", "Bibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
+        public void SetDeliveryLibrary(int orderNodeId, string deliveryLibraryPrevalue, bool doReindex = true, bool doSignal = true)
+        {
+            var deliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], deliveryLibraryPrevalue);
+            SetDeliveryLibrary(orderNodeId, deliveryLibraryId, doReindex, doSignal);
         }
 
         public void SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true)
@@ -367,7 +387,7 @@ namespace Chalmers.ILL.OrderItems
         public void SetPurchasedMaterial(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
-            int currentPurchasedMaterial = Helpers.GetPropertyValueAsInteger(content.GetValue("purchasedMaterial"));
+            int currentPurchasedMaterial = _umbraco.GetPropertyValueAsInteger(content.GetValue("purchasedMaterial"));
             if (currentPurchasedMaterial != purchasedMaterialId)
             {
                 content.SetValue("purchasedMaterial", purchasedMaterialId);
@@ -379,9 +399,10 @@ namespace Chalmers.ILL.OrderItems
         public void SetStatus(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
-            int currentStatus = Helpers.GetPropertyValueAsInteger(content.GetValue("status"));
+            int currentStatus = _umbraco.GetPropertyValueAsInteger(content.GetValue("status"));
             if (currentStatus != statusId)
             {
+                content.SetValue("previousStatus", content.GetValue("status"));
                 content.SetValue("status", statusId);
                 OnStatusChanged(content, statusId);
                 AddLogItem(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? umbraco.library.GetPreValueAsString(currentStatus).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(statusId).Split(':').Last(), false, false);
@@ -389,10 +410,16 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
+        public void SetStatus(int orderNodeId, string statusPrevalue, bool doReindex = true, bool doSignal = true)
+        {
+            var statusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], statusPrevalue);
+            SetStatus(orderNodeId, statusId, doReindex, doSignal);
+        }
+
         public void SetType(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
-            int currentType = Helpers.GetPropertyValueAsInteger(content.GetValue("type"));
+            int currentType = _umbraco.GetPropertyValueAsInteger(content.GetValue("type"));
             if (currentType != typeId)
             {
                 content.SetValue("type", typeId);
@@ -483,7 +510,7 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("patronCardNo", model.PatronCardNo);
             content.SetValue("followUpDate", DateTime.Now);
             content.SetValue("editedBy", "");
-            content.SetValue("status", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny"));
+            content.SetValue("status", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny"));
             content.SetValue("pType", model.SierraPatronInfo.ptype);
             content.SetValue("homeLibrary", model.SierraPatronInfo.home_library);
             content.SetValue("log", JsonConvert.SerializeObject(new List<LogItem>()));
@@ -499,15 +526,15 @@ namespace Chalmers.ILL.OrderItems
             {
                 if (model.SierraPatronInfo.home_library.ToLower() == "hbib")
                 {
-                    content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
+                    content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
                 }
                 else if (model.SierraPatronInfo.home_library.ToLower() == "abib")
                 {
-                    content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket"));
+                    content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket"));
                 }
                 else if (model.SierraPatronInfo.home_library.ToLower() == "lbib")
                 {
-                    content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket"));
+                    content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket"));
                 }
                 else
                 {
@@ -518,7 +545,7 @@ namespace Chalmers.ILL.OrderItems
             // Set Type directly if "IsPurchaseRequest" is true
             if (model.IsPurchaseRequest)
             {
-                content.SetValue("type", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Inköpsförslag"));
+                content.SetValue("type", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Inköpsförslag"));
             }
 
             // Save the OrderItem to get an Id
@@ -552,7 +579,7 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("patronCardNo", model.PatronCardNumber);
             content.SetValue("followUpDate", DateTime.Now);
             content.SetValue("editedBy", "");
-            content.SetValue("status", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny"));
+            content.SetValue("status", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny"));
             content.SetValue("pType", model.SierraPatronInfo.ptype);
             content.SetValue("homeLibrary", model.SierraPatronInfo.home_library);
             content.SetValue("log", JsonConvert.SerializeObject(new List<LogItem>()));
@@ -563,29 +590,29 @@ namespace Chalmers.ILL.OrderItems
 
             if (model.DeliveryLibrarySigel == "Z")
             {
-                content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
+                content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
             }
             else if (model.DeliveryLibrarySigel == "ZL")
             {
-                content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket"));
+                content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket"));
             }
             else if (model.DeliveryLibrarySigel == "ZA")
             {
-                content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket"));
+                content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket"));
             }
             else if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
             {
                 if (model.SierraPatronInfo.home_library.ToLower() == "hbib")
                 {
-                    content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
+                    content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
                 }
                 else if (model.SierraPatronInfo.home_library.ToLower() == "abib")
                 {
-                    content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket"));
+                    content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket"));
                 }
                 else if (model.SierraPatronInfo.home_library.ToLower() == "lbib")
                 {
-                    content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket"));
+                    content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket"));
                 }
                 else
                 {
@@ -775,9 +802,9 @@ namespace Chalmers.ILL.OrderItems
 
         private void SetDeliveryLibraryIfNewTypeIsArtikel(IContent content, int newTypeId)
         {
-            if (newTypeId == Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Artikel"))
+            if (newTypeId == _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Artikel"))
             {
-                content.SetValue("deliveryLibrary", Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
+                content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
             }
         }
 

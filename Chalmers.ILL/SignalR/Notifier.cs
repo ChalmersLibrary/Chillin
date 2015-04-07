@@ -9,16 +9,19 @@ using Chalmers.ILL.Controllers.SurfaceControllers;
 using umbraco.cms.businesslogic.datatype;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.SignalR
 {
     public class Notifier : INotifier
     {
         IOrderItemManager _orderItemManager;
+        IUmbracoWrapper _umbraco;
 
-        public void SetOrderItemManager(IOrderItemManager orderItemManager)
+        public void SetOrderItemManager(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco)
         {
             _orderItemManager = orderItemManager;
+            _umbraco = umbraco;
         }
 
         /*
@@ -56,7 +59,7 @@ namespace Chalmers.ILL.SignalR
             int chillinOrderStatusId = 0;
             var ds = new Umbraco.Core.Services.DataTypeService();
             PreValue iter;
-            foreach (DictionaryEntry pv in Helpers.GetPreValues(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"]))
+            foreach (DictionaryEntry pv in _umbraco.GetPreValues(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"]))
             {
                 iter = ((PreValue)pv.Value);
                 if (iter.Id == OrderStatusId)

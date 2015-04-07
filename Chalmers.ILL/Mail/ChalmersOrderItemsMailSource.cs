@@ -206,7 +206,7 @@ namespace Chalmers.ILL.Mail
                             // Set the OrderItem Status so it appears in lists
                             try
                             {
-                                _orderItemManager.SetStatus(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "02:Åtgärda"), false, false);
+                                _orderItemManager.SetStatus(item.OrderItemNodeId, "02:Åtgärda", false, false);
                             }
                             catch (Exception es)
                             {
@@ -271,7 +271,7 @@ namespace Chalmers.ILL.Mail
                             // Set the OrderItem Status so it appears in lists
                             try
                             {
-                                _orderItemManager.SetStatus(item.OrderItemNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "09:Mottagen"), false, false);
+                                _orderItemManager.SetStatus(item.OrderItemNodeId, "09:Mottagen", false, false);
                             }
                             catch (Exception es)
                             {
