@@ -1,6 +1,5 @@
-﻿using Chalmers.ILL.Models;
-using Chalmers.ILL.Models.PartialPage;
-using Chalmers.ILL.Templates;
+﻿using Chalmers.ILL.Templates;
+using Chalmers.ILL.Models;
 using Examine;
 using System;
 using System.Collections.Generic;
@@ -25,12 +24,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         [HttpGet]
         public ActionResult RenderEditTemplatesAction()
         {
-            var pageModel = new ChalmersILLEditTemplatesModel();
+            var pageModel = new Models.PartialPage.Settings.EditTemplates();
 
             _templateService.PopulateTemplateList(pageModel.Templates);
             PopulateAvailableOrderItemProperties(pageModel.AvailableOrderItemProperties);
 
-            return PartialView("Chalmers.ILL.EditTemplates", pageModel);
+            return PartialView("Settings/EditTemplates", pageModel);
         }
 
         [HttpGet]

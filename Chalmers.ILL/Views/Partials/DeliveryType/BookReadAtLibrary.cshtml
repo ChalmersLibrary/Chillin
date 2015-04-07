@@ -1,21 +1,9 @@
 ﻿@model Chalmers.ILL.Models.PartialPage.DeliveryType.BookReadAtLibrary
 @using System.Globalization;
 
+<textarea id="mail-message" hidden>@Model.BookAvailableForReadingAtLibraryMailTemplate</textarea>
+
 <div id="delivery-to-circulation" class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            <label for="message">Meddelande</label>
-            <textarea class="form-control" rows="12" id="message" name="message">@Model.BookAvailableForReadingAtLibraryMailTemplate</textarea>
-        </div>
-        <div class="form-group">
-            <label for="recipientName">Mottagarens namn</label>
-            <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.OrderItem.PatronName">
-        </div>
-        <div class="form-group">
-            <label for="recipientEmail">Mottagande e-postadress</label>
-            <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.OrderItem.PatronEmail">
-        </div>
-    </div>
     <div class="col-md-6">
         <div class="form-group">
             <label for="bookId">Bokens streckkod/identifikator</label>
@@ -30,17 +18,18 @@
                 </span>
             </div>
         </div>
+        <div class="row">
+            <div class="form-group col-sm-12">
+                <div class="alert alert-success" role="alert">Automatiskt mailutskick kommer att levereras till <span id="patron-email" class="content-editable" contenteditable>@Model.OrderItem.PatronEmail</span> <span class="glyphicon glyphicon-pencil"></span></div>
+                <button class="btn btn-success" onclick="deliver()">Leverera!</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
         <div class="form-group">
             <label for="providerInformation">Leverantörsinformation</label><br />
             <textarea class="form-control" cols="80" rows="10" id="providerInformation" name="providerInformation">@Model.OrderItem.ProviderInformation</textarea>
         </div>
-        <div class="form-group">
-            <button class="btn btn-success" onclick="">Skriv ut bokslip</button>
-        </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-6">
         <div class="form-group">
             <label for="log-message">Skriv till logg (valfritt)</label>
             <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
@@ -48,11 +37,6 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-6">
-        <button class="btn btn-success" onclick="deliver()">Leverera!</button>
-    </div>
-</div>
 <script type="text/javascript">
     $(function () {
         $(".datetimepicker").datetimepicker({
@@ -61,6 +45,26 @@
     });
 
     function deliver() {
-        // TODO: Implement delivery.
+        $('#container #bookSlip').insertAfter('#container');
+        var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
+        $('.dueDatePlaceHolder').html(dueDate);
+        window.print();
+        var r = window.confirm("Skrevs bokslippen ut korrekt?");
+        if (r == true) {
+            setOrderItemDeliveryReceived(@Model.OrderItem.NodeId, $('#bookId').val(), $('#dueDate').val(), $('#providerInformation').val(),
+            {
+                nodeId: @Model.OrderItem.NodeId,
+                recipientEmail: $("#patron-email").text().toString().trim(),
+                recipientName: "@Model.OrderItem.PatronName",
+                message: $("#mail-message").val(),
+                newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Utlånad")).Id,
+                newCancellationReasonId: -1,
+                newPurchasedMaterialId: -1,
+                newFollowUpDate: $('#dueDate').val(),
+            }, $("#log-message").val(), true);
+        } else {
+            alert("Sidan kommer laddas om, försök därefter igen.");
+            location.reload();
+        }
     }
 </script>

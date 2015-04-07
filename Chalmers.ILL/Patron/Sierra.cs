@@ -148,7 +148,7 @@ namespace Chalmers.ILL.Patron
 
         private void PopulateBasicPatronInfoFromLibraryCardNumber(string barcode, SierraModel model)
         {
-            using (NpgsqlCommand command = new NpgsqlCommand("SELECT pv.id, pv.barcode, pv.ptype_code, vv.field_content as email, first_name, last_name, home_library_code, mblock_code from sierra_view.patron_record_fullname fn, sierra_view.patron_view pv, sierra_view.varfield_view vv where pv.id=fn.patron_record_id and pv.id=vv.record_id and vv.varfield_type_code='z' and lower(pv.barcode)=:barcode", _connection))
+            using (NpgsqlCommand command = new NpgsqlCommand("SELECT pv.id, pv.barcode, pv.ptype_code, pv.record_num, vv.field_content as email, first_name, last_name, home_library_code, mblock_code from sierra_view.patron_record_fullname fn, sierra_view.patron_view pv, sierra_view.varfield_view vv where pv.id=fn.patron_record_id and pv.id=vv.record_id and vv.varfield_type_code='z' and lower(pv.barcode)=:barcode", _connection))
             {
                 command.Parameters.Add(new NpgsqlParameter("barcode", NpgsqlTypes.NpgsqlDbType.Text));
                 command.Parameters[0].Value = barcode.ToLower();
@@ -165,6 +165,7 @@ namespace Chalmers.ILL.Patron
                         model.last_name = dr["last_name"].ToString();
                         model.home_library = dr["home_library_code"].ToString();
                         model.mblock = dr["mblock_code"].ToString();
+                        model.record_id = Convert.ToInt32(dr["record_num"].ToString());
                     }
                 }
             }
@@ -172,7 +173,7 @@ namespace Chalmers.ILL.Patron
 
         private void PopulateBasicPatronInfoFromPersonnummer(string pnr, SierraModel model)
         {
-            using (NpgsqlCommand command = new NpgsqlCommand("SELECT pv.id, pv.barcode, pv.ptype_code, vv.field_content as email, first_name, last_name, home_library_code, mblock_code from sierra_view.patron_record_fullname fn, sierra_view.patron_view pv, sierra_view.varfield_view vv where pv.id=fn.patron_record_id and pv.id=vv.record_id and vv.varfield_type_code='z' and pv.id=(select record_id from sierra_view.varfield_view vs where lower(vs.field_content)=:barcode)", _connection))
+            using (NpgsqlCommand command = new NpgsqlCommand("SELECT pv.id, pv.barcode, pv.ptype_code, pv.record_num, vv.field_content as email, first_name, last_name, home_library_code, mblock_code from sierra_view.patron_record_fullname fn, sierra_view.patron_view pv, sierra_view.varfield_view vv where pv.id=fn.patron_record_id and pv.id=vv.record_id and vv.varfield_type_code='z' and pv.id=(select record_id from sierra_view.varfield_view vs where lower(vs.field_content)=:barcode)", _connection))
             {
                 command.Parameters.Add(new NpgsqlParameter("barcode", NpgsqlTypes.NpgsqlDbType.Text));
                 command.Parameters[0].Value = pnr.ToLower();
@@ -189,6 +190,7 @@ namespace Chalmers.ILL.Patron
                         model.last_name = dr["last_name"].ToString();
                         model.home_library = dr["home_library_code"].ToString();
                         model.mblock = dr["mblock_code"].ToString();
+                        model.record_id = Convert.ToInt32(dr["record_num"].ToString());
                     }
                 }
             }

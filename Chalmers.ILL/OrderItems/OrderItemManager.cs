@@ -268,7 +268,7 @@ namespace Chalmers.ILL.OrderItems
         public void SetFollowUpDateWithoutLogging(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
-            if (content.GetValue<DateTime>("followUpDate") != date)
+            if (GetDateTimeFromContent(content, "followUpDate") != date)
             {
                 SetContentValue(content, "followUpDate", date);
             }
@@ -285,10 +285,21 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
+        public void SetProviderNameWithoutLogging(int nodeId, string providerName, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentProviderName = content.GetValue<string>("providerName");
+            if (currentProviderName != providerName)
+            {
+                content.SetValue("providerName", providerName);
+            }
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
         public void SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
-            if (content.GetValue<DateTime>("followUpDate") != date)
+            if (GetDateTimeFromContent(content, "followUpDate") != date)
             {
                 SetContentValue(content, "followUpDate", date);
                 AddLogItem(nodeId, "DATE", "Följs upp senast " + date, false, false);
@@ -299,7 +310,7 @@ namespace Chalmers.ILL.OrderItems
         public void SetDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
-            if (content.GetValue<DateTime>("dueDate") != date)
+            if (GetDateTimeFromContent(content, "dueDate") != date)
             {
                 SetContentValue(content, "dueDate", date);
                 AddLogItem(nodeId, "DATE", "Återlämnas av låntagare senast " + date, false, false);
@@ -310,7 +321,7 @@ namespace Chalmers.ILL.OrderItems
         public void SetProviderDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
-            if (content.GetValue<DateTime>("providerDueDate") != date)
+            if (GetDateTimeFromContent(content, "providerDueDate") != date)
             {
                 SetContentValue(content, "providerDueDate", date);
                 AddLogItem(nodeId, "DATE", "Återlämnas till leverantör senast " + date, false, false);
@@ -403,10 +414,46 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
+        public void SetPatronEmail(int nodeId, string patronEmail, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentPatronEmail = content.GetValue<string>("patronEmail");
+            if (currentPatronEmail != patronEmail)
+            {
+                content.SetValue("patronEmail", patronEmail);
+                AddLogItem(nodeId, "MAIL_NOTE", "E-post mot låntagare ändrad till " + patronEmail, false, false);
+            }
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
+        public void SetProviderName(int nodeId, string providerName, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentProviderName = content.GetValue<string>("providerName");
+            if (currentProviderName != providerName)
+            {
+                content.SetValue("providerName", providerName);
+                AddLogItem(nodeId, "ORDER", "Beställd från " + providerName, false, false);
+            }
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
+        public void SetProviderOrderId(int nodeId, string providerOrderId, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentProviderOrderId = content.GetValue<string>("providerOrderId");
+            if (currentProviderOrderId != providerOrderId)
+            {
+                content.SetValue("providerOrderId", providerOrderId);
+                AddLogItem(nodeId, "ORDER", "Beställningsnr ändrat till " + providerOrderId, false, false);
+            }
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
         public void SetProviderInformation(int nodeId, string providerInformation, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
-            var currentProviderInformation = content.GetValue<string>("bookId");
+            var currentProviderInformation = content.GetValue<string>("providerInformation");
             if (currentProviderInformation != providerInformation)
             {
                 content.SetValue("providerInformation", providerInformation);
@@ -499,7 +546,7 @@ namespace Chalmers.ILL.OrderItems
 
             // Set properties
             content.SetValue("originalOrder", model.Message);
-            content.SetValue("reference", model.Message);
+            content.SetValue("reference", model.MessagePrefix + model.Message);
             content.SetValue("patronName", model.PatronName);
             content.SetValue("patronEmail", model.PatronEmail);
             content.SetValue("patronCardNo", model.PatronCardNumber);
@@ -674,6 +721,23 @@ namespace Chalmers.ILL.OrderItems
             {
                 res = Member.GetCurrentMember().Text;
             }
+            return res;
+        }
+
+        /* To be able to handle not yet assigned dates. */
+        private DateTime GetDateTimeFromContent(IContent content, string key)
+        {
+            DateTime res = new DateTime(1970, 1, 1);
+
+            try
+            {
+                res = content.GetValue<DateTime>(key);
+            }
+            catch (Exception)
+            {
+                // NOP
+            }
+
             return res;
         }
 

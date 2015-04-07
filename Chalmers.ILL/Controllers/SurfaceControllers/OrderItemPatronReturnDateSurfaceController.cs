@@ -59,6 +59,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
 
                 _orderItemManager.SetDueDate(pack.nodeId, pack.dueDate, false, false);
+                _orderItemManager.SetProviderDueDate(pack.nodeId, pack.dueDate, false, false);
+
+                // We save everything here first so that we get the new values injected into the message by the template service.
+                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail);
+
+                // Overwrite the message with message from template service so that we get the new values injected.
+                pack.mail.message = _templateService.GetTemplateData("ReturnDateChangedMailTemplate", _orderItemManager.GetOrderItem(pack.nodeId));
 
                 _mailService.SendMail(pack.mail);
                 _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);

@@ -17,9 +17,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemProviderReturnDateSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IMailService _mailService;
 
-        public OrderItemProviderReturnDateSurfaceController(IOrderItemManager orderItemManager, IMailService mailService)
+        public OrderItemProviderReturnDateSurfaceController(IOrderItemManager orderItemManager)
         {
             _orderItemManager = orderItemManager;
         }

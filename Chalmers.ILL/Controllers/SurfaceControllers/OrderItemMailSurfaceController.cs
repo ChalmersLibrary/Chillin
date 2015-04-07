@@ -17,6 +17,7 @@ using Chalmers.ILL.Mail;
 using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.UmbracoApi;
+using Chalmers.ILL.Templates;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -27,14 +28,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IExchangeMailWebApi _exchangeMailWebApi;
         IUmbracoWrapper _dataTypes;
         IMailService _mailService;
+        ITemplateService _templateService;
 
         public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IExchangeMailWebApi exchangeMailWebApi, 
-            IUmbracoWrapper dataTypes, IMailService mailService)
+            IUmbracoWrapper dataTypes, IMailService mailService, ITemplateService templateService)
         {
             _orderItemManager = orderItemManager;
             _exchangeMailWebApi = exchangeMailWebApi;
             _dataTypes = dataTypes;
             _mailService = mailService;
+            _templateService = templateService;
         }
 
         /// <summary>
@@ -48,6 +51,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var model = new ChalmersILLActionMailModel(_orderItemManager.GetOrderItem(nodeId));
 
             _dataTypes.PopulateModelWithAvailableValues(model);
+            model.SignatureTemplate = _templateService.GetTemplateData("SignatureTemplate", model.OrderItem);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Mail", model);

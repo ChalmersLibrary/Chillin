@@ -13,6 +13,7 @@ namespace Chalmers.ILL.Models
         public string PatronCardNumber { get; set; }
         public string DeliveryLibrarySigel { get; set; }
         public string Message { get; set; }
+        public string MessagePrefix { get; set; }
         public SierraModel SierraPatronInfo { get; set; }
     }
 }

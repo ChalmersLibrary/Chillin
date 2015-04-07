@@ -10,7 +10,9 @@
             <div class="form-group">
                 <label for="message">Meddelande</label>
                 <textarea class="form-control" rows="12" id="message" name="message">
-                    
+
+
+@Model.SignatureTemplate
                     @{
                         if (Model.OrderItem.LogItemsList.Where(x => x.Type == "MAIL").Count() > 0)
                         {

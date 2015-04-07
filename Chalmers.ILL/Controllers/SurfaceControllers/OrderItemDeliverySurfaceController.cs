@@ -91,6 +91,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var pageModel = new Models.PartialPage.DeliveryType.ArticleInInfodisk(_orderItemManager.GetOrderItem(nodeId));
             _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            pageModel.ArticleDeliveryLibrary = GetArticleDeliveryLibrary(pageModel.OrderItem.SierraInfo.home_library);
             return PartialView("DeliveryType/ArticleInInfodisk", pageModel);
         }
 
@@ -105,6 +106,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var pageModel = new Models.PartialPage.DeliveryType.ArticleInTransit(_orderItemManager.GetOrderItem(nodeId));
             _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
+            pageModel.ArticleDeliveryLibrary = GetArticleDeliveryLibrary(pageModel.OrderItem.SierraInfo.home_library);
             return PartialView("DeliveryType/ArticleInTransit", pageModel);
         }
 
@@ -138,10 +140,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         /// <summary>
-        /// Send mail to user from within the system, possibly change status and log means of delivery
+        /// Log message, set delivered status and log delivery type.
         /// </summary>
         /// <param name="nodeId">OrderItem Node Id</param>
-        /// <param name="newStatus">Means of delivery</param>
+        /// <param name="logEntry">Log message</param>
+        /// <param name="delivery">Type of delivery</param>
         /// <returns>JSON result</returns>
         [HttpPost]
         public ActionResult SetDelivery(int nodeId, string logEntry, string delivery)
@@ -167,6 +170,46 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         /// <summary>
+        /// Log message, set delivered status, log delivery type and send mail to user.
+        /// </summary>
+        /// <param name="packJson">The serialized object of type DeliveryByMailPackage.</param>
+        /// <returns>JSON result</returns>
+        [HttpPost]
+        public ActionResult DeliverByMail(string packJson)
+        {
+            var res = new ResultResponse();
+
+            try
+            {
+                var pack = JsonConvert.DeserializeObject<DeliverByMailPackage>(packJson);
+
+                _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: Direktleverans via e-post.", false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, false, false);
+                _orderItemManager.SetStatus(pack.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
+
+                // We save everything here first so that we get the new values injected into the message by the template service.
+                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail);
+
+                // Overwrite the message with message from template service so that we get the new values injected.
+                pack.mail.message = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", _orderItemManager.GetOrderItem(pack.nodeId));
+
+                _mailService.SendMail(pack.mail);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message);
+
+                res.Success = true;
+                res.Message = "Lyckades leverera via mail.";
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = "Fel vid leveransförsök via mail: " + e.Message;
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
         /// Set that the order item is received and ready for the patron to fetch.
         /// </summary>
         /// <param name="orderNodeId">OrderItem Node Id</param>
@@ -185,6 +228,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
 
+                if (pack.readOnlyAtLibrary)
+                {
+                    _orderItemManager.AddLogItem(pack.orderNodeId, "LEVERERAD", "Leveranstyp: Ej hemlån.", false, false);
+                }
+                else
+                {
+                    _orderItemManager.AddLogItem(pack.orderNodeId, "LEVERERAD", "Leveranstyp: Avhämtning i infodisk.", false, false);
+                }
                 _orderItemManager.SetDueDate(pack.orderNodeId, pack.dueDate, false, false);
                 _orderItemManager.SetProviderDueDate(pack.orderNodeId, pack.dueDate, false, false);
                 _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, false, false);
@@ -192,6 +243,19 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 _orderItemManager.SetStatus(pack.orderNodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "11:Utlånad"), false, false);
                 _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, false, false);
+
+                // We save everything here first so that we get the new values injected into the message by the template service.
+                _orderItemManager.SetPatronEmail(pack.orderNodeId, pack.mailData.recipientEmail);
+
+                // Overwrite the message with message from template service so that we get the new values injected.
+                if (pack.readOnlyAtLibrary)
+                {
+                    pack.mailData.message = _templateService.GetTemplateData("BookAvailableForReadingAtLibraryMailTemplate", _orderItemManager.GetOrderItem(pack.orderNodeId));
+                }
+                else
+                {
+                    pack.mailData.message = _templateService.GetTemplateData("BookAvailableMailTemplate", _orderItemManager.GetOrderItem(pack.orderNodeId));
+                }
 
                 _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
                 _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
@@ -209,6 +273,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return Json(json, JsonRequestBehavior.AllowGet);
         }
 
+        public class DeliverByMailPackage
+        {
+            public int nodeId { get; set; }
+            public string logEntry { get; set; }
+            public OutgoingMailModel mail { get; set; }
+        }
+
         public class DeliveryReceivedPackage
         {
             public int orderNodeId { get; set; }
@@ -217,7 +288,25 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             public string providerInformation { get; set; }
             public OutgoingMailPackageModel mailData { get; set; }
             public string logMsg { get; set; }
+            public bool readOnlyAtLibrary { get; set; }
+        }
+
+        private string GetArticleDeliveryLibrary(string sierraHomeLibrary)
+        {
+            var res = "Kunde ej avgöra lämpligt leveransbibliotek.";
+            if (sierraHomeLibrary != null && sierraHomeLibrary.Contains("hbib"))
+            {
+                res = "Huvudbiblioteket";
+            }
+            else if (sierraHomeLibrary != null && sierraHomeLibrary.Contains("lbib"))
+            {
+                res = "Lindholmenbiblioteket";
+            }
+            else if (sierraHomeLibrary != null && sierraHomeLibrary.Contains("abib"))
+            {
+                res = "Arkitekturbiblioteket";
+            }
+            return res;
         }
     }
-
 }

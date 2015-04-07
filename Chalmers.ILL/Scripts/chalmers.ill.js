@@ -717,7 +717,7 @@ function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
     }).error(unlockScreen);
 }
 
-function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg) {
+function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
     lockScreen();
     $.post("/umbraco/surface/OrderItemDeliverySurface/SetOrderItemDeliveryReceived", {
         packJson: JSON.stringify({
@@ -726,7 +726,8 @@ function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation
             dueDate: dueDate,
             providerInformation: providerInformation,
             mailData: maildata,
-            logMsg: logMsg
+            logMsg: logMsg,
+            readOnlyAtLibrary: readOnlyAtLibrary
         })
     }, function (json) {
         if (json.Success) {
@@ -750,10 +751,16 @@ function loadLogItems(id)
 
 /* Set new property values for Provider from form */
 
-function setOrderItemProvider(nodeId, providerName, providerOrderId, followUpDate)
+function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInformation, followUpDate)
 {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider?nodeId=" + nodeId + "&providerName=" + providerName + "&providerOrderId=" + providerOrderId.trim() + "&newFollowUpDate=" + followUpDate, function (json) {
+    $.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider", {
+        nodeId: nodeId,
+        providerName: providerName,
+        providerOrderId: providerOrderId.trim(),
+        providerInformation: providerInformation,
+        newFollowUpDate: followUpDate
+    }).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(nodeId);
         }
@@ -761,7 +768,10 @@ function setOrderItemProvider(nodeId, providerName, providerOrderId, followUpDat
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 /* Set new property values for Reference from form */
@@ -777,53 +787,6 @@ function setOrderItemReference(nodeId, reference) {
         }
         unlockScreen();
     }).error(unlockScreen);
-}
-
-function sendDeliveryByEmail(mailData, logEntry) {
-    lockScreen();
-    if (mailData.message && mailData.recipientEmail) {
-        $.ajax({
-            type: "POST",
-            url: "/umbraco/surface/OrderItemMailSurface/SendMail",
-            data: JSON.stringify(mailData),
-            success: function (json) {
-                if (json.Success) {
-                    $.post("/umbraco/surface/OrderItemDeliverySurface/SetDelivery", {
-                        nodeId: mailData.nodeId,
-                        logEntry: logEntry,
-                        delivery: "Direktleverans via e-post"
-                    }, function (json) {
-                        if (json.Success) {
-                            loadOrderItemDetails(mailData.nodeId);
-                        }
-                        else {
-                            alert(json.Message);
-                        }
-                        unlockScreen();
-                    }).error(unlockScreen);
-                }
-                else
-                {
-                    alert(json.Message);
-                    unlockScreen();
-                }
-            },
-            error: function (jqxhr, textStatus, errorThrown) {
-                alert(textStatus + "\n" + errorThrown);
-                unlockScreen();
-            },
-            contentType: "application/json"
-        });
-}
-    else {
-        if (mailData.message == "") {
-            alert("Du m\u00E5ste skriva ett meddelande till mottagaren.");
-        }
-        if (mailData.recipientEmail == "") {
-            alert("Du m\u00E5ste ange en mottagande e-postadress.");
-        }
-        unlockScreen();
-    }
 }
 
 /* Set new property values for Delivery from form */
@@ -904,25 +867,30 @@ function sendMailToPatron(mailData) {
 }
 
 /* Write Log Entry */
-function writeLogItem(nodeId, message, type, followUpDate, shouldUnlockScreen) {
+function writeLogItem(nodeId, message, type, followUpDate, cb) {
     lockScreen();
-    shouldUnlockScreen = typeof shouldUnlockScreen !== "undefined" ? shouldUnlockScreen : true;
     if (message) {
         $.post("/umbraco/surface/LogItemSurface/WriteLogItem", { nodeId: nodeId, Message: message, Type: type, newFollowUpDate: followUpDate }).done(function (json) {
             if (json.Success) {
-                loadOrderItemDetails(nodeId);
+                if (cb) {
+                    cb();
+                } else {
+                    loadOrderItemDetails(nodeId);
+                }
             }
             else {
                 alert(json.Message);
             }
-            if (shouldUnlockScreen) unlockScreen();
+            unlockScreen();
         }).error(function () {
-            if (shouldUnlockScreen) unlockScreen();
+            unlockScreen();
         });
+        return true;
     }
     else {
         alert("Du m\u00E5ste skriva n\u00E5got.");
-        if (shouldUnlockScreen) unlockScreen();
+        unlockScreen();
+        return false;
     }
 }
 
@@ -1141,4 +1109,12 @@ function openDocument(btn) {
         //Browser has blocked it
         alert("Misslyckades med att öppna popup-fönster.");
     }
+}
+
+function getDateStringWithHoursAndMinutes(date) {
+    return "" + date.getFullYear() + "-" +
+        ("00" + (date.getMonth() + 1)).substr(-2) + "-" +
+        ("00" + date.getDate()).substr(-2) + " " +
+        ("00" + date.getHours()).substr(-2) + ":" +
+        ("00" + date.getMinutes()).substr(-2);
 }

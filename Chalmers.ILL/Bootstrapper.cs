@@ -14,6 +14,7 @@ using Chalmers.ILL.Templates;
 using Examine;
 using Chalmers.ILL.Patron;
 using System.Configuration;
+using Chalmers.ILL.Providers;
 
 namespace Chalmers.ILL
 {
@@ -51,6 +52,7 @@ namespace Chalmers.ILL
             var templateService = new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher);
             var notifier = new Notifier();
             var orderItemManager = new OrderItemManager();
+            var providerService = new ProviderService(orderItemsSearcher);
 
             // Connect instances that depend on eachother.
             notifier.SetOrderItemManager(orderItemManager);
@@ -66,9 +68,10 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
             container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
             container.RegisterInstance(typeof(ITemplateService), templateService);
-            container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(orderItemsSearcher));
+            container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(orderItemsSearcher, templateService, orderItemManager, mailService));
             container.RegisterInstance(typeof(IPatronDataProvider), new Sierra(ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
             container.RegisterInstance(typeof(IMailService), mailService);
+            container.RegisterInstance(typeof(IProviderService), providerService);
             container.RegisterInstance<ISearcher>("TemplatesSearcher", templatesSearcher);
             container.RegisterInstance<ISearcher>("OrderItemsSearcher", orderItemsSearcher);
         }

@@ -12,6 +12,7 @@ using System.Configuration;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Models.PartialPage;
 using Examine;
+using Chalmers.ILL.Providers;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -20,10 +21,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemProviderSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
+        IProviderService _providerService;
 
-        public OrderItemProviderSurfaceController(IOrderItemManager orderItemManager)
+        public OrderItemProviderSurfaceController(IOrderItemManager orderItemManager, IProviderService providerService)
         {
             _orderItemManager = orderItemManager;
+            _providerService = providerService;
         }
 
         [HttpGet]
@@ -32,72 +35,29 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // Get a new OrderItem populated with values for this node
             var pageModel = new ChalmersILLActionProviderModel(_orderItemManager.GetOrderItem(nodeId));
 
-            pageModel.Providers = FetchAndCreateListOfUsedProviders();
+            pageModel.Providers = _providerService.FetchAndCreateListOfUsedProviders();
+            var deliveryTimeInHours = _providerService.GetSuggestedDeliveryTimeInHoursForProvider(pageModel.OrderItem.ProviderName);
+            pageModel.EstimatedDeliveryCurrentProvider = DateTime.Now.AddHours(deliveryTimeInHours);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Provider", pageModel);
         }
 
         [HttpGet]
-        public ActionResult SetProvider(int nodeId, string providerName, string providerOrderId, string newFollowUpDate)
+        public ActionResult SetProvider(int nodeId, string providerName, string providerOrderId, string providerInformation, string newFollowUpDate)
         {
             var json = new ResultResponse();
 
             try
             {
-                // Connect to Umbraco ContentService
-                var contentService = UmbracoContext.Application.Services.ContentService;
+                _orderItemManager.SetFollowUpDate(nodeId, Convert.ToDateTime(newFollowUpDate), false, false);
+                _orderItemManager.SetProviderName(nodeId, providerName, false, false);
+                _orderItemManager.SetProviderOrderId(nodeId, providerOrderId, false, false);
+                _orderItemManager.SetProviderInformation(nodeId, providerInformation, false, false);
+                _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "03:Beställd"));
 
-                // Find OrderItem
-                var contentNode = contentService.GetById(nodeId);
-
-                // Read current values on provider
-                var currentProviderName = contentNode.GetValue("providerName") != null ? contentNode.GetValue("providerName").ToString() : "";
-                var currentProviderOrderId = contentNode.GetValue("providerOrderId") != null ? contentNode.GetValue("providerOrderId").ToString() : "";
-
-                // Set Provider properties
-                contentNode.SetValue("providerName", providerName);
-                contentNode.SetValue("providerOrderId", providerOrderId);
-
-                // Log this action
-                if (currentProviderName != providerName)
-                {
-                    _orderItemManager.AddLogItem(nodeId, "ORDER", "Beställd från " + providerName, false, false);
-                }
-
-                if (currentProviderOrderId != providerOrderId)
-                {
-                    _orderItemManager.AddLogItem(nodeId, "ORDER", "Beställningsnr: " + providerOrderId, false, false);
-                }
-
-                // Set status = Beställd
-                try
-                {
-                    _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "03:Beställd"), false, false);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-
-                // Set FollowUpDate property if it differs from current
-                var currentFollowUpDate = _orderItemManager.GetOrderItem(nodeId).FollowUpDate;
-
-                if (!String.IsNullOrEmpty(newFollowUpDate))
-                {
-                    DateTime parsedNewFollowUpDate = Convert.ToDateTime(newFollowUpDate);
-                    if (currentFollowUpDate != parsedNewFollowUpDate)
-                    {
-                        _orderItemManager.SetFollowUpDate(nodeId, parsedNewFollowUpDate, false, false);
-                    }
-                }
-
-                // Save
-                _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);
-
-                // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;
-                json.Message = "Saved provider data.";
+                json.Message = "Sparade data för beställning.";
             }
             catch (Exception e)
             {
@@ -106,22 +66,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);
-        }
-
-        private List<String> FetchAndCreateListOfUsedProviders()
-        {
-            var res = new List<String>();
-
-            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-            var allOrders = searcher.Search(searchCriteria.RawQuery("nodeTypeAlias:ChalmersILLOrderItem"));
-
-            return allOrders.Where(x => x.Fields.ContainsKey("ProviderName") && x.Fields["ProviderName"] != "")
-                .Select(x => x.Fields["ProviderName"])
-                .GroupBy(x => x)
-                .OrderByDescending(x => x.Count())
-                .Select(x => x.Key)
-                .ToList();
         }
     }
 }

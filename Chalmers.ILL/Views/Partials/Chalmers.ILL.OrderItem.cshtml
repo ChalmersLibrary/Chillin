@@ -66,7 +66,7 @@
                         </button>
                         <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
                             @{
-                                var allowedStatusValues = new String[]{"Annullerad", "Åtgärda", "Överförd", "Inköpt", "Väntar"};
+                                var allowedStatusValues = new String[]{"Annullerad", "Åtgärda", "Överförd", "Inköpt"};
                                 
                                 foreach (var status in Model.AvailableStatuses)
                                 {
@@ -141,27 +141,30 @@
                         </ul>
                     </div>
                     
-                    <!-- Delivery Library button -->
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
-                            Bibliotek <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
-                            @{
-                                foreach (var library in Model.AvailableDeliveryLibraries)
-                                {
-                                    if (library.Id == Model.OrderItem.DeliveryLibrary) 
+                    if (Model.OrderItem.TypePrevalue == "Inköpsförslag")
+                    {
+                        <!-- Delivery Library button -->
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                                Bibliotek <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
+                                @{
+                                    foreach (var library in Model.AvailableDeliveryLibraries)
                                     {
-                                        <li><a href="#" class="disabled-link"><span class="current">@library.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
-                                    }
-                                    else
-                                    {
-                                        <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.OrderItem.NodeId, @library.Id); event.preventDefault();">@library.Value</a></li>
+                                        if (library.Id == Model.OrderItem.DeliveryLibrary) 
+                                        {
+                                            <li><a href="#" class="disabled-link"><span class="current">@library.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
+                                        }
+                                        else
+                                        {
+                                            <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.OrderItem.NodeId, @library.Id); event.preventDefault();">@library.Value</a></li>
+                                        }
                                     }
                                 }
-                            }
-                        </ul>
-                    </div>                    
+                            </ul>
+                        </div>
+                    }
                 }
                     
                 @if (Model.OrderItem.Type > 0)

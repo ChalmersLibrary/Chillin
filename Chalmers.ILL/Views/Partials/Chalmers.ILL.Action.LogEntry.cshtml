@@ -10,68 +10,70 @@
                 <label for="message">Inlägg</label>
                 <textarea class="form-control" rows="6" id="message" name="message"></textarea>
             </div>
-
-            <div class="form-group">
-                <label for="followUpDate">Följs upp</label>
-                <div class="input-group date datetimepicker">
-                    <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
-                    <span class="input-group-addon">
-                        <span class="glyphicon glyphicon-calendar"></span>
-                    </span>
+            @if (!String.IsNullOrWhiteSpace(Model.OrderItem.TypePrevalue))
+            {
+                <div class="form-group">
+                    <label for="followUpDate">Följs upp</label>
+                    <div class="input-group date datetimepicker">
+                        <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Ny status</label>
-                <!-- Status button -->
-                <div>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                            <span id="currently-selected-status" data-status-id="-1" data-cancellation-reason-id="-1" data-purchased-material-id="-1">Ingen förändring</span> <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
-                            <li><a href="#" onclick="updateSelectedStatus(-1, 'Ingen förändring', -1, -1); event.preventDefault();">Ingen förändring</a></li>
-                            @{
-                                var allowedStatusValues = new String[] { "Annullerad", "Åtgärda", "Överförd", "Inköpt", "Väntar" };
+                <div class="form-group">
+                    <label>Ny status</label>
+                    <!-- Status button -->
+                    <div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span id="currently-selected-status" data-status-id="-1" data-cancellation-reason-id="-1" data-purchased-material-id="-1">Ingen förändring</span> <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
+                                <li><a href="#" onclick="updateSelectedStatus(-1, 'Ingen förändring', -1, -1); event.preventDefault();">Ingen förändring</a></li>
+                                @{
+                                    var allowedStatusValues = new String[] { "Annullerad", "Åtgärda", "Överförd", "Inköpt", "Väntar" };
 
-                                foreach (var status in Model.AvailableStatuses)
-                                {
-                                    if (allowedStatusValues.Contains(status.Value))
+                                    foreach (var status in Model.AvailableStatuses)
                                     {
-                                        if (status.Value == "Annullerad")
+                                        if (allowedStatusValues.Contains(status.Value))
                                         {
-                                            <li class="dropdown-submenu">
-                                                <a>@status.Value</a>
-                                                <ul class="dropdown-menu">
-                                                    @foreach (var cancellationReason in Model.AvailableCancellationReasons)
-                                                    {
-                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @cancellationReason.Value', @cancellationReason.Id, -1); event.preventDefault();">@cancellationReason.Value</a></li>
-                                                    }
-                                                </ul>
-                                            </li>
-                                        }
-                                        else if (status.Value == "Inköpt")
-                                        {
-                                            <li class="dropdown-submenu">
-                                                <a>@status.Value</a>
-                                                <ul class="dropdown-menu">
-                                                    @foreach (var purchasedMaterial in Model.AvailablePurchasedMaterials)
-                                                    {
-                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @purchasedMaterial.Value', -1, @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
-                                                    }
-                                                </ul>
-                                            </li>
-                                        }
-                                        else
-                                        {
-                                            <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value', -1, -1); event.preventDefault();">@status.Value</a></li>
+                                            if (status.Value == "Annullerad")
+                                            {
+                                                <li class="dropdown-submenu">
+                                                    <a>@status.Value</a>
+                                                    <ul class="dropdown-menu">
+                                                        @foreach (var cancellationReason in Model.AvailableCancellationReasons)
+                                                        {
+                                                            <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @cancellationReason.Value', @cancellationReason.Id, -1); event.preventDefault();">@cancellationReason.Value</a></li>
+                                                        }
+                                                    </ul>
+                                                </li>
+                                            }
+                                            else if (status.Value == "Inköpt")
+                                            {
+                                                <li class="dropdown-submenu">
+                                                    <a>@status.Value</a>
+                                                    <ul class="dropdown-menu">
+                                                        @foreach (var purchasedMaterial in Model.AvailablePurchasedMaterials)
+                                                        {
+                                                            <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @purchasedMaterial.Value', -1, @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
+                                                        }
+                                                    </ul>
+                                                </li>
+                                            }
+                                            else
+                                            {
+                                                <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value', -1, -1); event.preventDefault();">@status.Value</a></li>
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        </ul>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
 
             <button class="btn btn-success" onclick="submitLogEntry(this); event.preventDefault();">Spara</button>
         </div>
@@ -93,20 +95,28 @@
 
     function submitLogEntry(obj) {
         var newStatusObj = $("#currently-selected-status");
-        var newStatusId = newStatusObj.data("status-id");
-        var newStatusCancellationReasonId = newStatusObj.data("cancellation-reason-id");
-        var newStatusPurchasedMaterialId = newStatusObj.data("purchased-material-id");
-        if (newStatusId != -1) {
-            writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, 'LOG', obj.form.followUpDate.value, false);
-            if (newStatusCancellationReasonId != -1) {
-                setOrderItemStatusAndCancellationReason(@Model.OrderItem.NodeId, newStatusId, newStatusCancellationReasonId);
-            } else if(newStatusPurchasedMaterialId != -1) {
-                setOrderItemStatusAndPurchasedMaterial(@Model.OrderItem.NodeId, newStatusId, newStatusPurchasedMaterialId);
+        if (newStatusObj.length > 0) {
+            var newStatusId = newStatusObj.data("status-id");
+            var newStatusCancellationReasonId = newStatusObj.data("cancellation-reason-id");
+            var newStatusPurchasedMaterialId = newStatusObj.data("purchased-material-id");
+
+            if (newStatusId != -1) {
+                if (!writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, "LOG", obj.form.followUpDate.value, function () {
+                    if (newStatusCancellationReasonId != -1) {
+                            setOrderItemStatusAndCancellationReason(@Model.OrderItem.NodeId, newStatusId, newStatusCancellationReasonId);
+                    } else if(newStatusPurchasedMaterialId != -1) {
+                            setOrderItemStatusAndPurchasedMaterial(@Model.OrderItem.NodeId, newStatusId, newStatusPurchasedMaterialId);
+                    } else {
+                            setOrderItemStatus(@Model.OrderItem.NodeId, newStatusId);
+                    }
+                })) {
+                    unlockScreen();
+                }
             } else {
-                setOrderItemStatus(@Model.OrderItem.NodeId, newStatusId);
+                writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, "LOG", obj.form.followUpDate.value);
             }
-        } else {
-            writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, 'LOG', obj.form.followUpDate.value);
+        } else { // If we can't find the currently-selected-status, this means that we are only logging without changing status or follow up date.
+            writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, "LOG", "@Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)");
         }
     }
     </script>
