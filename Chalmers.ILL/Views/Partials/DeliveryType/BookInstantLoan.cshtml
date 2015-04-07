@@ -35,8 +35,55 @@
             <textarea class="form-control" cols="80" rows="10" id="providerInformation" name="providerInformation">@Model.OrderItem.ProviderInformation</textarea>
         </div>
         <div id="bookSlip" class="print">
-            @Html.Raw(Model.BookSlipTemplate)
-        </div>    </div>
+            <h3 style="float:right" class="dueDatePlaceHolder"></h3><br />
+            <strong style="font-size:1.5em">@Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name</strong><br />
+            <p>
+                <strong>Fjärrlån</strong><br />
+                <strong>Återlämnas senast</strong><br />
+            </p>
+            <p>
+                <strong>Interlibrary loan</strong><br />
+                <strong>Due date</strong><br />
+            </p>
+            <p>
+                <strong style="font-size:1.5em" class="dueDatePlaceHolder"></strong>
+            </p>
+
+            <p>
+                <strong>Återlämnas omedelbart vid krav</strong><br />
+                <strong>Please return immediately if recalled</strong>
+            </p>
+            <p>
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <img src="~/images/cth_logo.png" width="148pt" />
+            </p>
+            <p>
+                Chalmers tekniska högskola<br />
+                Biblioteket<br />
+                412 96  Göteborg<br />
+                <br />
+                031-772 3737 / 3761<br />
+                <br />
+                www.lib.chalmers.se<br />
+                support.lib@chalmers.se
+            </p>
+            <div class="pb"></div>
+            <h3 class="dueDatePlaceHolder"></h3>
+        </div>
+    </div>
 </div>
 <div class="row">
     <div class="col-md-6">
