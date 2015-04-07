@@ -186,7 +186,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Leveranstyp: " + delivery, false, false);
                 _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, false, false);
-                _orderItemManager.SetStatus(nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "13:Transport"));
+                _orderItemManager.SetStatus(nodeId, "13:Transport");
 
                 json.Success = true;
                 json.Message = "Saved provider data.";
@@ -216,7 +216,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: Avhämtas i lånedisken.", false, false);
                 _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, false, false);
-                _orderItemManager.SetStatus(pack.nodeId, Helpers.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "05:Levererad"), false, false);
+                _orderItemManager.SetStatus(pack.nodeId, "05:Levererad", false, false);
 
                 // We save everything here first so that we get the new values injected into the message by the template service.
                 _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail);
