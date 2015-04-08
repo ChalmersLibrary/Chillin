@@ -143,6 +143,7 @@
             setOrderItemArticleAvailableForPickup(@Model.OrderItem.NodeId, 
                 {
                     nodeId: @Model.OrderItem.NodeId,
+                    OrderId: "@Model.OrderItem.OrderId",
                     recipientEmail: $("#patron-email").text().toString().trim(),
                     recipientName: "@Model.OrderItem.PatronName",
                     message: $("#mail-message").val(),
