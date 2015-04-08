@@ -101,7 +101,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 res.Success = true;
                 res.Message = "Successfully fetched data.";
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 res.Success = false;
                 res.Message = "Failed to get data.";
