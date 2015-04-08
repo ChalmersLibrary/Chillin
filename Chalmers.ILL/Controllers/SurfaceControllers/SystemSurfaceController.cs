@@ -13,16 +13,10 @@ using Chalmers.ILL.Mail;
 using Chalmers.ILL.UmbracoApi;
 using Microsoft.Practices.Unity;
 using Chalmers.ILL.Models;
+using System.Configuration;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class SystemInfo
-    {
-        public DateTime Timestamp { get; set; }
-        public bool EnableLogging { get; set; }
-    }
-
-    [MemberAuthorize(AllowType = "Standard")]
     public class SystemSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
@@ -32,10 +26,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         ISourceFactory _sourceFactory;
         ISearcher _orderItemsSearcher;
         IAutomaticMailSendingEngine _automaticMailSendingEngine;
+        IUmbracoWrapper _umbraco;
 
         public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, IExchangeMailWebApi exchangeMailWebApi, 
             IUmbracoWrapper dataTypes, ISourceFactory sourceFactory, [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher,
-            IAutomaticMailSendingEngine automaticMailSendingEngine)
+            IAutomaticMailSendingEngine automaticMailSendingEngine, IUmbracoWrapper umbraco)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;
@@ -44,18 +39,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _sourceFactory = sourceFactory;
             _orderItemsSearcher = orderItemsSearcher;
             _automaticMailSendingEngine = automaticMailSendingEngine;
-        }
-        
-        [HttpGet]
-        public ActionResult GetSystemInfo()
-        {
-            // Statistics JSON
-            var json = new SystemInfo();
-
-            json.Timestamp = DateTime.Now;
-            json.EnableLogging = UmbracoSettings.EnableLogging;
-
-            return Json(json, JsonRequestBehavior.AllowGet);
+            _umbraco = umbraco;
         }
 
         /// <summary>
@@ -71,19 +55,22 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                ConvertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus();
-
-                SignalExpiredFollowUpDates();
-
-                foreach (var source in _sourceFactory.Sources())
+                if (IsRequestAuthorized())
                 {
-                    try
+                    ConvertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus();
+
+                    SignalExpiredFollowUpDates();
+
+                    foreach (var source in _sourceFactory.Sources())
                     {
-                        res.Add(source.Poll());
-                    }
-                    catch (Exception e)
-                    {
-                        LogHelper.Error<SystemSurfaceController>("Error while polling source.", e);
+                        try
+                        {
+                            res.Add(source.Poll());
+                        }
+                        catch (Exception e)
+                        {
+                            LogHelper.Error<SystemSurfaceController>("Error while polling source.", e);
+                        }
                     }
                 }
             }
@@ -107,9 +94,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                _automaticMailSendingEngine.SendOutMailsThatAreDue();
-                res.Success = true;
-                res.Message = "Successfully sent out all the mail that should be sent out.";
+                if (IsRequestAuthorized())
+                {
+                    _automaticMailSendingEngine.SendOutMailsThatAreDue();
+                    res.Success = true;
+                    res.Message = "Successfully sent out all the mail that should be sent out.";
+                }
+                else
+                {
+                    res.Success = false;
+                    res.Message = "Failed to send out mail.";
+                }
             }
             catch (Exception e)
             {
@@ -121,6 +116,32 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         #region Private methods.
+
+        private bool IsRequestAuthorized()
+        {
+            var isLocalhost = Request.ServerVariables["SERVER_NAME"] == "localhost";
+            var isTestServer = Request.ServerVariables["SERVER_NAME"] == ConfigurationManager.AppSettings["testServer"];
+
+            string clientIpAddr = string.Empty;
+            if (Request.ServerVariables["HTTP_X_FORWARDED_FOR"] != null)
+            {
+                clientIpAddr = Request.ServerVariables["HTTP_X_FORWARDED_FOR"].ToString();
+            }
+            else if (Request.UserHostAddress.Length != 0)
+            {
+                clientIpAddr = Request.UserHostAddress;
+            }
+
+            var allowedIp = ConfigurationManager.AppSettings["cronServerIpAddress"];
+            var res = isLocalhost || isTestServer || (!String.IsNullOrWhiteSpace(allowedIp) && clientIpAddr == allowedIp);
+
+            if (!res)
+            {
+                _umbraco.LogWarn<SystemSurfaceController>("Denied access to system APIs for IP: " + clientIpAddr);
+            }
+
+            return res;
+        }
 
         private void SignalExpiredFollowUpDates()
         {
