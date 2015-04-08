@@ -113,8 +113,18 @@ $(function () {
         });
         $("#sort-on-status-link").click(function () {
             sortClickEventFunc(this, function (a, b) {
-                var aStatus = parseInt($(a).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/)[1]);
-                var bStatus = parseInt($(b).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/)[1]);
+                var aStatusMatch = $(a).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/);
+                var bStatusMatch = $(b).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/);
+
+                var aStatus = 0;
+                var bStatus = 0;
+
+                if (aStatusMatch) {
+                    aStatus = parseInt(aStatusMatch[1]);
+                }
+                if (bStatusMatch) {
+                    bStatus = parseInt(bStatusMatch[1]);
+                }
                 
                 var sortingWeights = [0, 1, 3, 5, 6, 9, 10, 11, 12, 2, 13, 8, 4, 7];
 
@@ -569,7 +579,12 @@ function loadOrderItemSummary(id)
             var statusClass = "";           
 
             if (statusClassAttr != null) {
-                statusClass = statusClassAttr.match(/chillin-status-[0-9]{2}/)[0];
+                var match = statusClassAttr.match(/chillin-status-[0-9]{2}/)
+                if (match) {
+                    statusClass = statusClassAttr.match()[0];
+                } else {
+                    statusClass = "-1";
+                }
             }
             if (!$("#" + json.NodeId).hasClass("open") || statusClass === "") {
                 statusClass = "chillin-status-" + json.StatusPrevalue.substring(0, 2);
