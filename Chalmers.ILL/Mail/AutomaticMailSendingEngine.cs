@@ -105,7 +105,7 @@ namespace Chalmers.ILL.Mail
         private ISearchResults GetOrderItemsThatAreRelevantForAutomaticMailSending()
         {
             var searchCriteria = _orderItemSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-            return _orderItemSearcher.Search(searchCriteria.RawQuery("Type:Bok AND (Status:Utlånad OR Status:Krävd OR Status:Transport)"));
+            return _orderItemSearcher.Search(searchCriteria.RawQuery("Status:Utlånad OR Status:Krävd OR Status:Transport"));
         }
 
         #endregion
