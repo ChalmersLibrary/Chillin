@@ -116,9 +116,9 @@ $(function () {
                 var aStatus = parseInt($(a).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/)[1]);
                 var bStatus = parseInt($(b).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/)[1]);
                 
-                var sortingWeights = [1, 3, 5, 6, 9, 10, 11, 12, 2, 13, 8, 4, 7];
+                var sortingWeights = [0, 1, 3, 5, 6, 9, 10, 11, 12, 2, 13, 8, 4, 7];
 
-                var result = sortingWeights[aStatus - 1] - sortingWeights[bStatus - 1];
+                var result = sortingWeights[aStatus] - sortingWeights[bStatus];
                 if (result == 0) {
                     result = parseInt($(a).find("div[data-column='createDate']").data("fud")) - parseInt($(b).find("div[data-column='createDate']").data("fud"))
                 }
