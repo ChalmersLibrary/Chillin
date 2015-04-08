@@ -39,7 +39,7 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
-                <button class="btn btn-success" onclick="setOrderItemProvider(@Model.OrderItem.NodeId, this.form.providerName.value, this.form.providerOrderId.value, this.form.providerInformation.value, this.form.followUpDate.value)">Spara beställning</button>
+                <button id="set-order-item-provider-button" class="btn btn-success" onclick="setOrderItemProvider(@Model.OrderItem.NodeId, this.form.providerName.value, this.form.providerOrderId.value, this.form.providerInformation.value, this.form.followUpDate.value)">Spara beställning</button>
             </div>
         </div>
     </div>
@@ -68,9 +68,11 @@
         });
 
         function updateFollowUpDate(providerName) {
+            $("#set-order-item-provider-button").attr("disabled", "disabled");
             $.get("/umbraco/surface/ProviderDataSurface/GetDeliveryTimeInHoursForProvider", {
                 providerName: providerName
             }).done(function (suggestedDeliveryTimeInHours) {
+                $("#set-order-item-provider-button").removeAttr("disabled");
                 var date = new Date("@DateTime.Now.ToString("yyyy-MM-dd HH:mm")");
                 date.setTime(date.getTime() + (suggestedDeliveryTimeInHours * 60 * 60 * 1000));
                 $("#followUpDate").val(getDateStringWithHoursAndMinutes(date));
