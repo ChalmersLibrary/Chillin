@@ -516,6 +516,7 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("log", JsonConvert.SerializeObject(new List<LogItem>()));
             content.SetValue("attachments", JsonConvert.SerializeObject(new List<OrderAttachment>()));
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
+            content.SetValue("sierraPatronRecordId", model.SierraPatronInfo.record_id);
             content.SetValue("dueDate", DateTime.Now);
             content.SetValue("providerDueDate", DateTime.Now);
             content.SetValue("deliveryDate", new DateTime(1970, 1, 1));
@@ -585,8 +586,8 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("log", JsonConvert.SerializeObject(new List<LogItem>()));
             content.SetValue("attachments", JsonConvert.SerializeObject(new List<OrderAttachment>()));
             content.SetValue("sierraInfo", JsonConvert.SerializeObject(model.SierraPatronInfo));
+            content.SetValue("sierraPatronRecordId", model.SierraPatronInfo.record_id);
             content.SetValue("seedId", model.Id);
-
 
             if (model.DeliveryLibrarySigel == "Z")
             {

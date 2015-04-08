@@ -20,6 +20,7 @@ using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
+    [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemPatronDataSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
@@ -95,6 +96,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 if (!String.IsNullOrEmpty(sm.id))
                 {
                     content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
+                    content.SetValue("sierraPatronRecordId", sm.record_id);
                     content.SetValue("pType", sm.ptype);
                     content.SetValue("homeLibrary", sm.home_library);
                     UpdateDeliveryLibraryIfNeeded(content.Id, sm);
@@ -135,6 +137,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 if (!String.IsNullOrEmpty(sm.id))
                 {
                     content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
+                    content.SetValue("sierraPatronRecordId", sm.record_id);
                     content.SetValue("pType", sm.ptype);
                     content.SetValue("homeLibrary", sm.home_library);
                     UpdateDeliveryLibraryIfNeeded(content.Id, sm);

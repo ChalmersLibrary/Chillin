@@ -413,6 +413,7 @@
     <Compile Include="Controllers\SurfaceControllers\OrderItemTypeSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemPatronDataSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ProviderDataSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\PublicDataSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\SystemSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\StatisticsSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
