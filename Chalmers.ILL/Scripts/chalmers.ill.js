@@ -116,19 +116,9 @@ $(function () {
                 var aStatus = parseInt($(a).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/)[1]);
                 var bStatus = parseInt($(b).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/)[1]);
                 
-                // Fix the fact that the status indexes does not always decide the sorting order
-                aStatus = aStatus * 100;
-                bStatus = bStatus * 100;
-                if (aStatus == 900)
-                {
-                    aStatus = 450;
-                }
-                if (bStatus == 900)
-                {
-                    bStatus = 450;
-                }
+                var sortingWeights = [1, 3, 5, 6, 9, 10, 11, 12, 2, 13, 8, 4, 7];
 
-                var result = aStatus - bStatus;
+                var result = sortingWeights[aStatus - 1] - sortingWeights[bStatus - 1];
                 if (result == 0) {
                     result = parseInt($(a).find("div[data-column='createDate']").data("fud")) - parseInt($(b).find("div[data-column='createDate']").data("fud"))
                 }
@@ -496,7 +486,7 @@ function applyLibraryListFilter(filter, animate)
 
 function updateFilterButtonCounters()
 {
-    var numberOfStatuses = 11;
+    var numberOfStatuses = 13;
 
     // TODO: AAAAAHHHH!! MY EYES!!! Rewrite this method.
     if ($("#library01-button").hasClass("active")) {
@@ -591,8 +581,7 @@ function loadOrderItemSummary(id)
                      json.StatusPrevalue.indexOf("06") == 0 || 
                      json.StatusPrevalue.indexOf("07") == 0 || 
                      json.StatusPrevalue.indexOf("08") == 0 ||
-                     json.StatusPrevalue.indexOf("10") == 0 ||
-                     json.StatusPrevalue.indexOf("11") == 0) {
+                     json.StatusPrevalue.indexOf("10") == 0) {
                 $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-info status-" + json.StatusPrevalue.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
             else {
