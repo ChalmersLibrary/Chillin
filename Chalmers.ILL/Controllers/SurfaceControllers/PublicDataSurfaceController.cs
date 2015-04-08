@@ -25,6 +25,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var res = new PublicChillinDataConnectedToPatron();
 
+            Response.AddHeader("Access-Control-Allow-Origin", "*");
+
             if (lang == null)
             {
                 lang = "en";
