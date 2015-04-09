@@ -183,5 +183,31 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             return Json(json, JsonRequestBehavior.AllowGet);
         }
+
+        /// <summary>
+        /// Just send a mail.
+        /// </summary>
+        /// <param name="m">The data for the outgoing mail.</param>
+        /// <returns>JSON result</returns>
+        [HttpPost, ValidateInput(false)]
+        public ActionResult SendSimpleMail(OutgoingMailModel m)
+        {
+            var res = new ResultResponse();
+
+            try
+            {
+                _mailService.SendMail(m);
+
+                res.Success = true;
+                res.Message = "Lyckades med att skicka ut mail.";
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = "Misslyckades med att skicka ut mail: " + e.Message;
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
+        }
     }
 }

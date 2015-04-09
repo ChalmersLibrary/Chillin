@@ -41,7 +41,7 @@
             @{
                 if (Convert.ToBoolean(ConfigurationManager.AppSettings["showManulMailFetchingTools"]))
                 {
-                    <text><img style="position:fixed; left:10px; bottom:10px;" src="~/images/chilli-plain.svg" onclick="lockScreen(); $.post('/umbraco/surface/SystemSurface/Update', {}, unlockScreen);" onerror="    onerror=null; this.src='~/images/chilli.png'" alt="Chilli"></text>
+                    <img style="position:fixed; left:10px; bottom:10px;" src="~/images/chilli-plain.svg" onclick="lockScreen(); $.post('/umbraco/surface/SystemSurface/Update', {}, unlockScreen);" onerror="    onerror=null; this.src='~/images/chilli.png'" alt="Chilli">
                 }
             }
 
@@ -57,11 +57,9 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <div id="busylockbg" class="navbar-left">
+                    <a id="main-brand-title" style="padding-top: 5px; padding-bottom: 0px;" class="navbar-brand" href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoRootContentDocumentType"]).First().Url">
                         <img id="busylock" src="~/images/lock-plain.svg" onerror="onerror=null; this.src='~/images/lock.png'" alt="Busy Lock">
-                    </div>
-                    <a id="main-brand-title" class="navbar-brand" href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoRootContentDocumentType"]).First().Url">
-                        Chalmers fjärrlån &amp; bokförvärv
+                        <img src="~/images/chilli-plain.svg" onerror="onerror=null; this.src='~/images/chilli.png'" alt="Chilli">
                     </a>
                 </div>
 
@@ -69,6 +67,7 @@
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav">
                         <li id="orders-button" class="@(Model.Content.Url == Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url ? "active" : null)"><a href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url">Beställningar <span id="pending-order-counter" class="badge" data-pending-order-items="[]">0</span></a></li>
+                        <li style="margin-left: 10px; margin-top: 8px;"><button id='send-feedback-button' class="btn btn-default" type="button" data-toggle="popover" data-content="<form name='feedback-form' onsubmit='sendFeedback(); event.preventDefault();'><h3>Lämna feedback</h3><textarea id='feedback-text' style='resize: none;' rows='5'></textarea><button style='width: 100%;' type='submit' class='btn btn-default'>Skicka</button></form>"><span class="glyphicon glyphicon-bullhorn"></span></button></li>
                     </ul>
 
                     <!-- Search form -->
@@ -134,5 +133,39 @@
 
         <!-- Custom Javascript for this app -->
         <script src="/scripts/chalmers.ill.js?r=@DateTime.Now.Ticks" type="text/javascript"></script>
+
+        <script type="text/javascript">
+    $(function () {
+        $("[data-toggle='popover']").popover({
+            trigger: "click",
+            placement: "bottom",
+            html: true
+        });
+    });
+
+    function sendFeedback() {
+        var message = $("#feedback-text").val() + "\n\n" + "/" + "@Model.CurrentMemberText";
+        if (message.trim() !== "") {
+            lockScreen();
+            $.post("/umbraco/surface/OrderItemMailSurface/SendSimpleMail", {
+                OrderId: "... Nej, FEEDBACK",
+                recipientName: "Buggfixarna",
+                recipientEmail: "@ConfigurationManager.AppSettings["bugFixersMailingList"]",
+                message: message,
+                attachments: []
+            }).done(function (res) {
+                if (!res.Success) {
+                    alert(res.Message);
+                }
+                unlockScreen();
+            }).fail(function (jqxhr, textStatus, error) {
+                alert("Error: " + textStatus + " " + error);
+                unlockScreen();
+            });
+
+            $("#send-feedback-button").popover("hide");
+        }
+    }
+        </script>
 </body>
 </html>
