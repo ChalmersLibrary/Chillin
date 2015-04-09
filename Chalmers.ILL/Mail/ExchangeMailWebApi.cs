@@ -273,7 +273,10 @@ namespace Chalmers.ILL.Mail
             // Add properties to the email message.
             message.Subject = subject + " #" + orderId;
             message.Body = new MessageBody(BodyType.Text, body);
-            message.ToRecipients.Add(recipientName, recipientAddress);
+            foreach (var address in recipientAddress.Split(','))
+            {
+                message.ToRecipients.Add(recipientName, address.Trim());
+            }
             message.ReplyTo.Add(senderEmail);
 
             foreach (var attachment in attachments)
