@@ -45,14 +45,18 @@
     <h3>Översikt status</h3>
     <ul class="list-group">
         <li class="list-group-item"><span class="label label-success">Ny</span> - nyinkommen beställning, syns alltid i listan.</li>
-        <li class="list-group-item"><span class="label label-danger">Åtgärda</span> - ska tas om hand, syns alltid i listan.</li>
-        <li class="list-group-item"><span class="label label-danger">Beställd</span> - hos leverantör, syns bara om uppföljningsdatum passerats.</li>
-        <li class="list-group-item"><span class="label label-danger">Väntar</span> - avvaktar svar från lt eller dyl, syns bara om uppföljningsdatum passerat.</li>
         <li class="list-group-item"><span class="label label-danger">Mottagen</span> - leverans eller svar från leverantör, syns alltid i listan.</li>
+        <li class="list-group-item"><span class="label label-danger">Åtgärda</span> - ska tas om hand, syns alltid i listan.</li>
+        <li class="list-group-item"><span class="label label-danger">Krävd</span> - krävd från lt pga. återlämningskrav från utlånande bibliotek, syns aldrig i listan.</li>
+        <li class="list-group-item"><span class="label label-danger">Beställd</span> - hos leverantör, syns bara om uppföljningsdatum passerats.</li>
+        <li class="list-group-item"><span class="label label-danger">Väntar</span> - avvaktar svar från lt eller dyl, syns aldrig i listan.</li>
+        <li class="list-group-item"><span class="label label-danger">Transport</span> - transporteras till filial för leverans, syns aldrig i listan.</li>
+        <li class="list-group-item"><span class="label label-danger">Utlånad</span> - utlånad till lt, syns aldrig i listan.</li>
         <li class="list-group-item"><span class="label label-info">Levererad</span> - klar, levererad till lt, syns aldrig i listan</li>
         <li class="list-group-item"><span class="label label-info">Annullerad</span> - avbeställd, syns aldrig i listan.</li>
         <li class="list-group-item"><span class="label label-info">Överförd</span> - bokbeställning inklistrad i Sierras fjärrlånemodul, syns aldrig i listan.</li>
-        <li class="list-group-item"><span class="label label-info">Inköpt</span> - färdigbehandlat inköpsförslag ,syns aldrig i listan.</li>
+        <li class="list-group-item"><span class="label label-info">Inköpt</span> - färdigbehandlat inköpsförslag, syns aldrig i listan.</li>
+        <li class="list-group-item"><span class="label label-info">Återsänd</span> - bok är återsänd till utlånande bibliotek, syns aldrig i listan.</li>
     </ul>
 
     <p>
@@ -79,6 +83,7 @@
         <li class="list-group-item">PatronName:</li>
         <li class="list-group-item">PatronEmail:</li>
         <li class="list-group-item">PatronCardNo:</li>
+        <li class="list-group-item">BookId:</li>
     </ul>
 </div>
 
