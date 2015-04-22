@@ -7,15 +7,18 @@ using Npgsql;
 using Chalmers.ILL.Models;
 using System.Configuration;
 using Chalmers.ILL.Utilities;
+using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Patron
 {
     public class Sierra : IPatronDataProvider, IDisposable
     {
+        private IUmbracoWrapper _umbraco;
         private NpgsqlConnection _connection;
 
-        public Sierra(string connectionString)
+        public Sierra(IUmbracoWrapper umbraco, string connectionString)
         {
+            _umbraco = umbraco;
             _connection = new NpgsqlConnection(connectionString);
             Connect();
         }
@@ -25,9 +28,9 @@ namespace Chalmers.ILL.Patron
             {
                 _connection.Open();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // NOP, we will retry this automatically on next usage.
+                _umbraco.LogError<Sierra>("Failed to open connection with Sierra.", e);
             }
 
             return this; // For call chaining
@@ -39,9 +42,9 @@ namespace Chalmers.ILL.Patron
             {
                 _connection.Close();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                // NOP, we will retry this automatically on next usage.
+                _umbraco.LogError<Sierra>("Failed to close connection with Sierra.", e);
             }
 
             return this; // For call chaining
@@ -64,8 +67,10 @@ namespace Chalmers.ILL.Patron
                     PopulatePatronAddressInfoUsingExistingModel(model);
                     success = true;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    _umbraco.LogError<Sierra>("Failed to get patron info from library card number " + barcode + " from Sierra.", e);
+
                     // If we fail the first time we reconnect and try to fetch the information one more time.
                     if (runCount < 2)
                     {
@@ -113,8 +118,10 @@ namespace Chalmers.ILL.Patron
 
                     success = true;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    _umbraco.LogError<Sierra>("Failed to get patron info from library card number or personnummer " + barcode + " from Sierra.", e);
+
                     // If we fail the first time we reconnect and try to fetch the information one more time.
                     if (runCount < 2)
                     {

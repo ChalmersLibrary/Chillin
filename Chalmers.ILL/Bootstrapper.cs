@@ -70,7 +70,7 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
             container.RegisterInstance(typeof(ITemplateService), templateService);
             container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(orderItemsSearcher, templateService, orderItemManager, mailService));
-            container.RegisterInstance(typeof(IPatronDataProvider), new Sierra(ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
+            container.RegisterInstance(typeof(IPatronDataProvider), new Sierra(umbraco, ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
             container.RegisterInstance(typeof(IMailService), mailService);
             container.RegisterInstance(typeof(IProviderService), providerService);
             container.RegisterInstance<ISearcher>("TemplatesSearcher", templatesSearcher);
