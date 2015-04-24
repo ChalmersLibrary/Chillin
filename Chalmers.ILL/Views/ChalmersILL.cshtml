@@ -82,7 +82,7 @@
                                 <span class="sr-only">Toggle Dropdown</span>
                             </button>
                             <ul class="dropdown-menu" role="menu">
-                                <li><a href="/bestaellningar/?query=Status%3AUtl%C3%A5nad+AND+DueDate%3A%5B19700101+TO+@DateTime.Now.ToString("yyyyMMdd")%5D">Sök fram utlånade böcker där lånetiden har gått ut</a></li>
+                                <li><a href="/bestaellningar/?query=Status%3AUtl%C3%A5nad+AND+DueDate%3A%5B19700101+TO+@DateTime.Now.AddDays(1).ToString("yyyyMMdd")%5D">Sök fram utlånade böcker där lånetiden har gått ut</a></li>
                             </ul>
                         </div>
                     </form>
