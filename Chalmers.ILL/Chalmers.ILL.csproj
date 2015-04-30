@@ -483,6 +483,7 @@
     <Compile Include="OrderItems\SourcePollingException.cs" />
     <Compile Include="OrderItems\SourcePollingResult.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />
+    <Compile Include="Patron\SierraConnectionException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\IProviderService.cs" />
     <Compile Include="Providers\LibrisOrderItemsSource.cs" />

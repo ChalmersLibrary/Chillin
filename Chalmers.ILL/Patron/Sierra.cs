@@ -155,6 +155,11 @@ namespace Chalmers.ILL.Patron
 
         private void PopulateBasicPatronInfoFromLibraryCardNumber(string barcode, SierraModel model)
         {
+            if (_connection.State != ConnectionState.Open)
+            {
+                throw new SierraConnectionException("Status på koppling mot Sierra är inte \"open\", det är: \"" + _connection.State.ToString() + "\".");
+            }
+
             using (NpgsqlCommand command = new NpgsqlCommand("SELECT pv.id, pv.barcode, pv.ptype_code, pv.record_num, vv.field_content as email, first_name, last_name, home_library_code, mblock_code from sierra_view.patron_record_fullname fn, sierra_view.patron_view pv, sierra_view.varfield_view vv where pv.id=fn.patron_record_id and pv.id=vv.record_id and vv.varfield_type_code='z' and lower(pv.barcode)=:barcode", _connection))
             {
                 command.Parameters.Add(new NpgsqlParameter("barcode", NpgsqlTypes.NpgsqlDbType.Text));
@@ -180,6 +185,11 @@ namespace Chalmers.ILL.Patron
 
         private void PopulateBasicPatronInfoFromPersonnummer(string pnr, SierraModel model)
         {
+            if (_connection.State != ConnectionState.Open)
+            {
+                throw new SierraConnectionException("Status på koppling mot Sierra är inte \"open\", det är: \"" + _connection.State.ToString() + "\".");
+            }
+
             using (NpgsqlCommand command = new NpgsqlCommand("SELECT pv.id, pv.barcode, pv.ptype_code, pv.record_num, vv.field_content as email, first_name, last_name, home_library_code, mblock_code from sierra_view.patron_record_fullname fn, sierra_view.patron_view pv, sierra_view.varfield_view vv where pv.id=fn.patron_record_id and pv.id=vv.record_id and vv.varfield_type_code='z' and pv.id=(select record_id from sierra_view.varfield_view vs where lower(vs.field_content)=:barcode)", _connection))
             {
                 command.Parameters.Add(new NpgsqlParameter("barcode", NpgsqlTypes.NpgsqlDbType.Text));
@@ -205,6 +215,11 @@ namespace Chalmers.ILL.Patron
 
         private void PopulatePatronAddressInfoUsingExistingModel(SierraModel model)
         {
+            if (_connection.State != ConnectionState.Open)
+            {
+                throw new SierraConnectionException("Status på koppling mot Sierra är inte \"open\", det är: \"" + _connection.State.ToString() + "\".");
+            }
+
             using (NpgsqlCommand newcommand = new NpgsqlCommand("SELECT patron_record_address_type_id, addr1, addr2, addr3, village, city, region, postal_code, country from sierra_view.patron_record_address where patron_record_id=:record_id order by patron_record_address_type_id", _connection))
             {
                 newcommand.Parameters.Add(new NpgsqlParameter("record_id", NpgsqlTypes.NpgsqlDbType.Bigint));
