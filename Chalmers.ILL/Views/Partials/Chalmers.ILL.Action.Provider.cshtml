@@ -73,7 +73,7 @@
                 providerName: providerName
             }).done(function (suggestedDeliveryTimeInHours) {
                 $("#set-order-item-provider-button").removeAttr("disabled");
-                var date = new Date("@DateTime.Now.ToString("yyyy-MM-dd HH:mm")");
+                var date = new Date("@DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")");
                 date.setTime(date.getTime() + (suggestedDeliveryTimeInHours * 60 * 60 * 1000));
                 $("#followUpDate").val(getDateStringWithHoursAndMinutes(date));
             }).fail(function (jqxhr, textStatus, error) {
