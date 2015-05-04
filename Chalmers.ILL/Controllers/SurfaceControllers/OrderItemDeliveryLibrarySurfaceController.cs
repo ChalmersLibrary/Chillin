@@ -38,7 +38,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 // Use internal method to set status property and log the result
-                _orderItemManager.SetOrderItemDeliveryLibraryInternal(orderNodeId, deliveryLibraryId);
+                _orderItemManager.SetDeliveryLibrary(orderNodeId, deliveryLibraryId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

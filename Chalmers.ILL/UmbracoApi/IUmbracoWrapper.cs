@@ -1,5 +1,6 @@
 ﻿using Chalmers.ILL.Models;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,12 +21,18 @@ namespace Chalmers.ILL.UmbracoApi
         List<UmbracoDropdownListNtextDataType> GetAvailableDeliveryLibraries();
         List<UmbracoDropdownListNtextDataType> GetAvailableCancellationReasons();
         List<UmbracoDropdownListNtextDataType> GetAvailablePurchasedMaterials();
+        int GetPropertyValueAsInteger(object property);
+        int DataTypePrevalueId(string dataTypeName, string prevalue);
+        SortedList GetPreValues(string dataTypeName);
         void PopulateModelWithAvailableValues(OrderItemPageModelBase model);
 
         IEnumerable<Umbraco.Core.Models.IPublishedContent> TypedContentAtXPath(string xpath);
 
         Member GetMember(int id);
 
+        void LogError<T>(string msg, Exception e);
         void LogWarn<T>(string msg);
+        void LogInfo<T>(string msg);
+        void LogDebug<T>(string msg);
     }
 }

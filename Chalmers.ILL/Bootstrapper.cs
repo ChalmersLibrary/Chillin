@@ -6,11 +6,15 @@ using Umbraco.Web;
 using Chalmers.ILL.Members;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.SignalR;
-using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.UmbracoApi;
 using Umbraco.Core;
 using Umbraco.Core.Services;
+using Chalmers.ILL.Templates;
+using Examine;
+using Chalmers.ILL.Patron;
+using System.Configuration;
+using Chalmers.ILL.Providers;
 
 namespace Chalmers.ILL
 {
@@ -36,22 +40,41 @@ namespace Chalmers.ILL
 
         public static void RegisterTypes(IUnityContainer container)
         {
-            var notifier = new Notifier();
-            var internalDbLogger = new InternalDbLogger();
-            var orderItemManager = new OrderItemManager();
-            notifier.SetOrderItemManager(orderItemManager);
-            internalDbLogger.SetOrderItemManager(orderItemManager);
-            orderItemManager.SetNotifier(notifier);
-            orderItemManager.SetInternalDbLogger(internalDbLogger);
+            container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
+            container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
 
+            // Fetch all needed Examine search providers.
+            var templatesSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLTemplatesSearcher"];
+            var orderItemsSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
+
+            // Create all our singleton type instances.
+            var mailService = new MailService(ApplicationContext.Current.Services.MediaService, container.Resolve<IExchangeMailWebApi>());
+            var templateService = new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher);
+            var notifier = new Notifier();
+            var umbraco = new UmbracoWrapper();
+            var orderItemManager = new OrderItemManager(umbraco);
+            var providerService = new ProviderService(orderItemsSearcher);
+
+            // Connect instances that depend on eachother.
+            notifier.SetOrderItemManager(orderItemManager, umbraco);
+            orderItemManager.SetNotifier(notifier);
+            orderItemManager.SetContentService(ApplicationContext.Current.Services.ContentService);
+
+            // Hook up everything that is needed for us to function.
             container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
             container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
-            container.RegisterInstance(typeof(IUmbracoWrapper), new UmbracoWrapper());
+            container.RegisterInstance(typeof(IUmbracoWrapper), umbraco);
             container.RegisterInstance(typeof(INotifier), notifier);
-            container.RegisterInstance(typeof(IInternalDbLogger), internalDbLogger);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
-            container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
+            container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
+            container.RegisterInstance(typeof(ITemplateService), templateService);
+            container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(orderItemsSearcher, templateService, orderItemManager, mailService));
+            container.RegisterInstance(typeof(IPatronDataProvider), new Sierra(umbraco, ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
+            container.RegisterInstance(typeof(IMailService), mailService);
+            container.RegisterInstance(typeof(IProviderService), providerService);
+            container.RegisterInstance<ISearcher>("TemplatesSearcher", templatesSearcher);
+            container.RegisterInstance<ISearcher>("OrderItemsSearcher", orderItemsSearcher);
         }
     }
 }

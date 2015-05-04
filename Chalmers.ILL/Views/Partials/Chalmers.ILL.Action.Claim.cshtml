@@ -1,0 +1,62 @@
+﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionClaimModel
+@using System.Globalization
+
+<textarea id="mail-message" hidden>@Model.ClaimBookMailTemplate</textarea>
+
+<div class="action-header">Kräv tillbaks bok</div>
+
+<form class="form" role="form" onsubmit="return false;">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="dueDate">Återlämningsdatum</label>
+                <div class="input-group date datetimepicker">
+                    <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.ClaimDueDate.ToString("yyyy-MM-dd", CultureInfo.CurrentCulture) 00:00">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="alert alert-success" role="alert">Automatiskt mailutskick kommer att levereras till <span id="patron-email" class="content-editable" contenteditable>@Model.OrderItem.PatronEmail</span> <span class="glyphicon glyphicon-pencil"></span></div>
+                <button type="button" class="btn btn-success" onclick="claim();">Kräv</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(function () {
+        $(".datetimepicker").datetimepicker({
+            locale: "sv"
+        });
+    });
+
+    function claim() {
+        lockScreen();
+        $.post("/umbraco/surface/OrderItemClaimSurface/ClaimItem", {
+            packJson: JSON.stringify({
+                nodeId: @Model.OrderItem.NodeId,
+                dueDate: $("#dueDate").val(),
+                mail: {
+                    OrderId: "@Model.OrderItem.OrderId",
+                    recipientName: "@Model.OrderItem.PatronName",
+                    recipientEmail: $("#patron-email").text().toString().trim(),
+                    message: $("#mail-message").val(),
+                    attachments: []
+                }
+            })
+        }).done(function (json) {
+            if (json.Success) {
+                loadOrderItemDetails(@Model.OrderItem.NodeId);
+            }
+            else {
+                alert(json.Message);
+            }
+            unlockScreen();
+        }).fail(function (jqxhr, textStatus, error) {
+            alert("Error: " + textStatus + " " + error);
+            unlockScreen();
+        });
+    }
+</script>

@@ -1,0 +1,135 @@
+﻿@model Chalmers.ILL.Models.PartialPage.DeliveryType.ArticleByEmail
+
+<textarea id="mail-message" hidden>@Model.ArticleDeliveryByMailTemplate</textarea>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="attachments-group">Filer att leverera</label>
+            <div id="attachments-group">
+                <button class="btn btn-default" onclick="$('#hidden-file-upload').trigger('click');">Ladda upp</button>
+                <input id="hidden-file-upload" type="file" name="hidden-file-upload" style="display: none;" />
+                @{
+                    foreach (var attachment in Model.OrderItem.AttachmentList)
+                    {
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default btn-attach-attachment btn-info active" onclick="toggleDocumentSendStatus(this);" data-media-id="@attachment.MediaItemNodeId">@attachment.Title <span class="glyphicon glyphicon-paperclip"></span></button>
+                            <button type="button" class="btn btn-default btn-view-attachment @(Model.DrmWarning ? "btn-danger": "")" onclick="openDocument(this);" data-link="@attachment.Link"><span class="glyphicon glyphicon-search"></span></button>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+        @if (Model.DrmWarning)
+        {
+            <div class="form-group drm-warning">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Dokumenten kan vara DRM-skyddade!</h3>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="row">
+            <div class="form-group col-sm-12">
+                <div class="alert alert-success" role="alert">Automatiskt mailutskick kommer att levereras till <span id="patron-email" class="content-editable" contenteditable>@Model.OrderItem.PatronEmail</span> <span class="glyphicon glyphicon-pencil"></span></div>
+                <button class="btn btn-success" onclick="deliver()">Leverera!</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="log-message">Skriv till logg (valfritt)</label>
+            <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $(".datetimepicker").datetimepicker({
+            locale: "sv"
+        });
+
+        $("#hidden-file-upload").change(function () {
+            if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
+                alert('FileApi, som används för att ladda upp filer, stöds ej i denna webbläsare.');
+                return;
+            }
+
+            var input = document.getElementById('hidden-file-upload');
+            if (!input) {
+                alert("Kunde ej hitta \"FileInput\"-elementet.");
+            }
+            else if (!input.files) {
+                alert("Denna webbläsare verkar inte stödja \"files\"-funktionen av FileApi.");
+            }
+            else if (!input.files[0]) {
+                alert("En fil måste väljas.");
+            }
+            else {
+                file = input.files[0];
+                fr = new FileReader();
+                fr.onload = function () {
+                    uploadDocument(@Model.OrderItem.NodeId, file.name, fr.result);
+                };
+                fr.readAsDataURL(file);
+            }
+        });
+
+        $("#patron-email").keypress(function(e) { 
+            if (e.which == 13) {
+                $(this).blur();    
+            }
+            return e.which != 13; 
+        });
+    });
+
+    function deliver() {
+        var attachmentIds = [];
+        $("#attachments-group .btn-attach-attachment[class~='active']").each(function () {
+            attachmentIds.push($(this).data("media-id"));
+        });
+
+        lockScreen();
+        $.post("/umbraco/surface/OrderItemDeliverySurface/DeliverByMail", {
+            packJson: JSON.stringify({
+                nodeId: @Model.OrderItem.NodeId,
+                logEntry: $('#log-message').val(),
+                mail: {
+                    OrderId: "@Model.OrderItem.OrderId",
+                    recipientEmail: $("#patron-email").text().toString().trim(),
+                    recipientName: "@Model.OrderItem.PatronName",
+                    message: "", // The message doesn't matter, it is overwritten using correct template on server.
+                    attachments: attachmentIds
+                }
+            })
+        }).done(function (json) {
+            if (json.Success) {
+                loadOrderItemDetails(@Model.OrderItem.NodeId);
+            }
+            else {
+                alert(json.Message);
+            }
+            unlockScreen();
+        }).fail(function (jqxhr, textStatus, error) {
+            alert("Fel vid leverans med mail: " + textStatus + " " + error);
+            unlockScreen();
+        });
+    }
+
+    function toggleDocumentSendStatus (btn) {
+        if ($(btn).hasClass("active"))
+        {
+            $(btn).removeClass("active");
+            $(btn).removeClass("btn-info");
+            $(btn).find("span").css("visibility", "hidden");
+        }
+        else
+        {
+            $(btn).addClass("active");
+            $(btn).addClass("btn-info");
+            $(btn).find("span").css("visibility", "visible");
+        }
+    }
+</script>

@@ -31,6 +31,10 @@ namespace Chalmers.ILL.Models
         public string StatusPrevalue { get; set; }
         public string StatusString { get; set; }
 
+        public int PreviousStatus { get; set; }
+        public string PreviousStatusPrevalue { get; set; }
+        public string PreviousStatusString { get; set; }
+
         public int DeliveryLibrary { get; set; }
         public string DeliveryLibraryPrevalue { get; set; }
 
@@ -46,6 +50,8 @@ namespace Chalmers.ILL.Models
 
         public string ProviderName { get; set; }
         public string ProviderOrderId { get; set; }
+        public string ProviderInformation { get; set; }
+        public DateTime ProviderDueDate { get; set; }
 
         public string EditedBy { get; set; }
         public string EditedByMemberName { get; set; }
@@ -56,6 +62,11 @@ namespace Chalmers.ILL.Models
         public string SierraInfoStr { get; set; }
 
         public string DrmWarning { get; set; }
+        public bool DeliveryLibrarySameAsHomeLibrary { get; set; }
+
+        public DateTime DueDate { get; set; }
+        public DateTime DeliveryDate { get; set; }
+        public string BookId { get; set; }
 
         public List<LogItem> LogItemsList { get; set; }
         public List<OrderAttachment> AttachmentList { get; set; }
@@ -72,7 +83,4 @@ namespace Chalmers.ILL.Models
         public int NodeId { get; set; }
         public int VersionCount { get; set; }
     }
-
-
-    
 }

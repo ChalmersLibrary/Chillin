@@ -12,7 +12,6 @@ using Chalmers.ILL.Models.PartialPage;
 using System.Globalization;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.Logging;
 using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
@@ -21,13 +20,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class LogItemSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IInternalDbLogger _internalDbLogger;
         IUmbracoWrapper _dataTypes;
 
-        public LogItemSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger, IUmbracoWrapper dataTypes)
+        public LogItemSurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper dataTypes)
         {
             _orderItemManager = orderItemManager;
-            _internalDbLogger = internalDbLogger;
             _dataTypes = dataTypes;
         }
 
@@ -56,7 +53,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult GetLogItemsAsPartial(int nodeId)
         {
             // Call internal method to return List of LogItems for this OrderItem nodeId
-            var logItems = _internalDbLogger.GetLogItems(nodeId);
+            var logItems = _orderItemManager.GetLogItems(nodeId);
 
             // Return Partial View for LogItems bound to Model with LogItems
             return PartialView("Chalmers.ILL.LogItem", logItems);
@@ -70,7 +67,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public JsonResult GetLogItems(int nodeId)
         {
             // The list of log entries to return binds to the model
-            var logItems = _internalDbLogger.GetLogItems(nodeId);
+            var logItems = _orderItemManager.GetLogItems(nodeId);
 
             // Return Json Result
             return Json(logItems, JsonRequestBehavior.AllowGet);
@@ -83,7 +80,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="Type"></param>
         /// <param name="Message"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost, ValidateInput(false)]
         public ActionResult WriteLogItem(int nodeId, string Type, string Message, string newFollowUpDate)
         {
             // Connect to Umbraco ContentService
@@ -106,12 +103,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     if (currentFollowUpDate != parsedNewFollowUpDate)
                     {
                         _orderItemManager.SetFollowUpDate(nodeId, parsedNewFollowUpDate, false, false);
-                        _internalDbLogger.WriteLogItemInternal(nodeId, "DATE", "Följs upp senast " + newFollowUpDate, false, false);
                     }
                 }
 
                 // Use internal method to set type property and log the result
-                _internalDbLogger.WriteLogItemInternal(nodeId, Type, Message);
+                _orderItemManager.AddLogItem(nodeId, Type, Message);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

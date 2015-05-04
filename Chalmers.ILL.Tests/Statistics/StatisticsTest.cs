@@ -50,6 +50,7 @@ namespace Chalmers.ILL.Tests.Statistics
                 }
             };
         }
+
         private SearchResult GetFakeSearchResult()
         {
             return new Examine.Fakes.ShimSearchResult()

@@ -1,0 +1,30 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace Chalmers.ILL.Models.Mail
+{
+    public class OutgoingMailModel
+    {
+        public string OrderId { get; set; }
+        public string recipientName { get; set; }
+        public string recipientEmail { get; set; }
+        public string message { get; set; }
+        public List<int> attachments { get; set; }
+
+        public OutgoingMailModel()
+        {
+            // NOP
+        }
+
+        public OutgoingMailModel(string orderId, OutgoingMailPackageModel pack)
+        {
+            OrderId = orderId;
+            recipientName = pack.recipientName;
+            recipientEmail = pack.recipientEmail;
+            message = pack.message;
+            attachments = pack.attachments;
+        }
+    }
+}

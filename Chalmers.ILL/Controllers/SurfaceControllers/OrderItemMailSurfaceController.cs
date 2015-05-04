@@ -13,10 +13,11 @@ using System.Configuration;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.Logging;
 using Chalmers.ILL.Mail;
+using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.UmbracoApi;
+using Chalmers.ILL.Templates;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -24,17 +25,19 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemMailSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IInternalDbLogger _internalDbLogger;
         IExchangeMailWebApi _exchangeMailWebApi;
         IUmbracoWrapper _dataTypes;
+        IMailService _mailService;
+        ITemplateService _templateService;
 
-        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger,
-            IExchangeMailWebApi exchangeMailWebApi, IUmbracoWrapper dataTypes)
+        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IExchangeMailWebApi exchangeMailWebApi, 
+            IUmbracoWrapper dataTypes, IMailService mailService, ITemplateService templateService)
         {
             _orderItemManager = orderItemManager;
-            _internalDbLogger = internalDbLogger;
             _exchangeMailWebApi = exchangeMailWebApi;
             _dataTypes = dataTypes;
+            _mailService = mailService;
+            _templateService = templateService;
         }
 
         /// <summary>
@@ -48,6 +51,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var model = new ChalmersILLActionMailModel(_orderItemManager.GetOrderItem(nodeId));
 
             _dataTypes.PopulateModelWithAvailableValues(model);
+            model.SignatureTemplate = _templateService.GetTemplateData("SignatureTemplate", model.OrderItem);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Mail", model);
@@ -59,7 +63,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="m">The data for the outgoing mail.</param>
         /// <returns>JSON result</returns>
         [HttpPost, ValidateInput(false)]
-        public ActionResult SendMail(OutgoingMailModel m)
+        public ActionResult SendMail(OutgoingMailPackageModel m)
         {
             var json = new ResultResponse();
 
@@ -79,38 +83,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Send mail to recipient
                 try
                 {
-                    var attachments = new Dictionary<string, byte[]>();
-                    if (m.attachments != null)
-                    {
-                        var ms = UmbracoContext.Application.Services.MediaService;
-                        var originalFilenamePattern = new Regex(@"^cthb-[a-zA-Z0-9]+-[0-9]+-(.*\.(?:pdf|tif|tiff))", RegexOptions.IgnoreCase);
-                        foreach (var mediaId in m.attachments)
-                        {
-                            var c = ms.GetById(mediaId);
-                            if (c != null)
-                            {
-                                var data = System.IO.File.ReadAllBytes(Server.MapPath(c.GetValue("file").ToString()));
-                                var match = originalFilenamePattern.Match(c.Name);
-                                if (match.Groups.Count > 1)
-                                {
-                                    attachments.Add(match.Groups[1].Value, data);
-                                }
-                                else
-                                {
-                                    throw new Exception("Failed to extract file name for attachment " + c.Name + ". Can only send pdf, tif and tiff files.");
-                                }
-                            }
-                            else
-                            {
-                                throw new Exception("Failed to fetch media item for id " + mediaId + ".");
-                            }
-                        }
-                    }
-                    string body = m.message + ConfigurationManager.AppSettings["chalmersILLMailSignature"].Replace("\\n", "\n");
-                    _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
-                    _exchangeMailWebApi.SendMailMessage(orderItem.OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], m.recipientName, m.recipientEmail, attachments);
-                    _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, false, false);
-                    _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL", m.message, false, false);
+                    _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, m));
+
+                    _orderItemManager.AddLogItem(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, false, false);
+                    _orderItemManager.AddLogItem(m.nodeId, "MAIL", m.message, false, false);
                 }
                 catch (Exception)
                 {
@@ -121,7 +97,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 if (currentPatronEmail != m.recipientEmail)
                 {
                     contentNode.SetValue("patronEmail", m.recipientEmail);
-                    _internalDbLogger.WriteLogItemInternal(m.nodeId, "MAIL_NOTE", "PatronEmail ändrad till " + m.recipientEmail, false, false);
+                    _orderItemManager.AddLogItem(m.nodeId, "MAIL_NOTE", "PatronEmail ändrad till " + m.recipientEmail, false, false);
                 }
 
                 // Set FollowUpDate property if it differs from current
@@ -133,26 +109,25 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     if (currentFollowUpDate != parsedNewFollowUpDate)
                     {
                         _orderItemManager.SetFollowUpDate(m.nodeId, parsedNewFollowUpDate, false, false);
-                        _internalDbLogger.WriteLogItemInternal(m.nodeId, "DATE", "Följs upp senast " + m.newFollowUpDate, false, false);
                     }
 	            }
 
                 // Set status property if it differs from newStatus and if it is not -1 (no change)
                 if (orderItem.Status != m.newStatusId && orderItem.Status != -1)
                 {
-                    _orderItemManager.SetOrderItemStatusInternal(m.nodeId, m.newStatusId, false, false);
+                    _orderItemManager.SetStatus(m.nodeId, m.newStatusId, false, false);
                 }
 
                 // Update cancellation reason if we have a value that is not -1 (no change)
                 if (orderItem.CancellationReason != m.newCancellationReasonId && m.newCancellationReasonId != -1)
                 {
-                    _orderItemManager.SetOrderItemCancellationReasonInternal(m.nodeId, m.newCancellationReasonId, false, false);
+                    _orderItemManager.SetCancellationReason(m.nodeId, m.newCancellationReasonId, false, false);
                 }
 
                 // Update purchased material if we have a value that is not -1 (no change)
                 if (orderItem.PurchasedMaterial != m.newPurchasedMaterialId && m.newPurchasedMaterialId != -1)
                 {
-                    _orderItemManager.SetOrderItemPurchasedMaterialInternal(m.nodeId, m.newPurchasedMaterialId, false, false);
+                    _orderItemManager.SetPurchasedMaterial(m.nodeId, m.newPurchasedMaterialId, false, false);
                 }
 
                 _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);
@@ -207,6 +182,32 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Just send a mail.
+        /// </summary>
+        /// <param name="m">The data for the outgoing mail.</param>
+        /// <returns>JSON result</returns>
+        [HttpPost, ValidateInput(false)]
+        public ActionResult SendSimpleMail(OutgoingMailModel m)
+        {
+            var res = new ResultResponse();
+
+            try
+            {
+                _mailService.SendMail(m);
+
+                res.Success = true;
+                res.Message = "Lyckades med att skicka ut mail.";
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = "Misslyckades med att skicka ut mail: " + e.Message;
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
         }
     }
 }

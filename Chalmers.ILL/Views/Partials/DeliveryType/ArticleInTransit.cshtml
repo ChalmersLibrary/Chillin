@@ -1,0 +1,144 @@
+﻿@model Chalmers.ILL.Models.PartialPage.DeliveryType.ArticleInTransit
+
+<div id="delivery-in-transit" class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="attachments-group2">Filer att leverera</label>
+            <div id="attachments-group2">
+                <button class="btn btn-default" onclick="$('#hidden-file-upload').trigger('click');">Ladda upp</button>
+                <input id="hidden-file-upload" type="file" name="hidden-file-upload" style="display: none;" />
+                @{
+                    foreach (var attachment in Model.OrderItem.AttachmentList)
+                    {
+                        <button type="button" class="btn btn-default btn-view-attachment @(Model.DrmWarning ? "btn-danger": "")" onclick="openDocument(this);" data-link="@attachment.Link" data-media-id="@attachment.MediaItemNodeId">@attachment.Title <span class="glyphicon glyphicon-search"></span></button>
+                    }
+                }
+            </div>
+        </div>
+        @if (Model.DrmWarning)
+        {
+            <div class="form-group drm-warning">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Dokumenten kan vara DRM-skyddade!</h3>
+                    </div>
+                </div>
+            </div>
+        }
+        <div class="row">
+            <div class="form-group col-sm-12">
+                @if (String.IsNullOrWhiteSpace(Model.OrderItem.SierraInfo.home_library))
+                {
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Låntagardata för hembibliotek saknas!</h3>
+                        </div>
+                    </div>
+                }
+                else if (Model.OrderItem.SierraInfo.home_library.Contains("hbib"))
+                {
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Det ser ut som att denna artikel ska levereras direkt till lokal infodisk.</h3>
+                        </div>
+                    </div>
+                }
+                <button class="btn btn-success" onclick="deliver()">Leverera!</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="log-message">Skriv till logg (valfritt)</label>
+            <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
+        </div>
+        <div id="printDiv" class="print">
+            <p style="font-size:1.5em">
+                Artikel för avhämtning på Chalmers @Model.OrderItem.DeliveryLibraryPrevalue<br />
+                Article for pickup at Chalmers @Model.OrderItem.DeliveryLibraryPrevalue
+            </p>
+            <p></p>
+            <p></p>
+            <strong style="font-size:1.5em">@Model.OrderItem.SierraInfo.last_name @Model.OrderItem.SierraInfo.first_name</strong>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <img src="~/images/cth_logo.png" width="148pt" /><br />
+            <br />
+            <p>
+                Chalmers tekniska högskola<br />
+                Biblioteket<br />
+                412 96  Göteborg<br />
+                <br />
+                031-772 3737<br />
+                <br />
+                www.lib.chalmers.se<br />
+                <span style="float:right;">@DateTime.Today.ToString("yyyy-MM-dd")</span>
+                support.libchalmers.se<br />
+            </p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $(".datetimepicker").datetimepicker({
+            locale: "sv"
+        });
+
+        $("#hidden-file-upload").change(function () {
+            if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
+                alert('FileApi, som används för att ladda upp filer, stöds ej i denna webbläsare.');
+                return;
+            }
+
+            var input = document.getElementById('hidden-file-upload');
+            if (!input) {
+                alert("Kunde ej hitta \"FileInput\"-elementet.");
+            }
+            else if (!input.files) {
+                alert("Denna webbläsare verkar inte stödja \"files\"-funktionen av FileApi.");
+            }
+            else if (!input.files[0]) {
+                alert("En fil måste väljas.");
+            }
+            else {
+                file = input.files[0];
+                fr = new FileReader();
+                fr.onload = function () {
+                    uploadDocument(@Model.OrderItem.NodeId, file.name, fr.result);
+                };
+                fr.readAsDataURL(file);
+            }
+        });
+    });
+
+    function deliver() {
+        $('#container #printDiv').insertAfter('#container');
+        window.print();
+        var r = window.confirm("Skrevs försättsbladet ut korrekt?");
+        if (r == true) {
+            setOrderItemTransport(@Model.OrderItem.NodeId, $('#log-message').val(), $("#active-delivery-type").text());
+            $("#printDiv").remove();
+        }else {
+            alert("Leveransfunktionen kommer laddas om, försök därefter igen.");
+            $("#printDiv").remove();
+            loadDeliveryAction(@Model.OrderItem.NodeId);
+        }    }
+</script>

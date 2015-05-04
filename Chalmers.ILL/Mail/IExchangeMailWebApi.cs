@@ -1,4 +1,4 @@
-﻿using Chalmers.ILL.Models;
+﻿using Chalmers.ILL.Models.Mail;
 using Microsoft.Exchange.WebServices.Data;
 using System;
 using System.Collections.Generic;

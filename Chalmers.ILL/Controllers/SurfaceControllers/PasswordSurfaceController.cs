@@ -7,7 +7,6 @@ using umbraco.cms.businesslogic.member;
 using Umbraco.Web.Mvc;
 using Umbraco.Web;
 using System.Security.Cryptography;
-using Chalmers.ILL.Models;
 using Chalmers.ILL.Members;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
@@ -21,8 +20,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _memberInfoManager = memberInfoManager;
         }
 
+        [HttpGet]
+        public ActionResult RenderChangePasswordAction()
+        {
+            return PartialView("Settings/ChangePassword", new Models.PartialPage.Settings.ChangePassword());
+        }
+
         [HttpPost]
-        public ActionResult ChangePassword(Models.PasswordModel model)
+        public ActionResult ChangePassword(Models.PartialPage.Settings.ChangePassword model)
         {
             if (ModelState.IsValid)
             {

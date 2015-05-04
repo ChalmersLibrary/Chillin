@@ -18,6 +18,11 @@ namespace Chalmers.ILL.UmbracoApi
     {
         UmbracoHelper _umbraco = new UmbracoHelper(UmbracoContext.Current);
 
+        public UmbracoWrapper()
+        {
+            PopulateCacheWithDataTypePreValues();
+        }
+
         public RelationType GetRelationTypeByAlias(string relationTypeStr)
         {
             return RelationType.GetByAlias(relationTypeStr);
@@ -58,6 +63,73 @@ namespace Chalmers.ILL.UmbracoApi
             return GetAvailableValues(ConfigurationManager.AppSettings["umbracoOrderPurchasedMaterialDataTypeDefinitionName"]);
         }
 
+        public int GetPropertyValueAsInteger(object property)
+        {
+            int returnValue = -1;
+
+            if (property != null)
+            {
+                if (!Int32.TryParse(property.ToString(), out returnValue))
+                {
+                    returnValue = -1;
+                }
+            }
+
+            return returnValue;
+        }
+
+        public int DataTypePrevalueId(string dataTypeName, string prevalue)
+        {
+            int ret = -1;
+
+            SortedList statusTypes = GetPreValues(dataTypeName);
+
+            // Get the datatype enumerator (to sort as in Backoffice)
+            IDictionaryEnumerator i = statusTypes.GetEnumerator();
+
+            // Move trough the enumerator
+            while (i.MoveNext())
+            {
+                // Get the prevalue (text) using umbraco.cms.businesslogic.datatype
+                PreValue statusType = (PreValue)i.Value;
+
+                // Check if it's the prevalue we want the id for
+                if (statusType.Value == prevalue)
+                {
+                    ret = statusType.Id;
+                }
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Get all the prevalues for a given data type.
+        /// </summary>
+        /// <param name="dataTypeName">The name of the data type.</param>
+        /// <returns>A sorted list with the prevalues.</returns>
+        public SortedList GetPreValues(string dataTypeName)
+        {
+            // Get a sorted list of all prevalues from the cache
+            var c = System.Web.HttpContext.Current.Cache;
+            SortedList statusTypes = c.Get(dataTypeName) as SortedList;
+
+            if (statusTypes == null)
+            {
+                // Connect to Umbraco DataTypeService
+                var ds = new Umbraco.Core.Services.DataTypeService();
+
+                // Get the Definition Id
+                int dataTypeDefinitionId = ds.GetAllDataTypeDefinitions().First(x => x.Name == dataTypeName).Id;
+
+                // Get a sorted list of all prevalues and store it in the cache
+                statusTypes = PreValues.GetPreValues(dataTypeDefinitionId);
+                c.Insert(dataTypeName, statusTypes);
+            }
+
+            return statusTypes;
+        }
+
         public void PopulateModelWithAvailableValues(OrderItemPageModelBase model)
         {
             model.AvailableCancellationReasons = GetAvailableCancellationReasons();
@@ -77,17 +149,43 @@ namespace Chalmers.ILL.UmbracoApi
             return new Member(id);
         }
 
+        public void LogError<T>(string msg, Exception e)
+        {
+            LogHelper.Error<T>(msg, e);
+        }
+
         public void LogWarn<T>(string msg)
         {
             LogHelper.Warn<T>(msg);
         }
 
+        public void LogInfo<T>(string msg)
+        {
+            LogHelper.Info<T>(msg);
+        }
+
+        public void LogDebug<T>(string msg)
+        {
+            LogHelper.Debug<T>(msg);
+        }
+
         #region Private methods
+
+        private void PopulateCacheWithDataTypePreValues()
+        {
+            var c = System.Web.HttpContext.Current.Cache;
+            var ds = new Umbraco.Core.Services.DataTypeService();
+
+            foreach (var dtd in ds.GetAllDataTypeDefinitions())
+            {
+                c.Insert(dtd.Name, PreValues.GetPreValues(dtd.Id));
+            }
+        }
 
         private List<UmbracoDropdownListNtextDataType> GetAvailableValues(string dataTypeName)
         {
             // Get a sorted list of all prevalues
-            SortedList typeTypes = Helpers.GetPreValues(dataTypeName);
+            SortedList typeTypes = GetPreValues(dataTypeName);
 
             // Get the datatype enumerator (to sort as in Backoffice)
             IDictionaryEnumerator i = typeTypes.GetEnumerator();

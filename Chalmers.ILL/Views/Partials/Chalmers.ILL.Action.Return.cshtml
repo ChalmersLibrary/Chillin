@@ -1,0 +1,23 @@
+﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionReturnModel
+
+<div class="action-header">Returnering till utlånande bibliotek</div>
+
+<form class="form" role="form" onsubmit="return false;">
+    <div class="row">
+        <div class="col-md-6">
+            <h4>@Model.OrderItem.ProviderName</h4>
+            <p>@(String.IsNullOrEmpty(Model.OrderItem.ProviderInformation) ? "Ingen leverantörsinformation tillgänglig." : @Model.OrderItem.ProviderInformation)</p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <button class="btn btn-success" onclick="itemIsReturned()">Returnera</button>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+        function itemIsReturned() {
+            setOrderItemStatus(@Model.OrderItem.NodeId, @Model.AvailableStatuses.Find(x => x.Value.Contains("Återsänd")).Id);
+        }
+    </script>
+</form>

@@ -90,7 +90,7 @@ $(function () {
             }
             $("#sort-icon").remove();
             $(elem).html($(elem).html() + "<span id=\"sort-icon\" class=\"glyphicon glyphicon-chevron-down\"></span>");
-            $(".order-list > div:not(.header)").sort(sortFunc).each(function () {
+            $(".order-list > .illedit").sort(sortFunc).each(function () {
                 $(this).parent().append(this);
             });
         }
@@ -113,22 +113,22 @@ $(function () {
         });
         $("#sort-on-status-link").click(function () {
             sortClickEventFunc(this, function (a, b) {
-                var aStatus = parseInt($(a).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/)[1]);
-                var bStatus = parseInt($(b).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/)[1]);
-                
-                // Fix the fact that the status indexes does not always decide the sorting order
-                aStatus = aStatus * 100;
-                bStatus = bStatus * 100;
-                if (aStatus == 900)
-                {
-                    aStatus = 450;
-                }
-                if (bStatus == 900)
-                {
-                    bStatus = 450;
-                }
+                var aStatusMatch = $(a).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/);
+                var bStatusMatch = $(b).find(".order-item-status").attr("class").match(/chillin-status-([0-9]{2})/);
 
-                var result = aStatus - bStatus;
+                var aStatus = 0;
+                var bStatus = 0;
+
+                if (aStatusMatch) {
+                    aStatus = parseInt(aStatusMatch[1]);
+                }
+                if (bStatusMatch) {
+                    bStatus = parseInt(bStatusMatch[1]);
+                }
+                
+                var sortingWeights = [0, 1, 3, 5, 6, 9, 10, 11, 12, 2, 13, 8, 4, 7];
+
+                var result = sortingWeights[aStatus] - sortingWeights[bStatus];
                 if (result == 0) {
                     result = parseInt($(a).find("div[data-column='createDate']").data("fud")) - parseInt($(b).find("div[data-column='createDate']").data("fud"))
                 }
@@ -175,19 +175,9 @@ $(function () {
 
     });
 
-    //$("a.reflink").click(function (e) {
-    //    e.stopPropagation();
-    //    alert(this);
-    //});
-
     $(".illedit").on("click", ".reflink", function (event) {
         event.stopPropagation();
             });
-
-    //$("div[data-column='reference']").click(function (event) {
-    //    event.stopPropagation();
-    //    alert(this);
-    //});
 
     // Logged in Member clicks an OrderItem Summary row
     $(".illedit").click(function () {
@@ -251,14 +241,13 @@ $(function () {
     });
 });
 
-// Creaate object containing the DOM object from document and also a timer.
+// Create object containing the DOM object from document and also a timer.
 var $docTimer = $(document), timer;
 
 function fullSiteBusyAnimationStart()
 {
     timer && clearTimeout(timer);
     timer = setTimeout(function () {
-        lockScreen();
         $("#lockscreen").animate({
             opacity: 1
         }, {
@@ -298,16 +287,23 @@ function closeOrderItem(elem)
     }
 }
 
+var lockLevel = 0;
 function lockScreen() {
-    $("#lockscreen").show();
-    $("#busylock").show();
-    fullSiteBusyAnimationStart();
+    if (lockLevel == 0) {
+        $("#lockscreen").show();
+        $("#busylock").show();
+        fullSiteBusyAnimationStart();
+    }
+    lockLevel++;
 }
 
 function unlockScreen() {
-    fullSiteBusyAnimationStop();
-    $("#lockscreen").hide();
-    $("#busylock").hide();
+    lockLevel--;
+    if (lockLevel == 0) {
+        fullSiteBusyAnimationStop();
+        $("#lockscreen").hide();
+        $("#busylock").hide();
+    }
 }
 
 function replaceURLWithHTMLLinks(text) {
@@ -497,15 +493,18 @@ function applyLibraryListFilter(filter, animate)
     }
     updateFilterButtonCounters();
 }
+
 function updateFilterButtonCounters()
 {
+    var numberOfStatuses = 13;
+
     // TODO: AAAAAHHHH!! MY EYES!!! Rewrite this method.
     if ($("#library01-button").hasClass("active")) {
         // hbib
         $("#order-list-title").text("Best\u00E4llningar - Huvudbiblioteket");
         setCounterOrHide($("#status00-counter"), $(".order-list").find(".illedit > .Huvudbiblioteket").length);
-        for (k = 1; k < 10; k++) {
-            setCounterOrHide($("#status0" + k + "-counter"), $(".order-list").find("div > div > .status-0" + k).filter(function (item) {
+        for (k = 1; k < (numberOfStatuses + 1); k++) {
+            setCounterOrHide($("#status" + zeroPadFromLeft(k, 2) + "-counter"), $(".order-list").find("div > div > .status-" + zeroPadFromLeft(k, 2)).filter(function (item) {
                 return $(this).parent().parent().find(".Huvudbiblioteket").length > 0;
             }).length);
         }
@@ -513,8 +512,8 @@ function updateFilterButtonCounters()
         // lbib
         $("#order-list-title").text("Best\u00E4llningar - Lindholmenbiblioteket");
         setCounterOrHide($("#status00-counter"), $(".order-list").find(".illedit > .Lindholmenbiblioteket").length);
-        for (k = 1; k < 10; k++) {
-        setCounterOrHide($("#status0" + k + "-counter"), $(".order-list").find("div > div > .status-0" +k).filter(function (item) {
+        for (k = 1; k < (numberOfStatuses + 1) ; k++) {
+            setCounterOrHide($("#status" + zeroPadFromLeft(k, 2) + "-counter"), $(".order-list").find("div > div > .status-" + zeroPadFromLeft(k, 2)).filter(function (item) {
                 return $(this).parent().parent().find(".Lindholmenbiblioteket").length > 0;
             }).length);
         }
@@ -522,8 +521,8 @@ function updateFilterButtonCounters()
         // abib
         $("#order-list-title").text("Best\u00E4llningar - Arkitekturbiblioteket");
         setCounterOrHide($("#status00-counter"), $(".order-list").find(".illedit > .Arkitekturbiblioteket").length);
-        for (k = 1; k < 10; k++) {
-            setCounterOrHide($("#status0" + k + "-counter"), $(".order-list").find("div > div > .status-0" + k).filter(function (item) {
+        for (k = 1; k < (numberOfStatuses + 1) ; k++) {
+            setCounterOrHide($("#status" + zeroPadFromLeft(k, 2) + "-counter"), $(".order-list").find("div > div > .status-" + zeroPadFromLeft(k, 2)).filter(function (item) {
                 return $(this).parent().parent().find(".Arkitekturbiblioteket").length > 0;
             }).length);
         }
@@ -531,8 +530,8 @@ function updateFilterButtonCounters()
         // all
         $("#order-list-title").text("Best\u00E4llningar - Alla bibliotek");
         setCounterOrHide($("#status00-counter"), $(".order-list").find(".order-item-status").length) ;
-        for (k = 1; k < 10; k++) {
-            setCounterOrHide($("#status0" + k + "-counter"), $(".order-list").find(".status-0" + k).length);
+        for (k = 1; k < (numberOfStatuses + 1) ; k++) {
+            setCounterOrHide($("#status" + zeroPadFromLeft(k, 2) + "-counter"), $(".order-list").find(".status-" + zeroPadFromLeft(k, 2)).length);
         }
     }
 }
@@ -547,11 +546,6 @@ function updateLibraryFilterButtonCounters()
 
 function setCounterOrHide(elem, count) {
     elem.text(count.toString());
-    /*if (count > 0) {
-        elem.parent().show();
-    } else {
-        elem.parent().hide();
-    }*/
 }
 
 // Load OrderItem Summary (first row in list)
@@ -585,7 +579,12 @@ function loadOrderItemSummary(id)
             var statusClass = "";           
 
             if (statusClassAttr != null) {
-                statusClass = statusClassAttr.match(/chillin-status-[0-9]{2}/)[0];
+                var match = statusClassAttr.match(/chillin-status-[0-9]{2}/)
+                if (match) {
+                    statusClass = statusClassAttr.match()[0];
+                } else {
+                    statusClass = "-1";
+                }
             }
             if (!$("#" + json.NodeId).hasClass("open") || statusClass === "") {
                 statusClass = "chillin-status-" + json.StatusPrevalue.substring(0, 2);
@@ -596,18 +595,13 @@ function loadOrderItemSummary(id)
             else if (json.StatusPrevalue.indexOf("05") == 0 || 
                      json.StatusPrevalue.indexOf("06") == 0 || 
                      json.StatusPrevalue.indexOf("07") == 0 || 
-                     json.StatusPrevalue.indexOf("08") == 0) {
+                     json.StatusPrevalue.indexOf("08") == 0 ||
+                     json.StatusPrevalue.indexOf("10") == 0) {
                 $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-info status-" + json.StatusPrevalue.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
             else {
                 $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-danger status-" + json.StatusPrevalue.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
-
-            // Animate to catch their eye (TODO: this is missing from our CSS)
-            /*
-            $("#" + json.NodeId + " div[data-column='status']").css({ 'animation': 'myfirst 0.3s', '-webkit-animation': 'myfirst 0.3s' });
-            $("#" + json.NodeId + " div[data-column='status']").removeAttr("style");
-            */
 
             // Reference with links
             $("#" + json.NodeId + " div[data-column='reference']").html(replaceURLWithHTMLLinks(json.Reference));
@@ -727,6 +721,48 @@ function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
     }).error(unlockScreen);
 }
 
+function setOrderItemArticleAvailableForPickup(node, maildata, logMsg) {
+    lockScreen();
+    $.post("/umbraco/surface/OrderItemDeliverySurface/SetArticleAvailableForPickup", {
+        packJson: JSON.stringify({
+            nodeId: node,
+            logMsg: logMsg,
+            mail: maildata
+        })
+    }, function (json) {
+        if (json.Success) {
+            loadOrderItemDetails(node);
+        }
+        else {
+            alert(json.Message);
+        }
+        unlockScreen();
+    }).error(unlockScreen);
+}
+
+function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
+    lockScreen();
+    $.post("/umbraco/surface/OrderItemDeliverySurface/SetOrderItemDeliveryReceived", {
+        packJson: JSON.stringify({
+            orderNodeId: node,
+            bookId: bookId,
+            dueDate: dueDate,
+            providerInformation: providerInformation,
+            mailData: maildata,
+            logMsg: logMsg,
+            readOnlyAtLibrary: readOnlyAtLibrary
+        })
+    }, function (json) {
+        if (json.Success) {
+            loadOrderItemDetails(node);
+        }
+        else {
+            alert(json.Message);
+        }
+        unlockScreen();
+    }).error(unlockScreen);
+}
+
 function loadLogItems(id)
 {
     $.getJSON("/umbraco/surface/LogItemSurface/GetLogItems?nodeid="+id, function (data) {
@@ -738,10 +774,16 @@ function loadLogItems(id)
 
 /* Set new property values for Provider from form */
 
-function setOrderItemProvider(nodeId, providerName, providerOrderId, followUpDate)
+function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInformation, followUpDate)
 {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider?nodeId=" + nodeId + "&providerName=" + providerName + "&providerOrderId=" + providerOrderId.trim() + "&newFollowUpDate=" + followUpDate, function (json) {
+    $.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider", {
+        nodeId: nodeId,
+        providerName: providerName,
+        providerOrderId: providerOrderId.trim(),
+        providerInformation: providerInformation,
+        newFollowUpDate: followUpDate
+    }).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(nodeId);
         }
@@ -749,7 +791,10 @@ function setOrderItemProvider(nodeId, providerName, providerOrderId, followUpDat
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 /* Set new property values for Reference from form */
@@ -767,54 +812,32 @@ function setOrderItemReference(nodeId, reference) {
     }).error(unlockScreen);
 }
 
-function sendDeliveryByEmail(mailData, logEntry) {
+/* Set new property values for Delivery from form */
+function setOrderItemDelivery(nodeId, logEntry, delivery) {
     lockScreen();
-    if (message && recipientEmail) {
-        $.ajax({
-            type: "POST",
-            url: "/umbraco/surface/OrderItemMailSurface/SendMail",
-            data: JSON.stringify(mailData),
-            success: function (json) {
-                if (json.Success) {
-                    $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetDelivery?nodeId=" + mailData.nodeId + "&logEntry=" + logEntry + "&delivery=email", function (json) {
-                        if (json.Success) {
-                            loadOrderItemDetails(mailData.nodeId);
-                        }
-                        else {
-                            alert(json.Message);
-                        }
-                        unlockScreen();
-                    }).error(unlockScreen);
-                }
-                else
-                {
-                    alert(json.Message);
-                    unlockScreen();
-                }
-            },
-            error: function (jqxhr, textStatus, errorThrown) {
-                alert(textStatus + "\n" + errorThrown);
-                unlockScreen();
-            },
-            contentType: "application/json"
-        });
-}
-    else {
-        if (message == "") {
-            alert("Du m\u00E5ste skriva ett meddelande till mottagaren.");
+    $.post("/umbraco/surface/OrderItemDeliverySurface/SetDelivery", {
+        nodeId: nodeId,
+        logEntry: logEntry,
+        delivery: delivery
+    }, function (json) {
+        if (json.Success) {
+            loadOrderItemDetails(nodeId);
         }
-        if (recipientEmail == "") {
-            alert("Du m\u00E5ste ange en mottagande e-postadress.");
+        else {
+            alert(json.Message);
         }
         unlockScreen();
-    }
+    }).error(unlockScreen);
 }
 
 /* Set new property values for Delivery from form */
-
-function setOrderItemDelivery(nodeId, logEntry, delivery) {
+function setOrderItemTransport(nodeId, logEntry, delivery) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemDeliverySurface/SetDelivery?nodeId=" + nodeId + "&logEntry=" + logEntry + "&delivery=" + delivery, function (json) {
+    $.post("/umbraco/surface/OrderItemDeliverySurface/SetTransport", {
+        nodeId: nodeId,
+        logEntry: logEntry,
+        delivery: delivery
+    }, function (json) {
         if (json.Success) {
             loadOrderItemDetails(nodeId);
         }
@@ -885,25 +908,30 @@ function sendMailToPatron(mailData) {
 }
 
 /* Write Log Entry */
-function writeLogItem(nodeId, message, type, followUpDate, shouldUnlockScreen) {
+function writeLogItem(nodeId, message, type, followUpDate, cb) {
     lockScreen();
-    shouldUnlockScreen = typeof shouldUnlockScreen !== "undefined" ? shouldUnlockScreen : true;
     if (message) {
         $.post("/umbraco/surface/LogItemSurface/WriteLogItem", { nodeId: nodeId, Message: message, Type: type, newFollowUpDate: followUpDate }).done(function (json) {
             if (json.Success) {
-                loadOrderItemDetails(nodeId);
+                if (cb) {
+                    cb();
+                } else {
+                    loadOrderItemDetails(nodeId);
+                }
             }
             else {
                 alert(json.Message);
             }
-            if (shouldUnlockScreen) unlockScreen();
+            unlockScreen();
         }).error(function () {
-            if (shouldUnlockScreen) unlockScreen();
+            unlockScreen();
         });
+        return true;
     }
     else {
         alert("Du m\u00E5ste skriva n\u00E5got.");
-        if (shouldUnlockScreen) unlockScreen();
+        unlockScreen();
+        return false;
     }
 }
 
@@ -979,6 +1007,42 @@ function loadDeliveryAction(id) {
             if (req.status == 200) {
                 $('#action-' + id + ' #radio').focus();
             }
+            $("#loading-partial-view").hide();
+        }
+    );
+}
+
+function loadClaimAction(id) {
+    $("#loading-partial-view").show();
+    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemClaimSurface/RenderClaimAction?nodeId=' + id,
+        function (responseText, textStatus, req) {
+            $("#loading-partial-view").hide();
+        }
+    );
+}
+
+function loadProviderReturnDateAction(id) {
+    $("#loading-partial-view").show();
+    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemProviderReturnDateSurface/RenderProviderReturnDateAction?nodeId=' + id,
+        function (responseText, textStatus, req) {
+            $("#loading-partial-view").hide();
+        }
+    );
+}
+
+function loadPatronReturnDateAction(id) {
+    $("#loading-partial-view").show();
+    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemPatronReturnDateSurface/RenderPatronReturnDateAction?nodeId=' + id,
+        function (responseText, textStatus, req) {
+            $("#loading-partial-view").hide();
+        }
+    );
+}
+
+function loadReturnAction(id) {
+    $("#loading-partial-view").show();
+    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemReturnSurface/RenderReturnAction?nodeId=' + id,
+        function (responseText, textStatus, req) {
             $("#loading-partial-view").hide();
         }
     );
@@ -1069,3 +1133,29 @@ $.connection.hub.start()
     .fail(function () {
         alert("Could not Connect to signalR notification hub");
     });
+
+/* Small helper functions */
+
+function zeroPadFromLeft(num, size) {
+    var s = "000000000" + num;
+    return s.substr(s.length - size);
+}
+
+function openDocument(btn) {
+    var win = window.open($(btn).data("link"), "_blank");
+    if (win) {
+        //Browser has allowed it to be opened
+        win.focus();
+    } else {
+        //Browser has blocked it
+        alert("Misslyckades med att öppna popup-fönster.");
+    }
+}
+
+function getDateStringWithHoursAndMinutes(date) {
+    return "" + date.getFullYear() + "-" +
+        ("00" + (date.getMonth() + 1)).substr(-2) + "-" +
+        ("00" + date.getDate()).substr(-2) + " " +
+        ("00" + date.getHours()).substr(-2) + ":" +
+        ("00" + date.getMinutes()).substr(-2);
+}

@@ -38,7 +38,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 // Use internal method to set type property and log the result
-                _orderItemManager.SetOrderItemCancellationReasonInternal(orderNodeId, cancellationReasonId);
+                _orderItemManager.SetCancellationReason(orderNodeId, cancellationReasonId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

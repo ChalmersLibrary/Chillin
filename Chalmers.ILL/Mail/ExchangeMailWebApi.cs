@@ -10,13 +10,13 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Exchange.WebServices.Data;
 using System.Security;
 using System.Runtime.InteropServices;
-using Chalmers.ILL.Models;
 using System.Globalization;
 using HtmlAgilityPack;
 using System.Configuration;
 using System.Diagnostics;
 using Npgsql;
 using Chalmers.ILL.Utilities;
+using Chalmers.ILL.Models.Mail;
 
 namespace Chalmers.ILL.Mail
 {
@@ -273,7 +273,10 @@ namespace Chalmers.ILL.Mail
             // Add properties to the email message.
             message.Subject = subject + " #" + orderId;
             message.Body = new MessageBody(BodyType.Text, body);
-            message.ToRecipients.Add(recipientName, recipientAddress);
+            foreach (var address in recipientAddress.Split(','))
+            {
+                message.ToRecipients.Add(recipientName, address.Trim());
+            }
             message.ReplyTo.Add(senderEmail);
 
             foreach (var attachment in attachments)

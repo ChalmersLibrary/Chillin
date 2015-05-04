@@ -12,6 +12,7 @@ using Examine;
 using UmbracoExamine;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Mail;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -84,7 +85,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
             catch (Exception e)
             {
-                LogHelper.Error<MailQueueSurfaceController>("Failed to remove old media items.", e);
+                LogHelper.Error<SystemSurfaceController>("Failed to remove old media items.", e);
                 res.Success = false;
                 res.Message += "Failed to remove old media items. ";
             }
@@ -107,7 +108,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
             catch (Exception e)
             {
-                LogHelper.Error<MailQueueSurfaceController>("Failed to optimize indexes.", e);
+                LogHelper.Error<SystemSurfaceController>("Failed to optimize indexes.", e);
                 res.Success = false;
                 res.Message += "Failed to optimize indexes. ";
             }

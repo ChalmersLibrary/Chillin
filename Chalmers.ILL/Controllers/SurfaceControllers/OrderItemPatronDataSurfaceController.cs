@@ -15,19 +15,23 @@ using System.Configuration;
 using System.Net;
 using System.IO;
 using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.Logging;
+using Umbraco.Core.Models;
+using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
+    [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemPatronDataSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IInternalDbLogger _internalDbLogger;
+        IPatronDataProvider _patronDataProvider;
+        IUmbracoWrapper _umbraco;
 
-        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IInternalDbLogger internalDbLogger)
+        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProvider, IUmbracoWrapper umbraco)
         {
             _orderItemManager = orderItemManager;
-            _internalDbLogger = internalDbLogger;
+            _patronDataProvider = patronDataProvider;
+            _umbraco = umbraco;
         }
 
         [HttpGet]
@@ -88,20 +92,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var cs = Services.ContentService;
                 var content = cs.GetById(orderItemNodeId);
 
-                using (Sierra s = new Sierra())
+                var sm = _patronDataProvider.GetPatronInfoFromLibraryCardNumberOrPersonnummer(lcn, pnr);
+                if (!String.IsNullOrEmpty(sm.id))
                 {
-                    s.Connect(ConfigurationManager.AppSettings["sierraConnectionString"]);
-
-                    var sm = s.GetPatronInfoFromLibraryCardNumberOrPersonnummer(lcn, pnr);
-                    if (!String.IsNullOrEmpty(sm.id))
-                    {
-                        content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
-                        content.SetValue("pType", sm.ptype);
-                        content.SetValue("homeLibrary", sm.home_library);
-                        _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    }
-                    _internalDbLogger.WriteSierraDataToLog(orderItemNodeId, sm);
+                    content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
+                    content.SetValue("sierraPatronRecordId", sm.record_id);
+                    content.SetValue("pType", sm.ptype);
+                    content.SetValue("homeLibrary", sm.home_library);
+                    UpdateDeliveryLibraryIfNeeded(content.Id, sm);
+                    _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 }
+                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm);
 
                 json.Success = true;
                 json.Message = "Succcessfully loaded Sierra data from \"personnummer\" or library card number.";
@@ -132,20 +133,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var cs = Services.ContentService;
                 var content = cs.GetById(orderItemNodeId);
 
-                using (Sierra s = new Sierra())
+                var sm = _patronDataProvider.GetPatronInfoFromLibraryCardNumber(lcn);
+                if (!String.IsNullOrEmpty(sm.id))
                 {
-                    s.Connect(ConfigurationManager.AppSettings["sierraConnectionString"]);
-
-                    var sm = s.GetPatronInfoFromLibraryCardNumber(lcn);
-                    if (!String.IsNullOrEmpty(sm.id))
-                    {
-                        content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
-                        content.SetValue("pType", sm.ptype);
-                        content.SetValue("homeLibrary", sm.home_library);
-                        _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
-                    }
-                    _internalDbLogger.WriteSierraDataToLog(orderItemNodeId, sm);
+                    content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
+                    content.SetValue("sierraPatronRecordId", sm.record_id);
+                    content.SetValue("pType", sm.ptype);
+                    content.SetValue("homeLibrary", sm.home_library);
+                    UpdateDeliveryLibraryIfNeeded(content.Id, sm);
+                    _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 }
+                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm);
 
                 json.Success = true;
                 json.Message = "Succcessfully loaded Sierra data from library card number.";
@@ -158,5 +156,30 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             return Json(json, JsonRequestBehavior.AllowGet);
         }
+
+        #region Private methods
+
+        private void UpdateDeliveryLibraryIfNeeded(int nodeId, SierraModel sierraModel)
+        {
+            var orderItem = _orderItemManager.GetOrderItem(nodeId);
+
+            if (orderItem.TypePrevalue.Contains("Bok"))
+            {
+                if (sierraModel.home_library != null && sierraModel.home_library.Contains("hbib"))
+                {
+                    _orderItemManager.SetDeliveryLibrary(nodeId, "Huvudbiblioteket", false, false);
+                }
+                else if (sierraModel.home_library != null && sierraModel.home_library.Contains("abib"))
+                {
+                    _orderItemManager.SetDeliveryLibrary(nodeId, "Arkitekturbiblioteket", false, false);
+                }
+                else if (sierraModel.home_library != null && sierraModel.home_library.Contains("lbib"))
+                {
+                    _orderItemManager.SetDeliveryLibrary(nodeId, "Lindholmenbiblioteket", false, false);
+                }
+            }
+        }
+
+        #endregion
     }
 }

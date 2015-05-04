@@ -28,6 +28,15 @@
                         </div>
                     </div>
                 }
+                
+                @if (Model.OrderItem.TypePrevalue == "Bok" && !Model.OrderItem.DeliveryLibrarySameAsHomeLibrary)
+                {
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Låntagarens hembibliotek stämmer ej överrens med leveransbibliotek!</h3>
+                        </div>
+                    </div>
+                }
 
                 <!-- Type button -->
                 <div class="btn-group">
@@ -57,7 +66,12 @@
                         </button>
                         <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
                             @{
-                                var allowedStatusValues = new String[]{"Annullerad", "Åtgärda", "Överförd", "Inköpt", "Väntar"};
+                                var allowedStatusValues = new List<String>(){"Annullerad", "Åtgärda", "Överförd", "Inköpt"};
+
+                                if (Model.OrderItem.StatusString.Contains("Åtgärda") && !Model.OrderItem.PreviousStatusString.Contains("Vänta"))
+                                {
+                                    allowedStatusValues.Add(Model.OrderItem.PreviousStatusString);
+                                }
                                 
                                 foreach (var status in Model.AvailableStatuses)
                                 {
@@ -132,49 +146,58 @@
                         </ul>
                     </div>
                     
-                    <!-- Delivery Library button -->
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
-                            Bibliotek <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
-                            @{
-                                foreach (var library in Model.AvailableDeliveryLibraries)
-                                {
-                                    if (library.Id == Model.OrderItem.DeliveryLibrary) 
+                    if (Model.OrderItem.TypePrevalue == "Inköpsförslag")
+                    {
+                        <!-- Delivery Library button -->
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                                Bibliotek <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
+                                @{
+                                    foreach (var library in Model.AvailableDeliveryLibraries)
                                     {
-                                        <li><a href="#" class="disabled-link"><span class="current">@library.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
-                                    }
-                                    else
-                                    {
-                                        <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.OrderItem.NodeId, @library.Id); event.preventDefault();">@library.Value</a></li>
+                                        if (library.Id == Model.OrderItem.DeliveryLibrary) 
+                                        {
+                                            <li><a href="#" class="disabled-link"><span class="current">@library.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
+                                        }
+                                        else
+                                        {
+                                            <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.OrderItem.NodeId, @library.Id); event.preventDefault();">@library.Value</a></li>
+                                        }
                                     }
                                 }
-                            }
-                        </ul>
-                    </div>                    
+                            </ul>
+                        </div>
+                    }
                 }
                     
                 @if (Model.OrderItem.Type > 0)
                 {
-                    <!-- Individual action buttons -->
-                    if (Model.OrderItem.TypePrevalue == "Artikel" || Model.OrderItem.TypePrevalue == "Inköpsförslag")
-                    {
-                        <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.OrderItem.NodeId);">Referens</button>
-                        <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.OrderItem.NodeId);">Beställardata</button>
-                        <button type="button" class="btn btn-primary" onclick="loadMailAction(@Model.OrderItem.NodeId);">Skicka mail</button>
-                        <button type="button" class="btn btn-primary" onclick="loadProviderAction(@Model.OrderItem.NodeId);">Beställ</button>
-                        <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.OrderItem.NodeId);">Logga</button>
-                        <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Annullera</button> -->
-                        <button type="button" class="btn btn-primary" onclick="loadDeliveryAction(@Model.OrderItem.NodeId);">Leverans <span id="attachment-counter1" class="badge">@Model.OrderItem.AttachmentList.Count</span></button>
-                        <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Överför</button> -->
-                    }
-                    else if (Model.OrderItem.TypePrevalue == "Bok")
-                    {
-                        <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.OrderItem.NodeId);">Referens</button>
-                        <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.OrderItem.NodeId);">Beställardata</button>
-                        <!-- <button type="button" class="btn btn-primary dropdown-toggle" disabled>Överför</button> -->
-                    }
+                    <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.OrderItem.NodeId);">Referens</button>
+                    <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.OrderItem.NodeId);">Beställardata</button>
+                    <button type="button" class="btn btn-primary" onclick="loadMailAction(@Model.OrderItem.NodeId);">Skicka mail</button>
+                    <button type="button" class="btn btn-primary" onclick="loadProviderAction(@Model.OrderItem.NodeId);">Beställ</button>
+                }
+                <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.OrderItem.NodeId);">Logga</button>
+                @if (Model.OrderItem.Type > 0)
+                {
+                    <button type="button" class="btn btn-primary" onclick="loadDeliveryAction(@Model.OrderItem.NodeId);">Leverans <span id="attachment-counter1" class="badge">@Model.OrderItem.AttachmentList.Count</span></button>
+                }
+                @if (Model.OrderItem.TypePrevalue == "Bok")
+                {
+                    <!-- Large button group -->
+                    <div class="btn-group">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
+                            Lånetid <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a href="#" onclick="loadPatronReturnDateAction(@Model.OrderItem.NodeId); event.preventDefault();">Mot låntagare</a></li>
+                            <li><a href="#" onclick="loadProviderReturnDateAction(@Model.OrderItem.NodeId); event.preventDefault();">Från leverantör</a></li>
+                        </ul>
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="loadClaimAction(@Model.OrderItem.NodeId);">Kräv</button>
+                    <button type="button" class="btn btn-primary" onclick="loadReturnAction(@Model.OrderItem.NodeId);">Retur</button>
                 }
             </div>
 
@@ -213,58 +236,68 @@
 <!-- Details about this OrderItem -->
 <div class="col-sm-4 order-details">
     <div>
-        <span class="label label-primary">OrderId:</span> @Model.OrderItem.OrderId
+        <span class="label label-primary order-item-var-label">Order ID</span> @Model.OrderItem.OrderId
     </div>
     <div>
-        <span class="label label-primary">Created:</span> @Model.OrderItem.CreateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+        <span class="label label-primary order-item-var-label">Skapad</span> @Model.OrderItem.CreateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
     <div>
-        <span class="label label-primary">Updated:</span> @Model.OrderItem.UpdateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+        <span class="label label-primary order-item-var-label">Uppdaterad</span> @Model.OrderItem.UpdateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
     <div>
-        <span class="label label-primary">FollowUp:</span> @Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+        <span class="label label-primary order-item-var-label">Uppföljning</span> @Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+    </div>
+    @if (Model.OrderItem.StatusString == "Utlånad")
+    {
+        <div>
+            <span class="label label-primary order-item-var-label">Återlämning</span> @Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+            @if (Model.OrderItem.DueDate != Model.OrderItem.ProviderDueDate)
+            {
+                <span class="glyphicon glyphicon-exclamation-sign" data-toggle="popover" data-content="Vår lånetid mot leverantören <span class='label label-primary'>@Model.OrderItem.ProviderDueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)</span> skiljer sig från den lånetid som låntagaren har mot oss <span class='label label-primary'>@Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)</span>."></span>
+            }
+        </div>
+    }
+</div>
+<div class="col-sm-4 order-details">
+    <div>
+        <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lt. - Namn</span> @Model.OrderItem.PatronName</span>
+    </div>
+    <div>
+        <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lt. - E-post</span> @Model.OrderItem.PatronEmail</span>
+    </div>
+    <div>
+        <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lt. - Kortnr.</span> @Model.OrderItem.PatronCardNo</span>
+    </div>
+    <div>
+        <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lev. - Namn</span> @Model.OrderItem.ProviderName</span>
+    </div>
+    <div>
+        <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lev. - Order ID</span> @Model.OrderItem.ProviderOrderId</span>
     </div>
 </div>
 <div class="col-sm-4 order-details">
     <div>
-        <span class="label label-primary">PatronName:</span> @Model.OrderItem.PatronName
+        <span class="label label-primary order-item-var-label">Sierra - Namn</span> @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name
     </div>
     <div>
-        <span class="label label-primary">PatronEmail:</span> @Model.OrderItem.PatronEmail
+        <span class="label label-primary order-item-var-label">Sierra - Kortnr.</span> @Model.OrderItem.SierraInfo.barcode
     </div>
     <div>
-        <span class="label label-primary">PatronIdentifier:</span> @Model.OrderItem.PatronCardNo
+        <span class="label label-primary order-item-var-label">Sierra - P-typ</span> @(!String.IsNullOrEmpty(Model.OrderItem.SierraInfo.barcode) ? Model.OrderItem.SierraInfo.ptype.ToString() : "")
     </div>
     <div>
-        <span class="label label-primary">ProviderName:</span> @Model.OrderItem.ProviderName
+        <span class="label label-primary order-item-var-label">Sierra - E-post</span> @Model.OrderItem.SierraInfo.email
     </div>
     <div>
-        <span class="label label-primary">ProviderOrderId:</span> @Model.OrderItem.ProviderOrderId
-    </div>
-</div>
-<div class="col-sm-4 order-details">
-    <div>
-        <span class="label label-primary">Name</span> @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name
+        <span class="label label-primary order-item-var-label">Sierra - Hbib</span> @Model.OrderItem.SierraInfo.home_library
     </div>
     <div>
-        <span class="label label-primary">Barcode</span> @Model.OrderItem.SierraInfo.barcode
-    </div>
-    <div>
-        <span class="label label-primary">Ptyp</span> @(!String.IsNullOrEmpty(Model.OrderItem.SierraInfo.barcode) ? Model.OrderItem.SierraInfo.ptype.ToString() : "")
-    </div>
-    <div>
-        <span class="label label-primary">Email</span> @Model.OrderItem.SierraInfo.email
-    </div>
-    <div>
-        <span class="label label-primary">Home Library</span> @Model.OrderItem.SierraInfo.home_library
-    </div>
-    <div>
-        <span class='label @((String.IsNullOrEmpty(Model.OrderItem.SierraInfo.mblock) || Model.OrderItem.SierraInfo.mblock=="-") ? "label-primary" : "label-danger")'>Mblock</span> @Model.OrderItem.SierraInfo.mblock
+        <span class='label @((String.IsNullOrEmpty(Model.OrderItem.SierraInfo.mblock) || Model.OrderItem.SierraInfo.mblock=="-") ? "label-primary" : "label-danger") order-item-var-label'>Sierra - M-block</span> @Model.OrderItem.SierraInfo.mblock
     </div>
 </div>
 
 <!-- Log list -->
-<div>
+<div class="col-sm-12">
     <span class="label label-default">Händelser</span>
 </div>
 <div id="log-@Model.OrderItem.NodeId" class="col-sm-12 log-list">
@@ -291,6 +324,13 @@
 </div>
 
 <script type="text/javascript">
+    $(function () {
+        $("[data-toggle='popover']").popover({
+            trigger: "hover",
+            placement: "top",
+            html: true
+        });
+    })
     // Open up an old mail
     $(".MAIL").click(function () {
         //debugger;
