@@ -14,7 +14,7 @@ This is the system that is used on Chalmers Library for handling incoming inter 
 4. Rename the unzipped folder to "Chalmers.ILL".
 5. Download the Chillin Initial Configuration Umbraco package https://chalmersuniversity.box.com/s/auljr2s1gxkzq5h2s73b13shv3ys083e
 6. Setup Umbraco, for example by using Microsoft WebMatrix's "Open as a Web Site" capabilities.
-7. Install the ChillinFoundation Umbraco package into Umbraco.
+7. Install the Chillin Initial Configuration Umbraco package into Umbraco.
 8. Create a member and assign the proper roles.
 9. Close down Microsoft Web Matrix or corresponding and do "git checkout -- ." in the repository.
 
