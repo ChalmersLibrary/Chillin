@@ -125,11 +125,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             string clientIpAddr = string.Empty;
             if (Request.ServerVariables["HTTP_X_FORWARDED_FOR"] != null)
             {
-                clientIpAddr = Request.ServerVariables["HTTP_X_FORWARDED_FOR"].ToString();
+                clientIpAddr = Request.ServerVariables["HTTP_X_FORWARDED_FOR"].ToString().Split(':').First();
             }
             else if (Request.UserHostAddress.Length != 0)
             {
-                clientIpAddr = Request.UserHostAddress;
+                clientIpAddr = Request.UserHostAddress.Split(':').First();
             }
 
             var allowedIp = ConfigurationManager.AppSettings["cronServerIpAddress"];
