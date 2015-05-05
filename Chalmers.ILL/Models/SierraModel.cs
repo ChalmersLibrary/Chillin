@@ -20,6 +20,7 @@ namespace Chalmers.ILL.Models
         public string last_name { get; set; }
         public string mblock { get; set; }
         public string home_library { get; set; }
+        public string home_library_pretty_name { get; set; }
         public int record_id { get; set; }
         public List<SierraAddressModel> adress { get; set; }
     }

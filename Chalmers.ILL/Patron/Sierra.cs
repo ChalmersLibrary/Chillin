@@ -8,17 +8,20 @@ using Chalmers.ILL.Models;
 using System.Configuration;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.UmbracoApi;
+using Chalmers.ILL.Templates;
 
 namespace Chalmers.ILL.Patron
 {
     public class Sierra : IPatronDataProvider, IDisposable
     {
         private IUmbracoWrapper _umbraco;
+        private ITemplateService _templateService;
         private NpgsqlConnection _connection;
 
-        public Sierra(IUmbracoWrapper umbraco, string connectionString)
+        public Sierra(IUmbracoWrapper umbraco, ITemplateService templateService, string connectionString)
         {
             _umbraco = umbraco;
+            _templateService = templateService;
             _connection = new NpgsqlConnection(connectionString);
             Connect();
         }
@@ -176,6 +179,7 @@ namespace Chalmers.ILL.Patron
                         model.first_name = dr["first_name"].ToString();
                         model.last_name = dr["last_name"].ToString();
                         model.home_library = dr["home_library_code"].ToString();
+                        model.home_library_pretty_name = _templateService.GetPrettyLibraryNameFromLibraryAbbreviation(model.home_library);
                         model.mblock = dr["mblock_code"].ToString();
                         model.record_id = Convert.ToInt32(dr["record_num"].ToString());
                     }
@@ -206,6 +210,7 @@ namespace Chalmers.ILL.Patron
                         model.first_name = dr["first_name"].ToString();
                         model.last_name = dr["last_name"].ToString();
                         model.home_library = dr["home_library_code"].ToString();
+                        model.home_library_pretty_name = _templateService.GetPrettyLibraryNameFromLibraryAbbreviation(model.home_library);
                         model.mblock = dr["mblock_code"].ToString();
                         model.record_id = Convert.ToInt32(dr["record_num"].ToString());
                     }
