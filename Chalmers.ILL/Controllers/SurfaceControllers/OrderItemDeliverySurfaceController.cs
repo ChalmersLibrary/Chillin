@@ -91,7 +91,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var pageModel = new Models.PartialPage.DeliveryType.ArticleInInfodisk(_orderItemManager.GetOrderItem(nodeId));
             _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
-            pageModel.ArticleDeliveryLibrary = GetArticleDeliveryLibrary(pageModel.OrderItem.SierraInfo.home_library);
+            pageModel.ArticleDeliveryLibrary = _templateService.GetPrettyLibraryNameFromLibraryAbbreviation(pageModel.OrderItem.SierraInfo.home_library);
             pageModel.ArticleAvailableInInfodiskMailTemplate = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", pageModel.OrderItem);
             return PartialView("DeliveryType/ArticleInInfodisk", pageModel);
         }
@@ -107,7 +107,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var pageModel = new Models.PartialPage.DeliveryType.ArticleInTransit(_orderItemManager.GetOrderItem(nodeId));
             _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
-            pageModel.ArticleDeliveryLibrary = GetArticleDeliveryLibrary(pageModel.OrderItem.SierraInfo.home_library);
+            pageModel.ArticleDeliveryLibrary = _templateService.GetPrettyLibraryNameFromLibraryAbbreviation(pageModel.OrderItem.SierraInfo.home_library);
             return PartialView("DeliveryType/ArticleInTransit", pageModel);
         }
 
@@ -365,23 +365,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             public int nodeId { get; set; }
             public OutgoingMailModel mail { get; set; }
             public string logEntry { get; set; }
-        }
-        private string GetArticleDeliveryLibrary(string sierraHomeLibrary)
-        {
-            var res = "Kunde ej avgöra lämpligt leveransbibliotek.";
-            if (sierraHomeLibrary != null && sierraHomeLibrary.Contains("hbib"))
-            {
-                res = "Huvudbiblioteket";
-            }
-            else if (sierraHomeLibrary != null && sierraHomeLibrary.Contains("lbib"))
-            {
-                res = "Lindholmenbiblioteket";
-            }
-            else if (sierraHomeLibrary != null && sierraHomeLibrary.Contains("abib"))
-            {
-                res = "Arkitekturbiblioteket";
-            }
-            return res;
         }
     }
 }

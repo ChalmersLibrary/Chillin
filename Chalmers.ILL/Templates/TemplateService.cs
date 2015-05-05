@@ -71,6 +71,14 @@ namespace Chalmers.ILL.Templates
                         template.Replace("{{" + property + "}}", GetTemplateData(templateName, orderItem));
                     }
                 }
+                else if (property.StartsWith("S:")) // Special variables that exists in awkward places.
+                {
+                    var varName = property.Split(':').Last();
+                    if (varName == "HomeLibrary")
+                    {
+                        template.Replace("{{" + property + "}}", GetPrettyLibraryNameFromLibraryAbbreviation(orderItem.SierraInfo.home_library));
+                    }
+                }
                 else
                 {
                     var value = orderItem.GetType().GetProperty(property).GetValue(orderItem);
@@ -114,6 +122,24 @@ namespace Chalmers.ILL.Templates
             list.Sort((x1, x2) => x1.Description.CompareTo(x2.Description)); 
 
             return list;
+        }
+
+        public string GetPrettyLibraryNameFromLibraryAbbreviation(string libraryName)
+        {
+            var res = "Okänt bibliotek";
+            if (libraryName != null && libraryName.Contains("hbib"))
+            {
+                res = "Huvudbiblioteket";
+            }
+            else if (libraryName != null && libraryName.Contains("lbib"))
+            {
+                res = "Lindholmenbiblioteket";
+            }
+            else if (libraryName != null && libraryName.Contains("abib"))
+            {
+                res = "Arkitekturbiblioteket";
+            }
+            return res;
         }
     }
 }

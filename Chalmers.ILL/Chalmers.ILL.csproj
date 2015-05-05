@@ -332,7 +332,6 @@
     <Content Include="Scripts\dummy.txt" />
     <Content Include="UserControls\dummy.txt" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.Return.cshtml" />
-    <Content Include="Views\Partials\Chalmers.ILL.EditTemplates.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.Claim.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.ProviderReturnDate.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.PatronReturnDate.cshtml" />
