@@ -146,7 +146,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="logEntry">Log message</param>
         /// <param name="delivery">Type of delivery</param>
         /// <returns>JSON result</returns>
-        [HttpPost]
+        [HttpPost, ValidateInput(false)]
         public ActionResult SetDelivery(int nodeId, string logEntry, string delivery)
         {
             var json = new ResultResponse();
@@ -176,7 +176,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="logEntry">Log message</param>
         /// <param name="delivery">Type of delivery</param>
         /// <returns>JSON result</returns>
-        [HttpPost]
+        [HttpPost, ValidateInput(false)]
         public ActionResult SetTransport(int nodeId, string logEntry, string delivery)
         {
             var json = new ResultResponse();
@@ -204,7 +204,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// </summary>
         /// <param name="packJson">The serialized object of type DeliveryByMailPackage.</param>
         /// <returns>JSON result</returns>
-        [HttpPost]
+        [HttpPost, ValidateInput(false)]
         public ActionResult SetArticleAvailableForPickup(string packJson)
         {
             var res = new ResultResponse();
@@ -243,7 +243,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// </summary>
         /// <param name="packJson">The serialized object of type DeliveryByMailPackage.</param>
         /// <returns>JSON result</returns>
-        [HttpPost]
+        [HttpPost, ValidateInput(false)]
         public ActionResult DeliverByMail(string packJson)
         {
             var res = new ResultResponse();
@@ -286,7 +286,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="dueDate">Delivery Library Due Date</param>
         /// <param name="providerInformation">Information about the provider</param>
         /// <returns>MVC ActionResult with JSON</returns>
-        [HttpPost]
+        [HttpPost, ValidateInput(false)]
         public ActionResult SetOrderItemDeliveryReceived(string packJson)
         {
             var json = new ResultResponse();

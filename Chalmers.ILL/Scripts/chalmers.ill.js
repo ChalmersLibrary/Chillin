@@ -330,7 +330,10 @@ function saveDocument(nodeId, url) {
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 function uploadDocument(nodeId, name, data) {
@@ -360,7 +363,10 @@ function uploadDocument(nodeId, name, data) {
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 function takeOverLockedOrderItem(id)
@@ -705,7 +711,10 @@ function setOrderItemType(node, type) {
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
@@ -718,7 +727,10 @@ function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 function setOrderItemArticleAvailableForPickup(node, maildata, logMsg) {
@@ -737,7 +749,10 @@ function setOrderItemArticleAvailableForPickup(node, maildata, logMsg) {
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
@@ -760,7 +775,10 @@ function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 function loadLogItems(id)
@@ -809,7 +827,10 @@ function setOrderItemReference(nodeId, reference) {
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 /* Set new property values for Delivery from form */
@@ -827,7 +848,10 @@ function setOrderItemDelivery(nodeId, logEntry, delivery) {
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 /* Set new property values for Delivery from form */
@@ -845,7 +869,10 @@ function setOrderItemTransport(nodeId, logEntry, delivery) {
             alert(json.Message);
         }
         unlockScreen();
-    }).error(unlockScreen);
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
 }
 
 function sendMailForNewOrder(body, name, mail, libCardNr) {
@@ -894,7 +921,10 @@ function sendMailToPatron(mailData) {
                 alert(json.Message);
             }
             unlockScreen();
-        }).error(unlockScreen);
+        }).fail(function (jqxhr, textStatus, error) {
+            alert("Error: " + textStatus + " " + error);
+            unlockScreen();
+        });
     }
     else {
         if (message == "") {
