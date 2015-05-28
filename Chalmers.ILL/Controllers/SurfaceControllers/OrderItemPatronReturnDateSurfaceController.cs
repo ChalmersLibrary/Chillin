@@ -44,7 +44,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return PartialView("Chalmers.ILL.Action.PatronReturnDate", pageModel);
         }
 
-        [HttpPost]
+        [HttpPost, ValidateInput(false)]
         public ActionResult ChangeReturnDate(string packJson)
         {
             var json = new ResultResponse();
