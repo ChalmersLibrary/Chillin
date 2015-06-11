@@ -1155,6 +1155,12 @@ notifier.client.updateStream = function (value) {
     $("#debug-bucket .panel-body").prepend("<div>NodeId=" + value.NodeId + ", EditedBy=" + value.EditedBy + ", EditedByMemberName=" + value.EditedByMemberName + "</div>");
 };
 
+$.connection.hub.disconnected(function () {
+    setTimeout(function () {
+        $.connection.hub.start();
+    }, 5000); // Re-start connection after 5 seconds
+});
+
 /* Starting the signalR hub connections */
 $.connection.hub.start()
     .done(function () {
