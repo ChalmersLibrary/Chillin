@@ -18,6 +18,13 @@ namespace Chalmers.ILL.Models.Mail
             // NOP
         }
 
+        public OutgoingMailModel(string orderId, string recipientName, string recipientEmail)
+        {
+            this.OrderId = orderId;
+            this.recipientName = recipientName;
+            this.recipientEmail = recipientEmail;
+        }
+
         public OutgoingMailModel(string orderId, OutgoingMailPackageModel pack)
         {
             OrderId = orderId;
