@@ -116,14 +116,16 @@ namespace Chalmers.ILL.Mail
                     _mailService.SendMail(delayedMailOperation.Mail);
                 }
 
-                foreach (var logMsg in delayedMailOperation.LogMessages)
+                for (int i=0; i<delayedMailOperation.LogMessages.Count; i++)
                 {
-                    _orderItemManager.AddLogItem(delayedMailOperation.InternalOrderId, logMsg.type, logMsg.message, false, false);
+                    var logMsg = delayedMailOperation.LogMessages[i];
+                    var shouldReindexAndSignal = String.IsNullOrWhiteSpace(delayedMailOperation.NewStatus) && i == delayedMailOperation.LogMessages.Count - 1;
+                    _orderItemManager.AddLogItem(delayedMailOperation.InternalOrderId, logMsg.type, logMsg.message, shouldReindexAndSignal, shouldReindexAndSignal);
                 }
 
                 if (!String.IsNullOrWhiteSpace(delayedMailOperation.NewStatus))
                 {
-                    _orderItemManager.SetStatus(delayedMailOperation.InternalOrderId, delayedMailOperation.NewStatus);
+                    _orderItemManager.SetStatus(delayedMailOperation.InternalOrderId, delayedMailOperation.NewStatus, true, true);
                 }
             }
         }
