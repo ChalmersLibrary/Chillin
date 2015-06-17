@@ -121,7 +121,7 @@ namespace Chalmers.ILL.Mail
                     _orderItemManager.AddLogItem(delayedMailOperation.InternalOrderId, logMsg.type, logMsg.message, false, false);
                 }
 
-                if (delayedMailOperation.NewStatus != "")
+                if (!String.IsNullOrWhiteSpace(delayedMailOperation.NewStatus))
                 {
                     _orderItemManager.SetStatus(delayedMailOperation.InternalOrderId, delayedMailOperation.NewStatus);
                 }
