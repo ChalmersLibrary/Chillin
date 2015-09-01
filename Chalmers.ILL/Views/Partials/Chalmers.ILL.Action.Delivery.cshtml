@@ -62,15 +62,39 @@
 
 <script type="text/javascript">
     $(function () {
-        if ("@Model.OrderItem.TypePrevalue" == "Bok")
-        {
-            renderDeliveryTypePartial("RenderBookInstantLoanDeliveryType");
-        }
-        else
-        {
-            renderDeliveryTypePartial("RenderArticleByEmailDeliveryType");
+        if ("@Model.OrderItem.TypePrevalue" == "Bok") {
+            selectDeliveryType($("#delivery-type-dropdown").parent().find("ul li a[data-delivery-type=infodisk]"));
+        } else {
+            // Order is of type Article
+            if (isStudent(@Model.OrderItem.SierraInfo.ptype) && @(Model.OrderItem.SierraInfo.home_library != null && Model.OrderItem.SierraInfo.home_library.Contains("hbib") ? "true" : "false")) {
+                // Student with home library Z.
+                selectDeliveryType($("#delivery-type-dropdown").parent().find("ul li a[data-delivery-type=infodisk]"));
+            } else if (isStudent(@Model.OrderItem.SierraInfo.ptype) && @(Model.OrderItem.SierraInfo.home_library != null && Model.OrderItem.SierraInfo.home_library.Contains("lbib") ? "true" : "false")) {
+                // Student with home library Zl.
+                selectDeliveryType($("#delivery-type-dropdown").parent().find("ul li a[data-delivery-type=transport]"));
+            } else if (isStudent(@Model.OrderItem.SierraInfo.ptype) && @(Model.OrderItem.SierraInfo.home_library != null && Model.OrderItem.SierraInfo.home_library.Contains("abib") ? "true" : "false")) {
+                // Student with home library Za.
+                selectDeliveryType($("#delivery-type-dropdown").parent().find("ul li a[data-delivery-type=transport]"));
+            } else if (isEmployee(@Model.OrderItem.SierraInfo.ptype) && "@Model.OrderItem.DrmWarning" == "1") {
+                // Employee and DRM on ordered material.
+                selectDeliveryType($("#delivery-type-dropdown").parent().find("ul li a[data-delivery-type=internpost]"));
+            } else if (isEmployee(@Model.OrderItem.SierraInfo.ptype) && "@Model.OrderItem.DrmWarning" == "0") {
+                // Employee and no DRM on ordered material.
+                selectDeliveryType($("#delivery-type-dropdown").parent().find("ul li a[data-delivery-type=epost]"));
+            } else {
+                // Everything else
+                selectDeliveryType($("#delivery-type-dropdown").parent().find("ul li a[data-delivery-type=post]"));
+            }
         }
     })
+
+    function isEmployee(ptype) {
+        return ptype == 10 || ptype == 11 || ptype == 17;
+    }
+
+    function isStudent(ptype) {
+        return ptype == 19 || ptype == 20 || ptype == 21 || ptype == 30;
+    }
 
     function selectDeliveryType(obj) {
         renderDeliveryTypePartial($(obj).data("render-method"));
