@@ -477,9 +477,11 @@
     <Compile Include="Models\ResultResponse.cs" />
     <Compile Include="Models\SierraModel.cs" />
     <Compile Include="OrderItems\ChalmersSourceFactory.cs" />
+    <Compile Include="OrderItems\IBulkDataManager.cs" />
     <Compile Include="OrderItems\IOrderItemManager.cs" />
     <Compile Include="OrderItems\ISource.cs" />
     <Compile Include="OrderItems\ISourceFactory.cs" />
+    <Compile Include="OrderItems\BulkDataManager.cs" />
     <Compile Include="OrderItems\SaveException.cs" />
     <Compile Include="OrderItems\SourcePollingException.cs" />
     <Compile Include="OrderItems\SourcePollingResult.cs" />

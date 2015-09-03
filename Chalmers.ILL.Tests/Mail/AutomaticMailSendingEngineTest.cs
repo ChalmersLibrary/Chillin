@@ -75,7 +75,7 @@ namespace Chalmers.ILL.Tests.Mail
                 }
             };
 
-            IOrderItemManager orderItemManager = new OrderItems.Fakes.StubIOrderItemManager()
+            IOrderItemManager orderItemManager = new Chalmers.ILL.OrderItems.Fakes.StubIOrderItemManager()
             {
                 SetStatusInt32StringBooleanBoolean = (nodeId, statusPrevalue, doReindex, doSignal) =>
                 {

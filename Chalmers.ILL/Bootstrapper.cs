@@ -54,6 +54,7 @@ namespace Chalmers.ILL
             var umbraco = new UmbracoWrapper();
             var orderItemManager = new OrderItemManager(umbraco);
             var providerService = new ProviderService(orderItemsSearcher);
+            var bulkDataManager = new BulkDataManager(orderItemsSearcher);
 
             // Connect instances that depend on eachother.
             notifier.SetOrderItemManager(orderItemManager, umbraco);
@@ -73,6 +74,7 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IPatronDataProvider), new Sierra(umbraco, templateService, ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
             container.RegisterInstance(typeof(IMailService), mailService);
             container.RegisterInstance(typeof(IProviderService), providerService);
+            container.RegisterInstance(typeof(IBulkDataManager), bulkDataManager);
             container.RegisterInstance<ISearcher>("TemplatesSearcher", templatesSearcher);
             container.RegisterInstance<ISearcher>("OrderItemsSearcher", orderItemsSearcher);
         }
