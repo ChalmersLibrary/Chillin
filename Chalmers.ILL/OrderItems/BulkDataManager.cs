@@ -32,7 +32,7 @@ namespace Chalmers.ILL.OrderItems
 
                 var rawDueDate = orderItem.Fields.GetValueString("DueDate") == "" ? DateTime.Now :
                     DateTime.ParseExact(orderItem.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                var rawType = orderItem.Fields["Type"];
+                var rawType = orderItem.Fields.ContainsKey("Type") ? orderItem.Fields["Type"] : null;
                 var rawStatus = orderItem.Fields["Status"];
                 var rawReference = orderItem.Fields["OriginalOrder"];
                 var rawDeliveryDate = orderItem.Fields.GetValueString("DeliveryDate") == "" ? new DateTime(1970, 1, 1) :
