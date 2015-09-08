@@ -211,7 +211,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                var pack = JsonConvert.DeserializeObject<ArticleDeliveredToInfodisk>(packJson);
+                var pack = JsonConvert.DeserializeObject<ArticleDelivered>(packJson);
 
                 _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: Avhämtas i lånedisken.", false, false);
                 _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, false, false);
@@ -238,6 +238,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             return Json(res, JsonRequestBehavior.AllowGet);
         }
+
         /// <summary>
         /// Log message, set delivered status, log delivery type and send mail to user.
         /// </summary>
@@ -273,6 +274,54 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 res.Success = false;
                 res.Message = "Fel vid leveransförsök via mail: " + e.Message;
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Log message, set delivered status, log delivery type and send mail to user.
+        /// </summary>
+        /// <param name="packJson">The serialized object of type DeliveryByMailPackage.</param>
+        /// <returns>JSON result</returns>
+        [HttpPost, ValidateInput(false)]
+        public ActionResult DeliverByPost(string packJson)
+        {
+            var res = new ResultResponse();
+
+            try
+            {
+                var pack = JsonConvert.DeserializeObject<ArticleDelivered>(packJson);
+                RegisterArticleDeliveryAndSendMail(pack, "post", "ArticleDeliveryByPostTemplate", res);
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = "Fel vid leveransförsök via post: " + e.Message;
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Log message, set delivered status, log delivery type and send mail to user.
+        /// </summary>
+        /// <param name="packJson">The serialized object of type DeliveryByMailPackage.</param>
+        /// <returns>JSON result</returns>
+        [HttpPost, ValidateInput(false)]
+        public ActionResult DeliverByInternpost(string packJson)
+        {
+            var res = new ResultResponse();
+
+            try
+            {
+                var pack = JsonConvert.DeserializeObject<ArticleDelivered>(packJson);
+                RegisterArticleDeliveryAndSendMail(pack, "internpost", "ArticleDeliveryByInternpostTemplate", res);
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = "Fel vid leveransförsök via internpost: " + e.Message;
             }
 
             return Json(res, JsonRequestBehavior.AllowGet);
@@ -360,11 +409,33 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             public bool readOnlyAtLibrary { get; set; }
         }
 
-        public class ArticleDeliveredToInfodisk
+        public class ArticleDelivered
         {
             public int nodeId { get; set; }
             public OutgoingMailModel mail { get; set; }
             public string logEntry { get; set; }
+        }
+
+        private ResultResponse RegisterArticleDeliveryAndSendMail(ArticleDelivered pack, string deliveryType, string mailTemplateName, /* out */ ResultResponse res)
+        {
+            _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: " + deliveryType, false, false);
+            _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, false, false);
+            _orderItemManager.SetStatus(pack.nodeId, "05:Levererad", false, false);
+
+            // We save everything here first so that we get the new values injected into the message by the template service.
+            _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail);
+
+            // Overwrite the message with message from template service so that we get the new values injected.
+            pack.mail.message = _templateService.GetTemplateData(mailTemplateName, _orderItemManager.GetOrderItem(pack.nodeId));
+
+            _mailService.SendMail(pack.mail);
+            _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);
+            _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message);
+
+            res.Success = true;
+            res.Message = "Lyckades leverera via mail.";
+
+            return res;
         }
     }
 }
