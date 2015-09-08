@@ -1042,6 +1042,18 @@ function loadDeliveryAction(id) {
     );
 }
 
+function loadReceiveBookAction(id) {
+    $("#loading-partial-view").show();
+    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemReceiveBookSurface/RenderReceiveBookAction?nodeId=' + id,
+        function (responseText, textStatus, req) {
+            if (req.status == 200) {
+                $('#action-' + id + ' #radio').focus();
+            }
+            $("#loading-partial-view").hide();
+        }
+    );
+}
+
 function loadClaimAction(id) {
     $("#loading-partial-view").show();
     $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemClaimSurface/RenderClaimAction?nodeId=' + id,

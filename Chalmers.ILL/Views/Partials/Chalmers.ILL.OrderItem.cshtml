@@ -180,13 +180,13 @@
                     <button type="button" class="btn btn-primary" onclick="loadProviderAction(@Model.OrderItem.NodeId);">Beställ</button>
                 }
                 <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.OrderItem.NodeId);">Logga</button>
-                @if (Model.OrderItem.Type > 0)
+                @if (Model.OrderItem.TypePrevalue == "Artikel")
                 {
                     <button type="button" class="btn btn-primary" onclick="loadDeliveryAction(@Model.OrderItem.NodeId);">Leverans <span id="attachment-counter1" class="badge">@Model.OrderItem.AttachmentList.Count</span></button>
                 }
                 @if (Model.OrderItem.TypePrevalue == "Bok")
                 {
-                    <!-- Large button group -->
+                    <button type="button" class="btn btn-primary" onclick="loadReceiveBookAction(@Model.OrderItem.NodeId);">Ta emot bok</button>
                     <div class="btn-group">
                         <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false">
                             Lånetid <span class="caret"></span>
