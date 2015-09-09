@@ -38,6 +38,15 @@
                     </div>
                 }
 
+                @if (String.IsNullOrEmpty(Model.OrderItem.SierraInfo.id))
+                {
+                    <div class="panel panel-danger">
+                        <div class="panel-heading">
+                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Låntagardata från Sierra saknas!</h3>
+                        </div>
+                    </div>
+                }
+
                 <!-- Type button -->
                 <div class="btn-group">
                     <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
