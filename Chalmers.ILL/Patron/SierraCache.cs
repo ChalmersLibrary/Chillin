@@ -46,7 +46,8 @@ namespace Chalmers.ILL.Patron
             var pnrWithoutDash = pnr.Replace("-", "").Replace(" ", "");
             var pnrWithDash = pnrWithoutDash.Insert(6, "-").Replace(" ", "");
 
-            var query = "barcode:*" + barcode + "* OR pnum:(*" + pnrWithoutDash + "* OR *" + pnrWithDash + "*)";
+            // Only search on first barcode if there are multiple. Only search on exact pnr with or without dash.
+            var query = "barcode:" + barcode + "* OR pnum:(" + pnrWithoutDash + " OR " + pnrWithDash + ")";
 
             try
             {
@@ -105,7 +106,7 @@ namespace Chalmers.ILL.Patron
                 }
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // NOP
             }
