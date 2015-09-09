@@ -111,7 +111,7 @@
                 recipientEmail: $("#patron-email").text().toString().trim(),
                 recipientName: "@Model.OrderItem.PatronName",
                 message: $("#mail-message").val(),
-                newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Utlånad")).Id,
+                newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Infodisk")).Id,
                 newCancellationReasonId: -1,
                 newPurchasedMaterialId: -1,
                 newFollowUpDate: $('#dueDate').val(),

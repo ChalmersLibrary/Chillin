@@ -358,8 +358,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetProviderDueDate(pack.orderNodeId, pack.dueDate, false, false);
                 _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, false, false);
                 _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, false, false);
-
-                _orderItemManager.SetStatus(pack.orderNodeId, "11:Utlånad", false, false);
+                _orderItemManager.SetStatus(pack.orderNodeId, "14:Infodisk", false, false);
                 _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, false, false);
 
                 // We save everything here first so that we get the new values injected into the message by the template service.

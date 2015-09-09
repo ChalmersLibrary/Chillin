@@ -71,7 +71,7 @@
 
         var i = Convert.ToInt32(status == "" ? "0" : status.Split(':').First());
         
-        var sortingWeights = new Int32[]{0, 1, 3, 5, 6, 9, 10, 11, 12, 2, 13, 8, 4, 7};
+        var sortingWeights = new Int32[]{1, 2, 4, 6, 7, 10, 11, 12, 13, 3, 14, 9, 5, 8, 0};
 
         return sortingWeights[i];
     }
@@ -107,7 +107,8 @@
         <button id="status03-button" type="button" value=".chillin-status-03" class="btn btn-default btn-danger">Beställd <span id="status03-counter" class="badge">0</span></button>
         <button id="status04-button" type="button" value=".chillin-status-04" class="btn btn-default btn-danger">Väntar <span id="status04-counter" class="badge">0</span></button>
         <button id="status13-button" type="button" value=".chillin-status-13" class="btn btn-default btn-danger">Transport <span id="status13-counter" class="badge">0</span></button>
-        <button id="status05-button" type="button" value=".chillin-status-11" class="btn btn-default btn-danger">Utlånad <span id="status11-counter" class="badge">0</span></button>
+        <button id="status14-button" type="button" value=".chillin-status-14" class="btn btn-default btn-danger">Infodisk <span id="status14-counter" class="badge">0</span></button>
+        <button id="status11-button" type="button" value=".chillin-status-11" class="btn btn-default btn-danger">Utlånad <span id="status11-counter" class="badge">0</span></button>
         <button id="status05-button" type="button" value=".chillin-status-05" class="btn btn-default btn-info">Levererad <span id="status05-counter" class="badge">0</span></button>
         <button id="status06-button" type="button" value=".chillin-status-06" class="btn btn-default btn-info">Annullerad <span id="status06-counter" class="badge">0</span></button>
         <button id="status07-button" type="button" value=".chillin-status-07" class="btn btn-default btn-info">Överförd <span id="status07-counter" class="badge">0</span></button>
@@ -175,7 +176,8 @@
                 (Status:01\:Ny OR 
                  Status:02\:Åtgärda OR
                  Status:09\:Mottagen OR 
-                 (Status:03\:Beställd AND FollowUpDate:[197501010000000 TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]))");
+                 (Status:03\:Beställd AND FollowUpDate:[197501010000000 TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + @"]) OR
+                 (Status:14\:Infodisk AND DueDate:[197501010000000 TO " + DateTime.Now.AddDays(5).Date.ToString("yyyyMMdd") + @"999999999]))");
             
             // Search for our items
             var results = searcher.Search(query);

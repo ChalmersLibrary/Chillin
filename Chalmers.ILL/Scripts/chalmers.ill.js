@@ -126,7 +126,7 @@ $(function () {
                     bStatus = parseInt(bStatusMatch[1]);
                 }
                 
-                var sortingWeights = [0, 1, 3, 5, 6, 9, 10, 11, 12, 2, 13, 8, 4, 7];
+                var sortingWeights = [1, 2, 4, 6, 7, 10, 11, 12, 13, 3, 14, 9, 5, 8, 0];
 
                 var result = sortingWeights[aStatus] - sortingWeights[bStatus];
                 if (result == 0) {
@@ -456,17 +456,13 @@ function applyListFilter(filter, animate)
     if (filter === "") {
         animate ? $(".order-list").find(".order-item-status").parent().parent().slideDown() : $(".order-list").find(".order-item-status").parent().parent().show();
         if (libfilter != "") {
-            //animate ? $(".order-list").find(".deliveryLibrary:not(" + libfilter + ")").parent().slideUp() :
             $(".order-list").find(".deliveryLibrary:not(" + libfilter + ")").parent().hide();
-            // animate ? $(".order-list").find(".deliveryLibrary" + libfilter).parent().slideDown() : $(".order-list").find(".deliveryLibrary" + libfilter).parent().show();
         }
     } else {
         animate ? $(".order-list").find(".order-item-status:not(" + filter + ")").parent().parent().slideUp() : $(".order-list").find(".order-item-status:not(" + filter + ")").parent().parent().hide();
         animate ? $(".order-list").find(".order-item-status" + filter).parent().parent().slideDown() : $(".order-list").find(".order-item-status" + filter).parent().parent().show();
         if (libfilter != "") {
-            //animate ? $(".order-list").find(".deliveryLibrary:not(" + libfilter + ")").parent().slideUp() :
             $(".order-list").find(".deliveryLibrary:not(" + libfilter + ")").parent().hide();
-           // animate ? $(".order-list").find(".deliveryLibrary" + libfilter).parent().slideDown() : $(".order-list").find(".deliveryLibrary" + libfilter).parent().show();
         }
     }
 }
@@ -483,18 +479,14 @@ function applyLibraryListFilter(filter, animate)
     if (filter === "") {
         animate ? $(".order-list").find(".deliveryLibrary").parent().slideDown() : $(".order-list").find(".deliveryLibrary").parent().show();
         if (statusfilter != "") {
-            //animate ? $(".order-list").find(".order-item-status:not(" + statusfilter + ")").parent().parent().slideUp() :
             $(".order-list").find(".order-item-status:not(" + statusfilter + ")").parent().parent().hide();
-            // animate ? $(".order-list").find(".order-item-status" + statusfilter).parent().parent().slideDown() : $(".order-list").find(".order-item-status" + statusfilter).parent().parent().show();
         }
     }
     else {
         animate ? $(".order-list").find(".deliveryLibrary:not(" + filter + ")").parent().slideUp() : $(".order-list").find(".deliveryLibrary:not(" + filter + ")").parent().hide();
         animate ? $(".order-list").find(".deliveryLibrary" + filter).parent().slideDown() : $(".order-list").find(".deliveryLibrary" + filter).parent().show();
         if (statusfilter != ""){
-            //animate ? $(".order-list").find(".order-item-status:not(" + statusfilter + ")").parent().parent().slideUp() :
             $(".order-list").find(".order-item-status:not(" + statusfilter + ")").parent().parent().hide();
-            // animate ? $(".order-list").find(".order-item-status" + statusfilter).parent().parent().slideDown() : $(".order-list").find(".order-item-status" + statusfilter).parent().parent().show();
         }
     }
     updateFilterButtonCounters();
@@ -502,7 +494,7 @@ function applyLibraryListFilter(filter, animate)
 
 function updateFilterButtonCounters()
 {
-    var numberOfStatuses = 13;
+    var numberOfStatuses = 14;
 
     // TODO: AAAAAHHHH!! MY EYES!!! Rewrite this method.
     if ($("#library01-button").hasClass("active")) {
