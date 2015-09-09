@@ -796,7 +796,8 @@ namespace Chalmers.ILL.OrderItems
             var deliveryDateStr = content.GetValue("deliveryDate") == null ?  "" : content.GetValue("deliveryDate").ToString();
             var deliveryDate = deliveryDateStr == "" ? new DateTime(1970, 1, 1) : Convert.ToDateTime(deliveryDateStr);
             var statusStr = umbraco.library.GetPreValueAsString(newStatusId).Split(':').Last();
-            if (deliveryDate.Year == 1970 && (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport")))
+            if (deliveryDate.Year == 1970 && (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport") || 
+                    statusStr.Contains("Infodisk")))
             {
                 content.SetValue("deliveryDate", DateTime.Now);
             }
