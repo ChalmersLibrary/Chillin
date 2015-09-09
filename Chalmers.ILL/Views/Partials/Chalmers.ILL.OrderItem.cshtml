@@ -73,6 +73,19 @@
                                     allowedStatusValues.Add(Model.OrderItem.PreviousStatusString);
                                 }
                                 
+                                if (Model.OrderItem.DeliveryDate.Year > 1975) // The book or article has been delivered
+                                {
+                                    if (Model.OrderItem.TypePrevalue == "Artikel")
+                                    {
+                                        allowedStatusValues.Add("Levererad");
+                                    }
+                                    else if (Model.OrderItem.TypePrevalue == "Bok")
+                                    {
+                                        allowedStatusValues.Add("Infodisk");
+                                        allowedStatusValues.Add("Utlånad");
+                                    }
+                                }
+
                                 foreach (var status in Model.AvailableStatuses)
                                 {
                                     if (allowedStatusValues.Contains(status.Value))
