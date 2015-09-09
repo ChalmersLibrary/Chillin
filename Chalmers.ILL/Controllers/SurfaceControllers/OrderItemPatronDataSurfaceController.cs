@@ -17,6 +17,7 @@ using System.IO;
 using Chalmers.ILL.OrderItems;
 using Umbraco.Core.Models;
 using Chalmers.ILL.UmbracoApi;
+using Microsoft.Practices.Unity;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -24,13 +25,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemPatronDataSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
-        IPatronDataProvider _patronDataProvider;
+        IPatronDataProvider _patronDataProviderSierraCache;
+        IPatronDataProvider _patronDataProviderSierra;
         IUmbracoWrapper _umbraco;
 
-        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProvider, IUmbracoWrapper umbraco)
+        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProviderSierraCache, 
+            [Dependency("Sierra")] IPatronDataProvider patronDataProviderSierra, IUmbracoWrapper umbraco)
         {
             _orderItemManager = orderItemManager;
-            _patronDataProvider = patronDataProvider;
+            _patronDataProviderSierraCache = patronDataProviderSierraCache;
+            _patronDataProviderSierra = patronDataProviderSierra;
             _umbraco = umbraco;
         }
 
@@ -83,7 +87,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="pnr">The "personnummer" which we should search for.</param>
         /// <returns>Returns a result indicating how the request went.</returns>
         [HttpPost]
-        public ActionResult FetchPatronDataUsingLcnOrPnr(int orderItemNodeId, string lcn, string pnr)
+        public ActionResult FetchPatronDataUsingLcnOrPnr(int orderItemNodeId, string lcn, string pnr, bool cache=true)
         {
             var json = new ResultResponse();
 
@@ -92,7 +96,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var cs = Services.ContentService;
                 var content = cs.GetById(orderItemNodeId);
 
-                var sm = _patronDataProvider.GetPatronInfoFromLibraryCardNumberOrPersonnummer(lcn, pnr);
+                SierraModel sm = null;
+                if (cache)
+                {
+                    sm = _patronDataProviderSierraCache.GetPatronInfoFromLibraryCardNumberOrPersonnummer(lcn, pnr);
+                }
+                else
+                {
+                    sm = _patronDataProviderSierra.GetPatronInfoFromLibraryCardNumberOrPersonnummer(lcn, pnr);
+                }
+
                 if (!String.IsNullOrEmpty(sm.id))
                 {
                     content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
@@ -124,7 +137,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="lcn">The library card number which we should search for.</param>
         /// <returns>Returns a result indicating how the request went.</returns>
         [HttpPost]
-        public ActionResult FetchPatronDataUsingLcn(int orderItemNodeId, string lcn)
+        public ActionResult FetchPatronDataUsingLcn(int orderItemNodeId, string lcn, bool cache=true)
         {
             var json = new ResultResponse();
 
@@ -133,7 +146,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var cs = Services.ContentService;
                 var content = cs.GetById(orderItemNodeId);
 
-                var sm = _patronDataProvider.GetPatronInfoFromLibraryCardNumber(lcn);
+                SierraModel sm = null;
+                if (cache)
+                {
+                    sm = _patronDataProviderSierraCache.GetPatronInfoFromLibraryCardNumber(lcn);
+                }
+                else
+                {
+                    sm = _patronDataProviderSierra.GetPatronInfoFromLibraryCardNumber(lcn);
+                }
+
                 if (!String.IsNullOrEmpty(sm.id))
                 {
                     content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));

@@ -563,7 +563,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>49387</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:49387/</IISUrl>
+          <IISUrl>http://localhost:52758/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

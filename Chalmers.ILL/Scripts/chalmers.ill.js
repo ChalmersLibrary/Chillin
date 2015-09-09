@@ -965,9 +965,10 @@ function writeLogItem(nodeId, message, type, followUpDate, cb) {
     }
 }
 
-function fetchDataFromSierraUsingLibraryCardNumber(orderItemNodeId, lcn) {
+function fetchDataFromSierraUsingLibraryCardNumber(orderItemNodeId, lcn, cache) {
+    cache = typeof cache !== "undefined" ? cache : true;
     lockScreen();
-    $.post("/umbraco/surface/OrderItemPatronDataSurface/FetchPatronDataUsingLcn", { orderItemNodeId: orderItemNodeId, lcn: lcn }).done(function (json) {
+    $.post("/umbraco/surface/OrderItemPatronDataSurface/FetchPatronDataUsingLcn", { orderItemNodeId: orderItemNodeId, lcn: lcn, cache: cache }).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(orderItemNodeId);
         } else {
