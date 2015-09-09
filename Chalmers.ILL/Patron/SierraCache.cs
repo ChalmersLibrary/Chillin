@@ -7,6 +7,7 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Web;
 
 namespace Chalmers.ILL.Patron
@@ -43,11 +44,13 @@ namespace Chalmers.ILL.Patron
         {
             var ret = new Models.SierraModel();
 
-            var pnrWithoutDash = pnr.Replace("-", "").Replace(" ", "");
-            var pnrWithDash = pnrWithoutDash.Insert(6, "-").Replace(" ", "");
+            var rgx = new Regex("[^a-zA-Z0-9]");
+
+            var pnrWithoutDash = rgx.Replace(pnr, "");
+            var pnrWithDash = pnrWithoutDash.Length == 10 ? pnrWithoutDash.Insert(6, "-") : pnrWithoutDash;
 
             // Only search on first barcode if there are multiple. Only search on exact pnr with or without dash.
-            var query = "barcode:" + barcode + "* OR pnum:(" + pnrWithoutDash + " OR " + pnrWithDash + ")";
+            var query = "barcode:" + rgx.Replace(barcode, "") + "* OR pnum:(*" + pnrWithoutDash + "* OR *" + pnrWithDash + "*)";
 
             try
             {
