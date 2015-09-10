@@ -120,6 +120,7 @@ namespace Chalmers.ILL.OrderItems
                 // Parse out the integer of status and type
                 int OrderStatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], contentNode.Fields.GetValueString("Status"));
                 int OrderPreviousStatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], contentNode.Fields.GetValueString("PreviousStatus"));
+                int OrderLastDeliveryStatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], contentNode.Fields.GetValueString("LastDeliveryStatus"));
                 int OrderTypeId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], contentNode.Fields.GetValueString("Type"));
                 int OrderDeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], contentNode.Fields.GetValueString("DeliveryLibrary"));
                 int OrderCancellationReasonId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderCancellationReasonDataTypeDefinitionName"], contentNode.Fields.GetValueString("CancellationReason"));
@@ -134,6 +135,11 @@ namespace Chalmers.ILL.OrderItems
                 orderItem.PreviousStatus = OrderPreviousStatusId;
                 orderItem.PreviousStatusString = OrderPreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderPreviousStatusId).Split(':').Last() : "";
                 orderItem.PreviousStatusPrevalue = OrderPreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderPreviousStatusId) : "";
+
+                // Last delivery status (id, whole prevalue "xx:yyyy" and just string "yyyy")
+                orderItem.LastDeliveryStatus = OrderLastDeliveryStatusId;
+                orderItem.LastDeliveryStatusString = OrderLastDeliveryStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderLastDeliveryStatusId).Split(':').Last() : "";
+                orderItem.LastDeliveryStatusPrevalue = OrderLastDeliveryStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderLastDeliveryStatusId) : "";
 
                 // Type (id and prevalue)
                 orderItem.Type = OrderTypeId;
@@ -783,12 +789,22 @@ namespace Chalmers.ILL.OrderItems
 
         private void OnStatusChanged(IContent content, int newStatusId)
         {
+            UpdateLastDeliveryStatusWhenProper(content, newStatusId);
             UpdateDeliveryDateWhenProper(content, newStatusId);
         }
 
         private void OnTypeChanged(IContent content, int newTypeId)
         {
             SetDeliveryLibraryIfNewTypeIsArtikel(content, newTypeId);
+        }
+
+        private void UpdateLastDeliveryStatusWhenProper(IContent content, int newStatusId)
+        {
+            var statusStr = umbraco.library.GetPreValueAsString(newStatusId).Split(':').Last();
+            if (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport") || statusStr.Contains("Infodisk"))
+            {
+                content.SetValue("lastDeliveryStatus", newStatusId);
+            }
         }
 
         private void UpdateDeliveryDateWhenProper(IContent content, int newStatusId)
