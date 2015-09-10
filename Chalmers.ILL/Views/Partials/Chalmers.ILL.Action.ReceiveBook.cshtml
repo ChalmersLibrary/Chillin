@@ -28,7 +28,8 @@
         <div class="row">
             <div class="form-group col-sm-12">
                 <div class="alert alert-success" role="alert">Automatiskt mailutskick kommer att levereras till <span id="patron-email" class="content-editable" contenteditable>@Model.OrderItem.PatronEmail</span> <span class="glyphicon glyphicon-pencil"></span></div>
-                <button class="btn btn-success" onclick="deliver()">Ta emot</button>
+                <button class="btn btn-success" onclick="deliver(false, true)">Ta emot för vanligt lån</button>
+                <button class="btn btn-success" onclick="deliver(true, false)">Ta emot för läsesalslån</button>
             </div>
         </div>
     </div>
@@ -100,14 +101,18 @@
         });
     });
 
-    function deliver() {
+    function deliver(localLoan, print) {
         if (hasProviderInfoBeenEdited || confirm("Du har inte ändrat leverantörsdata. Är du säker på att du vill fortsätta?")) {
             $('#container #printDiv').insertAfter('#container');
             var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
             $('.dueDatePlaceHolder').html(dueDate);
-            window.print();
-            var r = window.confirm("Skrevs bokslippen ut korrekt?");
-            if (r == true) {
+
+            var r = true;
+            if (print) {
+                window.print();
+                r = window.confirm("Skrevs bokslippen ut korrekt?");
+            }
+            if (r) {
                 setOrderItemDeliveryReceived(@Model.OrderItem.NodeId, $('#bookId').val(), $('#dueDate').val(), $('#providerInformation').val(),
                 {
                     nodeId: @Model.OrderItem.NodeId,
@@ -118,7 +123,7 @@
                     newCancellationReasonId: -1,
                     newPurchasedMaterialId: -1,
                     newFollowUpDate: $('#dueDate').val(),
-                }, $("#log-message").val(), false);
+                }, $("#log-message").val(), localLoan);
                 $("#printDiv").remove();
             } else {
                 alert("Leveransfunktionen kommer laddas om, försök därefter igen.");
