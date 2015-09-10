@@ -60,7 +60,18 @@
                         <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
                             <li><a href="#" onclick="updateSelectedStatus(-1, 'Ingen förändring', -1, -1); event.preventDefault();">Ingen förändring</a></li>
                             @{
-                                var allowedStatusValues = new String[] { "Annullerad", "Inköpt", "Väntar" };
+                                var allowedStatusValues = new List<String>(){ "Annullerad", "Inköpt" };
+
+                                if (Model.OrderItem.DeliveryDate.Year <= 1975)
+                                {
+                                    // We only want them to be able to choose 'Väntar' if we haven't delivered the book or article.
+                                    allowedStatusValues.Add("Väntar");
+                                }
+
+                                if (Model.OrderItem.StatusString.Contains("Åtgärda"))
+                                {
+                                    allowedStatusValues.Add(Model.OrderItem.PreviousStatusString);
+                                }
 
                                 foreach (var status in Model.AvailableStatuses)
                                 {
