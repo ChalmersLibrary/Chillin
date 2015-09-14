@@ -172,7 +172,7 @@
             foreach (var item in results.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => DateTime.ParseExact(y.Fields["FollowUpDate"], "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None)))
             {          
                 @RenderOrderList(loggedInMember, item.Id, DateTime.ParseExact(item.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None),
-                    item.Fields.GetValueString("PatronName"), GetSigelFromLibraryName(item.Fields.GetValueString("DeliveryLibrary")), item.Fields.GetValueString("Status"), 
+                    item.Fields.GetValueString("PatronName"), item.Fields.GetValueString("DeliveryLibrary"), item.Fields.GetValueString("Status"), 
                     item.Fields.GetValueString("Type"), item.Fields.GetValueString("Reference"), EditedBy(item.Id));
             }
             
@@ -204,7 +204,7 @@
             foreach (var result in results.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.Fields["FollowUpDate"]))
             {
                 DateTime convertDate = DateTime.ParseExact(result.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                @RenderOrderList(loggedInMember, result.Id, convertDate, result.Fields.GetValueString("PatronName"), GetSigelFromLibraryName(result.Fields.GetValueString("DeliveryLibrary")), 
+                @RenderOrderList(loggedInMember, result.Id, convertDate, result.Fields.GetValueString("PatronName"), result.Fields.GetValueString("DeliveryLibrary"), 
                     result.Fields.GetValueString("Status"), result.Fields.GetValueString("Type"), result.Fields.GetValueString("Reference"), EditedBy(result.Id));
             }
         }
@@ -251,7 +251,7 @@
     <div id="@Id" class="@css_class" data-editorid="@editorID.ToString().AsInt()" @data_attribute>
         <div class="col-sm-7" data-column="reference">@Html.Raw(reference.ToString().Replace("\n", "<br />"))</div>
         <div class="col-sm-2" data-column="patronName">@patronName</div>
-        <div class="col-sm-1 deliveryLibrary @library" data-column="deliveryLibrary">@library</div>
+        <div class="col-sm-1 deliveryLibrary @library" data-column="deliveryLibrary">@GetSigelFromLibraryName(library.ToString())</div>
         <div class="col-sm-1" data-column="type">@type</div>
         <div class="col-sm-1" data-column="status" data-fud="@date.Ticks">
             @if (status.ToString().StartsWith("01:"))
