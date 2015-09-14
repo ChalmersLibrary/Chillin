@@ -602,7 +602,7 @@ function loadOrderItemSummary(id)
             }
 
             // Reference with links
-            $("#" + json.NodeId + " div[data-column='reference']").html(replaceURLWithHTMLLinks(json.Reference));
+            $("#" + json.NodeId + " div[data-column='reference']").html(replaceURLWithHTMLLinks(json.Reference.replace(/\n/g, "<br />")));
 
             // Mark as locked if being edited by other member
             if (json.EditedBy != "" && json.EditedByCurrentMember == false) {

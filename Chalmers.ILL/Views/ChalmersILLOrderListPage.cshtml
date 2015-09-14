@@ -231,7 +231,7 @@
     
     <div id="@Id" class="@css_class" data-editorid="@editorID.ToString().AsInt()" @data_attribute>
         <div class="col-sm-1" data-fud="@date.Ticks" data-column="createDate">@date.ToShortDateString()</div>
-        <div class="col-sm-5" data-column="reference">@reference</div>
+        <div class="col-sm-5" data-column="reference">@Html.Raw(reference.ToString().Replace("\n", "<br />"))</div>
         <div class="col-sm-2" data-column="patronName">@patronName</div>
         <div class="col-sm-2 deliveryLibrary @library" data-column="deliveryLibrary">@library</div>
         <div class="col-sm-1" data-column="type">@type</div>
