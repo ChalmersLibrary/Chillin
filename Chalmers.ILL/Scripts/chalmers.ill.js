@@ -546,6 +546,20 @@ function setCounterOrHide(elem, count) {
     elem.text(count.toString());
 }
 
+function getSigelFromLibraryName(libraryName) {
+    var ret = "-";
+
+    if (libraryName == "Huvudbiblioteket") {
+        ret = "Z";
+    } else if (libraryName == "Arkitekturbiblioteket") {
+        ret = "Za";
+    } else if (libraryName == "Lindholmenbiblioteket") {
+        ret = "Zl";
+    }
+
+    return ret;
+}
+
 // Load OrderItem Summary (first row in list)
 function loadOrderItemSummary(id)
 {
@@ -562,7 +576,7 @@ function loadOrderItemSummary(id)
 
             // Update delivery library
             var delLibDiv = $("#" + json.NodeId + " div[data-column='deliveryLibrary']");
-            delLibDiv.text(json.DeliveryLibraryPrevalue);
+            delLibDiv.text(getSigelFromLibraryName(json.DeliveryLibraryPrevalue));
 
             // TODO: Should solve this in some less hard coded way.
             delLibDiv.removeClass("Huvudbiblioteket");

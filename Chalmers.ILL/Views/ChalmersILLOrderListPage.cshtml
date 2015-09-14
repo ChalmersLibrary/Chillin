@@ -75,6 +75,26 @@
 
         return sortingWeights[i];
     }
+
+    string GetSigelFromLibraryName(string libraryName)
+    {
+        var ret = "-";
+
+        if (libraryName == "Huvudbiblioteket")
+        {
+            ret = "Z";
+        }
+        else if (libraryName == "Arkitekturbiblioteket")
+        {
+            ret = "Za";
+        }
+        else if (libraryName == "Lindholmenbiblioteket")
+        {
+            ret = "Zl";
+        }
+
+        return ret;
+    }
 }
 
 @{
@@ -153,8 +173,8 @@
             foreach (var item in results.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => DateTime.ParseExact(y.Fields["FollowUpDate"], "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None)))
             {          
                 @RenderOrderList(loggedInMember, item.Id, DateTime.ParseExact(item.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None),
-                    item.Fields.GetValueString("PatronName"), item.Fields.GetValueString("DeliveryLibrary"), item.Fields.GetValueString("Status"), item.Fields.GetValueString("Type"), 
-                    item.Fields.GetValueString("Reference"), EditedBy(item.Id));
+                    item.Fields.GetValueString("PatronName"), GetSigelFromLibraryName(item.Fields.GetValueString("DeliveryLibrary")), item.Fields.GetValueString("Status"), 
+                    item.Fields.GetValueString("Type"), item.Fields.GetValueString("Reference"), EditedBy(item.Id));
             }
             
             // Add debug message
@@ -185,8 +205,8 @@
             foreach (var result in results.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.Fields["FollowUpDate"]))
             {
                 DateTime convertDate = DateTime.ParseExact(result.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                @RenderOrderList(loggedInMember, result.Id, convertDate, result.Fields.GetValueString("PatronName"), result.Fields.GetValueString("DeliveryLibrary"), result.Fields.GetValueString("Status"), 
-                    result.Fields.GetValueString("Type"), result.Fields.GetValueString("Reference"), EditedBy(result.Id));
+                @RenderOrderList(loggedInMember, result.Id, convertDate, result.Fields.GetValueString("PatronName"), GetSigelFromLibraryName(result.Fields.GetValueString("DeliveryLibrary")), 
+                    result.Fields.GetValueString("Status"), result.Fields.GetValueString("Type"), result.Fields.GetValueString("Reference"), EditedBy(result.Id));
             }
         }
     }
