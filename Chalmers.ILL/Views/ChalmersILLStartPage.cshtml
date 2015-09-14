@@ -51,6 +51,7 @@
         <li class="list-group-item"><span class="label label-danger">Beställd</span> - hos leverantör, syns bara om uppföljningsdatum passerats.</li>
         <li class="list-group-item"><span class="label label-danger">Väntar</span> - avvaktar svar från lt eller dyl, syns aldrig i listan.</li>
         <li class="list-group-item"><span class="label label-danger">Transport</span> - transporteras till filial för leverans, syns aldrig i listan.</li>
+        <li class="list-group-item"><span class="label label-danger">Infodisk</span> - boken är mottagen från utlånande bibliotek och utställd i infodisken, syns i listan fem dagar innan återlämningsdatum.</li>
         <li class="list-group-item"><span class="label label-danger">Utlånad</span> - utlånad till lt, syns aldrig i listan.</li>
         <li class="list-group-item"><span class="label label-info">Levererad</span> - klar, levererad till lt, syns aldrig i listan</li>
         <li class="list-group-item"><span class="label label-info">Annullerad</span> - avbeställd, syns aldrig i listan.</li>
@@ -87,6 +88,41 @@
     </ul>
 </div>
 
-<p>
-    Meddelandemallar finns på <a href="@ConfigurationManager.AppSettings["messageTemplatesLink"]">intranätet</a>.
-</p>
+<div>
+    <h3>Automatiskt mailutskick</h3>
+    <p>Automatiska mail skickas ut 05:50 varje dag. Missade meddelanden skickas ej ut retroaktivt.</p>
+    <ul class="list-group">
+        <li class="list-group-item">
+            <b>Artighetsmeddelande</b><br />
+            Status: Utlånad<br />
+            Datum: Exakt fem dagar innan återlämningsdatum
+        </li>
+        <li class="list-group-item">
+            <b>Lånetid slut</b><br />
+            Status: Utlånad<br />
+            Datum: Exakt en dag efter återlämningsdatum
+        </li>
+        <li class="list-group-item">
+            <b>Bok lite försenad</b><br />
+            Status: Utlånad eller Krävd<br />
+            Datum: Exakt fem dagar efter återlämningsdatum
+        </li>
+        <li class="list-group-item">
+            <b>Bok mycket försenad!</b><br />
+            Status: Utlånad eller Krävd<br />
+            Datum: Exakt tio dagar efter återlämningsdatum
+        </li>
+        <li class="list-group-item">
+            <b>Bok väldigt mycket försenad! (inget mailutskick)</b><br />
+            Status: Utlånad eller krävd<br />
+            Datum: 17 dagar eller mer efter återlämningsdatum<br />
+            Note: Inget mailutskick. Loggar och ändrar status till Åtgärda.
+        </li>
+        <li class="list-group-item">
+            <b>Artikel tillgänglig i infodisk efter transport</b><br />
+            Status: Transport<br />
+            Datum: Mer än en dag efter leveransdatum<br />
+            Note: Loggar och ändrar status till Levererad.
+        </li>
+    </ul>
+</div>
