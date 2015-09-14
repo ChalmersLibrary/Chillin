@@ -35,6 +35,10 @@ namespace Chalmers.ILL.Models
         public string PreviousStatusPrevalue { get; set; }
         public string PreviousStatusString { get; set; }
 
+        public int LastDeliveryStatus { get; set; }
+        public string LastDeliveryStatusPrevalue { get; set; }
+        public string LastDeliveryStatusString { get; set; }
+
         public int DeliveryLibrary { get; set; }
         public string DeliveryLibraryPrevalue { get; set; }
 

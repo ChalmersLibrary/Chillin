@@ -95,11 +95,6 @@ $(function () {
             });
         }
 
-        $("#sort-on-follow-up-link").click(function () {
-            sortClickEventFunc(this, function (a, b) {
-                return parseInt($(a).find("div[data-column='createDate']").data("fud")) - parseInt($(b).find("div[data-column='createDate']").data("fud"));
-            })
-        });
         $("#sort-on-type-link").click(function () {
             sortClickEventFunc(this, function (a, b) {
                 var aType = $(a).find("div[data-column='type']").text();
@@ -130,7 +125,7 @@ $(function () {
 
                 var result = sortingWeights[aStatus] - sortingWeights[bStatus];
                 if (result == 0) {
-                    result = parseInt($(a).find("div[data-column='createDate']").data("fud")) - parseInt($(b).find("div[data-column='createDate']").data("fud"))
+                    result = parseInt($(a).find("div[data-column='status']").data("fud")) - parseInt($(b).find("div[data-column='status']").data("fud"))
                 }
                 return result;
             })
@@ -562,7 +557,7 @@ function loadOrderItemSummary(id)
 
             // Update delivery library
             var delLibDiv = $("#" + json.NodeId + " div[data-column='deliveryLibrary']");
-            delLibDiv.text(json.DeliveryLibraryPrevalue);
+            delLibDiv.text(getSigelFromLibraryName(json.DeliveryLibraryPrevalue));
 
             // TODO: Should solve this in some less hard coded way.
             delLibDiv.removeClass("Huvudbiblioteket");
@@ -602,7 +597,7 @@ function loadOrderItemSummary(id)
             }
 
             // Reference with links
-            $("#" + json.NodeId + " div[data-column='reference']").html(replaceURLWithHTMLLinks(json.Reference));
+            $("#" + json.NodeId + " div[data-column='reference']").html(replaceURLWithHTMLLinks(json.Reference.replace(/\n/g, "<br />")));
 
             // Mark as locked if being edited by other member
             if (json.EditedBy != "" && json.EditedByCurrentMember == false) {
@@ -1199,4 +1194,18 @@ function getDateStringWithHoursAndMinutes(date) {
         ("00" + date.getDate()).substr(-2) + " " +
         ("00" + date.getHours()).substr(-2) + ":" +
         ("00" + date.getMinutes()).substr(-2);
+}
+
+function getSigelFromLibraryName(libraryName) {
+    var ret = "";
+
+    if (libraryName == "Huvudbiblioteket") {
+        ret = "Z";
+    } else if (libraryName == "Arkitekturbiblioteket") {
+        ret = "Za";
+    } else if (libraryName == "Lindholmenbiblioteket") {
+        ret = "Zl";
+    }
+
+    return ret;
 }

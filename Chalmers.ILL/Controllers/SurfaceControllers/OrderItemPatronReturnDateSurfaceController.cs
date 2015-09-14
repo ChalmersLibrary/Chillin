@@ -53,11 +53,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 var pack = JsonConvert.DeserializeObject<ChangeReturnDatePackage>(packJson);
 
+                var orderItem = _orderItemManager.GetOrderItem(pack.nodeId);
+
                 if (pack.logMsg != "")
                 {
                     _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logMsg, false, false);
                 }
 
+                if (orderItem.LastDeliveryStatus != -1)
+                {
+                    _orderItemManager.SetStatus(pack.nodeId, orderItem.LastDeliveryStatus);
+                }
                 _orderItemManager.SetDueDate(pack.nodeId, pack.dueDate, false, false);
                 _orderItemManager.SetProviderDueDate(pack.nodeId, pack.dueDate, false, false);
 
