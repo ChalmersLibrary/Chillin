@@ -35,54 +35,50 @@
     <div class="col-md-6">
         <div id="printDiv" class="print">
             <h3 style="float:right" class="dueDatePlaceHolder"></h3><br />
+            <div style="font-size:1.5em">Infodisk, tag ut och läs!</div>
             <strong style="font-size:1.5em">@Model.OrderItem.SierraInfo.last_name @Model.OrderItem.SierraInfo.first_name</strong><br />
             <br />
             <br />
-            <p>
-                <strong>Fjärrlån</strong><br />
-                <strong>Återlämnas senast</strong><br />
+            <p style="font-size:1.4em">
+                OBS! Innan du lånar ut boken<br />
+                1.	Kolla låntagaren i Sierra.<br />
+                2.	Ta ut detta papper ur boken.<br />
+                3.	Ge boken till låntagaren.<br />
+                4.	Lägg detta papper i lila lådan.<br />
             </p>
-            <p>
-                <strong>Interlibrary loan</strong><br />
-                <strong>Due date</strong><br />
-            </p>
-            <p>
-                <strong style="font-size:1.5em" class="dueDatePlaceHolder"></strong>
-            </p>
-
-            <p>
-                <strong>Återlämnas omedelbart vid krav</strong><br />
-                <strong>Please return immediately if recalled</strong>
-            </p>
-            <p>
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <img src="~/images/cth_logo.png" width="148pt" />
-            </p>
-            <p>
-                Chalmers tekniska högskola<br />
-                Biblioteket<br />
-                412 96  Göteborg<br />
-                <br />
-                031-772 3737 / 3761<br />
-                <br />
-                www.lib.chalmers.se<br />
-                support.lib@chalmers.se
-            </p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <div style="float:right">
+                @{
+                    string barcodeurl = "http://barcode.tec-it.com/barcode.ashx?translate-esc=off&data=" + Model.OrderItem.OrderId + "w&code=Code128&unit=Fit&dpi=96&imagetype=Gif&rotation=0&color=000000&bgcolor=FFFFFF&qunit=Mm&quiet=0";
+                    //string barcodeurl = "http://barcodes4.me/barcode/c39/" + @Model.OrderItem.OrderId + ".png";
+                    <img width="300" src=@barcodeurl /><br />
+                }
+            </div>
             <div class="pb"></div>
             <h3 class="dueDatePlaceHolder"></h3>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
         </div>
         <div class="form-group">
             <label for="log-message">Skriv till logg (valfritt)</label>
