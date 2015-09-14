@@ -32,12 +32,22 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="statusId">Status property DataType Id</param>
         /// <returns>MVC ActionResult with JSON</returns>
         [HttpGet]
-        public ActionResult SetOrderItemStatus(int orderNodeId, int statusId)
+        public ActionResult SetOrderItemStatus(int orderNodeId, int statusId, int cancellationReasonId = -1, int purchasedMaterialId = -1)
         {
             var json = new ResultResponse();
 
             try 
 	        {
+                if (cancellationReasonId != -1)
+                {
+                    _orderItemManager.SetCancellationReason(orderNodeId, cancellationReasonId, false, false);
+                }
+
+                if (purchasedMaterialId != -1)
+                {
+                    _orderItemManager.SetPurchasedMaterial(orderNodeId, purchasedMaterialId, false, false);
+                }
+
                 // Use internal method to set status property and log the result
                 _orderItemManager.SetStatus(orderNodeId, statusId);
 

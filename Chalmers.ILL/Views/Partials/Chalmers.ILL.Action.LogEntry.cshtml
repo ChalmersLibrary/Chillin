@@ -95,29 +95,18 @@
 
     function submitLogEntry(obj) {
         var newStatusObj = $("#currently-selected-status");
-        if (newStatusObj.length > 0) {
-            var newStatusId = newStatusObj.data("status-id");
-            var newStatusCancellationReasonId = newStatusObj.data("cancellation-reason-id");
-            var newStatusPurchasedMaterialId = newStatusObj.data("purchased-material-id");
+        var newStatusId = -1;
+        var newStatusCancellationReasonId = -1;
+        var newStatusPurchasedMaterialId = -1;
 
-            if (newStatusId != -1) {
-                if (!writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, "LOG", obj.form.followUpDate.value, function () {
-                    if (newStatusCancellationReasonId != -1) {
-                            setOrderItemStatusAndCancellationReason(@Model.OrderItem.NodeId, newStatusId, newStatusCancellationReasonId);
-                    } else if(newStatusPurchasedMaterialId != -1) {
-                            setOrderItemStatusAndPurchasedMaterial(@Model.OrderItem.NodeId, newStatusId, newStatusPurchasedMaterialId);
-                    } else {
-                            setOrderItemStatus(@Model.OrderItem.NodeId, newStatusId);
-                    }
-                })) {
-                    unlockScreen();
-                }
-            } else {
-                writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, "LOG", obj.form.followUpDate.value);
-            }
-        } else { // If we can't find the currently-selected-status, this means that we are only logging without changing status or follow up date.
-            writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, "LOG", "@Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)");
+        if (newStatusObj.length > 0) {
+            newStatusId = newStatusObj.data("status-id");
+            newStatusCancellationReasonId = newStatusObj.data("cancellation-reason-id");
+            newStatusPurchasedMaterialId = newStatusObj.data("purchased-material-id");
         }
+
+        writeLogItem(@Model.OrderItem.NodeId, obj.form.message.value, "LOG", obj.form.followUpDate.value, newStatusId, 
+            newStatusCancellationReasonId, newStatusPurchasedMaterialId);
     }
     </script>
 </form>

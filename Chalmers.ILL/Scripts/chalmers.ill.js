@@ -634,25 +634,14 @@ function setOrderItemStatus(node, status) {
 
 function setOrderItemStatusAndCancellationReason(node, status, reason) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemStatusSurface/SetOrderItemStatus?orderNodeId=" + node + "&statusId=" + status, function (json) {
+    $.getJSON("/umbraco/surface/OrderItemStatusSurface/SetOrderItemStatus?orderNodeId=" + node + "&statusId=" + status + "&cancellationReasonId=" + reason, function (json) {
         if (json.Success) {
-            $.getJSON("/umbraco/surface/OrderItemCancellationReasonSurface/SetOrderItemCancellationReason?orderNodeId=" + node + "&cancellationReasonId=" + reason, function (json) {
-                if (json.Success) {
-                    loadOrderItemDetails(node);
-                }
-                else {
-                    alert(json.Message);
-                }
-                unlockScreen();
-            }).fail(function (jqxhr, textStatus, error) {
-                alert("Error: " + textStatus + " " + error);
-                unlockScreen();
-            });
+            loadOrderItemDetails(node);
         }
         else {
             alert(json.Message);
-            unlockScreen();
         }
+        unlockScreen();
     }).fail(function (jqxhr, textStatus, error) {
         alert("Error: " + textStatus + " " + error);
         unlockScreen();
@@ -661,25 +650,14 @@ function setOrderItemStatusAndCancellationReason(node, status, reason) {
 
 function setOrderItemStatusAndPurchasedMaterial(node, status, material) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemStatusSurface/SetOrderItemStatus?orderNodeId=" + node + "&statusId=" + status, function (json) {
+    $.getJSON("/umbraco/surface/OrderItemStatusSurface/SetOrderItemStatus?orderNodeId=" + node + "&statusId=" + status + "&purchasedMaterialId=" + material, function (json) {
         if (json.Success) {
-            $.getJSON("/umbraco/surface/OrderItemPurchasedMaterialSurface/SetOrderItemPurchasedMaterial?orderNodeId=" + node + "&purchasedMaterialId=" + material, function (json) {
-                if (json.Success) {
-                    loadOrderItemDetails(node);
-                }
-                else {
-                    alert(json.Message);
-                }
-                unlockScreen();
-            }).fail(function (jqxhr, textStatus, error) {
-                alert("Error: " + textStatus + " " + error);
-                unlockScreen();
-            });
+            loadOrderItemDetails(node);
         }
         else {
             alert(json.Message);
-            unlockScreen();
         }
+        unlockScreen();
     }).fail(function (jqxhr, textStatus, error) {
         alert("Error: " + textStatus + " " + error);
         unlockScreen();
@@ -925,18 +903,14 @@ function sendMailToPatron(mailData) {
 }
 
 /* Write Log Entry */
-function writeLogItem(nodeId, message, type, followUpDate, cb) {
+function writeLogItem(nodeId, message, type, followUpDate, statusId, cancellationReasonId, purchasedMaterialId) {
     lockScreen();
     if (message) {
-        $.post("/umbraco/surface/LogItemSurface/WriteLogItem", { nodeId: nodeId, Message: message, Type: type, newFollowUpDate: followUpDate }).done(function (json) {
+        $.post("/umbraco/surface/LogItemSurface/WriteLogItem", { nodeId: nodeId, Message: message, Type: type, newFollowUpDate: followUpDate, 
+            statusId: statusId, cancellationReasonId: cancellationReasonId, purchasedMaterialId: purchasedMaterialId }).done(function (json) {
             if (json.Success) {
-                if (cb) {
-                    cb();
-                } else {
-                    loadOrderItemDetails(nodeId);
-                }
-            }
-            else {
+                loadOrderItemDetails(nodeId);
+            } else {
                 alert(json.Message);
             }
             unlockScreen();
@@ -944,8 +918,7 @@ function writeLogItem(nodeId, message, type, followUpDate, cb) {
             unlockScreen();
         });
         return true;
-    }
-    else {
+    } else {
         alert("Du m\u00E5ste skriva n\u00E5got.");
         unlockScreen();
         return false;

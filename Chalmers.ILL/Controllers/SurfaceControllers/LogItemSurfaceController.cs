@@ -81,7 +81,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="Message"></param>
         /// <returns></returns>
         [HttpPost, ValidateInput(false)]
-        public ActionResult WriteLogItem(int nodeId, string Type, string Message, string newFollowUpDate)
+        public ActionResult WriteLogItem(int nodeId, string Type, string Message, string newFollowUpDate, int statusId, int cancellationReasonId, int purchasedMaterialId)
         {
             // Connect to Umbraco ContentService
             var contentService = UmbracoContext.Application.Services.ContentService;
@@ -104,6 +104,21 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     {
                         _orderItemManager.SetFollowUpDate(nodeId, parsedNewFollowUpDate, false, false);
                     }
+                }
+
+                if (statusId != -1)
+                {
+                    _orderItemManager.SetStatus(nodeId, statusId, false, false);
+                }
+
+                if (cancellationReasonId != -1)
+                {
+                    _orderItemManager.SetCancellationReason(nodeId, cancellationReasonId, false, false);
+                }
+
+                if (purchasedMaterialId != -1)
+                {
+                    _orderItemManager.SetPurchasedMaterial(nodeId, purchasedMaterialId, false, false);
                 }
 
                 // Use internal method to set type property and log the result
