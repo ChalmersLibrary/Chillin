@@ -78,7 +78,7 @@
 
     string GetSigelFromLibraryName(string libraryName)
     {
-        var ret = "-";
+        var ret = "";
 
         if (libraryName == "Huvudbiblioteket")
         {
@@ -147,10 +147,9 @@
 <div class="order-list container-fluid">
 
     <div class="row header">
-        <div class="col-sm-1"><a id="sort-on-follow-up-link" href="#">Följ upp </a></div>
-        <div class="col-sm-5">Referens</div>
+        <div class="col-sm-7">Referens</div>
         <div class="col-sm-2">Namn</div>
-        <div class="col-sm-2">Bibliotek</div>
+        <div class="col-sm-1">Bibliotek</div>
         <div class="col-sm-1"><a id="sort-on-type-link" href="#">Typ </a></div>
         <div class="col-sm-1"><a id="sort-on-status-link" href="#">Status <span id="sort-icon" class="glyphicon glyphicon-chevron-down"></span></a></div>
     </div>
@@ -250,12 +249,11 @@
     }
     
     <div id="@Id" class="@css_class" data-editorid="@editorID.ToString().AsInt()" @data_attribute>
-        <div class="col-sm-1" data-fud="@date.Ticks" data-column="createDate">@date.ToShortDateString()</div>
-        <div class="col-sm-5" data-column="reference">@Html.Raw(reference.ToString().Replace("\n", "<br />"))</div>
+        <div class="col-sm-7" data-column="reference">@Html.Raw(reference.ToString().Replace("\n", "<br />"))</div>
         <div class="col-sm-2" data-column="patronName">@patronName</div>
-        <div class="col-sm-2 deliveryLibrary @library" data-column="deliveryLibrary">@library</div>
+        <div class="col-sm-1 deliveryLibrary @library" data-column="deliveryLibrary">@library</div>
         <div class="col-sm-1" data-column="type">@type</div>
-        <div class="col-sm-1" data-column="status">
+        <div class="col-sm-1" data-column="status" data-fud="@date.Ticks">
             @if (status.ToString().StartsWith("01:"))
             {
                 <span class="order-item-status label label-success status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
