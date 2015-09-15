@@ -14,29 +14,29 @@ namespace Chalmers.ILL.OrderItems
         OrderItemModel GetOrderItem(int nodeId);
         List<LogItem> GetLogItems(int nodeId);
 
-        void AddExistingMediaItemAsAnAttachment(int orderNodeId, int mediaNodeId, string title, string link, bool doReindex = true, bool doSignal = true);
-        void AddLogItem(int OrderItemNodeId, string Type, string Message, bool doReindex = true, bool doSignal = true);
-        void AddSierraDataToLog(int orderItemNodeId, SierraModel sm, bool doReindex = true, bool doSignal = true);
+        void AddExistingMediaItemAsAnAttachment(int orderNodeId, int mediaNodeId, string title, string link, string eventId, bool doReindex = true, bool doSignal = true);
+        void AddLogItem(int OrderItemNodeId, string Type, string Message, string eventId, bool doReindex = true, bool doSignal = true);
+        void AddSierraDataToLog(int orderItemNodeId, SierraModel sm, string eventId, bool doReindex = true, bool doSignal = true);
 
         void SetFollowUpDateWithoutLogging(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
         void SetDrmWarningWithoutLogging(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
         void SetProviderNameWithoutLogging(int nodeId, string providerName, bool doReindex = true, bool doSignal = true);
-        void SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
-        void SetDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
-        void SetProviderDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
-        void SetCancellationReason(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true);
-        void SetDeliveryLibrary(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true);
-        void SetDeliveryLibrary(int orderNodeId, string deliveryLibraryPrevalue, bool doReindex = true, bool doSignal = true);
-        void SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
-        void SetPurchasedMaterial(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true);
-        void SetStatus(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true);
-        void SetStatus(int orderNodeId, string statusPrevalue, bool doReindex = true, bool doSignal = true);
-        void SetType(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true);
-        void SetBookId(int nodeId, string bookId, bool doReindex = true, bool doSignal = true);
-        void SetPatronEmail(int nodeId, string email, bool doReindex = true, bool doSignal = true);
-        void SetProviderName(int nodeId, string providerName, bool doReindex = true, bool doSignal = true);
-        void SetProviderOrderId(int nodeId, string providerOrderId, bool doReindex = true, bool doSignal = true);
-        void SetProviderInformation(int nodeId, string providerInformation, bool doReindex = true, bool doSignal = true);
+        void SetFollowUpDate(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetDueDate(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetProviderDueDate(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetCancellationReason(int orderNodeId, int cancellationReasonId, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetDeliveryLibrary(int orderNodeId, int deliveryLibraryId, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetDeliveryLibrary(int orderNodeId, string deliveryLibraryPrevalue, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetDrmWarning(int orderNodeId, bool status, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetPurchasedMaterial(int orderNodeId, int purchasedMaterialId, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetStatus(int orderNodeId, int statusId, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetStatus(int orderNodeId, string statusPrevalue, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetType(int orderNodeId, int typeId, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetBookId(int nodeId, string bookId, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetPatronEmail(int nodeId, string email, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetProviderName(int nodeId, string providerName, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetProviderOrderId(int nodeId, string providerOrderId, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetProviderInformation(int nodeId, string providerInformation, string eventId, bool doReindex = true, bool doSignal = true);
 
         /// <summary>
         /// Creates a new OrderItem from a MailQueueModel
@@ -70,5 +70,7 @@ namespace Chalmers.ILL.OrderItems
         /// <param name="doReindex">Indicates if we should do a reindex operation of the saved node.</param>
         /// <param name="doSignal">Indicates if we should emit Signal R events or not.</param>
         void SaveWithoutEventsAndWithSynchronousReindexing(IContent content, bool doReindex = true, bool doSignal = true);
+
+        string GenerateEventId(int type);
     }
 }

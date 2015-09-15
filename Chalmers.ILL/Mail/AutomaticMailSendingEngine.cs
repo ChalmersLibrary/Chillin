@@ -13,6 +13,8 @@ namespace Chalmers.ILL.Mail
 {
     public class AutomaticMailSendingEngine : IAutomaticMailSendingEngine
     {
+        public static int EVENT_TYPE { get { return 15; } }
+
         ISearcher _orderItemSearcher;
         ITemplateService _templateService;
         IOrderItemManager _orderItemManager;
@@ -111,6 +113,8 @@ namespace Chalmers.ILL.Mail
 
             // Send out all the delayed mails now, so that the IndexReader is not used and gets broken.
             foreach (var delayedMailOperation in delayedMailOperations) {
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
                 if (delayedMailOperation.Mail != null)
                 {
                     _mailService.SendMail(delayedMailOperation.Mail);
@@ -120,12 +124,12 @@ namespace Chalmers.ILL.Mail
                 {
                     var logMsg = delayedMailOperation.LogMessages[i];
                     var shouldReindexAndSignal = String.IsNullOrWhiteSpace(delayedMailOperation.NewStatus) && i == delayedMailOperation.LogMessages.Count - 1;
-                    _orderItemManager.AddLogItem(delayedMailOperation.InternalOrderId, logMsg.type, logMsg.message, shouldReindexAndSignal, shouldReindexAndSignal);
+                    _orderItemManager.AddLogItem(delayedMailOperation.InternalOrderId, logMsg.type, logMsg.message, eventId, shouldReindexAndSignal, shouldReindexAndSignal);
                 }
 
                 if (!String.IsNullOrWhiteSpace(delayedMailOperation.NewStatus))
                 {
-                    _orderItemManager.SetStatus(delayedMailOperation.InternalOrderId, delayedMailOperation.NewStatus, true, true);
+                    _orderItemManager.SetStatus(delayedMailOperation.InternalOrderId, delayedMailOperation.NewStatus, eventId, true, true);
                 }
             }
         }

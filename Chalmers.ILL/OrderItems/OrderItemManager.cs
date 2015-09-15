@@ -34,9 +34,12 @@ namespace Chalmers.ILL.OrderItems
         IContentService _contentService;
         IUmbracoWrapper _umbraco;
 
+        private Random _rand;
+
         public OrderItemManager(IUmbracoWrapper umbraco)
         {
             _umbraco = umbraco;
+            _rand = new Random();
         }
 
         public void SetNotifier(INotifier notifier)
@@ -217,7 +220,7 @@ namespace Chalmers.ILL.OrderItems
         }
 
 
-        public void AddExistingMediaItemAsAnAttachment(int orderNodeId, int mediaNodeId, string title, string link, bool doReindex = true, bool doSignal = true)
+        public void AddExistingMediaItemAsAnAttachment(int orderNodeId, int mediaNodeId, string title, string link, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
 
@@ -241,13 +244,13 @@ namespace Chalmers.ILL.OrderItems
                 attachmentList.Add(att);
 
                 content.SetValue("attachments", JsonConvert.SerializeObject(attachmentList));
-                AddLogItem(orderNodeId, "ATTACHMENT", "Nytt dokument bundet till ordern.", false, false);
+                AddLogItem(orderNodeId, "ATTACHMENT", "Nytt dokument bundet till ordern.", eventId, false, false);
             }
 
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void AddLogItem(int OrderItemNodeId, string Type, string Message, bool doReindex = true, bool doSignal = true)
+        public void AddLogItem(int OrderItemNodeId, string Type, string Message, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var contentNode = _contentService.GetById(OrderItemNodeId);
 
@@ -260,7 +263,8 @@ namespace Chalmers.ILL.OrderItems
                     MemberName = GetCurrentUserOrSystem(),
                     Type = Type,
                     Message = Message,
-                    CreateDate = DateTime.Now
+                    CreateDate = DateTime.Now,
+                    EventId = eventId
                 };
 
                 logItems.Add(newLog);
@@ -270,17 +274,17 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(contentNode, doReindex, doSignal);
         }
 
-        public void AddSierraDataToLog(int orderItemNodeId, SierraModel sm, bool doReindex = true, bool doSignal = true)
+        public void AddSierraDataToLog(int orderItemNodeId, SierraModel sm, string eventId, bool doReindex = true, bool doSignal = true)
         {
             if (!string.IsNullOrEmpty(sm.id))
             {
                 string logtext = "Firstname: " + sm.first_name + " Lastname: " + sm.last_name + "\n" +
                                     "Barcode: " + sm.barcode + " Email: " + sm.email + " Ptyp: " + sm.ptype + "\n";
-                AddLogItem(orderItemNodeId, "SIERRA", logtext, doReindex, doSignal);
+                AddLogItem(orderItemNodeId, "SIERRA", logtext, eventId, doReindex, doSignal);
             }
             else
             {
-                AddLogItem(orderItemNodeId, "SIERRA", "Låntagaren hittades inte.", doReindex, doSignal);
+                AddLogItem(orderItemNodeId, "SIERRA", "Låntagaren hittades inte.", eventId, doReindex, doSignal);
             }
         }
 
@@ -316,93 +320,93 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetFollowUpDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
+        public void SetFollowUpDate(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
             if (GetDateTimeFromContent(content, "followUpDate") != date)
             {
                 SetContentValue(content, "followUpDate", date);
-                AddLogItem(nodeId, "DATE", "Följs upp senast " + date, false, false);
+                AddLogItem(nodeId, "DATE", "Följs upp senast " + date, eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
+        public void SetDueDate(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
             if (GetDateTimeFromContent(content, "dueDate") != date)
             {
                 SetContentValue(content, "dueDate", date);
-                AddLogItem(nodeId, "DATE", "Återlämnas av låntagare senast " + date, false, false);
+                AddLogItem(nodeId, "DATE", "Återlämnas av låntagare senast " + date, eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetProviderDueDate(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
+        public void SetProviderDueDate(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
             if (GetDateTimeFromContent(content, "providerDueDate") != date)
             {
                 SetContentValue(content, "providerDueDate", date);
-                AddLogItem(nodeId, "DATE", "Återlämnas till leverantör senast " + date, false, false);
+                AddLogItem(nodeId, "DATE", "Återlämnas till leverantör senast " + date, eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetCancellationReason(int orderNodeId, int cancellationReasonId, bool doReindex = true, bool doSignal = true)
+        public void SetCancellationReason(int orderNodeId, int cancellationReasonId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
             int currentCancellationReason = _umbraco.GetPropertyValueAsInteger(content.GetValue("cancellationReason"));
             if (_umbraco.GetPropertyValueAsInteger(content.GetValue("cancellationReason")) != cancellationReasonId)
             {
                 SetContentValue(content, "cancellationReason", cancellationReasonId);
-                AddLogItem(orderNodeId, "ANNULLERINGSORSAK", "Annulleringsorsak ändrad till " + umbraco.library.GetPreValueAsString(cancellationReasonId), false, false);
+                AddLogItem(orderNodeId, "ANNULLERINGSORSAK", "Annulleringsorsak ändrad till " + umbraco.library.GetPreValueAsString(cancellationReasonId), eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetDeliveryLibrary(int orderNodeId, int deliveryLibraryId, bool doReindex = true, bool doSignal = true)
+        public void SetDeliveryLibrary(int orderNodeId, int deliveryLibraryId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
             int currentDeliveryLibrary = _umbraco.GetPropertyValueAsInteger(content.GetValue("deliveryLibrary"));
             if (currentDeliveryLibrary != deliveryLibraryId)
             {
                 SetContentValue(content, "deliveryLibrary", deliveryLibraryId);
-                AddLogItem(orderNodeId, "BIBLIOTEK", "Bibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), false, false);
+                AddLogItem(orderNodeId, "BIBLIOTEK", "Bibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetDeliveryLibrary(int orderNodeId, string deliveryLibraryPrevalue, bool doReindex = true, bool doSignal = true)
+        public void SetDeliveryLibrary(int orderNodeId, string deliveryLibraryPrevalue, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var deliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], deliveryLibraryPrevalue);
-            SetDeliveryLibrary(orderNodeId, deliveryLibraryId, doReindex, doSignal);
+            SetDeliveryLibrary(orderNodeId, deliveryLibraryId, eventId, doReindex, doSignal);
         }
 
-        public void SetDrmWarning(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true)
+        public void SetDrmWarning(int orderNodeId, bool status, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
             if (content.GetValue<bool>("drmWarning") != status)
             {
                 content.SetValue("drmWarning", status);
-                AddLogItem(orderNodeId, "DRM", "Kan innehålla drm-material!", false, false);
+                AddLogItem(orderNodeId, "DRM", "Kan innehålla drm-material!", eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetPurchasedMaterial(int orderNodeId, int purchasedMaterialId, bool doReindex = true, bool doSignal = true)
+        public void SetPurchasedMaterial(int orderNodeId, int purchasedMaterialId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
             int currentPurchasedMaterial = _umbraco.GetPropertyValueAsInteger(content.GetValue("purchasedMaterial"));
             if (currentPurchasedMaterial != purchasedMaterialId)
             {
                 content.SetValue("purchasedMaterial", purchasedMaterialId);
-                AddLogItem(orderNodeId, "MATERIALINKÖP", "Inköpt material ändrat till " + umbraco.library.GetPreValueAsString(purchasedMaterialId), false, false);
+                AddLogItem(orderNodeId, "MATERIALINKÖP", "Inköpt material ändrat till " + umbraco.library.GetPreValueAsString(purchasedMaterialId), eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetStatus(int orderNodeId, int statusId, bool doReindex = true, bool doSignal = true)
+        public void SetStatus(int orderNodeId, int statusId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
             int currentStatus = _umbraco.GetPropertyValueAsInteger(content.GetValue("status"));
@@ -411,18 +415,18 @@ namespace Chalmers.ILL.OrderItems
                 content.SetValue("previousStatus", content.GetValue("status"));
                 content.SetValue("status", statusId);
                 OnStatusChanged(content, statusId);
-                AddLogItem(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? umbraco.library.GetPreValueAsString(currentStatus).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(statusId).Split(':').Last(), false, false);
+                AddLogItem(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? umbraco.library.GetPreValueAsString(currentStatus).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(statusId).Split(':').Last(), eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetStatus(int orderNodeId, string statusPrevalue, bool doReindex = true, bool doSignal = true)
+        public void SetStatus(int orderNodeId, string statusPrevalue, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var statusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], statusPrevalue);
-            SetStatus(orderNodeId, statusId, doReindex, doSignal);
+            SetStatus(orderNodeId, statusId, eventId, doReindex, doSignal);
         }
 
-        public void SetType(int orderNodeId, int typeId, bool doReindex = true, bool doSignal = true)
+        public void SetType(int orderNodeId, int typeId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
             int currentType = _umbraco.GetPropertyValueAsInteger(content.GetValue("type"));
@@ -430,67 +434,67 @@ namespace Chalmers.ILL.OrderItems
             {
                 content.SetValue("type", typeId);
                 OnTypeChanged(content, typeId);
-                AddLogItem(orderNodeId, "TYP", "Typ ändrad till " + umbraco.library.GetPreValueAsString(typeId), false, false);
+                AddLogItem(orderNodeId, "TYP", "Typ ändrad till " + umbraco.library.GetPreValueAsString(typeId), eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetBookId(int nodeId, string bookId, bool doReindex = true, bool doSignal = true)
+        public void SetBookId(int nodeId, string bookId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
             var currentBookId = content.GetValue<string>("bookId");
             if (currentBookId != bookId)
             {
                 content.SetValue("bookId", bookId);
-                AddLogItem(nodeId, "BOKINFO", "Bok-ID ändrat till " + bookId + ".", false, false);
+                AddLogItem(nodeId, "BOKINFO", "Bok-ID ändrat till " + bookId + ".", eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetPatronEmail(int nodeId, string patronEmail, bool doReindex = true, bool doSignal = true)
+        public void SetPatronEmail(int nodeId, string patronEmail, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
             var currentPatronEmail = content.GetValue<string>("patronEmail");
             if (currentPatronEmail != patronEmail)
             {
                 content.SetValue("patronEmail", patronEmail);
-                AddLogItem(nodeId, "MAIL_NOTE", "E-post mot låntagare ändrad till " + patronEmail, false, false);
+                AddLogItem(nodeId, "MAIL_NOTE", "E-post mot låntagare ändrad till " + patronEmail, eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetProviderName(int nodeId, string providerName, bool doReindex = true, bool doSignal = true)
+        public void SetProviderName(int nodeId, string providerName, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
             var currentProviderName = content.GetValue<string>("providerName");
             if (currentProviderName != providerName)
             {
                 content.SetValue("providerName", providerName);
-                AddLogItem(nodeId, "ORDER", "Beställd från " + providerName, false, false);
+                AddLogItem(nodeId, "ORDER", "Beställd från " + providerName, eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetProviderOrderId(int nodeId, string providerOrderId, bool doReindex = true, bool doSignal = true)
+        public void SetProviderOrderId(int nodeId, string providerOrderId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
             var currentProviderOrderId = content.GetValue<string>("providerOrderId");
             if (currentProviderOrderId != providerOrderId)
             {
                 content.SetValue("providerOrderId", providerOrderId);
-                AddLogItem(nodeId, "ORDER", "Beställningsnr ändrat till " + providerOrderId, false, false);
+                AddLogItem(nodeId, "ORDER", "Beställningsnr ändrat till " + providerOrderId, eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetProviderInformation(int nodeId, string providerInformation, bool doReindex = true, bool doSignal = true)
+        public void SetProviderInformation(int nodeId, string providerInformation, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
             var currentProviderInformation = content.GetValue<string>("providerInformation");
             if (currentProviderInformation != providerInformation)
             {
                 content.SetValue("providerInformation", providerInformation);
-                AddLogItem(nodeId, "LEVERANTÖR", "Leverantörsinformation ändrad till \"" + providerInformation + "\".", false, false);
+                AddLogItem(nodeId, "LEVERANTÖR", "Leverantörsinformation ändrad till \"" + providerInformation + "\".", eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
@@ -721,6 +725,11 @@ namespace Chalmers.ILL.OrderItems
         {
             // Indicate to the waiting thread that the index operation has completed.
             semLock.Release();
+        }
+
+        public string GenerateEventId(int type)
+        {
+            return "event-" + _rand.Next(0, 65535).ToString("X4") + "-" + type.ToString("D2");
         }
 
         #region Private methods

@@ -19,6 +19,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemClaimSurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 13; } }
+
         IOrderItemManager _orderItemManager;
         ITemplateService _templateService;
         IMailService _mailService;
@@ -50,19 +52,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 var pack = JsonConvert.DeserializeObject<ClaimItemPackage>(packJson);
 
-                _orderItemManager.SetDueDate(pack.nodeId, pack.dueDate, false, false);
-                _orderItemManager.SetProviderDueDate(pack.nodeId, pack.dueDate, false, false);
-                _orderItemManager.SetStatus(pack.nodeId, "12:Krävd", false, false);
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                _orderItemManager.SetDueDate(pack.nodeId, pack.dueDate, eventId, false, false);
+                _orderItemManager.SetProviderDueDate(pack.nodeId, pack.dueDate, eventId, false, false);
+                _orderItemManager.SetStatus(pack.nodeId, "12:Krävd", eventId, false, false);
                 
                 // We save everything here first so that we get the new values injected into the message by the template service.
-                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail);
+                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail, eventId);
 
                 // Overwrite the message with message from template service so that we get the new values injected.
                 pack.mail.message = _templateService.GetTemplateData("ClaimBookMailTemplate", _orderItemManager.GetOrderItem(pack.nodeId));
 
                 _mailService.SendMail(pack.mail);
-                _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);
-                _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, eventId, false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message, eventId);
 
                 json.Success = true;
                 json.Message = "Krav genomfört.";

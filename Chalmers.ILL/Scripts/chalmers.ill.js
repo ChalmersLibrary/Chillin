@@ -722,7 +722,7 @@ function setOrderItemArticleAvailableForPickup(node, maildata, logMsg) {
 
 function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
     lockScreen();
-    $.post("/umbraco/surface/OrderItemDeliverySurface/SetOrderItemDeliveryReceived", {
+    $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceived", {
         packJson: JSON.stringify({
             orderNodeId: node,
             bookId: bookId,

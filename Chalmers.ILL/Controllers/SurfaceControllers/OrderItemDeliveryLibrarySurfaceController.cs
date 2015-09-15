@@ -17,6 +17,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemDeliveryLibrarySurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 3; } }
+
         IOrderItemManager _orderItemManager;
 
         public OrderItemDeliveryLibrarySurfaceController(IOrderItemManager orderItemManager)
@@ -37,8 +39,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
                 // Use internal method to set status property and log the result
-                _orderItemManager.SetDeliveryLibrary(orderNodeId, deliveryLibraryId);
+                _orderItemManager.SetDeliveryLibrary(orderNodeId, deliveryLibraryId, eventId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

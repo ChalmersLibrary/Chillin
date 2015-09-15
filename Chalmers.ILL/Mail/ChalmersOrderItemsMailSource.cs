@@ -29,6 +29,10 @@ namespace Chalmers.ILL.Mail
 {
     public class ChalmersOrderItemsMailSource : ISource
     {
+        public static int CREATE_ORDER_FROM_MAIL_DATA_EVENT_TYPE { get { return 20; } }
+        public static int UPDATE_ORDER_FROM_MAIL_DATA_PATRON_EVENT_TYPE { get { return 21; } }
+        public static int UPDATE_ORDER_FROM_MAIL_DATA_NOT_PATRON_EVENT_TYPE { get { return 22; } }
+
         IExchangeMailWebApi _exchangeMailWebApi;
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
@@ -172,7 +176,8 @@ namespace Chalmers.ILL.Mail
                             // Write a new OrderItem
                             int orderItemNodeId = _orderItemManager.CreateOrderItemInDbFromMailQueueModel(item, false, false);
 
-                            _orderItemManager.AddSierraDataToLog(orderItemNodeId, item.SierraPatronInfo);
+                            var eventId = _orderItemManager.GenerateEventId(CREATE_ORDER_FROM_MAIL_DATA_EVENT_TYPE);
+                            _orderItemManager.AddSierraDataToLog(orderItemNodeId, item.SierraPatronInfo, eventId);
 
                             // Archive the mail message to correct folder
                             if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
@@ -203,10 +208,11 @@ namespace Chalmers.ILL.Mail
                     {
                         try
                         {
+                            var eventId = _orderItemManager.GenerateEventId(UPDATE_ORDER_FROM_MAIL_DATA_PATRON_EVENT_TYPE);
                             // Set the OrderItem Status so it appears in lists
                             try
                             {
-                                _orderItemManager.SetStatus(item.OrderItemNodeId, "02:Åtgärda", false, false);
+                                _orderItemManager.SetStatus(item.OrderItemNodeId, "02:Åtgärda", eventId, false, false);
                             }
                             catch (Exception es)
                             {
@@ -226,8 +232,8 @@ namespace Chalmers.ILL.Mail
                             // Write LogItem with the mail received and metadata
                             try
                             {
-                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), false, false);
-                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL_NOTE", "Svar från " + item.Sender + " [" + item.From + "]");
+                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), eventId, false, false);
+                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL_NOTE", "Svar från " + item.Sender + " [" + item.From + "]", eventId);
                             }
                             catch (Exception el)
                             {
@@ -268,10 +274,11 @@ namespace Chalmers.ILL.Mail
                     {
                         try
                         {
+                            var eventId = _orderItemManager.GenerateEventId(UPDATE_ORDER_FROM_MAIL_DATA_NOT_PATRON_EVENT_TYPE);
                             // Set the OrderItem Status so it appears in lists
                             try
                             {
-                                _orderItemManager.SetStatus(item.OrderItemNodeId, "09:Mottagen", false, false);
+                                _orderItemManager.SetStatus(item.OrderItemNodeId, "09:Mottagen", eventId, false, false);
                             }
                             catch (Exception es)
                             {
@@ -327,7 +334,7 @@ namespace Chalmers.ILL.Mail
                                                 // cleanup, memory stream not needed any longer
                                                 attachment.Data.Dispose();
 
-                                                _orderItemManager.AddExistingMediaItemAsAnAttachment(item.OrderItemNodeId, m.Id, attachment.Title, m.GetValue("file").ToString(), false, false);
+                                                _orderItemManager.AddExistingMediaItemAsAnAttachment(item.OrderItemNodeId, m.Id, attachment.Title, m.GetValue("file").ToString(), eventId, false, false);
                                             }
                                         }
                                         catch (Exception)
@@ -349,8 +356,8 @@ namespace Chalmers.ILL.Mail
                             // Write LogItem with the mail received and metadata
                             try
                             {
-                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), false, false);
-                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL_NOTE", "Leverans från " + item.Sender + " [" + item.From + "]");
+                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL", getTextFromHtml(item.MessageBody), eventId, false, false);
+                                _orderItemManager.AddLogItem(item.OrderItemNodeId, "MAIL_NOTE", "Leverans från " + item.Sender + " [" + item.From + "]", eventId);
                             }
                             catch (Exception el)
                             {

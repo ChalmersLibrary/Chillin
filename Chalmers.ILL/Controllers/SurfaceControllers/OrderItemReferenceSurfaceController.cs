@@ -16,6 +16,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemReferenceSurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 4; } }
+
         IOrderItemManager _orderItemManager;
 
         public OrderItemReferenceSurfaceController(IOrderItemManager orderItemManager)
@@ -52,9 +54,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Save and Log this action
                 if (currentReference != reference)
                 {
+                    var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
                     contentNode.SetValue("reference", reference);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode, false, false);
-                    _orderItemManager.AddLogItem(nodeId, "REF", "Referens ändrad");
+                    _orderItemManager.AddLogItem(nodeId, "REF", "Referens ändrad", eventId);
                 }
 
                 // Construct JSON response for client (ie jQuery/getJSON)

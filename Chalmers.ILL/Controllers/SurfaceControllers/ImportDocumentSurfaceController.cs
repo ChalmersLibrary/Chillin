@@ -26,6 +26,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class ImportDocumentSurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 16; } }
+
         IOrderItemManager _orderItemManager;
 
         public ImportDocumentSurfaceController(IOrderItemManager orderItemManager)
@@ -98,7 +100,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // cleanup, memory stream not needed any longer
                             stream.Dispose();
 
-                            _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.Id, media.Id, name, media.GetValue("file").ToString());
+                            var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                            _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.Id, media.Id, name, media.GetValue("file").ToString(), eventId);
 
                             json.Success = true;
                             json.Message = "Document imported successfully.";
@@ -168,7 +171,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             // cleanup, memory stream not needed any longer
                             stream.Dispose();
 
-                            _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.Id, media.Id, filename, media.GetValue("file").ToString());
+                            var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                            _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.Id, media.Id, filename, media.GetValue("file").ToString(), eventId);
 
                             json.Success = true;
                             json.Message = media.Id.ToString() + ";" + media.GetValue("file").ToString();

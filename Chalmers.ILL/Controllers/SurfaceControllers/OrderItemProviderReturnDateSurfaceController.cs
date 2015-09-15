@@ -16,6 +16,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemProviderReturnDateSurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 12; } }
+
         IOrderItemManager _orderItemManager;
 
         public OrderItemProviderReturnDateSurfaceController(IOrderItemManager orderItemManager)
@@ -48,24 +50,26 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 var orderItem = _orderItemManager.GetOrderItem(pack.nodeId);
 
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
                 if (pack.logMsg != "")
                 {
-                    _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logMsg, false, false);
+                    _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logMsg, eventId, false, false);
                 }
 
                 if (orderItem.LastDeliveryStatus != -1)
                 {
-                    _orderItemManager.SetStatus(pack.nodeId, orderItem.LastDeliveryStatus);
+                    _orderItemManager.SetStatus(pack.nodeId, orderItem.LastDeliveryStatus, eventId, false, false);
                 }
-                _orderItemManager.SetProviderDueDate(pack.nodeId, pack.providerDueDate);
+                _orderItemManager.SetProviderDueDate(pack.nodeId, pack.providerDueDate, eventId);
 
                 json.Success = true;
-                json.Message = "Återlämningsdatum mot låntagare ändrat.";
+                json.Message = "Återlämningsdatum från utlånande bibliotek ändrat.";
             }
             catch (Exception e)
             {
                 json.Success = false;
-                json.Message = "Misslyckades med att ändra återlämningsdatum mot låntagare: " + e.Message;
+                json.Message = "Misslyckades med att ändra återlämningsdatum från utlånande bibliotek: " + e.Message;
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);

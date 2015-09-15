@@ -19,6 +19,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class SystemSurfaceController : SurfaceController
     {
+        public static int TIME_BASED_UPDATE_OF_ORDER_EVENT_TYPE { get { return 19; } }
+
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
         IExchangeMailWebApi _exchangeMailWebApi;
@@ -181,10 +183,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var ids = _orderItemsSearcher.Search(query).Select(x => x.Id).ToList();
             foreach (var id in ids)
             {
-                _orderItemManager.AddLogItem(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", false, false);
-
-                _orderItemManager.SetStatus(id, _dataTypes.GetAvailableStatuses().First(x => x.Value.Contains("Åtgärda")).Id);
-
+                var eventId = _orderItemManager.GenerateEventId(TIME_BASED_UPDATE_OF_ORDER_EVENT_TYPE);
+                _orderItemManager.AddLogItem(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", eventId, false, false);
+                _orderItemManager.SetStatus(id, _dataTypes.GetAvailableStatuses().First(x => x.Value.Contains("Åtgärda")).Id, eventId);
                 _notifier.UpdateOrderItemUpdate(id, memberId.ToString(), "", true, true);
             }
         }

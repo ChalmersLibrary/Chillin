@@ -19,6 +19,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class LogItemSurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 8; } }
+
         IOrderItemManager _orderItemManager;
         IUmbracoWrapper _dataTypes;
 
@@ -94,6 +96,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
                 // Set FollowUpDate property if it differs from current
                 DateTime currentFollowUpDate = _orderItemManager.GetOrderItem(nodeId).FollowUpDate;
 
@@ -102,27 +106,27 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     DateTime parsedNewFollowUpDate = Convert.ToDateTime(newFollowUpDate);
                     if (currentFollowUpDate != parsedNewFollowUpDate)
                     {
-                        _orderItemManager.SetFollowUpDate(nodeId, parsedNewFollowUpDate, false, false);
+                        _orderItemManager.SetFollowUpDate(nodeId, parsedNewFollowUpDate, eventId, false, false);
                     }
                 }
 
                 if (statusId != -1)
                 {
-                    _orderItemManager.SetStatus(nodeId, statusId, false, false);
+                    _orderItemManager.SetStatus(nodeId, statusId, eventId, false, false);
                 }
 
                 if (cancellationReasonId != -1)
                 {
-                    _orderItemManager.SetCancellationReason(nodeId, cancellationReasonId, false, false);
+                    _orderItemManager.SetCancellationReason(nodeId, cancellationReasonId, eventId, false, false);
                 }
 
                 if (purchasedMaterialId != -1)
                 {
-                    _orderItemManager.SetPurchasedMaterial(nodeId, purchasedMaterialId, false, false);
+                    _orderItemManager.SetPurchasedMaterial(nodeId, purchasedMaterialId, eventId, false, false);
                 }
 
                 // Use internal method to set type property and log the result
-                _orderItemManager.AddLogItem(nodeId, Type, Message);
+                _orderItemManager.AddLogItem(nodeId, Type, Message, eventId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

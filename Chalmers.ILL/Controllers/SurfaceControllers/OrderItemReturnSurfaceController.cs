@@ -1,4 +1,5 @@
-﻿using Chalmers.ILL.Models.PartialPage;
+﻿using Chalmers.ILL.Models;
+using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.UmbracoApi;
 using System;
@@ -12,6 +13,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemReturnSurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 14; } }
+
         IOrderItemManager _orderItemManager;
         IUmbracoWrapper _umbraco;
 
@@ -35,6 +38,28 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Return", pageModel);
+        }
+
+        [HttpPost]
+        public ActionResult ReturnItem(int nodeId)
+        {
+            var json = new ResultResponse();
+
+            try
+            {
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                _orderItemManager.SetStatus(nodeId, "10:Återsänd", eventId, false, false);
+
+                json.Success = true;
+                json.Message = "Returnering genomförd.";
+            }
+            catch (Exception e)
+            {
+                json.Success = false;
+                json.Message = "Misslyckades med att returnera: " + e.Message;
+            }
+
+            return Json(json, JsonRequestBehavior.AllowGet);
         }
     }
 }

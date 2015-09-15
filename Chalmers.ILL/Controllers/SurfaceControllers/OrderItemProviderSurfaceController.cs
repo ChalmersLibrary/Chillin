@@ -20,6 +20,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemProviderSurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 7; } }
+
         IOrderItemManager _orderItemManager;
         IProviderService _providerService;
 
@@ -50,11 +52,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                _orderItemManager.SetFollowUpDate(nodeId, Convert.ToDateTime(newFollowUpDate), false, false);
-                _orderItemManager.SetProviderName(nodeId, providerName, false, false);
-                _orderItemManager.SetProviderOrderId(nodeId, providerOrderId, false, false);
-                _orderItemManager.SetProviderInformation(nodeId, providerInformation, false, false);
-                _orderItemManager.SetStatus(nodeId, "03:Beställd");
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                _orderItemManager.SetFollowUpDate(nodeId, Convert.ToDateTime(newFollowUpDate), eventId, false, false);
+                _orderItemManager.SetProviderName(nodeId, providerName, eventId, false, false);
+                _orderItemManager.SetProviderOrderId(nodeId, providerOrderId, eventId, false, false);
+                _orderItemManager.SetProviderInformation(nodeId, providerInformation, eventId, false, false);
+                _orderItemManager.SetStatus(nodeId, "03:Beställd", eventId);
 
                 json.Success = true;
                 json.Message = "Sparade data för beställning.";

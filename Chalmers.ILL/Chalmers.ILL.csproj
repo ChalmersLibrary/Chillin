@@ -411,8 +411,6 @@
     <Compile Include="Controllers\SurfaceControllers\OrderItemReferenceSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemStatusSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemSurfaceController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\OrderItemPurchasedMaterialSurfaceController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\OrderItemCancellationReasonSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemTypeSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemPatronDataSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ProviderDataSurfaceController.cs" />

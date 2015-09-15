@@ -24,6 +24,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemPatronDataSurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 5; } }
+
         IOrderItemManager _orderItemManager;
         IPatronDataProvider _patronDataProviderSierraCache;
         IPatronDataProvider _patronDataProviderSierra;
@@ -96,6 +98,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var cs = Services.ContentService;
                 var content = cs.GetById(orderItemNodeId);
 
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
                 SierraModel sm = null;
                 if (cache)
                 {
@@ -112,10 +116,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     content.SetValue("sierraPatronRecordId", sm.record_id);
                     content.SetValue("pType", sm.ptype);
                     content.SetValue("homeLibrary", sm.home_library);
-                    UpdateDeliveryLibraryIfNeeded(content.Id, sm);
+                    UpdateDeliveryLibraryIfNeeded(content.Id, sm, eventId);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 }
-                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm);
+                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm, eventId);
 
                 json.Success = true;
                 json.Message = "Succcessfully loaded Sierra data from \"personnummer\" or library card number.";
@@ -146,6 +150,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var cs = Services.ContentService;
                 var content = cs.GetById(orderItemNodeId);
 
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
                 SierraModel sm = null;
                 if (cache)
                 {
@@ -162,10 +168,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     content.SetValue("sierraPatronRecordId", sm.record_id);
                     content.SetValue("pType", sm.ptype);
                     content.SetValue("homeLibrary", sm.home_library);
-                    UpdateDeliveryLibraryIfNeeded(content.Id, sm);
+                    UpdateDeliveryLibraryIfNeeded(content.Id, sm, eventId);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
                 }
-                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm);
+                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm, eventId);
 
                 json.Success = true;
                 json.Message = "Succcessfully loaded Sierra data from library card number.";
@@ -181,7 +187,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
         #region Private methods
 
-        private void UpdateDeliveryLibraryIfNeeded(int nodeId, SierraModel sierraModel)
+        private void UpdateDeliveryLibraryIfNeeded(int nodeId, SierraModel sierraModel, string eventId)
         {
             var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
@@ -189,15 +195,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 if (sierraModel.home_library != null && sierraModel.home_library.Contains("hbib"))
                 {
-                    _orderItemManager.SetDeliveryLibrary(nodeId, "Huvudbiblioteket", false, false);
+                    _orderItemManager.SetDeliveryLibrary(nodeId, "Huvudbiblioteket", eventId, false, false);
                 }
                 else if (sierraModel.home_library != null && sierraModel.home_library.Contains("abib"))
                 {
-                    _orderItemManager.SetDeliveryLibrary(nodeId, "Arkitekturbiblioteket", false, false);
+                    _orderItemManager.SetDeliveryLibrary(nodeId, "Arkitekturbiblioteket", eventId, false, false);
                 }
                 else if (sierraModel.home_library != null && sierraModel.home_library.Contains("lbib"))
                 {
-                    _orderItemManager.SetDeliveryLibrary(nodeId, "Lindholmenbiblioteket", false, false);
+                    _orderItemManager.SetDeliveryLibrary(nodeId, "Lindholmenbiblioteket", eventId, false, false);
                 }
             }
         }

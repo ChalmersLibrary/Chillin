@@ -18,6 +18,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemStatusSurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 2; } }
+
         IOrderItemManager _orderItemManager;
 
         public OrderItemStatusSurfaceController(IOrderItemManager orderItemManager)
@@ -38,18 +40,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try 
 	        {
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
                 if (cancellationReasonId != -1)
                 {
-                    _orderItemManager.SetCancellationReason(orderNodeId, cancellationReasonId, false, false);
+                    _orderItemManager.SetCancellationReason(orderNodeId, cancellationReasonId, eventId, false, false);
                 }
 
                 if (purchasedMaterialId != -1)
                 {
-                    _orderItemManager.SetPurchasedMaterial(orderNodeId, purchasedMaterialId, false, false);
+                    _orderItemManager.SetPurchasedMaterial(orderNodeId, purchasedMaterialId, eventId, false, false);
                 }
 
                 // Use internal method to set status property and log the result
-                _orderItemManager.SetStatus(orderNodeId, statusId);
+                _orderItemManager.SetStatus(orderNodeId, statusId, eventId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

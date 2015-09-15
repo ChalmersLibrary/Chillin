@@ -24,6 +24,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemDeliverySurfaceController : SurfaceController
     {
+        public static int EVENT_TYPE { get { return 9; } }
+
         IOrderItemManager _orderItemManager;
         IUmbracoWrapper _umbraco;
         ITemplateService _templateService;
@@ -153,9 +155,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Leveranstyp: " + delivery, false, false);
-                _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, false, false);
-                _orderItemManager.SetStatus(nodeId, "05:Levererad");
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Leveranstyp: " + delivery, eventId, false, false);
+                _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, eventId, false, false);
+                _orderItemManager.SetStatus(nodeId, "05:Levererad", eventId);
 
                 json.Success = true;
                 json.Message = "Saved provider data.";
@@ -183,9 +186,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Leveranstyp: " + delivery, false, false);
-                _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, false, false);
-                _orderItemManager.SetStatus(nodeId, "13:Transport");
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Leveranstyp: " + delivery, eventId, false, false);
+                _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, eventId, false, false);
+                _orderItemManager.SetStatus(nodeId, "13:Transport", eventId);
 
                 json.Success = true;
                 json.Message = "Saved provider data.";
@@ -213,19 +217,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 var pack = JsonConvert.DeserializeObject<ArticleDelivered>(packJson);
 
-                _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: Avhämtas i lånedisken.", false, false);
-                _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, false, false);
-                _orderItemManager.SetStatus(pack.nodeId, "05:Levererad", false, false);
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: Avhämtas i lånedisken.", eventId, false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, eventId, false, false);
+                _orderItemManager.SetStatus(pack.nodeId, "05:Levererad", eventId, false, false);
 
                 // We save everything here first so that we get the new values injected into the message by the template service.
-                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail);
+                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail, eventId);
 
                 // Overwrite the message with message from template service so that we get the new values injected.
                 pack.mail.message = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", _orderItemManager.GetOrderItem(pack.nodeId));
 
                 _mailService.SendMail(pack.mail);
-                _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);
-                _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, eventId, false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message, eventId);
 
                 res.Success = true;
                 res.Message = "Lyckades leverera via mail.";
@@ -253,19 +258,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 var pack = JsonConvert.DeserializeObject<DeliverByMailPackage>(packJson);
 
-                _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: Direktleverans via e-post.", false, false);
-                _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, false, false);
-                _orderItemManager.SetStatus(pack.nodeId, "05:Levererad", false, false);
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: Direktleverans via e-post.", eventId, false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, eventId, false, false);
+                _orderItemManager.SetStatus(pack.nodeId, "05:Levererad", eventId, false, false);
 
                 // We save everything here first so that we get the new values injected into the message by the template service.
-                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail);
+                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail, eventId);
 
                 // Overwrite the message with message from template service so that we get the new values injected.
                 pack.mail.message = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", _orderItemManager.GetOrderItem(pack.nodeId));
 
                 _mailService.SendMail(pack.mail);
-                _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);
-                _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, eventId, false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message, eventId);
 
                 res.Success = true;
                 res.Message = "Lyckades leverera via mail.";
@@ -327,85 +333,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return Json(res, JsonRequestBehavior.AllowGet);
         }
 
-        /// <summary>
-        /// Set that the order item is received and ready for the patron to fetch.
-        /// </summary>
-        /// <param name="orderNodeId">OrderItem Node Id</param>
-        /// <param name="bookId">Delivery Library Book Id</param>
-        /// <param name="dueDate">Delivery Library Due Date</param>
-        /// <param name="providerInformation">Information about the provider</param>
-        /// <returns>MVC ActionResult with JSON</returns>
-        [HttpPost, ValidateInput(false)]
-        public ActionResult SetOrderItemDeliveryReceived(string packJson)
-        {
-            var json = new ResultResponse();
-
-            try
-            {
-                DeliveryReceivedPackage pack = JsonConvert.DeserializeObject<DeliveryReceivedPackage>(packJson);
-
-                var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
-
-                if (pack.readOnlyAtLibrary)
-                {
-                    _orderItemManager.AddLogItem(pack.orderNodeId, "LEVERERAD", "Leveranstyp: Ej hemlån.", false, false);
-                }
-                else
-                {
-                    _orderItemManager.AddLogItem(pack.orderNodeId, "LEVERERAD", "Leveranstyp: Avhämtning i infodisk.", false, false);
-                }
-                _orderItemManager.SetDueDate(pack.orderNodeId, pack.dueDate, false, false);
-                _orderItemManager.SetProviderDueDate(pack.orderNodeId, pack.dueDate, false, false);
-                _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, false, false);
-                _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, false, false);
-                _orderItemManager.SetStatus(pack.orderNodeId, "14:Infodisk", false, false);
-                _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, false, false);
-
-                // We save everything here first so that we get the new values injected into the message by the template service.
-                _orderItemManager.SetPatronEmail(pack.orderNodeId, pack.mailData.recipientEmail);
-
-                // Overwrite the message with message from template service so that we get the new values injected.
-                if (pack.readOnlyAtLibrary)
-                {
-                    pack.mailData.message = _templateService.GetTemplateData("BookAvailableForReadingAtLibraryMailTemplate", _orderItemManager.GetOrderItem(pack.orderNodeId));
-                }
-                else
-                {
-                    pack.mailData.message = _templateService.GetTemplateData("BookAvailableMailTemplate", _orderItemManager.GetOrderItem(pack.orderNodeId));
-                }
-
-                _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
-                _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, false, false);
-                _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL", pack.mailData.message);
-
-                json.Success = true;
-                json.Message = "Leverans till infodisk genomförd.";
-            }
-            catch (Exception e)
-            {
-                json.Success = false;
-                json.Message = "Error: " + e.Message;
-            }
-
-            return Json(json, JsonRequestBehavior.AllowGet);
-        }
-
         public class DeliverByMailPackage
         {
             public int nodeId { get; set; }
             public string logEntry { get; set; }
             public OutgoingMailModel mail { get; set; }
-        }
-
-        public class DeliveryReceivedPackage
-        {
-            public int orderNodeId { get; set; }
-            public string bookId { get; set; }
-            public DateTime dueDate { get; set; }
-            public string providerInformation { get; set; }
-            public OutgoingMailPackageModel mailData { get; set; }
-            public string logMsg { get; set; }
-            public bool readOnlyAtLibrary { get; set; }
         }
 
         public class ArticleDelivered
@@ -417,19 +349,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
         private ResultResponse RegisterArticleDeliveryAndSendMail(ArticleDelivered pack, string deliveryType, string mailTemplateName, /* out */ ResultResponse res)
         {
-            _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: " + deliveryType, false, false);
-            _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, false, false);
-            _orderItemManager.SetStatus(pack.nodeId, "05:Levererad", false, false);
+            var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+            _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: " + deliveryType, eventId, false, false);
+            _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logEntry, eventId, false, false);
+            _orderItemManager.SetStatus(pack.nodeId, "05:Levererad", eventId, false, false);
 
             // We save everything here first so that we get the new values injected into the message by the template service.
-            _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail);
+            _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail, eventId);
 
             // Overwrite the message with message from template service so that we get the new values injected.
             pack.mail.message = _templateService.GetTemplateData(mailTemplateName, _orderItemManager.GetOrderItem(pack.nodeId));
 
             _mailService.SendMail(pack.mail);
-            _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, false, false);
-            _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message);
+            _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, eventId, false, false);
+            _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message, eventId);
 
             res.Success = true;
             res.Message = "Lyckades leverera via mail.";

@@ -12,6 +12,7 @@ namespace Chalmers.ILL.Models
         public int OrderItemNodeId { get; set; }
         public int NodeId { get; set; }
 
+        public string EventId { get; set; }
         public string Type { get; set; }
         public string Message { get; set; }
         public string MemberName { get; set; }

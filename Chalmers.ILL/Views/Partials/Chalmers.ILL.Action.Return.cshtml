@@ -11,13 +11,25 @@
     </div>
     <div class="row">
         <div class="col-md-6">
-            <button class="btn btn-success" onclick="itemIsReturned()">Returnera</button>
+            <button class="btn btn-success" onclick="returnItem();">Returnera</button>
         </div>
     </div>
     
     <script type="text/javascript">
-        function itemIsReturned() {
-            setOrderItemStatus(@Model.OrderItem.NodeId, @Model.AvailableStatuses.Find(x => x.Value.Contains("Återsänd")).Id);
+        function returnItem() {
+            lockScreen();
+            $.post("/umbraco/surface/OrderItemReturnSurface/ReturnItem", { nodeId: "@Model.OrderItem.NodeId" }).done(function (json) {
+                if (json.Success) {
+                    loadOrderItemDetails(@Model.OrderItem.NodeId);
+                }
+                else {
+                    alert(json.Message);
+                }
+                unlockScreen();
+            }).fail(function (jqxhr, textStatus, error) {
+                alert("Error: " + textStatus + " " + error);
+                unlockScreen();
+            });
         }
     </script>
 </form>

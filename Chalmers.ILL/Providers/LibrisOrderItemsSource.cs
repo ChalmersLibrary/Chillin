@@ -16,6 +16,9 @@ namespace Chalmers.ILL.Providers
 {
     public class LibrisOrderItemsSource : ISource
     {
+        public static int CREATE_ORDER_FROM_LIBRIS_DATA_EVENT_TYPE { get { return 17; } }
+        public static int UPDATE_ORDER_FROM_LIBRIS_DATA_EVENT_TYPE { get { return 18; } }
+
         IUmbracoWrapper _umbraco;
         IOrderItemManager _orderItemManager;
         IPatronDataProvider _patronDataProvider;
@@ -138,7 +141,8 @@ namespace Chalmers.ILL.Providers
                     {
                         int orderItemNodeId = _orderItemManager.CreateOrderItemInDbFromOrderItemSeedModel(seed, false, false);
 
-                        _orderItemManager.AddSierraDataToLog(orderItemNodeId, seed.SierraPatronInfo);
+                        var eventId = _orderItemManager.GenerateEventId(CREATE_ORDER_FROM_LIBRIS_DATA_EVENT_TYPE);
+                        _orderItemManager.AddSierraDataToLog(orderItemNodeId, seed.SierraPatronInfo, eventId);
 
                         _result.NewOrders++;
                     }
@@ -190,13 +194,15 @@ namespace Chalmers.ILL.Providers
 
                             if (order.Fields["Status"] == "03:Beställd" && req.status_code.Value == "6") // Status code 6 is "Negativt svar" in Libris
                             {
-                                _orderItemManager.SetStatus(order.Id, "02:Åtgärda", false, false);
-                                _orderItemManager.AddLogItem(order.Id, "LIBRIS", "Negativt svar. " + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=notfullfilled&id=" + req.request_id.Value);
+                                var eventId = _orderItemManager.GenerateEventId(UPDATE_ORDER_FROM_LIBRIS_DATA_EVENT_TYPE);
+                                _orderItemManager.SetStatus(order.Id, "02:Åtgärda", eventId, false, false);
+                                _orderItemManager.AddLogItem(order.Id, "LIBRIS", "Negativt svar. " + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=notfullfilled&id=" + req.request_id.Value, eventId);
                             }
                             else if (order.Fields["Status"] == "03:Beställd" && req.status_code.Value == "7") // Status code 7 is "Kan reserveras" in Libris
                             {
-                                _orderItemManager.SetStatus(order.Id, "02:Åtgärda", false, false);
-                                _orderItemManager.AddLogItem(order.Id, "LIBRIS", "Kan reserveras." + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=may_reserve&id=" + req.request_id.Value);
+                                var eventId = _orderItemManager.GenerateEventId(UPDATE_ORDER_FROM_LIBRIS_DATA_EVENT_TYPE);
+                                _orderItemManager.SetStatus(order.Id, "02:Åtgärda", eventId, false, false);
+                                _orderItemManager.AddLogItem(order.Id, "LIBRIS", "Kan reserveras." + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=may_reserve&id=" + req.request_id.Value, eventId);
                             }
                         }
                     }
