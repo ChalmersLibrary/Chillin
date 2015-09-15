@@ -48,7 +48,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
-                _orderItemManager.SetStatus(nodeId, "10:Återsänd", eventId, false, false);
+                _orderItemManager.SetStatus(nodeId, "10:Återsänd", eventId);
 
                 json.Success = true;
                 json.Message = "Returnering genomförd.";
