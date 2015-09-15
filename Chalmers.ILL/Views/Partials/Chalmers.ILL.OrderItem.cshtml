@@ -323,21 +323,60 @@
     <span class="label label-default">Händelser</span>
 </div>
 <div id="log-@Model.OrderItem.NodeId" class="col-sm-12 log-list">
-    @foreach (var logItem in Model.OrderItem.LogItemsList)
-    {
-        <div class="row log-item @logItem.Type">
-            <div class="col-sm-3">
-                <span class="log-createdate">@logItem.CreateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)</span>
-                <span class="log-membername">@logItem.MemberName</span>
+    @{
+        string lastEventId = "";
+        DateTime lastCreateDate = new DateTime(1970, 1, 1);
+        var first = true;
+        var firstMail = true;
+        var evenRow = true;
+        foreach (var logItem in Model.OrderItem.LogItemsList)
+        {
+            if (String.IsNullOrEmpty(lastEventId) || lastEventId != logItem.EventId)
+            {
+                if (!first)
+                {
+                    @:</div>
+                }
+                @:<div class="log-item-container @(evenRow ? "even" : "odd")">
+                    <div class="row log-item-header">
+                        <div class="col-sm-8">
+                            @if (!String.IsNullOrEmpty(logItem.EventId))
+                            {
+                                @Model.EventIdToEventNameMapping[Convert.ToInt32(logItem.EventId.Substring(logItem.EventId.Length - 2))]
+                            }
+                            else
+                            {
+                                <text>Okänd händelse</text>
+                            }
+                        </div>
+                        <div class="col-sm-2">
+                            @logItem.MemberName
+                        </div>
+                        <div class="col-sm-2">
+                            @logItem.CreateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+                        </div>
+                    </div>
+                            evenRow = !evenRow;
+            }
+
+            <div class="row log-item-content @logItem.Type @(logItem.Type == "MAIL" && !firstMail ? "collapsed" : "")">
+                <div class="col-sm-2">
+                    @logItem.Type
+                </div>
+                <div class="col-sm-10">
+                    <span class="log-message">@logItem.Message</span>
+                </div>
             </div>
-            <div class="col-sm-1">
-                <span class="log-type">@logItem.Type</span>
-            </div>
-            <div class="col-sm-8">
-                <span class="log-message">@logItem.Message</span>
-            </div>
-        </div>
-    }
+
+            first = false;
+            lastEventId = logItem.EventId;
+            lastCreateDate = logItem.CreateDate;
+            if (logItem.Type == "MAIL")
+            {
+                firstMail = false;
+            }
+        }
+}
     <script type="text/javascript">
     $.each($("#log-@Model.OrderItem.NodeId .log-message:contains('http')"), function () {
             $(this).html(addSaveDocumentButton(@Model.OrderItem.NodeId, replaceURLWithHTMLLinks($(this).text())));
@@ -355,26 +394,22 @@
     })
     // Open up an old mail
     $(".MAIL").click(function () {
-        //debugger;
-        var of = $(this).css("overflow");
-        //var h = $(this).css("height");
-        //alert(of);
-        if (of == "hidden") {
-            //alert("unhiding");
-            $(this).css("overflow", "auto");
-            $(this).css("height", "inherit");
-            $(this).find("span.glyphicon").removeClass("glyphicon-chevron-right");
-            $(this).find("span.glyphicon").addClass("glyphicon-chevron-down");
+        var sel = getSelection().toString();
+        if (!sel) {
+            var of = $(this).css("overflow");
+            if (of == "hidden") {
+                $(this).css("overflow", "auto");
+                $(this).css("height", "inherit");
+                $(this).find("span.glyphicon").removeClass("glyphicon-chevron-right");
+                $(this).find("span.glyphicon").addClass("glyphicon-chevron-down");
+            }
+            else {
+                $(this).css("overflow", "hidden");
+                $(this).css("height", "1.5em");
+                $(this).find("span.glyphicon").removeClass("glyphicon-chevron-down");
+                $(this).find("span.glyphicon").addClass("glyphicon-chevron-right");
+            }
         }
-        else {
-            $(this).css("overflow", "hidden");
-            $(this).css("height", "1.5em");
-            $(this).find("span.glyphicon").removeClass("glyphicon-chevron-down");
-            $(this).find("span.glyphicon").addClass("glyphicon-chevron-right");
-            //alert("hiding");
-        }
-        //alert(this + " " + of);
-        //console.log(of + " " + h);
     });
     $(".MAIL").each(function () {
         var of = $(this).css("overflow");

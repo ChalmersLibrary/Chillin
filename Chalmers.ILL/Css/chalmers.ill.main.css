@@ -160,6 +160,8 @@ div.illedit:hover{
     padding-top: 8px;
     padding-bottom: 12px;
 }
+
+/* Log list stuff */
 .log-list {
     font-size: 12px;
     margin-bottom: 12px;
@@ -171,6 +173,29 @@ div.illedit:hover{
 .log-list .log-message {
     white-space: pre-line;
 }
+.log-list .collapsed {
+    height: 1.5em;
+    overflow: hidden;
+}
+
+.log-item-header {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.log-item-container {
+    padding: 10px;
+}
+
+.log-item-container.even {
+    background-color: #eaeaea;
+}
+
+.log-item-container.odd {
+    background-color: #fefefe;
+}
+
+
 span.current {
     font-weight: bold;
     color: rgb(12, 83, 96);
@@ -227,15 +252,6 @@ div[data-column="reference"]{
 /* Change the color on the filter buttons. */
 .btn > .badge {
     color: #1f1f1f;
-}
-
-.MAIL{
-}
-
-.MAIL ~ .MAIL{
-    background-color: inherit;
-    height: 1.5em;
-    overflow: hidden;
 }
 
 /* Indicate that we have pending orders. */
