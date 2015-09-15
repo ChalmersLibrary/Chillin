@@ -269,7 +269,7 @@
     <div>
         <span class="label label-primary order-item-var-label">Uppföljning</span> @Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
-    @if (Model.OrderItem.StatusString == "Utlånad" || Model.OrderItem.StatusString == "Infodisk")
+    @if (Model.OrderItem.DeliveryDate.Year >= 1975 && Model.OrderItem.TypePrevalue == "Bok")
     {
         <div>
             <span class="label label-primary order-item-var-label">Återlämning</span> @Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
