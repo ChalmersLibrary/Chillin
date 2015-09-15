@@ -326,7 +326,7 @@ namespace Chalmers.ILL.OrderItems
             if (GetDateTimeFromContent(content, "followUpDate") != date)
             {
                 SetContentValue(content, "followUpDate", date);
-                AddLogItem(nodeId, "DATE", "Följs upp senast " + date, eventId, false, false);
+                AddLogItem(nodeId, "DATE", "Följs upp senast " + date.ToString("yyyy-MM-dd HH:mm"), eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
@@ -337,7 +337,7 @@ namespace Chalmers.ILL.OrderItems
             if (GetDateTimeFromContent(content, "dueDate") != date)
             {
                 SetContentValue(content, "dueDate", date);
-                AddLogItem(nodeId, "DATE", "Återlämnas av låntagare senast " + date, eventId, false, false);
+                AddLogItem(nodeId, "DATE", "Återlämnas av låntagare senast " + date.ToString("yyyy-MM-dd HH:mm"), eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
@@ -348,7 +348,7 @@ namespace Chalmers.ILL.OrderItems
             if (GetDateTimeFromContent(content, "providerDueDate") != date)
             {
                 SetContentValue(content, "providerDueDate", date);
-                AddLogItem(nodeId, "DATE", "Återlämnas till leverantör senast " + date, eventId, false, false);
+                AddLogItem(nodeId, "DATE", "Återlämnas till leverantör senast " + date.ToString("yyyy-MM-dd HH:mm"), eventId, false, false);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
