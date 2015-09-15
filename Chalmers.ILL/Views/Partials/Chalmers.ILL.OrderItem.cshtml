@@ -326,12 +326,14 @@
     @{
         string lastEventId = "";
         DateTime lastCreateDate = new DateTime(1970, 1, 1);
+        string lastMemberName = "";
         var first = true;
         var firstMail = true;
         var evenRow = true;
         foreach (var logItem in Model.OrderItem.LogItemsList)
         {
-            if (String.IsNullOrEmpty(lastEventId) || lastEventId != logItem.EventId)
+            if (first || lastEventId != logItem.EventId ||
+                (String.IsNullOrEmpty(logItem.EventId) && String.IsNullOrEmpty(lastEventId) && (Math.Abs((logItem.CreateDate - lastCreateDate).TotalSeconds) > 30 || logItem.MemberName != lastMemberName)))
             {
                 if (!first)
                 {
@@ -368,9 +370,11 @@
                 </div>
             </div>
 
-            first = false;
             lastEventId = logItem.EventId;
             lastCreateDate = logItem.CreateDate;
+            lastMemberName = logItem.MemberName;
+
+            first = false;
             if (logItem.Type == "MAIL")
             {
                 firstMail = false;
