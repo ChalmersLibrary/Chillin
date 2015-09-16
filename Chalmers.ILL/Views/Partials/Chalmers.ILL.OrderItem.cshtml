@@ -355,7 +355,7 @@
                         <div class="col-sm-2">
                             @logItem.MemberName
                         </div>
-                        <div class="col-sm-2">
+                        <div class="col-sm-2 @(DateTime.Now.Date == logItem.CreateDate.Date ? "dynamic-time-diff" : "")" data-minutes="@(DateTime.Now.Date == logItem.CreateDate.Date ? (DateTime.Now - logItem.CreateDate).TotalMinutes : 0)">
                             @logItem.CreateDate.ToPrettyString()
                         </div>
                     </div>
@@ -391,6 +391,15 @@
 
 <script type="text/javascript">
     $(function () {
+        // Start a timer for when we should update all calculated time differences in the opened order.
+        setInterval(function () {
+            // Updates all dynamic time differences in the opened order.
+            $(".dynamic-time-diff").each(function () {
+                $(this).data("minutes", parseInt($(this).data("minutes")) + 1);
+                $(this).text(getPrettyDateString($(this).data("minutes")));
+            });
+        }, 60000);
+
         $("[data-toggle='popover']").popover({
             trigger: "hover",
             placement: "top",
@@ -425,4 +434,20 @@
             $(this).find("span.log-message").prepend("<span style='margin-right:2px' class='glyphicon glyphicon-chevron-down'></span>");
         }
     });
+
+    function getPrettyDateString(minutes)
+    {
+        var ret = "";
+
+        if (minutes < 60) // Inom en timme
+        {
+            ret = minutes + " minuter";
+        }
+        else
+        {
+            ret = Math.floor(minutes/60) + " timmar";
+        }
+
+        return ret;
+    }
 </script>

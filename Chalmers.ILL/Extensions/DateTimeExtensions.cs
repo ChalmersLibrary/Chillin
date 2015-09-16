@@ -18,11 +18,23 @@ namespace Chalmers.ILL.Extensions
             }
             else if (DateTime.Now.Date == date.Date) // Samma dag
             {
-                ret = date.ToString("HH:mm", CultureInfo.CurrentCulture);
+                ret = Math.Floor((DateTime.Now - date).TotalHours) + " timmar";
             }
-            else if ((DateTime.Now - date).TotalDays < 7) // Inom de senaste sju dagarna
+            else if (DateTime.Now.AddDays(-1).Date == date.Date) // I går
             {
-                ret = new System.Globalization.CultureInfo("sv-SE").DateTimeFormat.GetDayName(date.DayOfWeek) + " " + date.ToString("HH:mm", CultureInfo.CurrentCulture);
+                ret = "i går";
+            }
+            else if ((DateTime.Now - date).TotalDays < 30) // Inom de senaste trettio dagarna
+            {
+                ret = Math.Floor((DateTime.Now - date).TotalDays) + " dagar";
+            }
+            else if ((DateTime.Now - date).TotalDays < 365) // Inom det senaste året
+            {
+                ret = Math.Floor((DateTime.Now - date).TotalDays / 7) + " veckor";
+            }
+            else // Gammal
+            {
+                ret = Math.Floor((DateTime.Now - date).TotalDays / 365) + " år";
             }
 
             return ret;

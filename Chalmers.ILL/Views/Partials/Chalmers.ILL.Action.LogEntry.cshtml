@@ -87,7 +87,7 @@
                 {
                     <li class="list-group-item chat-item">
                         <span class="chat-item-message">@logItem.Message</span><br /><br />
-                        <span class="chat-item-name-and-date">@logItem.MemberName - @logItem.CreateDate.ToPrettyString()</span><br />
+                        <span class="chat-item-name-and-date">@logItem.MemberName - <span class="@(DateTime.Now.Date == logItem.CreateDate.Date ? "dynamic-time-diff" : "")" data-minutes="@(DateTime.Now.Date == logItem.CreateDate.Date ? (DateTime.Now - logItem.CreateDate).TotalMinutes : 0)">@logItem.CreateDate.ToPrettyString()</span></span><br />
                     </li>
                 }
             }
