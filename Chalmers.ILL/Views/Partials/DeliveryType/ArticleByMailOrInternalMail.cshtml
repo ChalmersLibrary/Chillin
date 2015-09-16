@@ -25,24 +25,28 @@
             else
             {
                 <div class="form-group row">
-                    @foreach (var address in @Model.OrderItem.SierraInfo.adress)
-                    {
-                        <div class="col-sm-4">
-                            <label for="address-box">Adress @address.addresscount</label>
-                            <div id="address-box" class="panel panel-default">
-                                <div class="panel-body">
-                                    @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name<br />
-                                    @address.addr1@(String.IsNullOrEmpty(@address.addr1) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.addr2@(String.IsNullOrEmpty(@address.addr2) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.addr3@(String.IsNullOrEmpty(@address.addr3) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.postal_code@(String.IsNullOrEmpty(@address.postal_code) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.village@(String.IsNullOrEmpty(@address.village) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.city@(String.IsNullOrEmpty(@address.city) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.region@(String.IsNullOrEmpty(@address.region) ? Html.Raw("") : Html.Raw("<br />"))
-                                    @address.country@(String.IsNullOrEmpty(@address.country) ? Html.Raw("") : Html.Raw("<br />"))
+                    @{
+                        var addressCount = 0;
+                        foreach (var address in @Model.OrderItem.SierraInfo.adress)
+                        {
+                            addressCount++;
+                            <div class="col-sm-4">
+                                <label for="address-box">Adress @addressCount</label>
+                                <div id="address-box" class="panel panel-default">
+                                    <div class="panel-body">
+                                        @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name<br />
+                                        @address.addr1@(String.IsNullOrEmpty(@address.addr1) ? Html.Raw("") : Html.Raw("<br />"))
+                                        @address.addr2@(String.IsNullOrEmpty(@address.addr2) ? Html.Raw("") : Html.Raw("<br />"))
+                                        @address.addr3@(String.IsNullOrEmpty(@address.addr3) ? Html.Raw("") : Html.Raw("<br />"))
+                                        @address.postal_code@(String.IsNullOrEmpty(@address.postal_code) ? Html.Raw("") : Html.Raw("<br />"))
+                                        @address.village@(String.IsNullOrEmpty(@address.village) ? Html.Raw("") : Html.Raw("<br />"))
+                                        @address.city@(String.IsNullOrEmpty(@address.city) ? Html.Raw("") : Html.Raw("<br />"))
+                                        @address.region@(String.IsNullOrEmpty(@address.region) ? Html.Raw("") : Html.Raw("<br />"))
+                                        @address.country@(String.IsNullOrEmpty(@address.country) ? Html.Raw("") : Html.Raw("<br />"))
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     }
                </div>
             }
