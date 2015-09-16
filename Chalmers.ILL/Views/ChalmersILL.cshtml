@@ -145,6 +145,15 @@
 
         <script type="text/javascript">
     $(function () {
+        // Start a timer for when we should update all calculated time differences in the opened order.
+        setInterval(function () {
+            // Updates all dynamic time differences in the opened order.
+            $(".dynamic-time-diff").each(function () {
+                $(this).data("minutes", parseInt($(this).data("minutes")) + 1);
+                $(this).text(getPrettyDateString($(this).data("minutes")));
+            });
+        }, 60 * 1000);
+
         $("[data-toggle='popover']").popover({
             trigger: "click",
             placement: "bottom",

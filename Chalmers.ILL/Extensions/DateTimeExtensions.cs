@@ -14,11 +14,13 @@ namespace Chalmers.ILL.Extensions
 
             if ((DateTime.Now - date).TotalMinutes < 60) // Inom en timme
             {
-                ret = Math.Floor((DateTime.Now - date).TotalMinutes) + " minuter";
+                var m = Math.Floor((DateTime.Now - date).TotalMinutes);
+                ret = m + " " + (m == 1 ? "minut" : "minuter");
             }
             else if (DateTime.Now.Date == date.Date) // Samma dag
             {
-                ret = Math.Floor((DateTime.Now - date).TotalHours) + " timmar";
+                var h = Math.Floor((DateTime.Now - date).TotalHours);
+                ret = h + " " + (h == 1 ? "timme" : "timmar");
             }
             else if (DateTime.Now.AddDays(-1).Date == date.Date) // I går
             {

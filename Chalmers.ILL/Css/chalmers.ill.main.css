@@ -386,5 +386,5 @@ tr:nth-child(odd) {
 }
 
 .chat-item-message {
-
+    white-space: pre-line;
 }
