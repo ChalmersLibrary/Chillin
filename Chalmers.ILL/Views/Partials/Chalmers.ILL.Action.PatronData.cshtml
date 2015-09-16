@@ -13,11 +13,11 @@
             <div class="form-group">
             @if (!String.IsNullOrEmpty(Model.SierraInfo.barcode))
             {
-                <button name="fetch-patron-data-button" type="button" class="btn btn-success" onclick="fetchDataFromSierraUsingLibraryCardNumber(@Model.NodeId, '@Model.SierraInfo.barcode', false);">Uppdatera med nuvarande lånekortsnummer <span class="glyphicon glyphicon-refresh"></span></button>
+                <button name="fetch-patron-data-button" type="button" class="btn btn-success" onclick="fetchDataFromSierraUsingLibraryCardNumber(@Model.NodeId, '@Model.SierraInfo.barcode.Split(';')[0]', false);">Uppdatera med nuvarande lånekortsnummer <span class="glyphicon glyphicon-refresh"></span></button>
             }
             else
             {
-                <button name="fetch-patron-data-button" type="button" class="btn btn-success disabled" onclick="fetchDataFromSierraUsingLibraryCardNumber(@Model.NodeId, '@Model.SierraInfo.barcode', false);">Uppdatera med nuvarande lånekortsnummer <span class="glyphicon glyphicon-refresh"></span></button>
+                <button name="fetch-patron-data-button" type="button" class="btn btn-success disabled">Uppdatera med nuvarande lånekortsnummer <span class="glyphicon glyphicon-refresh"></span></button>
             }
             </div>
         </div>
