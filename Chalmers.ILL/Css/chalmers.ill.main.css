@@ -364,3 +364,27 @@ tr:nth-child(odd) {
     border-bottom-style: solid;
     padding: 3px;
 }
+
+/* Chat */
+.chat-container {
+    border-style: solid;
+    border-width: thin;
+    border-color: #bbbbbb;
+    background: rgba(255,255,255,0.7);
+    height: 250px;
+    overflow: auto;
+}
+
+.chat-item {
+
+}
+
+.chat-item-name-and-date {
+    color: rgb(126, 126, 126);
+    float: right;
+    font-size: 0.9em;
+}
+
+.chat-item-message {
+
+}

@@ -1,6 +1,29 @@
 ﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionLogEntryModel
 @using System.Globalization
 
+@functions
+{
+    string GetPrettyDate(DateTime date)
+    {
+        var ret = date.ToString("yyyy-MM-dd HH:mm");
+
+        if ((DateTime.Now - date).TotalMinutes < 60) // Inom en timme
+        {
+            ret = Math.Floor((DateTime.Now - date).TotalMinutes) + " minuter";
+        }
+        else if (DateTime.Now.Date == date.Date) // Samma dag
+        {
+            ret = date.ToString("HH:mm");
+        }
+        else if ((DateTime.Now - date).TotalDays < 7) // Inom de senaste sju dagarna
+        {
+            ret = new System.Globalization.CultureInfo("sv-SE").DateTimeFormat.GetDayName(date.DayOfWeek) + " " + date.ToString("HH:mm");
+        }
+
+        return ret;
+    }
+}
+
 <div class="action-header">Skriv till loggen</div>
 
 <form class="form" role="form" onsubmit="return false;">
@@ -77,12 +100,29 @@
 
             <button class="btn btn-success" onclick="submitLogEntry(this); event.preventDefault();">Spara</button>
         </div>
+        <div class="col-md-6">
+            <label for="log-function-chat-log">Tidigare kommunikation</label>
+            <ul id="log-function-chat-log" class="list-group chat-container">
+            @foreach (var logItem in Enumerable.Reverse(Model.OrderItem.LogItemsList))
+            {
+                if (logItem.Type == "LOG")
+                {
+                    <li class="list-group-item chat-item">
+                        <span class="chat-item-message">@logItem.Message</span><br /><br />
+                        <span class="chat-item-name-and-date">@logItem.MemberName - @GetPrettyDate(logItem.CreateDate)</span><br />
+                    </li>
+                }
+            }
+            </ul>
+        </div>
    </div>
     <script type="text/javascript">
     $(function () {
         $(".datetimepicker").datetimepicker({
             locale: "sv"
         });
+
+        $("#log-function-chat-log").scrollTop($("#log-function-chat-log")[0].scrollHeight);
     });
 
     function updateSelectedStatus(newStatusId, newStatusText, cancellationReasonId, purchasedMaterialId) {
