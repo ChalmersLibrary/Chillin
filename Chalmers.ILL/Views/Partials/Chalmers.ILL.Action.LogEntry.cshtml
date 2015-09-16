@@ -103,7 +103,7 @@
         <div class="col-md-6">
             <label for="log-function-chat-log">Tidigare kommunikation</label>
             <ul id="log-function-chat-log" class="list-group chat-container">
-            @foreach (var logItem in Enumerable.Reverse(Model.OrderItem.LogItemsList))
+            @foreach (var logItem in Enumerable.OrderBy(Model.OrderItem.LogItemsList, x => x.CreateDate))
             {
                 if (logItem.Type == "LOG")
                 {
