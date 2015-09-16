@@ -272,7 +272,7 @@ namespace Chalmers.ILL.Mail
 
             // Add properties to the email message.
             message.Subject = subject + " #" + orderId;
-            message.Body = new MessageBody(BodyType.Text, body);
+            message.Body = new MessageBody(BodyType.HTML, body.Replace("\n", "<br />"));
             foreach (var address in recipientAddress.Split(','))
             {
                 message.ToRecipients.Add(recipientName, address.Trim());
@@ -304,7 +304,7 @@ namespace Chalmers.ILL.Mail
 
             // Add properties to the email message.
             message.Subject = subject;
-            message.Body = new MessageBody(BodyType.HTML, body);
+            message.Body = new MessageBody(BodyType.HTML, body.Replace("\n", "<br />"));
             message.ToRecipients.Add(recipientAddress);
             message.ReplyTo.Add(senderEmail);
 
