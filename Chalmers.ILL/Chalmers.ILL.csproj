@@ -419,6 +419,7 @@
     <Compile Include="Controllers\SurfaceControllers\StatisticsSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\TemplatesSurfaceController.cs" />
+    <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Mail\AutomaticMailSendingEngine.cs" />
     <Compile Include="Mail\ChalmersOrderItemsMailSource.cs" />

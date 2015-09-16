@@ -1,5 +1,6 @@
 ﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.PartialPage.ChalmersILLOrderItemModel>
 @using System.Globalization;
+@using Chalmers.ILL.Extensions;
 
 <div class="col-sm-12 order-details">
 
@@ -355,7 +356,7 @@
                             @logItem.MemberName
                         </div>
                         <div class="col-sm-2">
-                            @logItem.CreateDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
+                            @logItem.CreateDate.ToPrettyString()
                         </div>
                     </div>
                             evenRow = !evenRow;
