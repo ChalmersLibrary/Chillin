@@ -26,17 +26,17 @@ namespace Chalmers.ILL.Extensions
             {
                 ret = "i går";
             }
-            else if ((DateTime.Now - date).TotalDays < 30) // Inom de senaste trettio dagarna
+            else if ((DateTime.Now.Date - date.Date).TotalDays < 30) // Inom de senaste trettio dagarna
             {
-                ret = Math.Floor((DateTime.Now - date).TotalDays) + " dagar";
+                ret = Math.Floor((DateTime.Now.Date - date.Date).TotalDays) + " dagar";
             }
-            else if ((DateTime.Now - date).TotalDays < 365) // Inom det senaste året
+            else if ((DateTime.Now.Date - date.Date).TotalDays < 365) // Inom det senaste året
             {
-                ret = Math.Floor((DateTime.Now - date).TotalDays / 7) + " veckor";
+                ret = Math.Floor((DateTime.Now.Date - date.Date).TotalDays / 7) + " veckor";
             }
             else // Gammal
             {
-                ret = Math.Floor((DateTime.Now - date).TotalDays / 365) + " år";
+                ret = Math.Floor((DateTime.Now.Date - date.Date).TotalDays / 365) + " år";
             }
 
             return ret;
