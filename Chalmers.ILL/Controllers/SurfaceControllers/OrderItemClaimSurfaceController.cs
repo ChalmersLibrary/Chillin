@@ -43,7 +43,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return PartialView("Chalmers.ILL.Action.Claim", pageModel);
         }
 
-        [HttpPost]
+        [HttpPost, ValidateInput(false)]
         public ActionResult ClaimItem(string packJson)
         {
             var json = new ResultResponse();
