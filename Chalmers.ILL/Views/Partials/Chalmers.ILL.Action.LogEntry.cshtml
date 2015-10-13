@@ -33,7 +33,7 @@
                             <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
                                 <li><a href="#" onclick="updateSelectedStatus(-1, 'Ingen förändring', -1, -1); event.preventDefault();">Ingen förändring</a></li>
                                 @{
-                                    var allowedStatusValues = new String[] { "Annullerad", "Åtgärda", "Överförd", "Inköpt", "Väntar" };
+                                    var allowedStatusValues = new String[] { "Annullerad", "Åtgärda", "Inköpt", "Väntar" };
 
                                     foreach (var status in Model.AvailableStatuses)
                                     {
