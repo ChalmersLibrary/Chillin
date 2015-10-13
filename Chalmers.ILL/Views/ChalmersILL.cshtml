@@ -73,17 +73,10 @@
                     <!-- Search form -->
                     <form class="navbar-form navbar-left" role="search" action="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url">
                         <div class="form-group">
-                            <input type="text" class="form-control" name="query" id="query" value="@Request.Params["query"]" placeholder="Namn, referens mm">
+                            <input type="text" class="form-control" name="query" id="query" value="@Request.Params["query"]" placeholder="Namn, referens mm" oninput="correctSearchString()">
                         </div>
                         <div class="btn-group">
                             <button type="submit" class="btn btn-default">Sök</button>
-                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                                <span class="caret"></span>
-                                <span class="sr-only">Toggle Dropdown</span>
-                            </button>
-                            <ul class="dropdown-menu" role="menu">
-                                <li><a href="/bestaellningar/?query=Status%3AUtl%C3%A5nad+AND+DueDate%3A%5B19700101+TO+@DateTime.Now.AddDays(2).ToString("yyyyMMdd")%5D">Sök fram utlånade böcker där lånetiden går ut i morgon</a></li>
-                            </ul>
                         </div>
                     </form>
 
@@ -182,6 +175,23 @@
             });
 
             $("#send-feedback-button").popover("hide");
+        }
+    }
+
+    // Look for things that look like Chillin IDs and make sure they look really correct.
+    function correctSearchString() {
+        var queryStr = $("#query").val();
+        var regExp = /(cthb[+-][a-zA-Z0-9]{8}[+-][0-9]+)/g;
+        var matches = regExp.exec(queryStr);
+
+        for (var i = 1; i < matches.length; i++) {
+            var originalStr = matches[i];
+            var fixedStr = matches[i].replace(/\+/g, '-');
+            queryStr = queryStr.replace(originalStr, fixedStr);
+        }
+
+        if ($("#query").val() !== queryStr) {
+            $("#query").val(queryStr);
         }
     }
         </script>
