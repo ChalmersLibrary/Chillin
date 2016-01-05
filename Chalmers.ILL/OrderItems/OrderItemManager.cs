@@ -513,8 +513,9 @@ namespace Chalmers.ILL.OrderItems
             IContent content = cs.CreateContent(contentName, uh.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListContentDocumentType"]).First().Id, "ChalmersILLOrderItem");
 
             // Set properties
-            content.SetValue("originalOrder", HttpUtility.UrlDecode(model.OriginalOrder));
-            content.SetValue("reference", HttpUtility.UrlDecode(model.OriginalOrder));
+            var originalOrder = UrlDecodeAndEscapeAllLinks(model.OriginalOrder);
+            content.SetValue("originalOrder", originalOrder);
+            content.SetValue("reference", originalOrder);
             content.SetValue("patronName", model.PatronName);
             content.SetValue("patronEmail", model.PatronEmail);
             content.SetValue("patronCardNo", model.PatronCardNo);
@@ -834,6 +835,20 @@ namespace Chalmers.ILL.OrderItems
             {
                 content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
             }
+        }
+
+        private string UrlDecodeAndEscapeAllLinks(string str)
+        {
+            var res = "";
+            var regex = new Regex(@"((?:https?|ftp|file)(?::|%3a)(?:\/|%2f)(?:\/|%2f)[-a-zA-Z0-9+&@#\/%?=~_|!:,.;()]*[-a-zA-Z0-9+&@#()\/%=~_|()])");
+            var match = regex.Match(str);
+            res = HttpUtility.UrlDecode(str);
+            for (int i = 1; i < match.Groups.Count; i++)
+            {
+                var urlDecodedUrlStr = HttpUtility.UrlDecode(match.Groups[i].ToString());
+                res = res.Replace(urlDecodedUrlStr, Uri.EscapeUriString(urlDecodedUrlStr));
+            }
+            return res;
         }
 
         #endregion
