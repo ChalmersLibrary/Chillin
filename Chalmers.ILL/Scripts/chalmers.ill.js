@@ -302,8 +302,8 @@ function unlockScreen() {
 }
 
 function replaceURLWithHTMLLinks(text) {
-    var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;()]*[-A-Z0-9+&@#()\/%=~_|()])/ig;
-    return text.replace(exp, "<a target='blank' class='reflink' href='$1'>$1</a>");
+    var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;()]*[-A-Z0-9+&@#()\/%=~_|()\S]+)/ig;
+    return text.replace(exp, '<a target="blank" class="reflink" href="$1">$1</a>');
 }
 
 function addSaveDocumentButton(id, text) {
@@ -1157,7 +1157,7 @@ function openDocument(btn) {
         win.focus();
     } else {
         //Browser has blocked it
-        alert("Misslyckades med att öppna popup-fönster.");
+        alert("Misslyckades med att Ã¶ppna popup-fÃ¶nster.");
     }
 }
 
