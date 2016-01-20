@@ -303,7 +303,7 @@ function unlockScreen() {
 
 function replaceURLWithHTMLLinks(text) {
     var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;()]*[-A-Z0-9+&@#()\/%=~_|()\S]+)/ig;
-    return text.replace(exp, "<a target='blank' class='reflink' href='$1'>$1</a>");
+    return text.replace(exp, '<a target="blank" class="reflink" href="$1">$1</a>');
 }
 
 function addSaveDocumentButton(id, text) {
