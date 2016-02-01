@@ -95,16 +95,18 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             try
             {
-                var orderItemsIndexer = ExamineManager.Instance.IndexProviderCollection["ChalmersILLOrderItemsIndexer"];
-                UmbracoContentIndexer umbracoOrderItemsIndexer = null;
-
-                if (orderItemsIndexer is UmbracoContentIndexer)
+                foreach (var orderItemsIndexer in ExamineManager.Instance.IndexProviderCollection)
                 {
-                    umbracoOrderItemsIndexer = (UmbracoContentIndexer)orderItemsIndexer;
-                    umbracoOrderItemsIndexer.OptimizeIndex();
-                }
+                    UmbracoContentIndexer umbracoOrderItemsIndexer = null;
 
-                res.Success &= true;
+                    if (orderItemsIndexer is UmbracoContentIndexer)
+                    {
+                        umbracoOrderItemsIndexer = (UmbracoContentIndexer)orderItemsIndexer;
+                        umbracoOrderItemsIndexer.OptimizeIndex();
+                    }
+
+                    res.Success &= true;
+                }
             }
             catch (Exception e)
             {
