@@ -77,7 +77,7 @@ namespace Chalmers.ILL.Tests.Mail
 
             IOrderItemManager orderItemManager = new Chalmers.ILL.OrderItems.Fakes.StubIOrderItemManager()
             {
-                SetStatusInt32StringBooleanBoolean = (nodeId, statusPrevalue, doReindex, doSignal) =>
+                SetStatusInt32StringStringBooleanBoolean = (nodeId, statusPrevalue, eventId, doReindex, doSignal) =>
                 {
                     result.NewStatus = statusPrevalue;
 
@@ -91,7 +91,7 @@ namespace Chalmers.ILL.Tests.Mail
                         result.NumberOfSignals++;
                     }
                 },
-                AddLogItemInt32StringStringBooleanBoolean = (nodeId, type, msg, doReindex, doSignal) =>
+                AddLogItemInt32StringStringStringBooleanBoolean = (nodeId, type, msg, eventId, doReindex, doSignal) =>
                 {
                     result.NumberOfLogMessages++;
 
