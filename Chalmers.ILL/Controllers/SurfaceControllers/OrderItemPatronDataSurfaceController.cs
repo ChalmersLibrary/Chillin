@@ -95,9 +95,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                var cs = Services.ContentService;
-                var content = cs.GetById(orderItemNodeId);
-
+                var content = _orderItemManager.GetOrderItem(orderItemNodeId);
                 var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
 
                 SierraModel sm = null;
@@ -112,12 +110,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 if (!String.IsNullOrEmpty(sm.id))
                 {
-                    content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
-                    content.SetValue("sierraPatronRecordId", sm.record_id);
-                    content.SetValue("pType", sm.ptype);
-                    content.SetValue("homeLibrary", sm.home_library);
-                    UpdateDeliveryLibraryIfNeeded(content.Id, sm, eventId);
-                    _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                    _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library);
+                    UpdateDeliveryLibraryIfNeeded(content.NodeId, sm, eventId);
+                    _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content.NodeId, false, false);
                 }
                 _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm, eventId);
 
@@ -147,9 +142,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                var cs = Services.ContentService;
-                var content = cs.GetById(orderItemNodeId);
-
+                var content = _orderItemManager.GetOrderItem(orderItemNodeId);
                 var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
 
                 SierraModel sm = null;
@@ -164,12 +157,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 if (!String.IsNullOrEmpty(sm.id))
                 {
-                    content.SetValue("sierraInfo", JsonConvert.SerializeObject(sm));
-                    content.SetValue("sierraPatronRecordId", sm.record_id);
-                    content.SetValue("pType", sm.ptype);
-                    content.SetValue("homeLibrary", sm.home_library);
-                    UpdateDeliveryLibraryIfNeeded(content.Id, sm, eventId);
-                    _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content, false, false);
+                    _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library);
+                    UpdateDeliveryLibraryIfNeeded(content.NodeId, sm, eventId);
+                    _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content.NodeId, false, false);
                 }
                 _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm, eventId);
 

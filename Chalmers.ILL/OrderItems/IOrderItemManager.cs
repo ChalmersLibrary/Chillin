@@ -18,6 +18,8 @@ namespace Chalmers.ILL.OrderItems
         void AddLogItem(int OrderItemNodeId, string Type, string Message, string eventId, bool doReindex = true, bool doSignal = true);
         void AddSierraDataToLog(int orderItemNodeId, SierraModel sm, string eventId, bool doReindex = true, bool doSignal = true);
 
+        void RemoveConnectionToMediaItem(int orderNodeId, int mediaNodeId, bool doReindex = true, bool doSignal = true);
+
         void SetFollowUpDateWithoutLogging(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true);
         void SetDrmWarningWithoutLogging(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true);
         void SetProviderNameWithoutLogging(int nodeId, string providerName, bool doReindex = true, bool doSignal = true);
@@ -33,10 +35,12 @@ namespace Chalmers.ILL.OrderItems
         void SetStatus(int orderNodeId, string statusPrevalue, string eventId, bool doReindex = true, bool doSignal = true);
         void SetType(int orderNodeId, int typeId, string eventId, bool doReindex = true, bool doSignal = true);
         void SetBookId(int nodeId, string bookId, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetPatronData(int nodeId, string sierraInfo, int sierraPatronRecordId, int pType, string homeLibrary, bool doReindex = true, bool doSignal = true);
         void SetPatronEmail(int nodeId, string email, string eventId, bool doReindex = true, bool doSignal = true);
         void SetProviderName(int nodeId, string providerName, string eventId, bool doReindex = true, bool doSignal = true);
         void SetProviderOrderId(int nodeId, string providerOrderId, string eventId, bool doReindex = true, bool doSignal = true);
         void SetProviderInformation(int nodeId, string providerInformation, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetReference(int nodeId, string reference, string eventId, bool doReindex = true, bool doSignal = true);
 
         /// <summary>
         /// Creates a new OrderItem from a MailQueueModel
@@ -70,6 +74,8 @@ namespace Chalmers.ILL.OrderItems
         /// <param name="doReindex">Indicates if we should do a reindex operation of the saved node.</param>
         /// <param name="doSignal">Indicates if we should emit Signal R events or not.</param>
         void SaveWithoutEventsAndWithSynchronousReindexing(IContent content, bool doReindex = true, bool doSignal = true);
+
+        void SaveWithoutEventsAndWithSynchronousReindexing(int nodeId, bool doReindex = true, bool doSignal = true);
 
         string GenerateEventId(int type);
     }

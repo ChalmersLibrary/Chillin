@@ -1,25 +1,12 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using Umbraco.Web.Mvc;
-using umbraco.cms.businesslogic.member;
-using umbraco.cms.businesslogic.datatype;
 using System.Web.Mvc;
-using System.ComponentModel.DataAnnotations;
 using Chalmers.ILL.Models;
-using Chalmers.ILL.Utilities;
-using System.Web.Security;
 using System.IO;
 using System.Net;
-using System.Threading;
-using Umbraco.Core.Events;
-using Umbraco.Core.Services;
-using Umbraco.Core.Models;
 using System.Text.RegularExpressions;
-using System.Configuration;
 using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.MediaItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -29,10 +16,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public static int EVENT_TYPE { get { return 16; } }
 
         IOrderItemManager _orderItemManager;
+        IMediaItemManager _mediaItemManager;
 
-        public ImportDocumentSurfaceController(IOrderItemManager orderItemManager)
+        public ImportDocumentSurfaceController(IOrderItemManager orderItemManager, IMediaItemManager mediaItemManager)
         {
             _orderItemManager = orderItemManager;
+            _mediaItemManager = mediaItemManager;
         }
 
         /// <summary>
@@ -48,8 +37,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             var json = new ResultResponse();
 
             Stream stream = null;
-            int bytesToRead = 10000;
-            byte[] buffer = new Byte[bytesToRead];
 
             try
             {
@@ -59,62 +46,35 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 HttpWebResponse fileResp = (HttpWebResponse)fileReq.GetResponse();
                 stream = fileResp.GetResponseStream();
 
-                var ms = Services.MediaService;
-                var cs = Services.ContentService;
-                var mainFolder = ms.GetChildren(-1).First(m => m.Name == ConfigurationManager.AppSettings["umbracoOrderItemAttachmentsMediaFolderName"]);
-                using (Semaphore semLock = new Semaphore(0, 1))
+                var orderItem = _orderItemManager.GetOrderItem(orderItemNodeId);
+                var cdPattern = new Regex("filename=\"?(.*)\"?(?:;|$)");
+                var fileEndingPattern = new Regex("(?i)\\.(?:pdf|txt|tif|tiff)$");
+                string name = "";
+                if (fileEndingPattern.IsMatch(url))
                 {
-                    TypedEventHandler<IMediaService, SaveEventArgs<IMedia>> handler = (sender, e) => { semLock.Release(e.SavedEntities.Count()); };
-                    try
-                    {
-                        MediaService.Saved += handler;
+                    name = fileResp.ResponseUri.AbsoluteUri.Substring(fileResp.ResponseUri.AbsoluteUri.LastIndexOf("/") + 1);
+                }
+                else
+                {
+                    name = cdPattern.Match(fileResp.Headers["Content-Disposition"]).Groups[1].Value;
+                }
 
-                        var orderItem = cs.GetById(orderItemNodeId);
-                        var cdPattern = new Regex("filename=\"?(.*)\"?(?:;|$)");
-                        var fileEndingPattern = new Regex("(?i)\\.(?:pdf|txt|tif|tiff)$");
-                        string name = "";
-                        if (fileEndingPattern.IsMatch(url))
-                        {
-                            name = fileResp.ResponseUri.AbsoluteUri.Substring(fileResp.ResponseUri.AbsoluteUri.LastIndexOf("/") + 1);
-                        }
-                        else
-                        {
-                            name = cdPattern.Match(fileResp.Headers["Content-Disposition"]).Groups[1].Value;
-                        }
+                if (String.IsNullOrEmpty(name))
+                {
+                    throw new Exception("Not a valid document.");
+                }
+                else
+                {
+                    var savedMediaItem = _mediaItemManager.CreateMediaItem(name, orderItem.NodeId, orderItem.OrderId, stream);
 
-                        if (String.IsNullOrEmpty(name))
-                        {
-                            json.Success = false;
-                            json.Message = "Not a valid document.";
-                        }
-                        else
-                        {
-                            var media = ms.CreateMedia(orderItem.GetValue("orderId").ToString() + "-" + name, mainFolder, "OrderItemAttachment");
-                            media.SetValue("file", name, stream);
-                            media.SetValue("orderItemNodeId", orderItem.Id);
+                    // Dispose stream that is no longer needed. Handle this in some better way?
+                    savedMediaItem.Data.Dispose();
 
-                            // Save the media and wait until it is finished so that we can retrieve the link to the item.
-                            ms.Save(media);
-                            semLock.WaitOne();
+                    var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                    _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.NodeId, savedMediaItem.Id, name, savedMediaItem.Url, eventId);
 
-                            // cleanup, memory stream not needed any longer
-                            stream.Dispose();
-
-                            var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
-                            _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.Id, media.Id, name, media.GetValue("file").ToString(), eventId);
-
-                            json.Success = true;
-                            json.Message = "Document imported successfully.";
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        throw;
-                    }
-                    finally
-                    {
-                        MediaService.Saved -= handler;
-                    }
+                    json.Success = true;
+                    json.Message = "Document imported successfully.";
                 }
             }
             catch (Exception e)
@@ -141,51 +101,24 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                var ms = Services.MediaService;
-                var cs = Services.ContentService;
-                var mainFolder = ms.GetChildren(-1).First(m => m.Name == ConfigurationManager.AppSettings["umbracoOrderItemAttachmentsMediaFolderName"]);
-                using (Semaphore semLock = new Semaphore(0, 1))
+                if (String.IsNullOrEmpty(filename))
                 {
-                    TypedEventHandler<IMediaService, SaveEventArgs<IMedia>> handler = (sender, e) => { semLock.Release(e.SavedEntities.Count()); };
-                    try
-                    {
-                        MediaService.Saved += handler;
+                    throw new Exception("Not a valid document.");
+                }
+                else
+                {
+                    var orderItem = _orderItemManager.GetOrderItem(orderItemNodeId);
 
-                        var orderItem = cs.GetById(orderItemNodeId);
-                        if (String.IsNullOrEmpty(filename))
-                        {
-                            json.Success = false;
-                            json.Message = "Not a valid document.";
-                        }
-                        else
-                        {
-                            var media = ms.CreateMedia(orderItem.GetValue("orderId").ToString() + "-" + filename, mainFolder, "OrderItemAttachment");
-                            var stream = new MemoryStream(Convert.FromBase64String(Regex.Split(data, "base64[;,]")[1]));
-                            media.SetValue("file", filename, stream);
-                            media.SetValue("orderItemNodeId", orderItem.Id);
+                    var savedMediaItem = _mediaItemManager.CreateMediaItem(filename, orderItem.NodeId, orderItem.OrderId, new MemoryStream(Convert.FromBase64String(Regex.Split(data, "base64[;,]")[1])));
 
-                            // Save the media and wait until it is finished so that we can retrieve the link to the item.
-                            ms.Save(media);
-                            semLock.WaitOne();
+                    // Dispose stream that is no longer needed. Handle this in some better way?
+                    savedMediaItem.Data.Dispose();
 
-                            // cleanup, memory stream not needed any longer
-                            stream.Dispose();
+                    var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                    _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.NodeId, savedMediaItem.Id, filename, savedMediaItem.Url, eventId);
 
-                            var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
-                            _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.Id, media.Id, filename, media.GetValue("file").ToString(), eventId);
-
-                            json.Success = true;
-                            json.Message = media.Id.ToString() + ";" + media.GetValue("file").ToString();
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        throw;
-                    }
-                    finally
-                    {
-                        MediaService.Saved -= handler;
-                    }
+                    json.Success = true;
+                    json.Message = savedMediaItem.Id.ToString() + ";" + savedMediaItem.Url;
                 }
             }
             catch (Exception e)

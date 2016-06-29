@@ -31,16 +31,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
         IUmbracoWrapper _umbraco;
-        IContentService _contentService;
 
         public OrderItemSurfaceController(IMemberInfoManager memberInfoManager, IOrderItemManager orderItemManager, 
-            INotifier notifier, IUmbracoWrapper umbraco, IContentService contentService)
+            INotifier notifier, IUmbracoWrapper umbraco)
         {
             _memberInfoManager = memberInfoManager;
             _orderItemManager = orderItemManager;
             _notifier = notifier;
             _umbraco = umbraco;
-            _contentService = contentService;
         }
 
         public const string lockRelationType = "memberLocked";
@@ -133,30 +131,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // Return JSON object to the client to handle
             return Json(orderItem, JsonRequestBehavior.AllowGet);
         }
-
-        [HttpGet]
-        public ActionResult GetOrderItemVersions()
-        {
-            // Response JSON
-            var json = new OrderItemVersions();
-            json.List = new List<OrderItemVersion>();
-
-            // Get a new OrderItem populated with values for this node
-            var orderListNode = _umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListContentDocumentType"]).First();
-
-            // Give counter for versions for each node found
-            foreach (var node in _contentService.GetChildren(orderListNode.Id))
-	        {
-                var orderItemVersion = new OrderItemVersion();
-                orderItemVersion.NodeId = node.Id;
-                orderItemVersion.VersionCount = _contentService.GetVersions(node.Id).Count();
-                json.List.Add(orderItemVersion);
-	        }
-
-            // Return JSON object to the client to handle
-            return Json(json, JsonRequestBehavior.AllowGet);
-        }
-
 
         /// <summary>
         /// Take over lock for OrderItem

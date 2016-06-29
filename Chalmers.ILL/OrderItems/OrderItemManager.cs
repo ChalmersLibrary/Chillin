@@ -288,6 +288,22 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
+        public void RemoveConnectionToMediaItem(int orderNodeId, int mediaNodeId, bool doReindex = true, bool doSignal = true)
+        {
+            var contentNode = _contentService.GetById(orderNodeId);
+            var attachmentList = JsonConvert.DeserializeObject<List<OrderAttachment>>(contentNode.GetValue<string>("attachments"));
+            if (attachmentList == null)
+            {
+                attachmentList = new List<OrderAttachment>();
+            }
+            else
+            {
+                attachmentList.RemoveAll(i => i.MediaItemNodeId == mediaNodeId);
+            }
+            contentNode.SetValue("attachments", JsonConvert.SerializeObject(attachmentList));
+            SaveWithoutEventsAndWithSynchronousReindexing(contentNode, doReindex, doSignal);
+        }
+
 
         public void SetFollowUpDateWithoutLogging(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
@@ -463,6 +479,23 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
+        public void SetPatronData(int nodeId, string sierraInfo, int sierraPatronRecordId, int pType, string homeLibrary, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentSierraInfo = content.GetValue<string>("sierraInfo");
+            var currentSierraPatronRecordId = content.GetValue<int>("sierraPatronRecordId");
+            var currentPType = content.GetValue<int>("pType");
+            var currentHomeLibrary = content.GetValue<string>("homeLibrary");
+            if (currentSierraInfo != sierraInfo || currentSierraPatronRecordId != sierraPatronRecordId || currentPType != pType || currentHomeLibrary != homeLibrary)
+            {
+                content.SetValue("sierraInfo", sierraInfo);
+                content.SetValue("sierraPatronRecordId", sierraPatronRecordId);
+                content.SetValue("pType", pType);
+                content.SetValue("homeLibrary", homeLibrary);
+            }
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
         public void SetProviderName(int nodeId, string providerName, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
@@ -495,6 +528,18 @@ namespace Chalmers.ILL.OrderItems
             {
                 content.SetValue("providerInformation", providerInformation);
                 AddLogItem(nodeId, "LEVERANTÖR", "Leverantörsinformation ändrad till \"" + providerInformation + "\".", eventId, false, false);
+            }
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
+        public void SetReference(int nodeId, string reference, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            var currentReference = content.GetValue<string>("reference");
+            if (currentReference != reference)
+            {
+                content.SetValue("reference", reference);
+                AddLogItem(nodeId, "REF", "Referens ändrad", eventId);
             }
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
@@ -720,6 +765,11 @@ namespace Chalmers.ILL.OrderItems
                 throw new SaveException("Save NodeId=" + content.Id + ", Published=" + content.Published + ", Status=" + content.Status + ", Trashed=" + content.Trashed + ", UpdateDate=" + content.UpdateDate + ".", e);
 
             }
+        }
+
+        public void SaveWithoutEventsAndWithSynchronousReindexing(int nodeId, bool doReindex = true, bool doSignal = true)
+        {
+            SaveWithoutEventsAndWithSynchronousReindexing(_contentService.GetById(nodeId), doReindex, doSignal);
         }
 
         static void IndexOperationComplete(object sender, EventArgs e, Semaphore semLock)

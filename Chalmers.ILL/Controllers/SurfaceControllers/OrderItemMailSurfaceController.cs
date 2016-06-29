@@ -71,12 +71,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                // Connect to Umbraco ContentService
-                var contentService = UmbracoContext.Application.Services.ContentService;
-
-                // Find OrderItem
-                var contentNode = contentService.GetById(m.nodeId);
-
                 // Read current values that can be affected
                 var orderItem = _orderItemManager.GetOrderItem(m.nodeId);
                 var currentPatronEmail = orderItem.PatronEmail;
@@ -85,23 +79,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
 
                 // Send mail to recipient
-                try
-                {
-                    _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, m));
+                _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, m));
 
-                    _orderItemManager.AddLogItem(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, eventId, false, false);
-                    _orderItemManager.AddLogItem(m.nodeId, "MAIL", m.message, eventId, false, false);
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
+                _orderItemManager.AddLogItem(m.nodeId, "MAIL_NOTE", "Skickat mail till " + m.recipientEmail, eventId, false, false);
+                _orderItemManager.AddLogItem(m.nodeId, "MAIL", m.message, eventId, false, false);
 
                 // Set PatronEmail property if it differs from recipientEmail
                 if (currentPatronEmail != m.recipientEmail)
                 {
-                    contentNode.SetValue("patronEmail", m.recipientEmail);
-                    _orderItemManager.AddLogItem(m.nodeId, "MAIL_NOTE", "PatronEmail ändrad till " + m.recipientEmail, eventId, false, false);
+                    _orderItemManager.SetPatronEmail(m.nodeId, m.recipientEmail, eventId, false, false);
                 }
 
                 // Set FollowUpDate property if it differs from current
@@ -134,7 +120,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     _orderItemManager.SetPurchasedMaterial(m.nodeId, m.newPurchasedMaterialId, eventId, false, false);
                 }
 
-                _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode);
+                _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(m.nodeId);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

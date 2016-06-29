@@ -42,23 +42,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                // Connect to Umbraco ContentService
-                var contentService = UmbracoContext.Application.Services.ContentService;
-
                 // Find OrderItem
-                var contentNode = contentService.GetById(nodeId);
+                var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
-                // Read current reference
-                var currentReference = contentNode.GetValue("reference").ToString();                
-
-                // Save and Log this action
-                if (currentReference != reference)
-                {
-                    var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
-                    contentNode.SetValue("reference", reference);
-                    _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(contentNode, false, false);
-                    _orderItemManager.AddLogItem(nodeId, "REF", "Referens ändrad", eventId);
-                }
+                _orderItemManager.SetReference(nodeId, reference, _orderItemManager.GenerateEventId(EVENT_TYPE), false, false);
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;

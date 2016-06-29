@@ -1,4 +1,5 @@
 ﻿using Chalmers.ILL.Mail;
+using Chalmers.ILL.MediaItems;
 using Chalmers.ILL.Patron;
 using Chalmers.ILL.Providers;
 using Chalmers.ILL.SignalR;
@@ -16,17 +17,17 @@ namespace Chalmers.ILL.OrderItems
         IExchangeMailWebApi _exchangeMailWebApi;
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
-        IMediaService _mediaService;
+        IMediaItemManager _mediaItemManager;
         IUmbracoWrapper _umbraco;
         IPatronDataProvider _patronDataProvider;
 
         public ChalmersSourceFactory(IExchangeMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager, INotifier notifier, 
-            IMediaService mediaService, IUmbracoWrapper umbraco, IPatronDataProvider patronDataProvider)
+            IMediaItemManager mediaItemManager, IUmbracoWrapper umbraco, IPatronDataProvider patronDataProvider)
         {
             _exchangeMailWebApi = exchangeMailWebApi;
             _orderItemManager = orderItemManager;
             _notifier = notifier;
-            _mediaService = mediaService;
+            _mediaItemManager = mediaItemManager;
             _umbraco = umbraco;
             _patronDataProvider = patronDataProvider;
         }
@@ -34,7 +35,7 @@ namespace Chalmers.ILL.OrderItems
         public List<ISource> Sources()
         {
             var res = new List<ISource>();
-            res.Add(new ChalmersOrderItemsMailSource(_exchangeMailWebApi, _orderItemManager, _notifier, _mediaService, _patronDataProvider));
+            res.Add(new ChalmersOrderItemsMailSource(_exchangeMailWebApi, _orderItemManager, _notifier, _mediaItemManager, _patronDataProvider));
             res.Add(new LibrisOrderItemsSource(_umbraco, _orderItemManager, _patronDataProvider));
             return res;
         }

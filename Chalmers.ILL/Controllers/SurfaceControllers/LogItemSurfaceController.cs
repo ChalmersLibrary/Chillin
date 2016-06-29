@@ -85,12 +85,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         [HttpPost, ValidateInput(false)]
         public ActionResult WriteLogItem(int nodeId, string Type, string Message, string newFollowUpDate, int statusId, int cancellationReasonId, int purchasedMaterialId)
         {
-            // Connect to Umbraco ContentService
-            var contentService = UmbracoContext.Application.Services.ContentService;
-
-            // Find OrderItem
-            var contentNode = contentService.GetById(nodeId);
-
             // Json response
             var json = new ResultResponse();
 

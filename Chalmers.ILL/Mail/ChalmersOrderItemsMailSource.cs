@@ -24,6 +24,7 @@ using Umbraco.Core.Events;
 using Umbraco.Core.Models;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Models.Mail;
+using Chalmers.ILL.MediaItems;
 
 namespace Chalmers.ILL.Mail
 {
@@ -36,7 +37,7 @@ namespace Chalmers.ILL.Mail
         IExchangeMailWebApi _exchangeMailWebApi;
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
-        IMediaService _mediaService;
+        IMediaItemManager _mediaItemManager;
         IPatronDataProvider _patronDataProvider;
 
         private SourcePollingResult _result;
@@ -49,12 +50,12 @@ namespace Chalmers.ILL.Mail
         }
 
         public ChalmersOrderItemsMailSource(IExchangeMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager,
-            INotifier notifier, IMediaService mediaService, IPatronDataProvider patronDataProvider)
+            INotifier notifier, IMediaItemManager mediaItemManager, IPatronDataProvider patronDataProvider)
         {
             _exchangeMailWebApi = exchangeMailWebApi;
             _orderItemManager = orderItemManager;
             _notifier = notifier;
-            _mediaService = mediaService;
+            _mediaItemManager = mediaItemManager;
             _patronDataProvider = patronDataProvider;
         }
 
@@ -313,38 +314,14 @@ namespace Chalmers.ILL.Mail
                             {
                                 if (item.Attachments.Count > 0)
                                 {
-                                    var mainFolder = _mediaService.GetChildren(-1).First(m => m.Name == ConfigurationManager.AppSettings["umbracoOrderItemAttachmentsMediaFolderName"]);
-                                    using (Semaphore semLock = new Semaphore(0, 1))
+                                    foreach (var attachment in item.Attachments)
                                     {
-                                        TypedEventHandler<IMediaService, SaveEventArgs<IMedia>> handler = (sender, e) => { semLock.Release(e.SavedEntities.Count()); };
-                                        try
-                                        {
-                                            MediaService.Saved += handler;
+                                        var savedMediaItem = _mediaItemManager.CreateMediaItem(attachment.Title, item.OrderItemNodeId, item.OrderId, attachment.Data);
 
-                                            foreach (var attachment in item.Attachments)
-                                            {
-                                                var m = _mediaService.CreateMedia(item.OrderId + "-" + attachment.Title, mainFolder, "OrderItemAttachment");
-                                                m.SetValue("file", attachment.Title, attachment.Data);
-                                                m.SetValue("orderItemNodeId", item.OrderItemNodeId);
+                                        // Dispose stream that is no longer needed. Handle this in some better way?
+                                        savedMediaItem.Data.Dispose();
 
-                                                // Save the media and wait until it is finished so that we can retrieve the link to the item.
-                                                _mediaService.Save(m);
-                                                semLock.WaitOne();
-
-                                                // cleanup, memory stream not needed any longer
-                                                attachment.Data.Dispose();
-
-                                                _orderItemManager.AddExistingMediaItemAsAnAttachment(item.OrderItemNodeId, m.Id, attachment.Title, m.GetValue("file").ToString(), eventId, false, false);
-                                            }
-                                        }
-                                        catch (Exception)
-                                        {
-                                            throw;
-                                        }
-                                        finally
-                                        {
-                                            MediaService.Saved -= handler;
-                                        }
+                                        _orderItemManager.AddExistingMediaItemAsAnAttachment(item.OrderItemNodeId, savedMediaItem.Id, attachment.Title, savedMediaItem.Url, eventId, false, false);
                                     }
                                 }
                             }

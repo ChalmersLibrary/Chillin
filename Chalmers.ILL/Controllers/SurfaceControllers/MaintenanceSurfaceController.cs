@@ -1,9 +1,7 @@
 ﻿using Chalmers.ILL.Models;
-using Chalmers.ILL.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using Umbraco.Web.Mvc;
 using Newtonsoft.Json;
@@ -12,17 +10,19 @@ using Examine;
 using UmbracoExamine;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.Mail;
+using Chalmers.ILL.MediaItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class MaintenanceSurfaceController : SurfaceController
     {
         IOrderItemManager _orderItemManager;
+        IMediaItemManager _mediaItemManager;
 
-        public MaintenanceSurfaceController(IOrderItemManager orderItemManager)
+        public MaintenanceSurfaceController(IOrderItemManager orderItemManager, IMediaItemManager mediaItemManager)
         {
             _orderItemManager = orderItemManager;
+            _mediaItemManager = mediaItemManager;
         }
 
         /// <summary>
@@ -52,36 +52,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             try
             {
-                var ms = UmbracoContext.Application.Services.MediaService;
-                var cs = UmbracoContext.Application.Services.ContentService;
+                var deletedMediaItemIds = _mediaItemManager.DeleteOlderThan(DateTime.Now.AddDays(-30));
 
-                bool removedMedia = false;
-                foreach (var m in ms.GetChildren(ms.GetChildren(-1).First(m => m.Name == ConfigurationManager.AppSettings["umbracoOrderItemAttachmentsMediaFolderName"]).Id))
+                foreach (var idCollection in deletedMediaItemIds)
                 {
-                    if (m.CreateDate < DateTime.Now.AddDays(-30))
-                    {
-                        var c = cs.GetById(m.GetValue<int>("orderItemNodeId"));
-                        var attachmentList = JsonConvert.DeserializeObject<List<OrderAttachment>>(c.GetValue<string>("attachments"));
-                        if (attachmentList == null)
-                        {
-                            attachmentList = new List<OrderAttachment>();
-                        }
-                        else
-                        {
-                            attachmentList.RemoveAll(i => i.MediaItemNodeId == m.Id);
-                        }
-                        c.SetValue("attachments", JsonConvert.SerializeObject(attachmentList));
-                        _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(c);
-                        ms.Delete(m);
-                        removedMedia = true;
-                    }
+                    _orderItemManager.RemoveConnectionToMediaItem(idCollection.OrderItemId, idCollection.MediaItemId);
                 }
-                if (removedMedia)
-                {
-                    ms.EmptyRecycleBin();
-                }
-
-                res.Success &= true;
             }
             catch (Exception e)
             {

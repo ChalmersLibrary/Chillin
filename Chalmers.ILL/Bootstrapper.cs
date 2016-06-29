@@ -15,6 +15,7 @@ using Examine;
 using Chalmers.ILL.Patron;
 using System.Configuration;
 using Chalmers.ILL.Providers;
+using Chalmers.ILL.MediaItems;
 
 namespace Chalmers.ILL
 {
@@ -40,15 +41,19 @@ namespace Chalmers.ILL
 
         public static void RegisterTypes(IUnityContainer container)
         {
+            container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
+            container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
+
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
+            container.RegisterType<IMediaItemManager, UmbracoMediaItemManager>();
 
             // Fetch all needed Examine search providers.
             var templatesSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLTemplatesSearcher"];
             var orderItemsSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
 
             // Create all our singleton type instances.
-            var mailService = new MailService(ApplicationContext.Current.Services.MediaService, container.Resolve<IExchangeMailWebApi>());
+            var mailService = new MailService(container.Resolve<IMediaItemManager>(), container.Resolve<IExchangeMailWebApi>());
             var templateService = new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher);
             var notifier = new Notifier();
             var umbraco = new UmbracoWrapper();
@@ -67,8 +72,6 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IUmbracoWrapper), umbraco);
             container.RegisterInstance(typeof(INotifier), notifier);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
-            container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
-            container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
             container.RegisterInstance(typeof(ITemplateService), templateService);
             container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(orderItemsSearcher, templateService, orderItemManager, mailService));
             container.RegisterInstance(typeof(IMailService), mailService);
