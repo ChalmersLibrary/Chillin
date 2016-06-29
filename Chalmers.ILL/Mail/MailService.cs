@@ -52,6 +52,9 @@ namespace Chalmers.ILL.Mail
                     {
                         throw new Exception("Failed to fetch media item for id " + mediaId + ".");
                     }
+
+                    // Dispose stream that is no longer needed. Handle this in some better way?
+                    mediaItem.Data.Dispose();
                 }
             }
             string body = mailModel.message;
