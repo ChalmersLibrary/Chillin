@@ -13,6 +13,8 @@ namespace Chalmers.ILL.Models
     {
         [Required]
         public string OrderId { get; set; }
+
+        [Key]
         public int NodeId { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }

@@ -441,6 +441,7 @@
     <Compile Include="MediaItems\MediaItemNotFoundException.cs" />
     <Compile Include="MediaItems\UmbracoMediaItemManager.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
     <Compile Include="Models\MediaItemIdAndOrderItemId.cs" />
     <Compile Include="Models\MediaItemModel.cs" />
