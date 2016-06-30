@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 
@@ -11,6 +13,9 @@ namespace Chalmers.ILL.Models
         {
             adress = new List<SierraAddressModel>();
         }
+
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid DbId { get; set; }
 
         public string id { get; set; }
         public string barcode { get; set; }
@@ -27,6 +32,9 @@ namespace Chalmers.ILL.Models
 
     public class SierraAddressModel
     {
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid DbId { get; set; }
+
         public string addresscount { get; set; }
         public string addr1 { get; set; }
         public string addr2 { get; set; }

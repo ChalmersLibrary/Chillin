@@ -428,6 +428,7 @@
     <Compile Include="Controllers\SurfaceControllers\StatisticsSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\TemplatesSurfaceController.cs" />
+    <Compile Include="Database\OrderItemDbInitializer.cs" />
     <Compile Include="Database\OrderItemsDbContext.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
@@ -441,6 +442,10 @@
     <Compile Include="MediaItems\MediaItemNotFoundException.cs" />
     <Compile Include="MediaItems\UmbracoMediaItemManager.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
+    <Compile Include="Migrations\201606291112079_InitialDatabaseModel.cs" />
+    <Compile Include="Migrations\201606291112079_InitialDatabaseModel.Designer.cs">
+      <DependentUpon>201606291112079_InitialDatabaseModel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
     <Compile Include="Models\MediaItemIdAndOrderItemId.cs" />
@@ -501,6 +506,7 @@
     <Compile Include="OrderItems\ISource.cs" />
     <Compile Include="OrderItems\ISourceFactory.cs" />
     <Compile Include="OrderItems\BulkDataManager.cs" />
+    <Compile Include="OrderItems\OrderItemNotFoundException.cs" />
     <Compile Include="OrderItems\SaveException.cs" />
     <Compile Include="OrderItems\SourcePollingException.cs" />
     <Compile Include="OrderItems\SourcePollingResult.cs" />
@@ -534,6 +540,11 @@
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="Startup\" />
     <Folder Include="Views\Home\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201606291112079_InitialDatabaseModel.resx">
+      <DependentUpon>201606291112079_InitialDatabaseModel.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

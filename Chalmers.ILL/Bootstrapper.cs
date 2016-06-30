@@ -57,14 +57,13 @@ namespace Chalmers.ILL
             var templateService = new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher);
             var notifier = new Notifier();
             var umbraco = new UmbracoWrapper();
-            var orderItemManager = new OrderItemManager(umbraco);
+            var orderItemManager = new EntityFrameworkOrderItemManager(umbraco);
             var providerService = new ProviderService(orderItemsSearcher);
             var bulkDataManager = new BulkDataManager(orderItemsSearcher);
 
             // Connect instances that depend on eachother.
             notifier.SetOrderItemManager(orderItemManager, umbraco);
             orderItemManager.SetNotifier(notifier);
-            orderItemManager.SetContentService(ApplicationContext.Current.Services.ContentService);
 
             // Hook up everything that is needed for us to function.
             container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);

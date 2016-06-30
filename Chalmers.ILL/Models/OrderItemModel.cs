@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 using umbraco.businesslogic;
@@ -14,7 +15,7 @@ namespace Chalmers.ILL.Models
         [Required]
         public string OrderId { get; set; }
 
-        [Key]
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int NodeId { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime UpdateDate { get; set; }
@@ -77,16 +78,5 @@ namespace Chalmers.ILL.Models
         public List<LogItem> LogItemsList { get; set; }
         public List<OrderAttachment> AttachmentList { get; set; }
         public SierraModel SierraInfo { get; set; }
-    }
-
-    public class OrderItemVersions
-    {
-        public List<OrderItemVersion> List { get; set; }
-    }
-
-    public class OrderItemVersion
-    {
-        public int NodeId { get; set; }
-        public int VersionCount { get; set; }
     }
 }
