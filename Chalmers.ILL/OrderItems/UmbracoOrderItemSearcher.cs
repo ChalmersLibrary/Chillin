@@ -9,6 +9,21 @@ namespace Chalmers.ILL.OrderItems
 {
     public class UmbracoOrderItemSearcher : IOrderItemSearcher
     {
+        public void Added(OrderItemModel item)
+        {
+            // Handled automatically by Umbraco.
+        }
+
+        public void Deleted(OrderItemModel item)
+        {
+            // Handled automatically by Umbraco.
+        }
+
+        public void Modified(OrderItemModel item)
+        {
+            // Handled automatically by Umbraco.
+        }
+
         IEnumerable<OrderItemModel> IOrderItemSearcher.Search(string query)
         {
             var res = new List<OrderItemModel>();

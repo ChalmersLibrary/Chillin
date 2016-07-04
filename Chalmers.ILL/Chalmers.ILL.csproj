@@ -499,6 +499,7 @@
     <Compile Include="Models\ResultResponse.cs" />
     <Compile Include="Models\SierraModel.cs" />
     <Compile Include="OrderItems\ChalmersSourceFactory.cs" />
+    <Compile Include="OrderItems\ElasticSearchOrderItemSearcher.cs" />
     <Compile Include="OrderItems\EntityFrameworkOrderItemManager.cs" />
     <Compile Include="OrderItems\IBulkDataManager.cs" />
     <Compile Include="OrderItems\IOrderItemManager.cs" />

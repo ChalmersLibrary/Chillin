@@ -4,6 +4,7 @@ using System;
 using System.Data.Entity;
 using Umbraco.Core.Logging;
 using System.Linq;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Database
 {
@@ -11,10 +12,16 @@ namespace Chalmers.ILL.Database
     {
         private static readonly string _connectionStringName = "chillinOrderItemsDb";
 
+        private IOrderItemSearcher _orderItemSearcher;
+
         public DbSet<OrderItemModel> OrderItems { get; set; }
 
         public OrderItemsDbContext() : base(_connectionStringName) { }
 
+        public OrderItemsDbContext(IOrderItemSearcher orderItemSearcher)
+        {
+            _orderItemSearcher = orderItemSearcher;
+        }
 
         public override int SaveChanges()
         {
@@ -26,15 +33,15 @@ namespace Chalmers.ILL.Database
             {
                 if (change.State == EntityState.Added)
                 {
-
+                    _orderItemSearcher.Added(change.Entity);
                 }
                 else if (change.State == EntityState.Deleted)
                 {
-
+                    _orderItemSearcher.Deleted(change.Entity);
                 }
                 else if (change.State == EntityState.Modified)
                 {
-
+                    _orderItemSearcher.Modified(change.Entity);
                 }
             }
 
