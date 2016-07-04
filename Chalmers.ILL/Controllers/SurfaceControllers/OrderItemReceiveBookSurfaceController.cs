@@ -108,6 +108,54 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return Json(json, JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// Set that the order item is received and ready for transport.
+        /// </summary>
+        /// <param name="orderNodeId">OrderItem Node Id</param>
+        /// <param name="bookId">Delivery Library Book Id</param>
+        /// <param name="dueDate">Delivery Library Due Date</param>
+        /// <param name="providerInformation">Information about the provider</param>
+        /// <returns>MVC ActionResult with JSON</returns>
+        [HttpPost, ValidateInput(false)]
+        public ActionResult SetOrderItemDeliveryReceivedForTransport(string packJson)
+        {
+            var json = new ResultResponse();
+
+            try
+            {
+                DeliveryReceivedPackage pack = JsonConvert.DeserializeObject<DeliveryReceivedPackage>(packJson);
+
+                var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
+
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
+                if (pack.readOnlyAtLibrary)
+                {
+                    _orderItemManager.AddLogItem(pack.orderNodeId, "TRANSPORT", "Transporttyp: Ej hemlån.", eventId, false, false);
+                }
+                else
+                {
+                    _orderItemManager.AddLogItem(pack.orderNodeId, "TRANSPORT", "Transporttyp: Avhämtning i infodisk.", eventId, false, false);
+                }
+                _orderItemManager.SetDueDate(pack.orderNodeId, pack.dueDate, eventId, false, false);
+                _orderItemManager.SetProviderDueDate(pack.orderNodeId, pack.dueDate, eventId, false, false);
+                _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, eventId, false, false);
+                _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, eventId, false, false);
+                _orderItemManager.SetStatus(pack.orderNodeId, "13:Transport", eventId, false, false);
+                _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, eventId, true, true);
+                
+                json.Success = true;
+                json.Message = "Transport till filial påbörjad.";
+            }
+            catch (Exception e)
+            {
+                json.Success = false;
+                json.Message = "Error: " + e.Message;
+            }
+
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
         public class DeliveryReceivedPackage
         {
             public int orderNodeId { get; set; }

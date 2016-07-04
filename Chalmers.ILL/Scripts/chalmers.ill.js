@@ -746,6 +746,32 @@ function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation
     });
 }
 
+function setOrderItemDeliveryReceivedForTransport(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
+    lockScreen();
+    $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceivedForTransport", {
+        packJson: JSON.stringify({
+            orderNodeId: node,
+            bookId: bookId,
+            dueDate: dueDate,
+            providerInformation: providerInformation,
+            mailData: maildata,
+            logMsg: logMsg,
+            readOnlyAtLibrary: readOnlyAtLibrary
+        })
+    }, function (json) {
+        if (json.Success) {
+            loadOrderItemDetails(node);
+        }
+        else {
+            alert(json.Message);
+        }
+        unlockScreen();
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
+}
+
 function loadLogItems(id)
 {
     $.getJSON("/umbraco/surface/LogItemSurface/GetLogItems?nodeid="+id, function (data) {

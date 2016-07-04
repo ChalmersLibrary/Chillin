@@ -27,16 +27,24 @@
         </div>
         <div class="row">
             <div class="form-group col-sm-12">
-                <div class="alert alert-success" role="alert">Automatiskt mailutskick kommer att levereras till <span id="patron-email" class="content-editable" contenteditable>@Model.OrderItem.PatronEmail</span> <span class="glyphicon glyphicon-pencil"></span></div>
-                <button class="btn btn-success" onclick="deliver(false, true)">Ta emot för vanligt lån</button>
-                <button class="btn btn-success" onclick="deliver(true, false)">Ta emot för läsesalslån</button>
+                @if (Model.OrderItem.SierraInfo.home_library == "lbib" || Model.OrderItem.SierraInfo.home_library == "abib")
+                {
+                    <button class="btn btn-success" onclick="transport(false, true)">Transport till filial</button>
+                    <button class="btn btn-success" onclick="transport(true, true)">Transport till filial för läsesalslån</button>
+                }
+                else
+                {
+                    <div class="alert alert-success" role="alert">Automatiskt mailutskick kommer att levereras till <span id="patron-email" class="content-editable" contenteditable>@Model.OrderItem.PatronEmail</span> <span class="glyphicon glyphicon-pencil"></span></div>
+                    <button class="btn btn-success" onclick="deliver(false, true)">Ta emot för vanligt lån</button>
+                    <button class="btn btn-success" onclick="deliver(true, false)">Ta emot för läsesalslån</button>
+                }
             </div>
         </div>
     </div>
     <div class="col-md-6">
         <div id="printDiv" class="print">
             <h3 style="float:right" class="dueDatePlaceHolder"></h3><br />
-            <div style="font-size:1.5em">Infodisk, tag ut och läs!</div>
+            <div style="font-size:1.5em">@Model.OrderItem.SierraInfo.home_library_pretty_name Infodisk, tag ut och läs!</div>
             <strong style="font-size:1.5em">@Model.OrderItem.SierraInfo.last_name @Model.OrderItem.SierraInfo.first_name</strong><br />
             <br />
             <br />
@@ -105,6 +113,38 @@
                     recipientName: "@Model.OrderItem.PatronName",
                     message: $("#mail-message").val(),
                     newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Infodisk")).Id,
+                    newCancellationReasonId: -1,
+                    newPurchasedMaterialId: -1,
+                    newFollowUpDate: $('#dueDate').val(),
+                }, $("#log-message").val(), localLoan);
+                $("#printDiv").remove();
+            } else {
+                alert("Leveransfunktionen kommer laddas om, försök därefter igen.");
+                $("#printDiv").remove();
+                loadReceiveBookAction(@Model.OrderItem.NodeId);
+            }
+        }
+    }
+
+    function transport(localLoan, print) {
+        if (hasProviderInfoBeenEdited || confirm("Du har inte ändrat leverantörsdata. Är du säker på att du vill fortsätta?")) {
+            $('#container #printDiv').insertAfter('#container');
+            var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
+            $('.dueDatePlaceHolder').html(dueDate);
+
+            var r = true;
+            if (print) {
+                window.print();
+                r = window.confirm("Skrevs bokslippen ut korrekt?");
+            }
+            if (r) {
+                setOrderItemDeliveryReceivedForTransport(@Model.OrderItem.NodeId, $('#bookId').val(), $('#dueDate').val(), $('#providerInformation').val(),
+                {
+                    nodeId: @Model.OrderItem.NodeId,
+                    recipientEmail: $("#patron-email").text().toString().trim(),
+                    recipientName: "@Model.OrderItem.PatronName",
+                    message: $("#mail-message").val(),
+                    newStatusId: @Model.AvailableStatuses.First(x => x.Value.Contains("Transport")).Id,
                     newCancellationReasonId: -1,
                     newPurchasedMaterialId: -1,
                     newFollowUpDate: $('#dueDate').val(),
