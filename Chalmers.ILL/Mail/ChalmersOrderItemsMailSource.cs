@@ -39,6 +39,7 @@ namespace Chalmers.ILL.Mail
         INotifier _notifier;
         IMediaItemManager _mediaItemManager;
         IPatronDataProvider _patronDataProvider;
+        IOrderItemSearcher _orderItemSearcher;
 
         private SourcePollingResult _result;
         public SourcePollingResult Result
@@ -50,13 +51,14 @@ namespace Chalmers.ILL.Mail
         }
 
         public ChalmersOrderItemsMailSource(IExchangeMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager,
-            INotifier notifier, IMediaItemManager mediaItemManager, IPatronDataProvider patronDataProvider)
+            INotifier notifier, IMediaItemManager mediaItemManager, IPatronDataProvider patronDataProvider, IOrderItemSearcher orderItemSearcher)
         {
             _exchangeMailWebApi = exchangeMailWebApi;
             _orderItemManager = orderItemManager;
             _notifier = notifier;
             _mediaItemManager = mediaItemManager;
             _patronDataProvider = patronDataProvider;
+            _orderItemSearcher = orderItemSearcher;
         }
 
         public SourcePollingResult Poll()
@@ -438,24 +440,15 @@ namespace Chalmers.ILL.Mail
         {
             string ret = null;
 
-            // Connect to an Examine Search Provider
-            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-
-            // Specify Search Criteria
-            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-
-            // Specify the query
-            var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
-                (Status:01\:Ny OR Status:02\:Åtgärda OR Status:03\:Beställd OR Status:04\:Väntar OR Status:09\:Mottagen)");
-
             // Search for our items
-            var results = searcher.Search(query);
+            var results = _orderItemSearcher.Search(@"nodeTypeAlias:ChalmersILLOrderItem AND 
+                (Status:01\:Ny OR Status:02\:Åtgärda OR Status:03\:Beställd OR Status:04\:Väntar OR Status:09\:Mottagen)");
             string providerOrderId;
             string orderId;
             foreach (var result in results)
             {
-                providerOrderId = result.Fields.GetValueString("ProviderOrderId");
-                orderId = result.Fields.GetValueString("OrderId");
+                providerOrderId = result.ProviderOrderId;
+                orderId = result.OrderId;
 
                 if (!String.IsNullOrEmpty(providerOrderId) && !String.IsNullOrEmpty(orderId))
                 {

@@ -10,19 +10,18 @@ namespace Chalmers.ILL.OrderItems
 {
     public class BulkDataManager : IBulkDataManager
     {
-        ISearcher _orderItemsSearcher;
+        IOrderItemSearcher _orderItemsSearcher;
 
-        public BulkDataManager(ISearcher orderItemsSearcher)
+        public BulkDataManager(IOrderItemSearcher orderItemsSearcher)
         {
             _orderItemsSearcher = orderItemsSearcher;
         }
 
         public List<SimplifiedOrderItem> GetChillinDataForSierraPatron(int recordId, string lang)
         {
-            var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-            var searchResults = _orderItemsSearcher.Search(searchCriteria.RawQuery("SierraPatronRecordId:\"" + recordId + "\" AND " +
+            var searchResults = _orderItemsSearcher.Search("SierraPatronRecordId:\"" + recordId + "\" AND " +
                 "(Status:Ny OR Status:Åtgärda OR Status:Beställd OR Status:Väntar OR Status:Mottagen OR Status:Krävd OR Status:Utlånad OR Status:Transport OR " +
-                    "(Status:Levererad AND DeliveryDate:[" + DateTime.Now.AddDays(-7).ToString("yyyyMMddHHmmssfff") + " TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]))"));
+                    "(Status:Levererad AND DeliveryDate:[" + DateTime.Now.AddDays(-7).ToString("yyyyMMddHHmmssfff") + " TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]))");
 
             var items = new List<SimplifiedOrderItem>();
 
@@ -30,13 +29,11 @@ namespace Chalmers.ILL.OrderItems
             {
                 var newSimplifiedOrderItem = new SimplifiedOrderItem();
 
-                var rawDueDate = orderItem.Fields.GetValueString("DueDate") == "" ? DateTime.Now :
-                    DateTime.ParseExact(orderItem.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                var rawType = orderItem.Fields.ContainsKey("Type") ? orderItem.Fields["Type"] : null;
-                var rawStatus = orderItem.Fields["Status"];
-                var rawReference = orderItem.Fields["OriginalOrder"];
-                var rawDeliveryDate = orderItem.Fields.GetValueString("DeliveryDate") == "" ? new DateTime(1970, 1, 1) :
-                    DateTime.ParseExact(orderItem.Fields.GetValueString("DeliveryDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                var rawDueDate = orderItem.DueDate;
+                var rawType = orderItem.TypePrevalue;
+                var rawStatus = orderItem.StatusPrevalue;
+                var rawReference = orderItem.OriginalOrder;
+                var rawDeliveryDate = orderItem.DeliveryDate;
 
                 if (rawType == "Artikel")
                 {

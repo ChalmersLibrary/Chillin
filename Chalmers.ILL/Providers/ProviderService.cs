@@ -6,14 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Chalmers.ILL.Extensions;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Providers
 {
     public class ProviderService : IProviderService
     {
-        ISearcher _orderItemsSearcher;
+        IOrderItemSearcher _orderItemsSearcher;
 
-        public ProviderService(ISearcher orderItemsSearcher)
+        public ProviderService(IOrderItemSearcher orderItemsSearcher)
         {
             _orderItemsSearcher = orderItemsSearcher;
         }
@@ -22,12 +23,11 @@ namespace Chalmers.ILL.Providers
         {
             var res = new List<String>();
 
-            var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
             // NOTE: Should probably only fetch orders that are not too old, to keep the numbers down and to keep the data relevant.
-            var allOrders = _orderItemsSearcher.Search(searchCriteria.RawQuery("nodeTypeAlias:ChalmersILLOrderItem"));
+            var allOrders = _orderItemsSearcher.Search("nodeTypeAlias:ChalmersILLOrderItem");
 
-            return allOrders.Where(x => x.Fields.ContainsKey("ProviderName") && x.Fields["ProviderName"] != "")
-                .Select(x => x.Fields["ProviderName"])
+            return allOrders.Where(x => x.ProviderName != "")
+                .Select(x => x.ProviderName)
                 .GroupBy(x => x)
                 .OrderByDescending(x => x.Count())
                 .Select(x => x.Key)

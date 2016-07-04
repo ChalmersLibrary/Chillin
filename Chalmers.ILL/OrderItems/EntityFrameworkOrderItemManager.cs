@@ -858,6 +858,10 @@ namespace Chalmers.ILL.OrderItems
                 _dbContext.SaveChanges();
                 DisposeDatabaseContext();
             }
+            else
+            {
+                throw new Exception("Database context was null when trying to save changes to order items.");
+            }
         }
 
         private List<LogItem> GetLogItemsReverse(int nodeId)

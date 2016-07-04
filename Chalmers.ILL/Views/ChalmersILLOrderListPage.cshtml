@@ -6,6 +6,7 @@
 @using Chalmers.ILL.Extensions;
 @using Umbraco.Core.Logging;
 @using System.Globalization;
+@using Chalmers.ILL.Models;
 
 
 @{
@@ -57,12 +58,12 @@
     /// </summary>
     /// <param name="item">The search result from Examine containing the order item.</param>
     /// <returns>An index reflecting the sort order.</returns>
-    int GetSortOrderFromOrderItemSearchResult(SearchResult item)
+    int GetSortOrderFromOrderItemSearchResult(OrderItemModel item)
     {
         var status = "";
         try
         {
-            status = item.Fields["Status"];
+            status = item.StatusPrevalue;
         }
         catch (Exception)
         {
@@ -156,57 +157,14 @@
 
     @{
         int loggedInMember = Model.CurrentMemberId;
-        if (!String.IsNullOrEmpty(Request.QueryString["query"]))
-        {
-            // Connect to an Examine Search Provider
-            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-
-            // Specify Search Criteria
-            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-            
-            // Specify the query            
-            var query = searchCriteria.RawQuery(Request.Params["query"]);
-            
-            // Loop trough results
-            var results = searcher.Search(query);
-            foreach (var item in results.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => DateTime.ParseExact(y.Fields["FollowUpDate"], "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None)))
-            {          
-                @RenderOrderList(loggedInMember, item.Id, DateTime.ParseExact(item.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None),
-                    item.Fields.GetValueString("PatronName"), item.Fields.GetValueString("DeliveryLibrary"), item.Fields.GetValueString("Status"), 
-                    item.Fields.GetValueString("Type"), item.Fields.GetValueString("Reference"), EditedBy(item.Id));
-            }
-            
-            // Add debug message
-            debugMessage += "query.BooleanOperation=" + query.BooleanOperation + ", ";
-            debugMessage += "query.ToString()=" + query.ToString();
+        foreach (var item in Model.PendingOrderItems.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.FollowUpDate))
+        {          
+            @RenderOrderList(loggedInMember, item.NodeId, item.FollowUpDate, item.PatronName, item.DeliveryLibraryPrevalue, item.StatusPrevalue, 
+                item.TypePrevalue, item.Reference, EditedBy(item.NodeId));
         }
-        else
-        {
-            // Connect to an Examine Search Provider
-            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-
-            // Specify Search Criteria
-            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-
-            // Specify the query
-            var longAgo = DateTime.MinValue;
-            var now = DateTime.Now;
-            var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
-                (Status:01\:Ny OR 
-                 Status:02\:Åtgärda OR
-                 Status:09\:Mottagen OR 
-                 (Status:03\:Beställd AND FollowUpDate:[197501010000000 TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + @"]) OR
-                 (Status:14\:Infodisk AND DueDate:[197501010000000 TO " + DateTime.Now.AddDays(5).Date.ToString("yyyyMMdd") + @"999999999]))");
             
-            // Search for our items
-            var results = searcher.Search(query);
-
-            foreach (var result in results.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.Fields["FollowUpDate"]))
-            {
-                DateTime convertDate = DateTime.ParseExact(result.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                @RenderOrderList(loggedInMember, result.Id, convertDate, result.Fields.GetValueString("PatronName"), result.Fields.GetValueString("DeliveryLibrary"), 
-                    result.Fields.GetValueString("Status"), result.Fields.GetValueString("Type"), result.Fields.GetValueString("Reference"), EditedBy(result.Id));
-            }
+        // Add debug message
+        debugMessage += "query.ToString()=" + Request.QueryString["query"];
         }
     }
     <div class="silly-filler"></div>

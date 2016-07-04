@@ -47,10 +47,10 @@ namespace Chalmers.ILL
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
             container.RegisterType<IMediaItemManager, UmbracoMediaItemManager>();
+            container.RegisterType<IOrderItemSearcher, UmbracoOrderItemSearcher>();
 
             // Fetch all needed Examine search providers.
             var templatesSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLTemplatesSearcher"];
-            var orderItemsSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
 
             // Create all our singleton type instances.
             var mailService = new MailService(container.Resolve<IMediaItemManager>(), container.Resolve<IExchangeMailWebApi>());
@@ -58,8 +58,8 @@ namespace Chalmers.ILL
             var notifier = new Notifier();
             var umbraco = new UmbracoWrapper();
             var orderItemManager = new EntityFrameworkOrderItemManager(umbraco);
-            var providerService = new ProviderService(orderItemsSearcher);
-            var bulkDataManager = new BulkDataManager(orderItemsSearcher);
+            var providerService = new ProviderService(container.Resolve<IOrderItemSearcher>());
+            var bulkDataManager = new BulkDataManager(container.Resolve<IOrderItemSearcher>());
 
             // Connect instances that depend on eachother.
             notifier.SetOrderItemManager(orderItemManager, umbraco);
@@ -72,12 +72,11 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(INotifier), notifier);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
             container.RegisterInstance(typeof(ITemplateService), templateService);
-            container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(orderItemsSearcher, templateService, orderItemManager, mailService));
+            container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(container.Resolve<IOrderItemSearcher>(), templateService, orderItemManager, mailService));
             container.RegisterInstance(typeof(IMailService), mailService);
             container.RegisterInstance(typeof(IProviderService), providerService);
             container.RegisterInstance(typeof(IBulkDataManager), bulkDataManager);
             container.RegisterInstance<ISearcher>("TemplatesSearcher", templatesSearcher);
-            container.RegisterInstance<ISearcher>("OrderItemsSearcher", orderItemsSearcher);
             container.RegisterInstance<IPatronDataProvider>(new SierraCache(umbraco, templateService).Connect());
             container.RegisterInstance<IPatronDataProvider>("Sierra", new Sierra(umbraco, templateService, ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
         }

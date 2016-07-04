@@ -17,16 +17,11 @@ namespace Chalmers.ILL.Tests.Mail
     [TestClass]
     public class AutomaticMailSendingEngineTest
     {
-        private ISearcher GetFakeSearcher(ISearchResults fakeSearchResults)
+        private IOrderItemSearcher GetFakeSearcher(IEnumerable<OrderItemModel> fakeSearchResults)
         {
-            return new Examine.Fakes.StubISearcher()
+            return new Chalmers.ILL.OrderItems.Fakes.StubIOrderItemSearcher()
             {
-                CreateSearchCriteria = () => { return GetFakeSearchCriteria(); },
-                CreateSearchCriteriaBooleanOperation = (defaultOperation) => { return GetFakeSearchCriteria(); },
-                CreateSearchCriteriaString = (type) => { return GetFakeSearchCriteria(); },
-                CreateSearchCriteriaStringBooleanOperation = (type, defaultOperation) => { return GetFakeSearchCriteria(); },
-                SearchISearchCriteria = (searchParameters) => { return fakeSearchResults; },
-                SearchStringBoolean = (searchText, useWildcards) => { return fakeSearchResults; }
+                SearchString = (query) => { return fakeSearchResults; }
             };
         }
 
@@ -40,31 +35,20 @@ namespace Chalmers.ILL.Tests.Mail
 
         private IAutomaticMailSendingEngine SetupAutomaticMailSendingEngine(string status, DateTime dueDate, DateTime deliveryDate, AutomaticMailSendTestResult result)
         {
-            var fakeSearchResults = new Examine.Fakes.StubISearchResults()
+            var fakeSearchResults = new List<OrderItemModel>()
             {
-                GetEnumerator = () =>
+                new OrderItemModel()
                 {
-                    var tempList = new List<SearchResult>();
-                    tempList.Add(new Examine.Fakes.ShimSearchResult()
-                    {
-                        IdGet = () => { return 0; },
-                        FieldsGet = () =>
-                        {
-                            var val = new Dictionary<string, string>();
-                            val.Add("Status", status);
-                            val.Add("OrderId", "cth-123");
-                            val.Add("PatronName", "John Doe");
-                            val.Add("PatronEmail", "john@doe.com");
-                            val.Add("DueDate", dueDate.ToString("yyyyMMddHHmmssfff"));
-                            val.Add("DeliveryDate", deliveryDate.ToString("yyyyMMddHHmmssfff"));
-                            return val;
-                        }
-                    });
-                    return tempList.GetEnumerator();
+                    StatusPrevalue = status,
+                    OrderId = "cth-123",
+                    PatronName = "John Doe",
+                    PatronEmail = "john@doe.com",
+                    DueDate = dueDate,
+                    DeliveryDate = deliveryDate
                 }
             };
 
-            ISearcher orderItemsSearcher = GetFakeSearcher(fakeSearchResults);
+            IOrderItemSearcher orderItemsSearcher = GetFakeSearcher(fakeSearchResults);
 
             ITemplateService templateService = new Templates.Fakes.StubITemplateService()
             {

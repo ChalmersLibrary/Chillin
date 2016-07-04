@@ -502,6 +502,7 @@
     <Compile Include="OrderItems\EntityFrameworkOrderItemManager.cs" />
     <Compile Include="OrderItems\IBulkDataManager.cs" />
     <Compile Include="OrderItems\IOrderItemManager.cs" />
+    <Compile Include="OrderItems\IOrderItemSearcher.cs" />
     <Compile Include="OrderItems\ISource.cs" />
     <Compile Include="OrderItems\ISourceFactory.cs" />
     <Compile Include="OrderItems\BulkDataManager.cs" />
@@ -509,6 +510,7 @@
     <Compile Include="OrderItems\SaveException.cs" />
     <Compile Include="OrderItems\SourcePollingException.cs" />
     <Compile Include="OrderItems\SourcePollingResult.cs" />
+    <Compile Include="OrderItems\UmbracoOrderItemSearcher.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />
     <Compile Include="Patron\SierraCache.cs" />
     <Compile Include="Patron\SierraConnectionException.cs" />

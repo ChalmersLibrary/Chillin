@@ -13,12 +13,20 @@ using UmbracoExamine;
 using Newtonsoft.Json;
 using System.Globalization;
 using Chalmers.ILL.Statistics;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     [MemberAuthorize(AllowType = "Standard")]
     public class StatisticsSurfaceController : SurfaceController
     {
+        private IOrderItemSearcher _orderItemSearcher;
+
+        public StatisticsSurfaceController(IOrderItemSearcher orderItemSearcher)
+        {
+            _orderItemSearcher = orderItemSearcher;
+        }
+
         /// <summary>
         /// Get statistics data given a specific statistics request.
         /// </summary>
@@ -34,7 +42,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                IStatisticsManager statMngr = new DefaultStatMngr(ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"], new DefaultStatCalc());
+                IStatisticsManager statMngr = new DefaultStatMngr(_orderItemSearcher, new DefaultStatCalc());
 
                 statMngr.CalculateAllData(sReq);
 

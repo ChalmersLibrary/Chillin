@@ -1,18 +1,15 @@
 ﻿using Chalmers.ILL.Models;
-using Examine;
-using System;
+using Chalmers.ILL.OrderItems;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace Chalmers.ILL.Statistics
 {
     public class DefaultStatMngr : IStatisticsManager
     {
-        ISearcher _searcher;
+        IOrderItemSearcher _searcher;
         IStatisticsCalculator _statCalc;
 
-        public DefaultStatMngr(ISearcher searcher, IStatisticsCalculator statCalc)
+        public DefaultStatMngr(IOrderItemSearcher searcher, IStatisticsCalculator statCalc)
         {
             _searcher = searcher;
             _statCalc = statCalc;
@@ -25,8 +22,7 @@ namespace Chalmers.ILL.Statistics
                 sVar.Values = new List<int>();
                 foreach (var dataPointQuery in sVar.LuceneQueries)
                 {
-                    var searchCriteria = _searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-                    sVar.Values.Add(_statCalc.CalculateDataPointValue(_searcher.Search(searchCriteria.RawQuery(dataPointQuery)), sVar.CalculationType));
+                    sVar.Values.Add(_statCalc.CalculateDataPointValue(_searcher.Search(dataPointQuery), sVar.CalculationType));
                 }
             }
         }

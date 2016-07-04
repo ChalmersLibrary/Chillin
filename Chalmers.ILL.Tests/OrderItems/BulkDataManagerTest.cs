@@ -7,30 +7,18 @@ using System.Collections.Generic;
 using Microsoft.QualityTools.Testing.Fakes;
 using System.Collections;
 using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.Tests.OrderItems
 {
     [TestClass]
     public class BulkDataManagerTest
     {
-        private ISearcher CreateFakeSearcher(ISearchResults searchResults)
+        private IOrderItemSearcher CreateFakeSearcher(IEnumerable<OrderItemModel> searchResults)
         {
-            return new Examine.Fakes.StubISearcher()
+            return new Chalmers.ILL.OrderItems.Fakes.StubIOrderItemSearcher()
             {
-                CreateSearchCriteria = () => { return GetFakeSearchCriteria(); },
-                CreateSearchCriteriaBooleanOperation = (defaultOperation) => { return GetFakeSearchCriteria(); },
-                CreateSearchCriteriaString = (type) => { return GetFakeSearchCriteria(); },
-                CreateSearchCriteriaStringBooleanOperation = (type, defaultOperation) => { return GetFakeSearchCriteria(); },
-                SearchISearchCriteria = (searchParameters) => { return searchResults; },
-                SearchStringBoolean = (searchText, useWildcards) => { return searchResults; }
-            };
-        }
-
-        private ISearchCriteria GetFakeSearchCriteria()
-        {
-            return new Examine.SearchCriteria.Fakes.StubISearchCriteria()
-            {
-                RawQueryString = (query) => { return GetFakeSearchCriteria(); }
+                SearchString = (query) => { return searchResults; }
             };
         }
 
@@ -46,25 +34,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneArticleOrderedSv_ArticleNotAvailableYet()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(-3).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", new DateTime(1970, 1, 1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Artikel");
-                                    val.Add("Status", "03:Beställd");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(-3),
+                            DeliveryDate = new DateTime(1970, 1, 1),
+                            TypePrevalue = "Artikel",
+                            StatusPrevalue = "03:Beställd",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -80,25 +58,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneArticleOrderedAndReadyThreeDaysAgoSv_ArticleDelivered()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(-3).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", new DateTime(1970, 1, 1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Artikel");
-                                    val.Add("Status", "05:Levererad");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(-3),
+                            DeliveryDate = new DateTime(1970, 1, 1),
+                            TypePrevalue = "Artikel",
+                            StatusPrevalue = "05:Levererad",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -114,25 +82,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookOrderedSv_BookNotAvailableYet()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", new DateTime(1970, 1, 1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "01:Ny");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(-1),
+                            DeliveryDate = new DateTime(1970, 1, 1),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "01:Ny",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -148,25 +106,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookRetrievedSv_DuePlusDate()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(30).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "11:Utlånad");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(30),
+                            DeliveryDate = DateTime.Now.AddDays(-1),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "11:Utlånad",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -182,25 +130,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookRecalledSv_Recalled()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(12).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", DateTime.Now.AddDays(-6).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "12:Krävd");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(12),
+                            DeliveryDate = DateTime.Now.AddDays(-6),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "12:Krävd",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -216,25 +154,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookLateSv_Late()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", DateTime.Now.AddDays(-32).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "11:Utlånad");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(-1),
+                            DeliveryDate = DateTime.Now.AddDays(-32),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "11:Utlånad",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -250,25 +178,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookRetrievedMailContactSv_DuePlusDate()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(30).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "02:Åtgärda");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(30),
+                            DeliveryDate = DateTime.Now.AddDays(-1),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "02:Åtgärda",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -284,25 +202,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookLateMailContactSv_Late()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", DateTime.Now.AddDays(-32).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "02:Åtgärda");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(-1),
+                            DeliveryDate = DateTime.Now.AddDays(-32),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "02:Åtgärda",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -318,25 +226,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneArticleOrderedEn_ArticleNotAvailableYet()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(-3).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", new DateTime(1970, 1, 1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Artikel");
-                                    val.Add("Status", "03:Beställd");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(-3),
+                            DeliveryDate = new DateTime(1970, 1, 1),
+                            TypePrevalue = "Artikel",
+                            StatusPrevalue = "03:Beställd",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -352,25 +250,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneArticleOrderedAndReadyThreeDaysAgoEn_ArticleDelivered()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(-3).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", new DateTime(1970, 1, 1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Artikel");
-                                    val.Add("Status", "05:Levererad");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(-3),
+                            DeliveryDate = new DateTime(1970, 1, 1),
+                            TypePrevalue = "Artikel",
+                            StatusPrevalue = "05:Levererad",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -386,25 +274,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookOrderedEn_BookNotAvailableYet()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", new DateTime(1970, 1, 1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "01:Ny");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(-1),
+                            DeliveryDate = new DateTime(1970, 1, 1),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "01:Ny",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -420,25 +298,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookRetrievedEn_DuePlusDate()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(30).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "11:Utlånad");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(30),
+                            DeliveryDate = DateTime.Now.AddDays(-1),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "11:Utlånad",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -454,25 +322,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookRecalledEn_Recalled()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(12).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", DateTime.Now.AddDays(-6).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "12:Krävd");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(12),
+                            DeliveryDate = DateTime.Now.AddDays(-6),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "12:Krävd",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -488,25 +346,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookLateEn_Late()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", DateTime.Now.AddDays(-32).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "11:Utlånad");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(-1),
+                            DeliveryDate = DateTime.Now.AddDays(-32),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "11:Utlånad",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -522,25 +370,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookRetrievedMailContactEn_DuePlusDate()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(30).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "02:Åtgärda");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(30),
+                            DeliveryDate = DateTime.Now.AddDays(-1),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "02:Åtgärda",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));
@@ -556,25 +394,15 @@ namespace Chalmers.ILL.Tests.OrderItems
         public void GetChillinDataForSierraPatron_OneBookLateMailContactEn_Late()
         {
             var bulkDataManager = new BulkDataManager(CreateFakeSearcher(
-                    new Examine.Fakes.StubISearchResults()
+                    new List<OrderItemModel>()
                     {
-                        GetEnumerator = () =>
+                        new OrderItemModel()
                         {
-                            var tempList = new List<SearchResult>();
-                            tempList.Add(new Examine.Fakes.ShimSearchResult()
-                            {
-                                FieldsGet = () =>
-                                {
-                                    var val = new Dictionary<string, string>();
-                                    val.Add("DueDate", DateTime.Now.AddDays(-1).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("DeliveryDate", DateTime.Now.AddDays(-32).ToString("yyyyMMddHHmmssfff"));
-                                    val.Add("Type", "Bok");
-                                    val.Add("Status", "02:Åtgärda");
-                                    val.Add("OriginalOrder", "Mio min Mio.");
-                                    return val;
-                                }
-                            });
-                            return tempList.GetEnumerator();
+                            DueDate = DateTime.Now.AddDays(-1),
+                            DeliveryDate = DateTime.Now.AddDays(-32),
+                            TypePrevalue = "Bok",
+                            StatusPrevalue = "02:Åtgärda",
+                            OriginalOrder = "Mio min Mio."
                         }
                     }
                 ));

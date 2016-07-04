@@ -26,12 +26,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IExchangeMailWebApi _exchangeMailWebApi;
         IUmbracoWrapper _dataTypes;
         ISourceFactory _sourceFactory;
-        ISearcher _orderItemsSearcher;
+        IOrderItemSearcher _orderItemsSearcher;
         IAutomaticMailSendingEngine _automaticMailSendingEngine;
         IUmbracoWrapper _umbraco;
 
         public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, IExchangeMailWebApi exchangeMailWebApi, 
-            IUmbracoWrapper dataTypes, ISourceFactory sourceFactory, [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher,
+            IUmbracoWrapper dataTypes, ISourceFactory sourceFactory, IOrderItemSearcher orderItemsSearcher,
             IAutomaticMailSendingEngine automaticMailSendingEngine, IUmbracoWrapper umbraco)
         {
             _orderItemManager = orderItemManager;
@@ -149,10 +149,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             try
             {
-                var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-                var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
+                var query = @"nodeTypeAlias:ChalmersILLOrderItem AND 
                     Status:03\:Beställd AND 
-                    FollowUpDate:[" + DateTime.Now.AddMinutes(-60).ToString("yyyyMMddHHmmssfff") + " TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]");
+                    FollowUpDate:[" + DateTime.Now.AddMinutes(-60).ToString("yyyyMMddHHmmssfff") + " TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]";
 
                 // Search for our items and signal the ones that have expired recently.
                 var results = _orderItemsSearcher.Search(query);
@@ -160,7 +159,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     // -1 means that we haven't checked edited by properly and should disregard it
                     var memberId = -1;
-                    _notifier.UpdateOrderItemUpdate(item.Id, memberId.ToString(), "", true, true);
+                    _notifier.UpdateOrderItemUpdate(item.NodeId, memberId.ToString(), "", true, true);
                 }
             }
             catch (Exception e)
@@ -171,16 +170,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
         private void ConvertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus()
         {
-            var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-            var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
+            var query = @"nodeTypeAlias:ChalmersILLOrderItem AND 
                 Status:04\:Väntar AND 
-                FollowUpDate:[197501010000000 TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]");
+                FollowUpDate:[197501010000000 TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]";
 
             // -1 means that we haven't checked edited by properly and should disregard it
             var memberId = -1;
 
             // Search for our items and signal the ones that have expired recently.
-            var ids = _orderItemsSearcher.Search(query).Select(x => x.Id).ToList();
+            var ids = _orderItemsSearcher.Search(query).Select(x => x.NodeId).ToList();
             foreach (var id in ids)
             {
                 var eventId = _orderItemManager.GenerateEventId(TIME_BASED_UPDATE_OF_ORDER_EVENT_TYPE);

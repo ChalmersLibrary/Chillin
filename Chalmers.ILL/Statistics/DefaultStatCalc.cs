@@ -11,7 +11,7 @@ namespace Chalmers.ILL.Statistics
 {
     public class DefaultStatCalc : IStatisticsCalculator
     {
-        public int CalculateDataPointValue(ISearchResults dataBag, string calculationTypeStr)
+        public int CalculateDataPointValue(IEnumerable<OrderItemModel> dataBag, string calculationTypeStr)
         {
             int res = 0;
 
@@ -50,11 +50,11 @@ namespace Chalmers.ILL.Statistics
 
         #region private
 
-        private int CalculateTotalTurnaroundTime(SearchResult item)
+        private int CalculateTotalTurnaroundTime(OrderItemModel item)
         {
-            var log = JsonConvert.DeserializeObject<List<LogItem>>(item.Fields["Log"]);
+            var log = JsonConvert.DeserializeObject<List<LogItem>>(item.Log);
 
-            var startTime = DateTime.ParseExact(item.Fields["createDate"], "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
+            var startTime = item.CreateDate;
             var endTime = startTime;
 
             log.OrderByDescending(x => x.CreateDate);

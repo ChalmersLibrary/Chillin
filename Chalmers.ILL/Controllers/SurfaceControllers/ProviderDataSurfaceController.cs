@@ -19,11 +19,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         ITemplateService _templateService;
         IProviderService _providerService;
-        ISearcher _orderItemsSearcher;
+        IOrderItemSearcher _orderItemsSearcher;
         IOrderItemManager _orderItemManager;
 
         public ProviderDataSurfaceController(ITemplateService templateService, IProviderService providerService, 
-            [Dependency("OrderItemsSearcher")] ISearcher orderItemsSearcher, IOrderItemManager orderItemManager)
+            IOrderItemSearcher orderItemsSearcher, IOrderItemManager orderItemManager)
         {
             _templateService = templateService;
             _providerService = providerService;
@@ -48,10 +48,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                var searchCriteria = _orderItemsSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-                ids = _orderItemsSearcher.Search(searchCriteria.RawQuery("ProviderName:\"" + providerName + "\""))
-                    .Where(x => x.Fields["ProviderName"].ToString() == providerName)
-                    .Select(x => x.Id)
+                ids = _orderItemsSearcher.Search("ProviderName:\"" + providerName + "\"")
+                    .Where(x => x.ProviderName == providerName)
+                    .Select(x => x.NodeId)
                     .ToList();
             }
             catch (Exception)

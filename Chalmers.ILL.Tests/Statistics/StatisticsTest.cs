@@ -7,22 +7,19 @@ using Chalmers.ILL.Statistics;
 using System.Collections.Generic;
 using Microsoft.QualityTools.Testing.Fakes;
 using System.Collections;
+using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.Tests.Statistics
 {
     [TestClass]
     public class DefaultStatCalcTests
     {
-        private ISearcher GetFakeSearcher()
+        private IOrderItemSearcher GetFakeSearcher()
         {
-            return new Examine.Fakes.StubISearcher()
+            return new Chalmers.ILL.OrderItems.Fakes.StubIOrderItemSearcher()
             {
-                CreateSearchCriteria = () => { return GetFakeSearchCriteria(); },
-                CreateSearchCriteriaBooleanOperation = (defaultOperation) => { return GetFakeSearchCriteria(); },
-                CreateSearchCriteriaString = (type) => { return GetFakeSearchCriteria(); },
-                CreateSearchCriteriaStringBooleanOperation = (type, defaultOperation) => { return GetFakeSearchCriteria(); },
-                SearchISearchCriteria = (searchParameters) => { return GetFakeSearchResults(); },
-                SearchStringBoolean = (searchText, useWildcards) => { return GetFakeSearchResults(); }
+                SearchString = (query) => { return GetFakeSearchResults(); }
             };
         }
 
@@ -34,35 +31,26 @@ namespace Chalmers.ILL.Tests.Statistics
             };
         }
 
-        private ISearchResults GetFakeSearchResults()
+        private IEnumerable<OrderItemModel> GetFakeSearchResults()
         {
-            return new Examine.Fakes.StubISearchResults()
+            return new List<OrderItemModel>()
             {
-                GetEnumerator = () => {
-                    var tempList = new List<SearchResult>();
-                    tempList.Add(GetFakeSearchResult());
-                    tempList.Add(GetFakeSearchResult());
-                    tempList.Add(GetFakeSearchResult());
-                    tempList.Add(GetFakeSearchResult());
-                    tempList.Add(GetFakeSearchResult());
-                    tempList.Add(GetFakeSearchResult());
-                    return tempList.GetEnumerator(); 
-                }
+                GetFakeSearchResult(),
+                GetFakeSearchResult(),
+                GetFakeSearchResult(),
+                GetFakeSearchResult(),
+                GetFakeSearchResult(),
+                GetFakeSearchResult()
             };
         }
 
-        private SearchResult GetFakeSearchResult()
+        private OrderItemModel GetFakeSearchResult()
         {
-            return new Examine.Fakes.ShimSearchResult()
-                    {
-                        FieldsGet = () =>
-                        {
-                            var val = new Dictionary<string, string>();
-                            val.Add("Log", "[{\"OrderItemNodeId\":0,\"NodeId\":0,\"Type\":\"STATUS\",\"Message\":\"Status ändrad från Mottagen till Levererad\",\"MemberName\":\"Lars Andersson\",\"CreateDate\":\"2014-03-04T08:39:07.0230965+01:00\"}]");
-                            val.Add("createDate", "20140303080400000");
-                            return val;
-                        }
-                    };
+            return new OrderItemModel()
+            {
+                Log = "[{\"OrderItemNodeId\":0,\"NodeId\":0,\"Type\":\"STATUS\",\"Message\":\"Status ändrad från Mottagen till Levererad\",\"MemberName\":\"Lars Andersson\",\"CreateDate\":\"2014-03-04T08:39:07.0230965+01:00\"}]",
+                CreateDate = new DateTime(2014, 3, 3, 8, 4, 0)
+            };
         }
 
         [TestMethod]

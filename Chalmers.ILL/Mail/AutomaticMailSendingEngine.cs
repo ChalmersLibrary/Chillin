@@ -8,6 +8,7 @@ using System.Globalization;
 using Chalmers.ILL.Templates;
 using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.Mail
 {
@@ -15,12 +16,12 @@ namespace Chalmers.ILL.Mail
     {
         public static int EVENT_TYPE { get { return 15; } }
 
-        ISearcher _orderItemSearcher;
+        IOrderItemSearcher _orderItemSearcher;
         ITemplateService _templateService;
         IOrderItemManager _orderItemManager;
         IMailService _mailService;
 
-        public AutomaticMailSendingEngine(ISearcher orderItemSearcher, ITemplateService templateService, IOrderItemManager orderItemManager,
+        public AutomaticMailSendingEngine(IOrderItemSearcher orderItemSearcher, ITemplateService templateService, IOrderItemManager orderItemManager,
             IMailService mailService)
         {
             _orderItemSearcher = orderItemSearcher;
@@ -40,46 +41,42 @@ namespace Chalmers.ILL.Mail
 
             foreach (var orderItem in orderItems)
             {
-                var dueDate = orderItem.Fields.GetValueString("DueDate") == "" ? DateTime.Now :
-                    DateTime.ParseExact(orderItem.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
-
-                var deliveryDate = orderItem.Fields.GetValueString("DeliveryDate") == "" ? DateTime.Now :
-                    DateTime.ParseExact(orderItem.Fields.GetValueString("DeliveryDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
-
-                var status = orderItem.Fields.GetValueString("Status");
+                var dueDate = orderItem.DueDate;
+                var deliveryDate = orderItem.DeliveryDate;
+                var status = orderItem.StatusPrevalue;
 
                 var delayedMailOperation = new DelayedMailOperation(
-                    orderItem.Id,
-                    orderItem.Fields.GetValueString("OrderId"),
-                    orderItem.Fields.GetValueString("PatronName"),
-                    orderItem.Fields.GetValueString("PatronEmail"));
+                    orderItem.NodeId,
+                    orderItem.OrderId,
+                    orderItem.PatronName,
+                    orderItem.PatronEmail);
 
                 if (status.Contains("Utlånad") || status.Contains("Krävd"))
                 {
                     if (status.Contains("Utlånad") && now.Date == dueDate.AddDays(-5).Date)
                     {
-                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("CourtesyNoticeMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
+                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("CourtesyNoticeMailTemplate", _orderItemManager.GetOrderItem(orderItem.NodeId));
                         delayedMailOperation.LogMessages.Add(new LogMessage("MAIL_NOTE", "Skickat automatiskt \"courtesy notice\" till " + delayedMailOperation.Mail.recipientEmail));
                         delayedMailOperation.LogMessages.Add(new LogMessage("MAIL", delayedMailOperation.Mail.message));
                         delayedMailOperation.ShouldBeProcessed = true;
                     }
                     else if (status.Contains("Utlånad") && now.Date == dueDate.AddDays(1).Date)
                     {
-                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("LoanPeriodOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
+                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("LoanPeriodOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.NodeId));
                         delayedMailOperation.LogMessages.Add(new LogMessage("MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer ett till " + delayedMailOperation.Mail.recipientEmail));
                         delayedMailOperation.LogMessages.Add(new LogMessage("MAIL", delayedMailOperation.Mail.message));
                         delayedMailOperation.ShouldBeProcessed = true;
                     }
                     else if (now.Date == dueDate.AddDays(5).Date)
                     {
-                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("LoanPeriodReallyOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
+                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("LoanPeriodReallyOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.NodeId));
                         delayedMailOperation.LogMessages.Add(new LogMessage("MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer två till " + delayedMailOperation.Mail.recipientEmail));
                         delayedMailOperation.LogMessages.Add(new LogMessage("MAIL", delayedMailOperation.Mail.message));
                         delayedMailOperation.ShouldBeProcessed = true;
                     }
                     else if (now.Date == dueDate.AddDays(10).Date)
                     {
-                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("LoanPeriodReallyReallyOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
+                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("LoanPeriodReallyReallyOverMailTemplate", _orderItemManager.GetOrderItem(orderItem.NodeId));
                         delayedMailOperation.LogMessages.Add(new LogMessage("MAIL_NOTE", "Skickat automatiskt påminnelsemail nummer tre till " + delayedMailOperation.Mail.recipientEmail));
                         delayedMailOperation.LogMessages.Add(new LogMessage("MAIL", delayedMailOperation.Mail.message));
                         delayedMailOperation.ShouldBeProcessed = true;
@@ -97,7 +94,7 @@ namespace Chalmers.ILL.Mail
                     if (now.Date >= deliveryDate.AddDays(2))
                     {
                         delayedMailOperation.LogMessages.Add(new LogMessage("LOG", "Transport antas vara genomförd."));
-                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", _orderItemManager.GetOrderItem(orderItem.Id));
+                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", _orderItemManager.GetOrderItem(orderItem.NodeId));
                         delayedMailOperation.LogMessages.Add(new LogMessage("MAIL_NOTE", "Skickat automatiskt leveransmail till " + delayedMailOperation.Mail.recipientEmail));
                         delayedMailOperation.LogMessages.Add(new LogMessage("MAIL", delayedMailOperation.Mail.message));
                         delayedMailOperation.NewStatus = "05:Levererad";
@@ -136,10 +133,9 @@ namespace Chalmers.ILL.Mail
 
         #region Private methods.
 
-        private ISearchResults GetOrderItemsThatAreRelevantForAutomaticMailSending()
+        private IEnumerable<OrderItemModel> GetOrderItemsThatAreRelevantForAutomaticMailSending()
         {
-            var searchCriteria = _orderItemSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-            return _orderItemSearcher.Search(searchCriteria.RawQuery("Status:Utlånad OR Status:Krävd OR Status:Transport"));
+            return _orderItemSearcher.Search("Status:Utlånad OR Status:Krävd OR Status:Transport");
         }
 
         private class LogMessage

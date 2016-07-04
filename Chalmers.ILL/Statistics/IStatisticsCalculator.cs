@@ -1,4 +1,5 @@
-﻿using Examine;
+﻿using Chalmers.ILL.Models;
+using Examine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace Chalmers.ILL.Statistics
 {
     public interface IStatisticsCalculator
     {
-        int CalculateDataPointValue(ISearchResults dataBag, string calculationTypeStr);
+        int CalculateDataPointValue(IEnumerable<OrderItemModel> dataBag, string calculationTypeStr);
     }
 }

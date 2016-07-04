@@ -15,9 +15,6 @@
     {
         Response.RedirectPermanent("https://" + ConfigurationManager.AppSettings["liveServer"]);
     }
-
-    var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-    var searchCriteria = searcher.CreateSearchCriteria(BooleanOperation.Or);
 }
 
 <!doctype html>
