@@ -30,7 +30,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     Member.AddMemberToCache(m);
                     _memberInfoManager.AddMemberToCache(Response, m);
-                    string redirectUrl = Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url + "?login=ok";
+                    string redirectUrl;
+                    if(System.Web.Security.Roles.IsUserInRole(model.Login, "Desk"))
+                    {
+                        redirectUrl = "/disk/?login=ok";
+                    } else
+                    {
+                        redirectUrl = Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url + "?login=ok";
+                    }
                     Response.Redirect(redirectUrl);
                 }
                 else
