@@ -499,6 +499,17 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
+        public void SetReadOnlyAtLibrary(int nodeId, bool readOnlyAtLibrary, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            //TODO: Check what state it is in ant then set it.
+            //if (content.GetValue<bool>("readOnlyAtLibrary") != readOnlyAtLibrary)
+            //{ }
+
+            content.SetValue("readOnlyAtLibrary", readOnlyAtLibrary);
+            AddLogItem(nodeId, "LÄSESALSLÅN", "Läsesalslån satt till \"" + readOnlyAtLibrary + "\".", eventId, false, false);
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
 
         public int CreateOrderItemInDbFromMailQueueModel(MailQueueModel model, bool doReindex = true, bool doSignal = true)
         {
@@ -533,6 +544,7 @@ namespace Chalmers.ILL.OrderItems
             content.SetValue("deliveryDate", new DateTime(1970, 1, 1));
             content.SetValue("bookId", "");
             content.SetValue("providerInformation", "");
+            content.SetValue("readOnlyAtLibrary", "0");
 
             if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
             {

@@ -72,8 +72,8 @@
                     @RenderItems(loggedInMember, item.Id, DateTime.ParseExact(item.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None),
                         item.Fields.GetValueString("PatronName"), item.Fields.GetValueString("DeliveryLibrary"), item.Fields.GetValueString("Status"),
                         item.Fields.GetValueString("Type"), item.Fields.GetValueString("Reference"),
-                        item.Fields.GetValueString("DueDate"), item.Fields.GetValueString("BookId"),
-                        item.Fields.GetValueString("PatronCardNo"));
+                        item.Fields.GetValueString("DueDate"), item.Fields.GetValueString("BookId"), item.Fields.GetValueString("ReadOnlyAtLibrary"),
+                        item.Fields.GetValueString("PatronEmail"), item.Fields.GetValueString("PatronCardNo"));
                 }
             }
         }
@@ -89,6 +89,28 @@
         <script src="/bower_components/signalr/jquery.signalR.min.js" type="text/javascript"></script>
         <script src="/signalr/hubs" type="text/javascript"></script>
 
+        <!-- Custom Javascript for this app -->
+        <script src="/scripts/chalmers.ill.js?r=@DateTime.Now.Ticks" type="text/javascript"></script>
+
+        <script type="text/javascript">
+            function receive(id) {
+                lockScreen();
+                $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceivedAtBranch", {
+                    nodeId: id
+                }, function (json) {
+                    if (json.Success) {
+                        $("#statusActions").html("Boken mottagen.");
+                    }
+                    else {
+                        alert(json.Message);
+                    }
+                    unlockScreen();
+                }).fail(function (jqxhr, textStatus, error) {
+                    alert("Error: " + textStatus + " " + error);
+                    unlockScreen();
+                });
+            }
+        </script>
     </body>
 
 </html>
@@ -98,26 +120,35 @@
     @prevalue.Split(':').Last()
 }
 
-@helper RenderItems(int memberId, object Id, DateTime date, object patronName, object library, object status, object type, object reference, object dueDate, object bookId, object patronCardNumber)
+@helper RenderItems(int memberId, object Id, DateTime date, object patronName, object library, object status, object type, object reference, object dueDate, object bookId, object readOnlyAtLibrary, string patronEmail, object patronCardNumber)
 {
+    bool localLoan = false;
+    if(@readOnlyAtLibrary.ToString() == "1")
+    {
+        localLoan = true;
+    }
     <div class="row">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="row">
-                    <div class="col-sm-10">@patronName (@patronCardNumber)</div>
+                    <div class="col-sm-10">@patronName (@patronCardNumber | @patronEmail)</div>
                     <div class="col-sm-2 text-right">Återlämning: @dueDate.ToString().Substring(0,8)</div>
                 </div>
             </div>
             <div class="panel-body">
-                Identifikator: <strong>@bookId</strong><br />
+                @if (localLoan)
+                {
+                    <div class="alert alert-danger" role="alert">OBS! Endast läsesalslån!</div>
+                }
+            Identifikator: <strong>@bookId</strong><br />
                 Referens: @reference
             </div>
             <div class="panel-footer">
                 <div class="row">
                     <div class="col-sm-10">@ParseStatusPrevalue(status.ToString())</div>
-                    <div class="col-sm-2 text-right">
+                    <div id="statusActions" class="col-sm-2 text-right">
                         @if(ParseStatusPrevalue(status.ToString()).ToString() == "Transport") {
-                            <button type="submit" class="btn btn-success">Ta emot</button>
+                            <button type="submit" class="btn btn-success" onclick="receive(@Id)">Ta emot</button>
                         }
                     </div>
                 </div>
