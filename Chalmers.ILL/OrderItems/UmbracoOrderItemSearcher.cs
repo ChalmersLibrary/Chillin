@@ -39,15 +39,15 @@ namespace Chalmers.ILL.OrderItems
                     DateTime.ParseExact(item.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
                 newOrderItem.DeliveryDate = item.Fields.GetValueString("DeliveryDate") == "" ? DateTime.Now :
                     DateTime.ParseExact(item.Fields.GetValueString("DeliveryDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                newOrderItem.StatusPrevalue = item.Fields.GetValueString("Status");
+                newOrderItem.Status = item.Fields.GetValueString("Status");
                 newOrderItem.OrderId = item.Fields.GetValueString("OrderId");
                 newOrderItem.PatronName = item.Fields.GetValueString("PatronName");
                 newOrderItem.PatronEmail = item.Fields.GetValueString("PatronEmail");
                 newOrderItem.ProviderOrderId = item.Fields.GetValueString("ProviderOrderId");
                 newOrderItem.FollowUpDate = item.Fields.GetValueString("FollowUpDate") == "" ? DateTime.Now :
                     DateTime.ParseExact(item.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                newOrderItem.DeliveryLibraryPrevalue = item.Fields.GetValueString("DeliveryLibrary");
-                newOrderItem.TypePrevalue = item.Fields.GetValueString("Type");
+                newOrderItem.DeliveryLibrary = item.Fields.GetValueString("DeliveryLibrary");
+                newOrderItem.Type = item.Fields.GetValueString("Type");
                 newOrderItem.Reference = item.Fields.GetValueString("Reference");
                 newOrderItem.CreateDate = item.Fields["createDate"] == "" ? DateTime.Now :
                     DateTime.ParseExact(item.Fields.GetValueString("createDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);

@@ -43,7 +43,7 @@ namespace Chalmers.ILL.Mail
             {
                 var dueDate = orderItem.DueDate;
                 var deliveryDate = orderItem.DeliveryDate;
-                var status = orderItem.StatusPrevalue;
+                var status = orderItem.Status;
 
                 var delayedMailOperation = new DelayedMailOperation(
                     orderItem.NodeId,

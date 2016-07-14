@@ -30,7 +30,7 @@
                     </div>
                 }
                 
-                @if (Model.OrderItem.TypePrevalue == "Bok" && !Model.OrderItem.DeliveryLibrarySameAsHomeLibrary)
+                @if (Model.OrderItem.Type == "Bok" && !Model.OrderItem.DeliveryLibrarySameAsHomeLibrary)
                 {
                     <div class="panel panel-danger">
                         <div class="panel-heading">
@@ -56,7 +56,7 @@
                     <ul class="dropdown-menu" id="orderitem-typelist" role="menu">
                         @foreach (var type in Model.AvailableTypes)
                         {
-                            if (type.Id == Model.OrderItem.Type) 
+                            if (type.Id == Model.OrderItem.TypeId) 
                             {
                                 <li><a href="#" class="disabled-link"><span class="current">@type.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                             }
@@ -67,7 +67,7 @@
                         }
                     </ul>
                 </div>
-                @if (Model.OrderItem.Type > 0)
+                @if (Model.OrderItem.TypeId > 0)
                 {
                     <!-- Status button -->
                     <div class="btn-group">
@@ -85,11 +85,11 @@
                                 
                                 if (Model.OrderItem.DeliveryDate.Year > 1975) // The book or article has been delivered
                                 {
-                                    if (Model.OrderItem.TypePrevalue == "Artikel")
+                                    if (Model.OrderItem.Type == "Artikel")
                                     {
                                         allowedStatusValues.Add("Levererad");
                                     }
-                                    else if (Model.OrderItem.TypePrevalue == "Bok")
+                                    else if (Model.OrderItem.Type == "Bok")
                                     {
                                         allowedStatusValues.Add("Infodisk");
                                         allowedStatusValues.Add("Utlånad");
@@ -103,7 +103,7 @@
                                         if (status.Value == "Annullerad")
                                         {
                                             <li class="dropdown-submenu">
-                                                @if (status.Id == Model.OrderItem.Status)
+                                                @if (status.Id == Model.OrderItem.StatusId)
                                                 {
                                                     <a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a>
                                                 }
@@ -114,7 +114,7 @@
                                                 <ul class="dropdown-menu">
                                                     @foreach (var cancellationReason in Model.AvailableCancellationReasons)
                                                     {
-                                                        if (status.Id == Model.OrderItem.Status && cancellationReason.Id == Model.OrderItem.CancellationReason)
+                                                        if (status.Id == Model.OrderItem.StatusId && cancellationReason.Id == Model.OrderItem.CancellationReasonId)
                                                         {
                                                             <li><a href="#" class="disabled-link"><span class="current">@cancellationReason.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                                         }
@@ -129,7 +129,7 @@
                                         else if (status.Value == "Inköpt")
                                         {
                                             <li class="dropdown-submenu">
-                                                @if (status.Id == Model.OrderItem.Status)
+                                                @if (status.Id == Model.OrderItem.StatusId)
                                                 {
                                                     <a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a>
                                                 }
@@ -140,7 +140,7 @@
                                                 <ul class="dropdown-menu">
                                                     @foreach (var purchasedMaterial in Model.AvailablePurchasedMaterials)
                                                     {
-                                                        if (status.Id == Model.OrderItem.Status && purchasedMaterial.Id == Model.OrderItem.PurchasedMaterial)
+                                                        if (status.Id == Model.OrderItem.StatusId && purchasedMaterial.Id == Model.OrderItem.PurchasedMaterialId)
                                                         {
                                                             <li><a href="#" class="disabled-link"><span class="current">@purchasedMaterial.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                                         }
@@ -154,7 +154,7 @@
                                         }
                                         else
                                         {
-                                            if (status.Id == Model.OrderItem.Status)
+                                            if (status.Id == Model.OrderItem.StatusId)
                                             {
                                                 <li><a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                             }
@@ -169,7 +169,7 @@
                         </ul>
                     </div>
                     
-                    if (Model.OrderItem.TypePrevalue == "Inköpsförslag")
+                    if (Model.OrderItem.Type == "Inköpsförslag")
                     {
                         <!-- Delivery Library button -->
                         <div class="btn-group">
@@ -180,7 +180,7 @@
                                 @{
                                     foreach (var library in Model.AvailableDeliveryLibraries)
                                     {
-                                        if (library.Id == Model.OrderItem.DeliveryLibrary) 
+                                        if (library.Id == Model.OrderItem.DeliveryLibraryId) 
                                         {
                                             <li><a href="#" class="disabled-link"><span class="current">@library.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                         }
@@ -195,7 +195,7 @@
                     }
                 }
                     
-                @if (Model.OrderItem.Type > 0)
+                @if (Model.OrderItem.TypeId > 0)
                 {
                     <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.OrderItem.NodeId);">Referens</button>
                     <button type="button" class="btn btn-primary" onclick="loadPatronDataView(@Model.OrderItem.NodeId);">Beställardata</button>
@@ -203,11 +203,11 @@
                     <button type="button" class="btn btn-primary" onclick="loadProviderAction(@Model.OrderItem.NodeId);">Beställ</button>
                 }
                 <button type="button" class="btn btn-primary" onclick="loadLogEntryAction(@Model.OrderItem.NodeId);">Logga</button>
-                @if (Model.OrderItem.TypePrevalue == "Artikel")
+                @if (Model.OrderItem.Type == "Artikel")
                 {
                     <button type="button" class="btn btn-primary" onclick="loadDeliveryAction(@Model.OrderItem.NodeId);">Leverans <span id="attachment-counter1" class="badge">@Model.OrderItem.AttachmentList.Count</span></button>
                 }
-                @if (Model.OrderItem.TypePrevalue == "Bok")
+                @if (Model.OrderItem.Type == "Bok")
                 {
                     <button type="button" class="btn btn-primary" onclick="loadReceiveBookAction(@Model.OrderItem.NodeId);">Ta emot bok</button>
                     <div class="btn-group">
@@ -270,7 +270,7 @@
     <div>
         <span class="label label-primary order-item-var-label">Uppföljning</span> @Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
-    @if (Model.OrderItem.DeliveryDate.Year >= 1975 && Model.OrderItem.TypePrevalue == "Bok")
+    @if (Model.OrderItem.DeliveryDate.Year >= 1975 && Model.OrderItem.Type == "Bok")
     {
         <div>
             <span class="label label-primary order-item-var-label">Återlämning</span> @Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)

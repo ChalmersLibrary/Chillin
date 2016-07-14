@@ -2,17 +2,24 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Web;
-using umbraco.businesslogic;
-using umbraco.cms.businesslogic.member;
 
 namespace Chalmers.ILL.Models
 {
     // Main Order Item
     public class OrderItemModel
     {
-        [Required]
+        public OrderItemModel()
+        {
+            StatusId = -1;
+            PreviousStatusId = -1;
+            LastDeliveryStatusId = -1;
+            TypeId = -1;
+            DeliveryLibraryId = -1;
+            CancellationReasonId = -1;
+            PurchasedMaterialId = -1;
+            SierraInfo = new SierraModel();
+        }
+
         public string OrderId { get; set; }
 
         [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -27,29 +34,29 @@ namespace Chalmers.ILL.Models
         public string OriginalOrder { get; set; }
         public string Reference { get; set; }
 
-        public int Type { get; set; }
-        public string TypePrevalue { get; set; }
+        public int TypeId { get; set; }
+        public string Type { get; set; }
 
-        public int Status { get; set; }
-        public string StatusPrevalue { get; set; }
+        public int StatusId { get; set; }
+        public string Status { get; set; }
         public string StatusString { get; set; }
 
-        public int PreviousStatus { get; set; }
-        public string PreviousStatusPrevalue { get; set; }
+        public int PreviousStatusId { get; set; }
+        public string PreviousStatus { get; set; }
         public string PreviousStatusString { get; set; }
 
-        public int LastDeliveryStatus { get; set; }
-        public string LastDeliveryStatusPrevalue { get; set; }
+        public int LastDeliveryStatusId { get; set; }
+        public string LastDeliveryStatus { get; set; }
         public string LastDeliveryStatusString { get; set; }
 
-        public int DeliveryLibrary { get; set; }
-        public string DeliveryLibraryPrevalue { get; set; }
+        public int DeliveryLibraryId { get; set; }
+        public string DeliveryLibrary { get; set; }
 
-        public int CancellationReason { get; set; }
-        public string CancellationReasonPrevalue { get; set; }
+        public int CancellationReasonId { get; set; }
+        public string CancellationReason { get; set; }
 
-        public int PurchasedMaterial { get; set; }
-        public string PurchasedMaterialPrevalue { get; set; }
+        public int PurchasedMaterialId { get; set; }
+        public string PurchasedMaterial { get; set; }
 
         public string PatronName { get; set; }
         public string PatronEmail { get; set; }

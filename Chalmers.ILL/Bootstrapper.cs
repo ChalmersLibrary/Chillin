@@ -16,6 +16,7 @@ using Chalmers.ILL.Patron;
 using System.Configuration;
 using Chalmers.ILL.Providers;
 using Chalmers.ILL.MediaItems;
+using Nest;
 
 namespace Chalmers.ILL
 {
@@ -41,13 +42,18 @@ namespace Chalmers.ILL
 
         public static void RegisterTypes(IUnityContainer container)
         {
+            var elasticClientSettings = new ConnectionSettings(new System.Uri("http://localhost:9200"));
+            elasticClientSettings.DefaultIndex("chillin");
+            var elasticClient = new ElasticClient(elasticClientSettings);
+
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
             container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
+            container.RegisterInstance<IElasticClient>(elasticClient);
 
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
             container.RegisterType<IMediaItemManager, UmbracoMediaItemManager>();
-            container.RegisterType<IOrderItemSearcher, UmbracoOrderItemSearcher>();
+            container.RegisterType<IOrderItemSearcher, ElasticSearchOrderItemSearcher>();
 
             // Fetch all needed Examine search providers.
             var templatesSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLTemplatesSearcher"];
@@ -57,7 +63,7 @@ namespace Chalmers.ILL
             var templateService = new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher);
             var notifier = new Notifier();
             var umbraco = new UmbracoWrapper();
-            var orderItemManager = new EntityFrameworkOrderItemManager(umbraco);
+            var orderItemManager = new EntityFrameworkOrderItemManager(umbraco, container.Resolve<IOrderItemSearcher>());
             var providerService = new ProviderService(container.Resolve<IOrderItemSearcher>());
             var bulkDataManager = new BulkDataManager(container.Resolve<IOrderItemSearcher>());
 

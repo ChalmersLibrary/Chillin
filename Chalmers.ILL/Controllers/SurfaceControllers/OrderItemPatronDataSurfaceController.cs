@@ -181,7 +181,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
-            if (orderItem.TypePrevalue.Contains("Bok"))
+            if (orderItem.Type.Contains("Bok"))
             {
                 if (sierraModel.home_library != null && sierraModel.home_library.Contains("hbib"))
                 {

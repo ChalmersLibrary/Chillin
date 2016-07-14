@@ -10,6 +10,7 @@ using umbraco.cms.businesslogic.datatype;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.UmbracoApi;
+using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.SignalR
 {
@@ -79,6 +80,40 @@ namespace Chalmers.ILL.SignalR
                             IsPending = chillinOrderStatusId == 1 || chillinOrderStatusId == 2 || chillinOrderStatusId == 9 || (chillinOrderStatusId > 2 && chillinOrderStatusId < 5 && DateTime.Now > followUpDate),
                             UpdateFromMail = false
                         };
+
+            // this calls the javascript method updateStream(message) in all connected browsers
+            context.Clients.All.updateStream(n);
+        }
+
+        public void ReportNewOrderItemUpdate(OrderItemModel orderItem)
+        {
+            // get the NotificationHub
+            var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
+
+            // Extract the real chillin order status id from the umbraco id.
+            int chillinOrderStatusId = 0;
+            var ds = new Umbraco.Core.Services.DataTypeService();
+            PreValue iter;
+            foreach (DictionaryEntry pv in _umbraco.GetPreValues(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"]))
+            {
+                iter = ((PreValue)pv.Value);
+                if (iter.Id == orderItem.StatusId)
+                {
+                    chillinOrderStatusId = Convert.ToInt32(iter.Value.Split(':').First());
+                    break;
+                }
+            }
+
+            // create a notication object to send to the clients
+            var n = new OrderItemNotification
+            {
+                NodeId = orderItem.NodeId,
+                EditedBy = orderItem.EditedBy,
+                EditedByMemberName = orderItem.EditedByMemberName,
+                SignificantUpdate = true,
+                IsPending = chillinOrderStatusId == 1 || chillinOrderStatusId == 2 || chillinOrderStatusId == 9 || (chillinOrderStatusId > 2 && chillinOrderStatusId < 5 && DateTime.Now > orderItem.FollowUpDate),
+                UpdateFromMail = false
+            };
 
             // this calls the javascript method updateStream(message) in all connected browsers
             context.Clients.All.updateStream(n);

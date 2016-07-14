@@ -5,7 +5,7 @@
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
-            @if (Model.OrderItem.TypePrevalue == "Artikel")
+            @if (Model.OrderItem.Type == "Artikel")
             {
                 <label>Leveranssätt</label>
                 <div class="dropdown">
@@ -32,7 +32,7 @@
                     </ul>
                 </div>
             }
-            else if (Model.OrderItem.TypePrevalue == "Bok")
+            else if (Model.OrderItem.Type == "Bok")
             {
                 <label>Leveranssätt</label>
                 <div class="dropdown">
@@ -62,7 +62,7 @@
 
 <script type="text/javascript">
     $(function () {
-        if ("@Model.OrderItem.TypePrevalue" == "Bok") {
+        if ("@Model.OrderItem.Type" == "Bok") {
             selectDeliveryType($("#delivery-type-dropdown").parent().find("ul li a[data-delivery-type=infodisk]"));
         } else {
             // Order is of type Article

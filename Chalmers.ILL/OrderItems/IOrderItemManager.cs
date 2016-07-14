@@ -12,6 +12,7 @@ namespace Chalmers.ILL.OrderItems
     public interface IOrderItemManager
     {
         OrderItemModel GetOrderItem(int nodeId);
+        IEnumerable<OrderItemModel> GetLockedOrderItems(string memberId);
         List<LogItem> GetLogItems(int nodeId);
 
         void AddExistingMediaItemAsAnAttachment(int orderNodeId, int mediaNodeId, string title, string link, string eventId, bool doReindex = true, bool doSignal = true);
@@ -41,6 +42,7 @@ namespace Chalmers.ILL.OrderItems
         void SetProviderOrderId(int nodeId, string providerOrderId, string eventId, bool doReindex = true, bool doSignal = true);
         void SetProviderInformation(int nodeId, string providerInformation, string eventId, bool doReindex = true, bool doSignal = true);
         void SetReference(int nodeId, string reference, string eventId, bool doReindex = true, bool doSignal = true);
+        void SetEditedByData(int orderNodeId, string memberId, string memberName, bool doReindex = true, bool doSignal = true);
 
         /// <summary>
         /// Creates a new OrderItem from a MailQueueModel

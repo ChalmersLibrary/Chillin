@@ -39,7 +39,7 @@ namespace Chalmers.ILL.Tests.Mail
             {
                 new OrderItemModel()
                 {
-                    StatusPrevalue = status,
+                    Status = status,
                     OrderId = "cth-123",
                     PatronName = "John Doe",
                     PatronEmail = "john@doe.com",

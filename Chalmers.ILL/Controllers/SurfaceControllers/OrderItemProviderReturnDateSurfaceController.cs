@@ -57,9 +57,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logMsg, eventId, false, false);
                 }
 
-                if (orderItem.LastDeliveryStatus != -1)
+                if (orderItem.LastDeliveryStatusId != -1)
                 {
-                    _orderItemManager.SetStatus(pack.nodeId, orderItem.LastDeliveryStatus, eventId, false, false);
+                    _orderItemManager.SetStatus(pack.nodeId, orderItem.LastDeliveryStatusId, eventId, false, false);
                 }
                 _orderItemManager.SetProviderDueDate(pack.nodeId, pack.providerDueDate, eventId);
 

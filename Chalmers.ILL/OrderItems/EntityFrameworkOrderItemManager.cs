@@ -15,20 +15,116 @@ using Chalmers.ILL.UmbracoApi;
 using System.Configuration;
 using Umbraco.Core.Logging;
 using Chalmers.ILL.SignalR;
+using System.Threading;
 
 namespace Chalmers.ILL.OrderItems
 {
     public class EntityFrameworkOrderItemManager : IOrderItemManager
     {
         private INotifier _notifier;
-        private OrderItemsDbContext _dbContext;
         private IUmbracoWrapper _umbraco;
         private Random _rand;
+        private IOrderItemSearcher _orderItemSearcher;
 
-        public EntityFrameworkOrderItemManager(IUmbracoWrapper umbraco)
+        private Dictionary<int, OrderItemsDbContext> _threadIdToDbContextMap = new Dictionary<int, OrderItemsDbContext>();
+
+        public EntityFrameworkOrderItemManager(IUmbracoWrapper umbraco, IOrderItemSearcher orderItemSearcher)
         {
             _umbraco = umbraco;
+            _orderItemSearcher = orderItemSearcher;
             _rand = new Random();
+        }
+
+        public List<LogItem> GetLogItems(int nodeId)
+        {
+            var res = new List<LogItem>();
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
+                    .Where(x => x.NodeId == nodeId)
+                    .Include(x => x.LogItemsList)
+                    .FirstOrDefault();
+                if (orderItem != null)
+                {
+                    res = orderItem.LogItemsList;
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to fetch log items.");
+                }
+                return res;
+            }
+            finally
+            {
+                DisposeDatabaseContext(true);
+            }
+        }
+
+        public OrderItemModel GetOrderItem(int nodeId)
+        {
+            OrderItemModel res = null;
+            EnsureDatabaseContext();
+            try
+            {
+                try
+                {
+                    var orderItems = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
+                        .Where(x => x.NodeId == nodeId)
+                        .Include(x => x.AttachmentList)
+                        .Include(x => x.LogItemsList)
+                        .Include(x => x.SierraInfo)
+                        .Include(x => x.SierraInfo.adress)
+                        .ToList();
+
+                    foreach (var orderItem in orderItems)
+                    {
+                        orderItem.AttachmentList = orderItem.AttachmentList.OrderBy(x => x.Title).ToList();
+                        orderItem.LogItemsList = orderItem.LogItemsList.OrderByDescending(x => x.CreateDate).ToList();
+                    }
+
+                    if (orderItems.Count() == 0)
+                    {
+                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Couldn't find any node with the ID " + nodeId + " while querying with Examine.");
+                    }
+                    else if (orderItems.Count() > 1)
+                    {
+                        // should never happen
+                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Found more than one node with the ID " + nodeId + " while querying with Examine.");
+                    }
+                    else
+                    {
+                        res = orderItems.Single();
+
+                        FillOutStuff(res);
+                    }
+                }
+                catch (Exception e)
+                {
+                    LogHelper.Error<OrderItemManager>("Failed to query node.", e);
+                }
+
+                return res;
+            }
+            finally
+            {
+                DisposeDatabaseContext(true);
+            }
+        }
+
+        public IEnumerable<OrderItemModel> GetLockedOrderItems(string memberId)
+        {
+            EnsureDatabaseContext();
+            try
+            {
+                return _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
+                    .Where(x => x.EditedBy == memberId)
+                    .ToList();
+            }
+            finally
+            {
+                DisposeDatabaseContext(true);
+            }
         }
 
         public void SetNotifier(INotifier notifier)
@@ -39,69 +135,95 @@ namespace Chalmers.ILL.OrderItems
         public void AddExistingMediaItemAsAnAttachment(int orderNodeId, int mediaNodeId, string title, string link, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems
-                .Where(x => x.NodeId == orderNodeId)
-                .Include(x => x.AttachmentList)
-                .FirstOrDefault();
-            if (orderItem != null)
+            try
             {
-                if (!String.IsNullOrEmpty(title) && !String.IsNullOrEmpty(link))
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
+                    .Where(x => x.NodeId == orderNodeId)
+                    .Include(x => x.AttachmentList)
+                    .FirstOrDefault();
+                if (orderItem != null)
                 {
-                    if (orderItem.AttachmentList == null)
+                    if (!String.IsNullOrEmpty(title) && !String.IsNullOrEmpty(link))
                     {
-                        orderItem.AttachmentList = new List<OrderAttachment>();
+                        if (orderItem.AttachmentList == null)
+                        {
+                            orderItem.AttachmentList = new List<OrderAttachment>();
+                        }
+
+                        var att = new OrderAttachment();
+                        att.Title = title;
+                        att.Link = link;
+                        att.MediaItemNodeId = mediaNodeId;
+                        orderItem.AttachmentList.Add(att);
+                        FillOutStuff(orderItem);
+
+                        AddLogItem(orderNodeId, "ATTACHMENT", "Nytt dokument bundet till ordern.", eventId, false, false);
+
+                        MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                     }
-
-                    var att = new OrderAttachment();
-                    att.Title = title;
-                    att.Link = link;
-                    att.MediaItemNodeId = mediaNodeId;
-                    orderItem.AttachmentList.Add(att);
-
-                    AddLogItem(orderNodeId, "ATTACHMENT", "Nytt dokument bundet till ordern.", eventId, false, false);
-
-                    MaybeSaveToDatabase(doReindex);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to add existing media item as an attachment.");
                 }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to add existing media item as an attachment.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void AddLogItem(int OrderItemNodeId, string Type, string Message, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems
-                .Where(x => x.NodeId == OrderItemNodeId)
-                .Include(x => x.LogItemsList)
-                .FirstOrDefault();
-            if (orderItem != null)
+            try
             {
-                if (!String.IsNullOrEmpty(Message))
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
+                    .Where(x => x.NodeId == OrderItemNodeId)
+                    .Include(x => x.LogItemsList)
+                    .FirstOrDefault();
+                if (orderItem != null)
                 {
-                    if (orderItem.LogItemsList == null)
+                    if (!String.IsNullOrEmpty(Message))
                     {
-                        orderItem.LogItemsList = new List<LogItem>();
+                        if (orderItem.LogItemsList == null)
+                        {
+                            orderItem.LogItemsList = new List<LogItem>();
+                        }
+
+                        LogItem newLog = new LogItem
+                        {
+                            MemberName = GetCurrentUserOrSystem(),
+                            Type = Type,
+                            Message = Message,
+                            CreateDate = DateTime.Now,
+                            EventId = eventId
+                        };
+
+                        orderItem.LogItemsList.Add(newLog);
+                        FillOutStuff(orderItem);
+
+                        MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                     }
-
-                    LogItem newLog = new LogItem
-                    {
-                        MemberName = GetCurrentUserOrSystem(),
-                        Type = Type,
-                        Message = Message,
-                        CreateDate = DateTime.Now,
-                        EventId = eventId
-                    };
-
-                    orderItem.LogItemsList.Add(newLog);
-
-                    MaybeSaveToDatabase(doReindex);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to add log item.");
                 }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to add log item.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
@@ -123,131 +245,163 @@ namespace Chalmers.ILL.OrderItems
         {
             EnsureDatabaseContext();
 
-            // Temporary OrderId with MD5 Hash
-            var orderId = "cthb-" + Helpers.CalculateMD5Hash(DateTime.Now.Ticks.ToString());
-            var contentName = orderId;
-
-            var newOrderItem = new OrderItemModel();
-
-            // Set properties
-            var originalOrder = UrlDecodeAndEscapeAllLinks(model.OriginalOrder);
-            newOrderItem.OriginalOrder = originalOrder;
-            newOrderItem.Reference = originalOrder;
-            newOrderItem.PatronName = model.PatronName;
-            newOrderItem.PatronEmail = model.PatronEmail;
-            newOrderItem.PatronCardNo = model.PatronCardNo;
-            newOrderItem.FollowUpDate = DateTime.Now;
-            newOrderItem.EditedBy = "";
-            newOrderItem.Status = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny");
-            newOrderItem.SierraInfo = model.SierraPatronInfo;
-            newOrderItem.LogItemsList = new List<LogItem>();
-            newOrderItem.AttachmentList = new List<OrderAttachment>();
-            newOrderItem.DueDate = DateTime.Now;
-            newOrderItem.ProviderDueDate = DateTime.Now;
-            newOrderItem.DeliveryDate = new DateTime(1970, 1, 1);
-            newOrderItem.BookId = "";
-            newOrderItem.ProviderInformation = "";
-
-            if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
+            try
             {
-                if (model.SierraPatronInfo.home_library.ToLower() == "abib")
-                {
-                    newOrderItem.DeliveryLibrary = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
-                }
-                else if (model.SierraPatronInfo.home_library.ToLower() == "lbib")
-                {
-                    newOrderItem.DeliveryLibrary = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
-                }
-                else
-                {
-                    newOrderItem.DeliveryLibrary = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
-                }
-            }
+                // Temporary OrderId with MD5 Hash
+                var orderId = "cthb-" + Helpers.CalculateMD5Hash(DateTime.Now.Ticks.ToString());
+                var contentName = orderId;
 
-            // Set Type directly if "IsPurchaseRequest" is true
-            if (model.IsPurchaseRequest)
+                var newOrderItem = new OrderItemModel();
+
+                // Set properties
+                var originalOrder = UrlDecodeAndEscapeAllLinks(model.OriginalOrder);
+                newOrderItem.OriginalOrder = originalOrder;
+                newOrderItem.Reference = originalOrder;
+                newOrderItem.PatronName = model.PatronName;
+                newOrderItem.PatronEmail = model.PatronEmail;
+                newOrderItem.PatronCardNo = model.PatronCardNo;
+                newOrderItem.FollowUpDate = DateTime.Now;
+                newOrderItem.EditedBy = "";
+                newOrderItem.StatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny");
+                newOrderItem.SierraInfo = model.SierraPatronInfo;
+                newOrderItem.LogItemsList = new List<LogItem>();
+                newOrderItem.AttachmentList = new List<OrderAttachment>();
+                newOrderItem.DueDate = DateTime.Now;
+                newOrderItem.ProviderDueDate = DateTime.Now;
+                newOrderItem.DeliveryDate = new DateTime(1970, 1, 1);
+                newOrderItem.BookId = "";
+                newOrderItem.ProviderInformation = "";
+
+                if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
+                {
+                    if (model.SierraPatronInfo.home_library.ToLower() == "abib")
+                    {
+                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
+                    }
+                    else if (model.SierraPatronInfo.home_library.ToLower() == "lbib")
+                    {
+                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
+                    }
+                    else
+                    {
+                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
+                    }
+                }
+
+                // Set Type directly if "IsPurchaseRequest" is true
+                if (model.IsPurchaseRequest)
+                {
+                    newOrderItem.TypeId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Inköpsförslag");
+                }
+
+                FillOutStuff(newOrderItem);
+
+                _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Add(newOrderItem);
+
+                // Save the OrderItem to get an Id
+                SaveToDatabase(null, false);
+
+                // Shorten the OrderId and include the NodeId
+                newOrderItem.OrderId = orderId.Substring(0, 13) + "-" + newOrderItem.NodeId.ToString();
+
+                // Save
+                MaybeSaveToDatabase(doReindex, doSignal ? newOrderItem : null);
+
+                return newOrderItem.NodeId;
+            }
+            catch (Exception)
             {
-                newOrderItem.Type = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Inköpsförslag");
+                DisposeDatabaseContext(true);
+                throw;
             }
-
-            // Save the OrderItem to get an Id
-            SaveToDatabase(false);
-
-            // Shorten the OrderId and include the NodeId
-            newOrderItem.OrderId = orderId.Substring(0, 13) + "-" + newOrderItem.NodeId.ToString();
-
-            // Save
-            MaybeSaveToDatabase(doReindex);
-
-            return newOrderItem.NodeId;
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
         }
 
         public int CreateOrderItemInDbFromOrderItemSeedModel(OrderItemSeedModel model, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
 
-            // Temporary OrderId with MD5 Hash
-            var orderId = "cthb-" + Helpers.CalculateMD5Hash(DateTime.Now.Ticks.ToString());
-            var contentName = orderId;
+            try
+            {
+                // Temporary OrderId with MD5 Hash
+                var orderId = "cthb-" + Helpers.CalculateMD5Hash(DateTime.Now.Ticks.ToString());
+                var contentName = orderId;
 
-            var newOrderItem = new OrderItemModel();
+                var newOrderItem = new OrderItemModel();
 
-            // Set properties
-            newOrderItem.OriginalOrder = model.Message;
-            newOrderItem.Reference = model.MessagePrefix + model.Message;
-            newOrderItem.PatronName = model.PatronName;
-            newOrderItem.PatronEmail = model.PatronEmail;
-            newOrderItem.PatronCardNo = model.PatronCardNumber;
-            newOrderItem.FollowUpDate = DateTime.Now;
-            newOrderItem.EditedBy = "";
-            newOrderItem.Status = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny");
-            newOrderItem.SierraInfo = model.SierraPatronInfo;
-            newOrderItem.LogItemsList = new List<LogItem>();
-            newOrderItem.AttachmentList = new List<OrderAttachment>();
-            newOrderItem.DueDate = DateTime.Now;
-            newOrderItem.ProviderDueDate = DateTime.Now;
-            newOrderItem.DeliveryDate = new DateTime(1970, 1, 1);
-            newOrderItem.BookId = "";
-            newOrderItem.ProviderInformation = "";
+                // Set properties
+                newOrderItem.OriginalOrder = model.Message;
+                newOrderItem.Reference = model.MessagePrefix + model.Message;
+                newOrderItem.PatronName = model.PatronName;
+                newOrderItem.PatronEmail = model.PatronEmail;
+                newOrderItem.PatronCardNo = model.PatronCardNumber;
+                newOrderItem.FollowUpDate = DateTime.Now;
+                newOrderItem.EditedBy = "";
+                newOrderItem.StatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny");
+                newOrderItem.SierraInfo = model.SierraPatronInfo;
+                newOrderItem.LogItemsList = new List<LogItem>();
+                newOrderItem.AttachmentList = new List<OrderAttachment>();
+                newOrderItem.DueDate = DateTime.Now;
+                newOrderItem.ProviderDueDate = DateTime.Now;
+                newOrderItem.DeliveryDate = new DateTime(1970, 1, 1);
+                newOrderItem.BookId = "";
+                newOrderItem.ProviderInformation = "";
 
-            if (model.DeliveryLibrarySigel == "Z")
-            {
-                newOrderItem.DeliveryLibrary = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
-            }
-            else if (model.DeliveryLibrarySigel == "ZL")
-            {
-                newOrderItem.DeliveryLibrary = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
-            }
-            else if (model.DeliveryLibrarySigel == "ZA")
-            {
-                newOrderItem.DeliveryLibrary = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
-            }
-            else if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
-            {
-                if (model.SierraPatronInfo.home_library.ToLower() == "abib")
+                if (model.DeliveryLibrarySigel == "Z")
                 {
-                    newOrderItem.DeliveryLibrary = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
+                    newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
                 }
-                else if (model.SierraPatronInfo.home_library.ToLower() == "lbib")
+                else if (model.DeliveryLibrarySigel == "ZL")
                 {
-                    newOrderItem.DeliveryLibrary = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
+                    newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
                 }
-                else
+                else if (model.DeliveryLibrarySigel == "ZA")
                 {
-                    newOrderItem.DeliveryLibrary = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
+                    newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
                 }
+                else if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
+                {
+                    if (model.SierraPatronInfo.home_library.ToLower() == "abib")
+                    {
+                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
+                    }
+                    else if (model.SierraPatronInfo.home_library.ToLower() == "lbib")
+                    {
+                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
+                    }
+                    else
+                    {
+                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
+                    }
+                }
+
+                FillOutStuff(newOrderItem);
+
+                _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Add(newOrderItem);
+
+                // Save the OrderItem to get an Id
+                SaveToDatabase(null, false);
+
+                // Shorten the OrderId and include the NodeId
+                newOrderItem.OrderId = orderId.Substring(0, 13) + "-" + newOrderItem.NodeId.ToString();
+
+                // Save
+                MaybeSaveToDatabase(doReindex, doSignal ? newOrderItem : null);
+
+                return newOrderItem.NodeId;
             }
-
-            // Save the OrderItem to get an Id
-            SaveToDatabase(false);
-
-            // Shorten the OrderId and include the NodeId
-            newOrderItem.OrderId = orderId.Substring(0, 13) + "-" + newOrderItem.NodeId.ToString();
-
-            // Save
-            MaybeSaveToDatabase(doReindex);
-
-            return newOrderItem.NodeId;
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
         }
 
         public string GenerateEventId(int type)
@@ -255,175 +409,106 @@ namespace Chalmers.ILL.OrderItems
             return "event-" + _rand.Next(0, 65535).ToString("X4") + "-" + type.ToString("D2");
         }
 
-        public List<LogItem> GetLogItems(int nodeId)
-        {
-            var res = new List<LogItem>();
-            EnsureDatabaseContext();
-            try
-            {
-                var orderItem = _dbContext.OrderItems
-                    .Where(x => x.NodeId == nodeId)
-                    .Include(x => x.LogItemsList)
-                    .FirstOrDefault();
-                if (orderItem != null)
-                {
-                    res = orderItem.LogItemsList;
-                }
-                else
-                {
-                    throw new OrderItemNotFoundException("Failed to find order item when trying to fetch log items.");
-                }
-                return res;
-            }
-            finally
-            {
-                DisposeDatabaseContext();
-            }
-        }
-
-        public OrderItemModel GetOrderItem(int nodeId)
-        {
-            OrderItemModel res = null;
-            EnsureDatabaseContext();
-            try
-            {
-                try
-                {
-                    var orderItems = _dbContext.OrderItems
-                        .Where(x => x.NodeId == nodeId)
-                        .Include(x => x.AttachmentList)
-                        .Include(x => x.LogItemsList)
-                        .Include(x => x.SierraInfo)
-                        .Include(x => x.SierraInfo.adress)
-                        .ToList();
-
-                    if (orderItems.Count() == 0)
-                    {
-                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Couldn't find any node with the ID " + nodeId + " while querying with Examine.");
-                    }
-                    else if (orderItems.Count() > 1)
-                    {
-                        // should never happen
-                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Found more than one node with the ID " + nodeId + " while querying with Examine.");
-                    }
-                    else
-                    {
-                        res = orderItems.Single();
-                    }
-                }
-                catch (Exception e)
-                {
-                    LogHelper.Error<OrderItemManager>("Failed to query node.", e);
-                }
-
-                res.FollowUpDateIsDue = res.FollowUpDate <= DateTime.Now ? true : false;
-
-                // Status (id, whole prevalue "xx:yyyy" and just string "yyyy")
-                res.StatusString = res.Status != -1 ? umbraco.library.GetPreValueAsString(res.Status).Split(':').Last() : "";
-                res.StatusPrevalue = res.Status != -1 ? umbraco.library.GetPreValueAsString(res.Status) : "";
-
-                // Previous status (id, whole prevalue "xx:yyyy" and just string "yyyy")
-                res.PreviousStatusString = res.PreviousStatus != -1 ? umbraco.library.GetPreValueAsString(res.PreviousStatus).Split(':').Last() : "";
-                res.PreviousStatusPrevalue = res.PreviousStatus != -1 ? umbraco.library.GetPreValueAsString(res.PreviousStatus) : "";
-
-                // Last delivery status (id, whole prevalue "xx:yyyy" and just string "yyyy")
-                res.LastDeliveryStatusString = res.LastDeliveryStatus != -1 ? umbraco.library.GetPreValueAsString(res.LastDeliveryStatus).Split(':').Last() : "";
-                res.LastDeliveryStatusPrevalue = res.LastDeliveryStatus != -1 ? umbraco.library.GetPreValueAsString(res.LastDeliveryStatus) : "";
-
-                // Type (id and prevalue)
-                res.TypePrevalue = res.Type != -1 ? umbraco.library.GetPreValueAsString(res.Type) : "";
-
-                // Delivery Library (id and prevalue)
-                res.DeliveryLibraryPrevalue = res.DeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(res.DeliveryLibrary) : "";
-
-                // Cancellation reason (id and prevalue)
-                res.CancellationReasonPrevalue = res.CancellationReason != -1 ? umbraco.library.GetPreValueAsString(res.CancellationReason) : "";
-
-                // Purchased material (id and prevalue)
-                res.PurchasedMaterialPrevalue = res.PurchasedMaterial != -1 ? umbraco.library.GetPreValueAsString(res.PurchasedMaterial) : "";
-
-                // NOTE: These values are no longer stored in the actual node, only added in OrderItemSurfaceController after checking relations.
-                res.EditedBy = "";
-                res.EditedByMemberName = "";
-                res.EditedByCurrentMember = false;
-
-                // Include the Content Version Count in Umbraco db
-                // FIXME: Always set to zero to avoid ContentService calls. Never used. Should be removed from model?
-                res.ContentVersionsCount = 0;
-
-                res.DeliveryLibrarySameAsHomeLibrary = IsDeliveryLibrarySameAsHomeLibrary(res);
-
-                return res;
-            }
-            finally
-            {
-                DisposeDatabaseContext();
-            }
-        }
-
         public void RemoveConnectionToMediaItem(int orderNodeId, int mediaNodeId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems
-                .Where(x => x.NodeId == orderNodeId)
-                .Include(x => x.AttachmentList)
-                .FirstOrDefault();
-            if (orderItem != null)
+            try
             {
-                orderItem.AttachmentList.RemoveAll(i => i.MediaItemNodeId == mediaNodeId);
-                MaybeSaveToDatabase(doReindex);
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
+                    .Where(x => x.NodeId == orderNodeId)
+                    .Include(x => x.AttachmentList)
+                    .FirstOrDefault();
+                if (orderItem != null)
+                {
+                    orderItem.AttachmentList.RemoveAll(i => i.MediaItemNodeId == mediaNodeId);
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to remove connection to media item.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to remove connection to media item.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SaveWithoutEventsAndWithSynchronousReindexing(int nodeId, bool doReindex = true, bool doSignal = true)
         {
-            MaybeSaveToDatabase(doReindex);
+            MaybeSaveToDatabase(doReindex, null);
         }
 
         public void SaveWithoutEventsAndWithSynchronousReindexing(IContent content, bool doReindex = true, bool doSignal = true)
         {
-            MaybeSaveToDatabase(doReindex);
+            MaybeSaveToDatabase(doReindex, null);
         }
 
         public void SetBookId(int nodeId, string bookId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.BookId != bookId)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.BookId = bookId;
-                    AddLogItem(nodeId, "BOKINFO", "Bok-ID ändrat till " + bookId + ".", eventId, false, false);
+                    if (orderItem.BookId != bookId)
+                    {
+                        orderItem.BookId = bookId;
+                        AddLogItem(nodeId, "BOKINFO", "Bok-ID ändrat till " + bookId + ".", eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set book ID.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set book ID.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetCancellationReason(int orderNodeId, int cancellationReasonId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(orderNodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.CancellationReason != cancellationReasonId)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                if (orderItem != null)
                 {
-                    orderItem.CancellationReason = cancellationReasonId;
-                    AddLogItem(orderNodeId, "ANNULLERINGSORSAK", "Annulleringsorsak ändrad till " + umbraco.library.GetPreValueAsString(cancellationReasonId), eventId, false, false);
+                    if (orderItem.CancellationReasonId != cancellationReasonId)
+                    {
+                        orderItem.CancellationReasonId = cancellationReasonId;
+                        FillOutStuff(orderItem);
+                        AddLogItem(orderNodeId, "ANNULLERINGSORSAK", "Annulleringsorsak ändrad till " + umbraco.library.GetPreValueAsString(cancellationReasonId), eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set cancellation reason.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set cancellation reason.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
@@ -436,293 +521,475 @@ namespace Chalmers.ILL.OrderItems
         public void SetDeliveryLibrary(int orderNodeId, int deliveryLibraryId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(orderNodeId);
-            if (orderItem != null)
+            try
             {
-                var currentDeliveryLibrary = orderItem.DeliveryLibrary;
-                if (currentDeliveryLibrary != deliveryLibraryId)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                if (orderItem != null)
                 {
-                    orderItem.DeliveryLibrary = deliveryLibraryId;
-                    AddLogItem(orderNodeId, "BIBLIOTEK", "Bibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), eventId, false, false);
+                    var currentDeliveryLibrary = orderItem.DeliveryLibraryId;
+                    if (currentDeliveryLibrary != deliveryLibraryId)
+                    {
+                        orderItem.DeliveryLibraryId = deliveryLibraryId;
+                        AddLogItem(orderNodeId, "BIBLIOTEK", "Bibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set delivery library.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set delivery library.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetDrmWarning(int orderNodeId, bool status, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(orderNodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.DrmWarning != (status ? "1" : "0"))
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                if (orderItem != null)
                 {
-                    orderItem.DrmWarning = (status ? "1" : "0");
-                    AddLogItem(orderNodeId, "DRM", "Kan innehålla drm-material!", eventId, false, false);
+                    if (orderItem.DrmWarning != (status ? "1" : "0"))
+                    {
+                        orderItem.DrmWarning = (status ? "1" : "0");
+                        AddLogItem(orderNodeId, "DRM", "Kan innehålla drm-material!", eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set DRM warning.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set DRM warning.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetDrmWarningWithoutLogging(int orderNodeId, bool status, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(orderNodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.DrmWarning != (status ? "1" : "0"))
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                if (orderItem != null)
                 {
-                    orderItem.DrmWarning = (status ? "1" : "0");
+                    if (orderItem.DrmWarning != (status ? "1" : "0"))
+                    {
+                        orderItem.DrmWarning = (status ? "1" : "0");
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set DRM warning without logging.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set DRM warning without logging.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetDueDate(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.DueDate != date)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.DueDate = date;
-                    AddLogItem(nodeId, "DATE", "Återlämnas av låntagare senast " + date.ToString("yyyy-MM-dd HH:mm"), eventId, false, false);
+                    if (orderItem.DueDate != date)
+                    {
+                        orderItem.DueDate = date;
+                        AddLogItem(nodeId, "DATE", "Återlämnas av låntagare senast " + date.ToString("yyyy-MM-dd HH:mm"), eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set due date.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set due date.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetFollowUpDate(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.FollowUpDate != date)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.FollowUpDate = date;
-                    AddLogItem(nodeId, "DATE", "Följs upp senast " + date.ToString("yyyy-MM-dd HH:mm"), eventId, false, false);
+                    if (orderItem.FollowUpDate != date)
+                    {
+                        orderItem.FollowUpDate = date;
+                        FillOutStuff(orderItem);
+                        AddLogItem(nodeId, "DATE", "Följs upp senast " + date.ToString("yyyy-MM-dd HH:mm"), eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set follow up date.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set follow up date.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetFollowUpDateWithoutLogging(int nodeId, DateTime date, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.FollowUpDate != date)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.FollowUpDate = date;
+                    if (orderItem.FollowUpDate != date)
+                    {
+                        orderItem.FollowUpDate = date;
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set follow up date without logging.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set follow up date without logging.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetPatronData(int nodeId, string sierraInfo, int sierraPatronRecordId, int pType, string homeLibrary, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems
-                .Where(x => x.NodeId == nodeId)
-                .Include(x => x.SierraInfo)
-                .Include(X => X.SierraInfo.adress)
-                .FirstOrDefault();
-            if (orderItem != null)
+            try
             {
-                var newSierraInfo = JsonConvert.DeserializeObject<SierraModel>(sierraInfo);
-                orderItem.SierraInfo.adress = newSierraInfo.adress;
-                orderItem.SierraInfo.barcode = newSierraInfo.barcode;
-                orderItem.SierraInfo.email = newSierraInfo.email;
-                orderItem.SierraInfo.first_name = newSierraInfo.first_name;
-                orderItem.SierraInfo.home_library = newSierraInfo.home_library;
-                orderItem.SierraInfo.id = newSierraInfo.id;
-                orderItem.SierraInfo.last_name = newSierraInfo.last_name;
-                orderItem.SierraInfo.mblock = newSierraInfo.mblock;
-                orderItem.SierraInfo.ptype = newSierraInfo.ptype;
-                orderItem.SierraInfo.record_id = newSierraInfo.record_id;
-                MaybeSaveToDatabase(doReindex);
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
+                    .Where(x => x.NodeId == nodeId)
+                    .Include(x => x.SierraInfo)
+                    .Include(X => X.SierraInfo.adress)
+                    .FirstOrDefault();
+                if (orderItem != null)
+                {
+                    var newSierraInfo = JsonConvert.DeserializeObject<SierraModel>(sierraInfo);
+                    orderItem.SierraInfo.adress = newSierraInfo.adress;
+                    orderItem.SierraInfo.barcode = newSierraInfo.barcode;
+                    orderItem.SierraInfo.email = newSierraInfo.email;
+                    orderItem.SierraInfo.first_name = newSierraInfo.first_name;
+                    orderItem.SierraInfo.home_library = newSierraInfo.home_library;
+                    orderItem.SierraInfo.id = newSierraInfo.id;
+                    orderItem.SierraInfo.last_name = newSierraInfo.last_name;
+                    orderItem.SierraInfo.mblock = newSierraInfo.mblock;
+                    orderItem.SierraInfo.ptype = newSierraInfo.ptype;
+                    orderItem.SierraInfo.record_id = newSierraInfo.record_id;
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set patron data.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set patron data.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetPatronEmail(int nodeId, string email, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.PatronEmail != email)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.PatronEmail = email;
-                    AddLogItem(nodeId, "MAIL_NOTE", "E-post mot låntagare ändrad till " + email, eventId, false, false);
+                    if (orderItem.PatronEmail != email)
+                    {
+                        orderItem.PatronEmail = email;
+                        AddLogItem(nodeId, "MAIL_NOTE", "E-post mot låntagare ändrad till " + email, eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set patron email.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set patron email.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetProviderDueDate(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.ProviderDueDate != date)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.ProviderDueDate = date;
-                    AddLogItem(nodeId, "DATE", "Återlämnas till leverantör senast " + date.ToString("yyyy-MM-dd HH:mm"), eventId, false, false);
+                    if (orderItem.ProviderDueDate != date)
+                    {
+                        orderItem.ProviderDueDate = date;
+                        AddLogItem(nodeId, "DATE", "Återlämnas till leverantör senast " + date.ToString("yyyy-MM-dd HH:mm"), eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set provider due date.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set provider due date.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetProviderInformation(int nodeId, string providerInformation, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.ProviderInformation != providerInformation)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.ProviderInformation = providerInformation;
-                    AddLogItem(nodeId, "LEVERANTÖR", "Leverantörsinformation ändrad till \"" + providerInformation + "\".", eventId, false, false);
+                    if (orderItem.ProviderInformation != providerInformation)
+                    {
+                        orderItem.ProviderInformation = providerInformation;
+                        AddLogItem(nodeId, "LEVERANTÖR", "Leverantörsinformation ändrad till \"" + providerInformation + "\".", eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set provider information.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set provider information.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetProviderName(int nodeId, string providerName, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.ProviderName != providerName)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.ProviderName = providerName;
-                    AddLogItem(nodeId, "ORDER", "Beställd från " + providerName, eventId, false, false);
+                    if (orderItem.ProviderName != providerName)
+                    {
+                        orderItem.ProviderName = providerName;
+                        AddLogItem(nodeId, "ORDER", "Beställd från " + providerName, eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set provider name.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set provider name.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetProviderNameWithoutLogging(int nodeId, string providerName, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.ProviderName != providerName)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.ProviderName = providerName;
+                    if (orderItem.ProviderName != providerName)
+                    {
+                        orderItem.ProviderName = providerName;
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set provider name without logging.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set provider name without logging.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetProviderOrderId(int nodeId, string providerOrderId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.ProviderOrderId != providerOrderId)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.ProviderOrderId = providerOrderId;
-                    AddLogItem(nodeId, "ORDER", "Beställningsnr ändrat till " + providerOrderId, eventId, false, false);
+                    if (orderItem.ProviderOrderId != providerOrderId)
+                    {
+                        orderItem.ProviderOrderId = providerOrderId;
+                        AddLogItem(nodeId, "ORDER", "Beställningsnr ändrat till " + providerOrderId, eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set provider order ID.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set provider order ID.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetPurchasedMaterial(int orderNodeId, int purchasedMaterialId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(orderNodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.PurchasedMaterial != purchasedMaterialId)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                if (orderItem != null)
                 {
-                    orderItem.PurchasedMaterial = purchasedMaterialId;
-                    AddLogItem(orderNodeId, "MATERIALINKÖP", "Inköpt material ändrat till " + umbraco.library.GetPreValueAsString(purchasedMaterialId), eventId, false, false);
+                    if (orderItem.PurchasedMaterialId != purchasedMaterialId)
+                    {
+                        orderItem.PurchasedMaterialId = purchasedMaterialId;
+                        FillOutStuff(orderItem);
+                        AddLogItem(orderNodeId, "MATERIALINKÖP", "Inköpt material ändrat till " + umbraco.library.GetPreValueAsString(purchasedMaterialId), eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set purchased material.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set purchased material.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetReference(int nodeId, string reference, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(nodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.Reference != reference)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                if (orderItem != null)
                 {
-                    orderItem.Reference = reference;
-                    AddLogItem(nodeId, "REF", "Referens ändrad", eventId);
+                    if (orderItem.Reference != reference)
+                    {
+                        orderItem.Reference = reference;
+                        AddLogItem(nodeId, "REF", "Referens ändrad", eventId);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set reference.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set reference.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
@@ -735,42 +1002,98 @@ namespace Chalmers.ILL.OrderItems
         public void SetStatus(int orderNodeId, int statusId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(orderNodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.Status != statusId)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                if (orderItem != null)
                 {
-                    var currentStatus = orderItem.Status;
-                    orderItem.PreviousStatus = orderItem.Status;
-                    orderItem.Status = statusId;
-                    OnStatusChanged(orderItem, statusId);
-                    AddLogItem(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? umbraco.library.GetPreValueAsString(currentStatus).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(statusId).Split(':').Last(), eventId, false, false);
+                    if (orderItem.StatusId != statusId)
+                    {
+                        var currentStatus = orderItem.StatusId;
+                        orderItem.PreviousStatusId = orderItem.StatusId;
+                        orderItem.StatusId = statusId;
+                        OnStatusChanged(orderItem, statusId);
+                        FillOutStuff(orderItem);
+                        AddLogItem(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? umbraco.library.GetPreValueAsString(currentStatus).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(statusId).Split(':').Last(), eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set status.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set status.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
         public void SetType(int orderNodeId, int typeId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
-            var orderItem = _dbContext.OrderItems.Find(orderNodeId);
-            if (orderItem != null)
+            try
             {
-                if (orderItem.Type != typeId)
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                if (orderItem != null)
                 {
-                    orderItem.Type = typeId;
-                    OnTypeChanged(orderItem, typeId);
-                    AddLogItem(orderNodeId, "TYP", "Typ ändrad till " + umbraco.library.GetPreValueAsString(typeId), eventId, false, false);
+                    if (orderItem.TypeId != typeId)
+                    {
+                        orderItem.TypeId = typeId;
+                        OnTypeChanged(orderItem, typeId);
+                        FillOutStuff(orderItem);
+                        AddLogItem(orderNodeId, "TYP", "Typ ändrad till " + umbraco.library.GetPreValueAsString(typeId), eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
-                MaybeSaveToDatabase(doReindex);
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set type.");
+                }
             }
-            else
+            catch (Exception)
             {
-                throw new OrderItemNotFoundException("Failed to find order item when trying to set type.");
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
+        public void SetEditedByData(int orderNodeId, string memberId, string memberName, bool doReindex = true, bool doSignal = true)
+        {
+            var test = Thread.CurrentThread.ManagedThreadId;
+
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                if (orderItem != null)
+                {
+                    orderItem.EditedBy = memberId;
+                    orderItem.EditedByMemberName = memberName;
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set type.");
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 
@@ -792,7 +1115,7 @@ namespace Chalmers.ILL.OrderItems
             var statusStr = umbraco.library.GetPreValueAsString(newStatusId).Split(':').Last();
             if (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport") || statusStr.Contains("Infodisk"))
             {
-                orderItem.LastDeliveryStatus = newStatusId;
+                orderItem.LastDeliveryStatusId = newStatusId;
             }
         }
 
@@ -812,51 +1135,64 @@ namespace Chalmers.ILL.OrderItems
         {
             if (newTypeId == _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Artikel"))
             {
-                orderItem.DeliveryLibrary = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
+                orderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
             }
         }
 
         private bool IsDeliveryLibrarySameAsHomeLibrary(OrderItemModel orderItem)
         {
             return orderItem.SierraInfo.home_library == null ||
-                (orderItem.DeliveryLibraryPrevalue == "Huvudbiblioteket" && orderItem.SierraInfo.home_library.Contains("hbib")) ||
-                (orderItem.DeliveryLibraryPrevalue == "Lindholmenbiblioteket" && orderItem.SierraInfo.home_library.Contains("lbib")) ||
-                (orderItem.DeliveryLibraryPrevalue == "Arkitekturbiblioteket" && orderItem.SierraInfo.home_library.Contains("abib"));
+                (orderItem.DeliveryLibrary == "Huvudbiblioteket" && orderItem.SierraInfo.home_library.Contains("hbib")) ||
+                (orderItem.DeliveryLibrary == "Lindholmenbiblioteket" && orderItem.SierraInfo.home_library.Contains("lbib")) ||
+                (orderItem.DeliveryLibrary == "Arkitekturbiblioteket" && orderItem.SierraInfo.home_library.Contains("abib"));
         }
 
         private void EnsureDatabaseContext()
         {
-            if (_dbContext == null)
+            OrderItemsDbContext dbContext = null;
+
+            if (!_threadIdToDbContextMap.TryGetValue(Thread.CurrentThread.ManagedThreadId, out dbContext))
             {
-                _dbContext = new OrderItemsDbContext();
-                _dbContext.Configuration.LazyLoadingEnabled = false;
-                _dbContext.Configuration.ProxyCreationEnabled = false;
+                dbContext = new OrderItemsDbContext(_orderItemSearcher);
+                dbContext.Configuration.LazyLoadingEnabled = false;
+                dbContext.Configuration.ProxyCreationEnabled = false;
+                _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId] = dbContext;
             }
         }
 
-        private void DisposeDatabaseContext()
+        private void DisposeDatabaseContext(bool dispose)
         {
-            if (_dbContext != null)
+            if (dispose)
             {
-                _dbContext.Dispose();
-                _dbContext = null;
+                OrderItemsDbContext dbContext = null;
+
+                if (_threadIdToDbContextMap.TryGetValue(Thread.CurrentThread.ManagedThreadId, out dbContext))
+                {
+                    dbContext.Dispose();
+                    dbContext = null;
+                    _threadIdToDbContextMap.Remove(Thread.CurrentThread.ManagedThreadId);
+                }
             }
         }
 
-        private void MaybeSaveToDatabase(bool shouldSave)
+        private void MaybeSaveToDatabase(bool doSave, OrderItemModel item)
         {
-            if (shouldSave)
+            if (doSave)
             {
-                SaveToDatabase();
+                SaveToDatabase(item, true);
             }
         }
 
-        private void SaveToDatabase(bool disposeDbContext = true)
+        private void SaveToDatabase(OrderItemModel item, bool disposeDbContext)
         {
-            if (_dbContext != null)
+            OrderItemsDbContext dbContext = null;
+            if (_threadIdToDbContextMap.TryGetValue(Thread.CurrentThread.ManagedThreadId, out dbContext))
             {
-                _dbContext.SaveChanges();
-                DisposeDatabaseContext();
+                dbContext.SaveChanges();
+                if (item != null)
+                {
+                    _notifier.ReportNewOrderItemUpdate(item);
+                }
             }
             else
             {
@@ -866,7 +1202,9 @@ namespace Chalmers.ILL.OrderItems
 
         private List<LogItem> GetLogItemsReverse(int nodeId)
         {
-            var contentNode = _dbContext.OrderItems.Find(nodeId);
+            OrderItemsDbContext dbContext = null;
+            _threadIdToDbContextMap.TryGetValue(Thread.CurrentThread.ManagedThreadId, out dbContext);
+            var contentNode = dbContext.OrderItems.Find(nodeId);
 
             string oldLogItems;
             var logItems = new List<LogItem>();
@@ -901,6 +1239,46 @@ namespace Chalmers.ILL.OrderItems
                 res = res.Replace(urlDecodedUrlStr, Uri.EscapeUriString(urlDecodedUrlStr));
             }
             return res;
+        }
+
+        private void FillOutStuff(OrderItemModel orderItem)
+        {
+            orderItem.Log = JsonConvert.SerializeObject(orderItem.LogItemsList);
+            orderItem.Attachments = JsonConvert.SerializeObject(orderItem.AttachmentList);
+
+            orderItem.FollowUpDateIsDue = orderItem.FollowUpDate <= DateTime.Now ? true : false;
+
+            // Status (id, whole prevalue "xx:yyyy" and just string "yyyy")
+            orderItem.StatusString = orderItem.StatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.StatusId).Split(':').Last() : "";
+            orderItem.Status = orderItem.StatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.StatusId) : "";
+
+            // Previous status (id, whole prevalue "xx:yyyy" and just string "yyyy")
+            orderItem.PreviousStatusString = orderItem.PreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.PreviousStatusId).Split(':').Last() : "";
+            orderItem.PreviousStatus = orderItem.PreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.PreviousStatusId) : "";
+
+            // Last delivery status (id, whole prevalue "xx:yyyy" and just string "yyyy")
+            orderItem.LastDeliveryStatusString = orderItem.LastDeliveryStatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.LastDeliveryStatusId).Split(':').Last() : "";
+            orderItem.LastDeliveryStatus = orderItem.LastDeliveryStatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.LastDeliveryStatusId) : "";
+
+            // Type (id and prevalue)
+            orderItem.Type = orderItem.TypeId != -1 ? umbraco.library.GetPreValueAsString(orderItem.TypeId) : "";
+
+            // Delivery Library (id and prevalue)
+            orderItem.DeliveryLibrary = orderItem.DeliveryLibraryId != -1 ? umbraco.library.GetPreValueAsString(orderItem.DeliveryLibraryId) : "";
+
+            // Cancellation reason (id and prevalue)
+            orderItem.CancellationReason = orderItem.CancellationReasonId != -1 ? umbraco.library.GetPreValueAsString(orderItem.CancellationReasonId) : "";
+
+            // Purchased material (id and prevalue)
+            orderItem.PurchasedMaterial = orderItem.PurchasedMaterialId != -1 ? umbraco.library.GetPreValueAsString(orderItem.PurchasedMaterialId) : "";
+
+            orderItem.EditedByCurrentMember = false;
+
+            // Include the Content Version Count in Umbraco db
+            // FIXME: Always set to zero to avoid ContentService calls. Never used. Should be removed from model?
+            orderItem.ContentVersionsCount = 0;
+
+            orderItem.DeliveryLibrarySameAsHomeLibrary = IsDeliveryLibrarySameAsHomeLibrary(orderItem);
         }
 
         #endregion

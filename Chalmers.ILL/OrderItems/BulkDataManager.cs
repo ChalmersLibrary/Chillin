@@ -30,8 +30,8 @@ namespace Chalmers.ILL.OrderItems
                 var newSimplifiedOrderItem = new SimplifiedOrderItem();
 
                 var rawDueDate = orderItem.DueDate;
-                var rawType = orderItem.TypePrevalue;
-                var rawStatus = orderItem.StatusPrevalue;
+                var rawType = orderItem.Type;
+                var rawStatus = orderItem.Status;
                 var rawReference = orderItem.OriginalOrder;
                 var rawDeliveryDate = orderItem.DeliveryDate;
 

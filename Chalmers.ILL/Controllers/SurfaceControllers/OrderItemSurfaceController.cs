@@ -58,31 +58,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // Get a new OrderItem populated with values for this node
             var pageModel = new ChalmersILLOrderItemModel(_orderItemManager.GetOrderItem(nodeId));
 
-            // Get all relations with the given node ID and the correct relations type.
-            var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
-            var relations = _umbraco.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
-            var relationsCount = relations.Count();
-
-            // Is node locked?
-            if (relationsCount == 1)
-            {
-                // Is node locked by us?
-                if (relations.First().Parent.Id == memberId)
-                {
-                    pageModel.OrderItem.EditedBy = memberId.ToString();
-                    pageModel.OrderItem.EditedByMemberName = _memberInfoManager.GetCurrentMemberLoginName(Request, Response);
-                    pageModel.OrderItem.UpdateDate = relations.First().CreateDate;
-                    pageModel.OrderItem.EditedByCurrentMember = true;
-                }
-                else
-                {
-                    int userId = relations.First().Parent.Id;
-                    pageModel.OrderItem.EditedBy = userId.ToString();
-                    pageModel.OrderItem.UpdateDate = relations.First().CreateDate;
-                    pageModel.OrderItem.EditedByMemberName = _umbraco.GetMember(userId).Text;
-                    pageModel.OrderItem.EditedByCurrentMember = false;
-                }
-            }
+            // Check if the current user has the lock for the item.
+            pageModel.OrderItem.EditedByCurrentMember = pageModel.OrderItem.EditedBy != "" && pageModel.OrderItem.EditedBy == memberId.ToString();
 
             _umbraco.PopulateModelWithAvailableValues(pageModel);
 
@@ -104,29 +81,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // Get a new OrderItem populated with values for this node
             var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
-            // Get all relations with the given node ID and the correct relations type.
-            var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
-            var relations = _umbraco.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
-            var relationsCount = relations.Count();
-
-            // Is node locked?
-            if (relationsCount == 1)
-            {
-                // Is node locked by us?
-                if (relations.First().Parent.Id == memberId)
-                {
-                    orderItem.EditedBy = memberId.ToString();
-                    orderItem.EditedByMemberName = _memberInfoManager.GetCurrentMemberLoginName(Request, Response);
-                    //orderItem.EditedByMemberName = Member.GetCurrentMember().LoginName;
-                    orderItem.EditedByCurrentMember = true;
-                }
-                else
-                {
-                    int userId = relations.First().Parent.Id;
-                    orderItem.EditedBy = userId.ToString();
-                    orderItem.EditedByMemberName = _umbraco.GetMember(userId).Text;
-                }
-            }
+            // Check if the current user has the lock for the item.
+            orderItem.EditedByCurrentMember = orderItem.EditedBy != "" && orderItem.EditedBy == memberId.ToString();
 
             // Return JSON object to the client to handle
             return Json(orderItem, JsonRequestBehavior.AllowGet);
@@ -147,19 +103,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Get current member
                 int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
-                // Get all relations with the given node ID and the correct relations type.
-                var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
-                var relations = _umbraco.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
-                var relationsCount = relations.Count();
-
-                // Remove relations
-                foreach (var rel in relations)
-                {
-                    rel.Delete();
-                }
-
-                // Lock node for current user
-                _umbraco.MakeNewRelation(memberId, nodeId, relType, "Node with ID: " + nodeId + " has been locked by member with ID: " + memberId);
+                _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), new Member(memberId).Text);
 
                 // Return JSON to client
                 json.Success = true;
@@ -194,45 +138,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Get current member.
                 int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
-                // Get all relations with the given node ID and the correct relations type.
-                var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
-                var relations = _umbraco.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
-                var relationsCount = relations.Count();
+                var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
-                if (relationsCount == 0)
+                if (orderItem.EditedBy != "")
                 {
-                    // Node is unlocked, free for us to take it.
-                    _umbraco.MakeNewRelation(memberId, nodeId, relType, "Node with ID: " + nodeId + " has been locked by member with ID: " + memberId);
+                    // Locked by someone else
+                    json.Success = false;
+                    json.Message = "OrderItem is already locked by MemberId " + memberId;
+                }
+                else if (orderItem.EditedBy == "")
+                {
+                    // Unlocked
+                    _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), new Member(memberId).Text);
                     json.Success = true;
                     json.Message = "Order item locked by current member.";
-                }
-                else if (relationsCount == 1)
-                {
-                    // Node is already locked.
-
-                    if (relations.First().Parent.Id == memberId)
-                    {
-                        // Node is already locked by us.
-                        json.Success = true;
-                        json.Message = "Order item locked by current member.";
-                    }
-                    else
-                    {
-                        // Node locked by someone else.
-                        json.Success = false;
-                        json.Message = "OrderItem is already locked by MemberId " + memberId;
-                    }
-                }
-                else if (relationsCount > 1)
-                {
-                    // Should never happen.
-
-                    _umbraco.LogWarn<OrderItemSurfaceController>("Found more than one lock for the same content.");
-                    
-                    foreach (var rel in relations)
-                    {
-                        _umbraco.LogWarn<OrderItemSurfaceController>("LOCK - Node ID: " + nodeId + ", Member ID: " + memberId);
-                    }
                 }
 
                 // Notify SignalR clients of the update
@@ -264,39 +183,18 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Get current member.
                 int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
-                // Get all relations with the given node ID and the correct relations type.
-                var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
-                var relations = _umbraco.GetRelationsAsList(nodeId).Where(rel => rel.Child.Id == nodeId && rel.RelType.Id == relType.Id);
-                var relationsCount = relations.Count();
-                
-                if (relationsCount == 0)
+                var orderItem = _orderItemManager.GetOrderItem(nodeId);
+
+                if (orderItem.EditedBy == memberId.ToString())
                 {
-                    // Nothing to unlock, wp!
+                    _orderItemManager.SetEditedByData(nodeId, "", "");
+                    json.Success = true;
+                    json.Message = "OrderItem unlocked by Current Member.";
+                }
+                else if (orderItem.EditedBy == "")
+                {
                     json.Success = true;
                     json.Message = "OrderItem unlocked by current member.";
-                }
-                else if (relationsCount > 0)
-                {
-                    // There are locks, unlock them only if they are locked by current user.
-                    var removeCount = 0;
-                    foreach (var rel in relations.Where(x => x.Parent.Id == memberId))
-                    {
-                        rel.Delete();
-                        removeCount++;
-                    }
-
-                    if (removeCount == relationsCount)
-                    {
-                        // All locks have been unlocked.
-                        json.Success = true;
-                        json.Message = "OrderItem unlocked by Current Member.";
-                    }
-                    else
-                    {
-                        // There were some locks that couldn't be unlocked.
-                        json.Success = false;
-                        json.Message = "OrderItem is not locked by logged in MemberId.";
-                    }
                 }
 
                 // Notify SignalR clients of the update
@@ -327,28 +225,22 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Get current member
                 int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
-                // Get all lock relations.
-                var relType = _umbraco.GetRelationTypeByAlias(lockRelationType);
-                var relations = _umbraco.GetRelationsAsList(memberId).Where(rel => rel.Parent.Id == memberId && rel.RelType.Id == relType.Id);
+                var items = _orderItemManager.GetLockedOrderItems(memberId.ToString());
 
                 // Set response metadata.
                 json.MemberId = memberId;
                 json.MemberName = _memberInfoManager.GetCurrentMemberText(Request, Response);
                 json.List = new List<Lock>();
 
-                // Lambda statement found any locked OrderItem nodes.
-                if (relations.Any())
+                foreach (var item in items)
                 {
-                    foreach (var rel in relations)
-                    {
-                        var lockItem = new Lock();
-                        lockItem.NodeId = rel.Child.Id;
-                        // Missing data for the Lock model, but this data is currently not used.
-                        json.List.Add(lockItem);
-                    }
-
-                    json.Message = String.Format("Found {0} locked OrderItems for Current Member.", json.List.Count);
+                    var lockItem = new Lock();
+                    lockItem.NodeId = item.NodeId;
+                    // Missing data for the Lock model, but this data is currently not used.
+                    json.List.Add(lockItem);
                 }
+
+                json.Message = String.Format("Found {0} locked OrderItems for Current Member.", json.List.Count);
 
                 // Return JSON to client.
                 json.Success = true;

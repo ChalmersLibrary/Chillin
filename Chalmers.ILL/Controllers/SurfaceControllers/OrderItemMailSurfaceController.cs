@@ -74,7 +74,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Read current values that can be affected
                 var orderItem = _orderItemManager.GetOrderItem(m.nodeId);
                 var currentPatronEmail = orderItem.PatronEmail;
-                var currentStatus = orderItem.StatusPrevalue;
+                var currentStatus = orderItem.Status;
 
                 var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
 
@@ -103,19 +103,19 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 	            }
 
                 // Set status property if it differs from newStatus and if it is not -1 (no change)
-                if (orderItem.Status != m.newStatusId && orderItem.Status != -1)
+                if (orderItem.StatusId != m.newStatusId && orderItem.StatusId != -1)
                 {
                     _orderItemManager.SetStatus(m.nodeId, m.newStatusId, eventId, false, false);
                 }
 
                 // Update cancellation reason if we have a value that is not -1 (no change)
-                if (orderItem.CancellationReason != m.newCancellationReasonId && m.newCancellationReasonId != -1)
+                if (orderItem.CancellationReasonId != m.newCancellationReasonId && m.newCancellationReasonId != -1)
                 {
                     _orderItemManager.SetCancellationReason(m.nodeId, m.newCancellationReasonId, eventId, false, false);
                 }
 
                 // Update purchased material if we have a value that is not -1 (no change)
-                if (orderItem.PurchasedMaterial != m.newPurchasedMaterialId && m.newPurchasedMaterialId != -1)
+                if (orderItem.PurchasedMaterialId != m.newPurchasedMaterialId && m.newPurchasedMaterialId != -1)
                 {
                     _orderItemManager.SetPurchasedMaterial(m.nodeId, m.newPurchasedMaterialId, eventId, false, false);
                 }

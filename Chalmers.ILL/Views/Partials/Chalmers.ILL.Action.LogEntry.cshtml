@@ -11,7 +11,7 @@
                 <label for="message">Inlägg</label>
                 <textarea class="form-control" rows="6" id="message" name="message"></textarea>
             </div>
-            <div class="form-group" style="@(String.IsNullOrWhiteSpace(Model.OrderItem.TypePrevalue) ? "display: none;" : "")">
+            <div class="form-group" style="@(String.IsNullOrWhiteSpace(Model.OrderItem.Type) ? "display: none;" : "")">
                 <label for="followUpDate">Följs upp</label>
                 <div class="input-group date datetimepicker">
                     <input type="text" class="form-control" id="followUpDate" name="followUpDate" value="@Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
@@ -20,7 +20,7 @@
                     </span>
                 </div>
             </div>
-            <div class="form-group" style="@(String.IsNullOrWhiteSpace(Model.OrderItem.TypePrevalue) ? "display: none;" : "")">
+            <div class="form-group" style="@(String.IsNullOrWhiteSpace(Model.OrderItem.Type) ? "display: none;" : "")">
                 <label>Ny status</label>
                 <!-- Status button -->
                 <div>

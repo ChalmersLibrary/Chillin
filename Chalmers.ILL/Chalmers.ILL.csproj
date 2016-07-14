@@ -67,6 +67,10 @@
     <Reference Include="CookComputing.XmlRpcV2">
       <HintPath>..\packages\xmlrpcnet.2.5.0\lib\net20\CookComputing.XmlRpcV2.dll</HintPath>
     </Reference>
+    <Reference Include="Elasticsearch.Net, Version=2.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d, processorArchitecture=MSIL">
+      <HintPath>..\packages\Elasticsearch.Net.2.3.3\lib\net45\Elasticsearch.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
       <Private>True</Private>
@@ -148,9 +152,13 @@
     <Reference Include="MySql.Data">
       <HintPath>..\packages\MySql.Data.6.6.5\lib\net40\MySql.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Nest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d, processorArchitecture=MSIL">
+      <HintPath>..\packages\NEST.2.3.3\lib\net45\Nest.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Npgsql">
       <HintPath>..\packages\Npgsql.2.0.14.3\lib\net45\Npgsql.dll</HintPath>
@@ -437,6 +445,8 @@
     <Compile Include="Mail\IExchangeMailWebApi.cs" />
     <Compile Include="Mail\IMailService.cs" />
     <Compile Include="Mail\MailService.cs" />
+    <Compile Include="MediaItems\AzureStorageEmulatorManager.cs" />
+    <Compile Include="MediaItems\BlobStorageMediaItemManager.cs" />
     <Compile Include="MediaItems\IMediaItemManager.cs" />
     <Compile Include="MediaItems\MediaItemNotFoundException.cs" />
     <Compile Include="MediaItems\UmbracoMediaItemManager.cs" />
@@ -444,6 +454,14 @@
     <Compile Include="Migrations\201606291112079_InitialDatabaseModel.cs" />
     <Compile Include="Migrations\201606291112079_InitialDatabaseModel.Designer.cs">
       <DependentUpon>201606291112079_InitialDatabaseModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201607050813528_RemovedRequiredOnOrderId.cs" />
+    <Compile Include="Migrations\201607050813528_RemovedRequiredOnOrderId.Designer.cs">
+      <DependentUpon>201607050813528_RemovedRequiredOnOrderId.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201607051057242_RenamedSomeStuff.cs" />
+    <Compile Include="Migrations\201607051057242_RenamedSomeStuff.Designer.cs">
+      <DependentUpon>201607051057242_RenamedSomeStuff.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
@@ -546,6 +564,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201606291112079_InitialDatabaseModel.resx">
       <DependentUpon>201606291112079_InitialDatabaseModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201607050813528_RemovedRequiredOnOrderId.resx">
+      <DependentUpon>201607050813528_RemovedRequiredOnOrderId.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201607051057242_RenamedSomeStuff.resx">
+      <DependentUpon>201607051057242_RenamedSomeStuff.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

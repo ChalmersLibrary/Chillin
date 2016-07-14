@@ -42,6 +42,11 @@ namespace Chalmers.ILL.OrderItems
             _rand = new Random();
         }
 
+        public IEnumerable<OrderItemModel> GetLockedOrderItems(string memberId)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetNotifier(INotifier notifier)
         {
             _notifier = notifier;
@@ -130,35 +135,35 @@ namespace Chalmers.ILL.OrderItems
                 int OrderPurchasedMaterialId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderPurchasedMaterialDataTypeDefinitionName"], contentNode.Fields.GetValueString("PurchasedMaterial"));
 
                 // Status (id, whole prevalue "xx:yyyy" and just string "yyyy")
-                orderItem.Status = OrderStatusId;
+                orderItem.StatusId = OrderStatusId;
                 orderItem.StatusString = OrderStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderStatusId).Split(':').Last() : "";
-                orderItem.StatusPrevalue = OrderStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderStatusId) : "";
+                orderItem.Status = OrderStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderStatusId) : "";
 
                 // Previous status (id, whole prevalue "xx:yyyy" and just string "yyyy")
-                orderItem.PreviousStatus = OrderPreviousStatusId;
+                orderItem.PreviousStatusId = OrderPreviousStatusId;
                 orderItem.PreviousStatusString = OrderPreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderPreviousStatusId).Split(':').Last() : "";
-                orderItem.PreviousStatusPrevalue = OrderPreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderPreviousStatusId) : "";
+                orderItem.PreviousStatus = OrderPreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderPreviousStatusId) : "";
 
                 // Last delivery status (id, whole prevalue "xx:yyyy" and just string "yyyy")
-                orderItem.LastDeliveryStatus = OrderLastDeliveryStatusId;
+                orderItem.LastDeliveryStatusId = OrderLastDeliveryStatusId;
                 orderItem.LastDeliveryStatusString = OrderLastDeliveryStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderLastDeliveryStatusId).Split(':').Last() : "";
-                orderItem.LastDeliveryStatusPrevalue = OrderLastDeliveryStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderLastDeliveryStatusId) : "";
+                orderItem.LastDeliveryStatus = OrderLastDeliveryStatusId != -1 ? umbraco.library.GetPreValueAsString(OrderLastDeliveryStatusId) : "";
 
                 // Type (id and prevalue)
-                orderItem.Type = OrderTypeId;
-                orderItem.TypePrevalue = OrderTypeId != -1 ? umbraco.library.GetPreValueAsString(OrderTypeId) : "";
+                orderItem.TypeId = OrderTypeId;
+                orderItem.Type = OrderTypeId != -1 ? umbraco.library.GetPreValueAsString(OrderTypeId) : "";
 
                 // Delivery Library (id and prevalue)
-                orderItem.DeliveryLibrary = OrderDeliveryLibraryId;
-                orderItem.DeliveryLibraryPrevalue = OrderDeliveryLibraryId != -1 ? umbraco.library.GetPreValueAsString(OrderDeliveryLibraryId) : "";
+                orderItem.DeliveryLibraryId = OrderDeliveryLibraryId;
+                orderItem.DeliveryLibrary = OrderDeliveryLibraryId != -1 ? umbraco.library.GetPreValueAsString(OrderDeliveryLibraryId) : "";
 
                 // Cancellation reason (id and prevalue)
-                orderItem.CancellationReason = OrderCancellationReasonId;
-                orderItem.CancellationReasonPrevalue = OrderCancellationReasonId != -1 ? umbraco.library.GetPreValueAsString(OrderCancellationReasonId) : "";
+                orderItem.CancellationReasonId = OrderCancellationReasonId;
+                orderItem.CancellationReason = OrderCancellationReasonId != -1 ? umbraco.library.GetPreValueAsString(OrderCancellationReasonId) : "";
 
                 // Purchased material (id and prevalue)
-                orderItem.PurchasedMaterial = OrderPurchasedMaterialId;
-                orderItem.PurchasedMaterialPrevalue = OrderPurchasedMaterialId != -1 ? umbraco.library.GetPreValueAsString(OrderPurchasedMaterialId) : "";
+                orderItem.PurchasedMaterialId = OrderPurchasedMaterialId;
+                orderItem.PurchasedMaterial = OrderPurchasedMaterialId != -1 ? umbraco.library.GetPreValueAsString(OrderPurchasedMaterialId) : "";
 
                 orderItem.DueDate = contentNode.Fields.GetValueString("DueDate") == "" ? DateTime.Now :
                     DateTime.ParseExact(contentNode.Fields.GetValueString("DueDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None);
@@ -544,6 +549,11 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
+        public void SetEditedByData(int orderNodeId, string memberId, string memberName, bool doReindex = true, bool doSignal = true)
+        {
+            throw new NotImplementedException();
+        }
+
 
         public int CreateOrderItemInDbFromMailQueueModel(MailQueueModel model, bool doReindex = true, bool doSignal = true)
         {
@@ -788,9 +798,9 @@ namespace Chalmers.ILL.OrderItems
         private bool IsDeliveryLibrarySameAsHomeLibrary(OrderItemModel orderItem)
         {
             return orderItem.SierraInfo.home_library == null || 
-                (orderItem.DeliveryLibraryPrevalue == "Huvudbiblioteket" && orderItem.SierraInfo.home_library.Contains("hbib")) ||
-                (orderItem.DeliveryLibraryPrevalue == "Lindholmenbiblioteket" && orderItem.SierraInfo.home_library.Contains("lbib")) ||
-                (orderItem.DeliveryLibraryPrevalue == "Arkitekturbiblioteket" && orderItem.SierraInfo.home_library.Contains("abib"));
+                (orderItem.DeliveryLibrary == "Huvudbiblioteket" && orderItem.SierraInfo.home_library.Contains("hbib")) ||
+                (orderItem.DeliveryLibrary == "Lindholmenbiblioteket" && orderItem.SierraInfo.home_library.Contains("lbib")) ||
+                (orderItem.DeliveryLibrary == "Arkitekturbiblioteket" && orderItem.SierraInfo.home_library.Contains("abib"));
         }
 
         private List<LogItem> GetLogItemsReverse(int nodeId)

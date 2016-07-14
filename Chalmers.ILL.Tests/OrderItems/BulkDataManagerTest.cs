@@ -40,8 +40,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(-3),
                             DeliveryDate = new DateTime(1970, 1, 1),
-                            TypePrevalue = "Artikel",
-                            StatusPrevalue = "03:Beställd",
+                            Type = "Artikel",
+                            Status = "03:Beställd",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -64,8 +64,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(-3),
                             DeliveryDate = new DateTime(1970, 1, 1),
-                            TypePrevalue = "Artikel",
-                            StatusPrevalue = "05:Levererad",
+                            Type = "Artikel",
+                            Status = "05:Levererad",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -88,8 +88,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(-1),
                             DeliveryDate = new DateTime(1970, 1, 1),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "01:Ny",
+                            Type = "Bok",
+                            Status = "01:Ny",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -112,8 +112,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(30),
                             DeliveryDate = DateTime.Now.AddDays(-1),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "11:Utlånad",
+                            Type = "Bok",
+                            Status = "11:Utlånad",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -136,8 +136,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(12),
                             DeliveryDate = DateTime.Now.AddDays(-6),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "12:Krävd",
+                            Type = "Bok",
+                            Status = "12:Krävd",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -160,8 +160,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(-1),
                             DeliveryDate = DateTime.Now.AddDays(-32),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "11:Utlånad",
+                            Type = "Bok",
+                            Status = "11:Utlånad",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -184,8 +184,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(30),
                             DeliveryDate = DateTime.Now.AddDays(-1),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "02:Åtgärda",
+                            Type = "Bok",
+                            Status = "02:Åtgärda",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -208,8 +208,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(-1),
                             DeliveryDate = DateTime.Now.AddDays(-32),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "02:Åtgärda",
+                            Type = "Bok",
+                            Status = "02:Åtgärda",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -232,8 +232,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(-3),
                             DeliveryDate = new DateTime(1970, 1, 1),
-                            TypePrevalue = "Artikel",
-                            StatusPrevalue = "03:Beställd",
+                            Type = "Artikel",
+                            Status = "03:Beställd",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -256,8 +256,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(-3),
                             DeliveryDate = new DateTime(1970, 1, 1),
-                            TypePrevalue = "Artikel",
-                            StatusPrevalue = "05:Levererad",
+                            Type = "Artikel",
+                            Status = "05:Levererad",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -280,8 +280,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(-1),
                             DeliveryDate = new DateTime(1970, 1, 1),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "01:Ny",
+                            Type = "Bok",
+                            Status = "01:Ny",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -304,8 +304,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(30),
                             DeliveryDate = DateTime.Now.AddDays(-1),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "11:Utlånad",
+                            Type = "Bok",
+                            Status = "11:Utlånad",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -328,8 +328,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(12),
                             DeliveryDate = DateTime.Now.AddDays(-6),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "12:Krävd",
+                            Type = "Bok",
+                            Status = "12:Krävd",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -352,8 +352,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(-1),
                             DeliveryDate = DateTime.Now.AddDays(-32),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "11:Utlånad",
+                            Type = "Bok",
+                            Status = "11:Utlånad",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -376,8 +376,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(30),
                             DeliveryDate = DateTime.Now.AddDays(-1),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "02:Åtgärda",
+                            Type = "Bok",
+                            Status = "02:Åtgärda",
                             OriginalOrder = "Mio min Mio."
                         }
                     }
@@ -400,8 +400,8 @@ namespace Chalmers.ILL.Tests.OrderItems
                         {
                             DueDate = DateTime.Now.AddDays(-1),
                             DeliveryDate = DateTime.Now.AddDays(-32),
-                            TypePrevalue = "Bok",
-                            StatusPrevalue = "02:Åtgärda",
+                            Type = "Bok",
+                            Status = "02:Åtgärda",
                             OriginalOrder = "Mio min Mio."
                         }
                     }

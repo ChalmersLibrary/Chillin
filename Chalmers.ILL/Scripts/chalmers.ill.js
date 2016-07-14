@@ -553,17 +553,17 @@ function loadOrderItemSummary(id)
             $("#" + json.NodeId + " div[data-column='createDate']").text(followUpDate.getFullYear() + "-" + ("00" + (followUpDate.getMonth() + 1)).substr(-2) + "-" + ("00" + followUpDate.getDate()).substr(-2));
 
             // Update type
-            $("#" + json.NodeId + " div[data-column='type']").text(json.TypePrevalue);
+            $("#" + json.NodeId + " div[data-column='type']").text(json.Type);
 
             // Update delivery library
             var delLibDiv = $("#" + json.NodeId + " div[data-column='deliveryLibrary']");
-            delLibDiv.text(getSigelFromLibraryName(json.DeliveryLibraryPrevalue));
+            delLibDiv.text(getSigelFromLibraryName(json.DeliveryLibrary));
 
             // TODO: Should solve this in some less hard coded way.
             delLibDiv.removeClass("Huvudbiblioteket");
             delLibDiv.removeClass("Arkitekturbiblioteket");
             delLibDiv.removeClass("Lindholmenbiblioteket");
-            delLibDiv.addClass(json.DeliveryLibraryPrevalue);
+            delLibDiv.addClass(json.DeliveryLibrary);
 
 
             // Update status
@@ -580,20 +580,20 @@ function loadOrderItemSummary(id)
                 }
             }
             if (!$("#" + json.NodeId).hasClass("open") || statusClass === "") {
-                statusClass = "chillin-status-" + json.StatusPrevalue.substring(0, 2);
+                statusClass = "chillin-status-" + json.Status.substring(0, 2);
             }
-            if (json.StatusPrevalue.indexOf("01") == 0) {
-                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-success status-" + json.StatusPrevalue.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
+            if (json.Status.indexOf("01") == 0) {
+                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-success status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
-            else if (json.StatusPrevalue.indexOf("05") == 0 || 
-                     json.StatusPrevalue.indexOf("06") == 0 || 
-                     json.StatusPrevalue.indexOf("07") == 0 || 
-                     json.StatusPrevalue.indexOf("08") == 0 ||
-                     json.StatusPrevalue.indexOf("10") == 0) {
-                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-info status-" + json.StatusPrevalue.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
+            else if (json.Status.indexOf("05") == 0 || 
+                     json.Status.indexOf("06") == 0 || 
+                     json.Status.indexOf("07") == 0 || 
+                     json.Status.indexOf("08") == 0 ||
+                     json.Status.indexOf("10") == 0) {
+                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-info status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
             else {
-                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-danger status-" + json.StatusPrevalue.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
+                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-danger status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
 
             // Reference with links
