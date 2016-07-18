@@ -1083,6 +1083,34 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
+        public void SetReadOnlyAtLibrary(int nodeId, bool readOnlyAtLibrary, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
+                if (orderItem != null)
+                {
+                    orderItem.ReadOnlyAtLibrary = readOnlyAtLibrary;
+                    AddLogItem(nodeId, "LÄSESALSLÅN", "Läsesalslån satt till \"" + readOnlyAtLibrary + "\".", eventId, false, false);
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set read only at library.");
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
         #region Private methods
 
         private OrderItemModel GetOrderItemFromEntityFramework(int nodeId)
