@@ -7,13 +7,13 @@ namespace Chalmers.ILL.Models
 {
     public class MediaItemIdAndOrderItemId
     {
-        public MediaItemIdAndOrderItemId(int mediaItemId, int orderItemId)
+        public MediaItemIdAndOrderItemId(string mediaItemId, int orderItemId)
         {
             MediaItemId = mediaItemId;
             OrderItemId = orderItemId;
         }
 
-        public int MediaItemId { get; }
+        public string MediaItemId { get; }
         public int OrderItemId { get; }
     }
 }

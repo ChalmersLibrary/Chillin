@@ -132,15 +132,12 @@ namespace Chalmers.ILL.OrderItems
             _notifier = notifier;
         }
 
-        public void AddExistingMediaItemAsAnAttachment(int orderNodeId, int mediaNodeId, string title, string link, string eventId, bool doReindex = true, bool doSignal = true)
+        public void AddExistingMediaItemAsAnAttachment(int orderNodeId, string mediaNodeId, string title, string link, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
-                    .Where(x => x.NodeId == orderNodeId)
-                    .Include(x => x.AttachmentList)
-                    .FirstOrDefault();
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
                 if (orderItem != null)
                 {
                     if (!String.IsNullOrEmpty(title) && !String.IsNullOrEmpty(link))
@@ -183,10 +180,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
-                    .Where(x => x.NodeId == OrderItemNodeId)
-                    .Include(x => x.LogItemsList)
-                    .FirstOrDefault();
+                var orderItem = GetOrderItemFromEntityFramework(OrderItemNodeId);
                 if (orderItem != null)
                 {
                     if (!String.IsNullOrEmpty(Message))
@@ -409,15 +403,12 @@ namespace Chalmers.ILL.OrderItems
             return "event-" + _rand.Next(0, 65535).ToString("X4") + "-" + type.ToString("D2");
         }
 
-        public void RemoveConnectionToMediaItem(int orderNodeId, int mediaNodeId, bool doReindex = true, bool doSignal = true)
+        public void RemoveConnectionToMediaItem(int orderNodeId, string mediaNodeId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
-                    .Where(x => x.NodeId == orderNodeId)
-                    .Include(x => x.AttachmentList)
-                    .FirstOrDefault();
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
                 if (orderItem != null)
                 {
                     orderItem.AttachmentList.RemoveAll(i => i.MediaItemNodeId == mediaNodeId);
@@ -454,7 +445,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.BookId != bookId)
@@ -485,7 +476,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.CancellationReasonId != cancellationReasonId)
@@ -523,7 +514,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
                 if (orderItem != null)
                 {
                     var currentDeliveryLibrary = orderItem.DeliveryLibraryId;
@@ -555,7 +546,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.DrmWarning != (status ? "1" : "0"))
@@ -586,7 +577,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.DrmWarning != (status ? "1" : "0"))
@@ -616,7 +607,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.DueDate != date)
@@ -647,7 +638,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.FollowUpDate != date)
@@ -679,7 +670,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.FollowUpDate != date)
@@ -709,11 +700,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
-                    .Where(x => x.NodeId == nodeId)
-                    .Include(x => x.SierraInfo)
-                    .Include(X => X.SierraInfo.adress)
-                    .FirstOrDefault();
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     var newSierraInfo = JsonConvert.DeserializeObject<SierraModel>(sierraInfo);
@@ -727,6 +714,7 @@ namespace Chalmers.ILL.OrderItems
                     orderItem.SierraInfo.mblock = newSierraInfo.mblock;
                     orderItem.SierraInfo.ptype = newSierraInfo.ptype;
                     orderItem.SierraInfo.record_id = newSierraInfo.record_id;
+                    orderItem.SierraInfoStr = JsonConvert.SerializeObject(orderItem.SierraInfo);
                     MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
                 else
@@ -750,7 +738,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.PatronEmail != email)
@@ -781,7 +769,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.ProviderDueDate != date)
@@ -812,7 +800,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.ProviderInformation != providerInformation)
@@ -843,7 +831,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.ProviderName != providerName)
@@ -874,7 +862,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.ProviderName != providerName)
@@ -904,7 +892,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.ProviderOrderId != providerOrderId)
@@ -935,7 +923,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.PurchasedMaterialId != purchasedMaterialId)
@@ -967,7 +955,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(nodeId);
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.Reference != reference)
@@ -1004,7 +992,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.StatusId != statusId)
@@ -1039,7 +1027,7 @@ namespace Chalmers.ILL.OrderItems
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
                 if (orderItem != null)
                 {
                     if (orderItem.TypeId != typeId)
@@ -1069,12 +1057,10 @@ namespace Chalmers.ILL.OrderItems
 
         public void SetEditedByData(int orderNodeId, string memberId, string memberName, bool doReindex = true, bool doSignal = true)
         {
-            var test = Thread.CurrentThread.ManagedThreadId;
-
             EnsureDatabaseContext();
             try
             {
-                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Find(orderNodeId);
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
                 if (orderItem != null)
                 {
                     orderItem.EditedBy = memberId;
@@ -1098,6 +1084,21 @@ namespace Chalmers.ILL.OrderItems
         }
 
         #region Private methods
+
+        private OrderItemModel GetOrderItemFromEntityFramework(int nodeId)
+        {
+            var res = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
+                .Where(x => x.NodeId == nodeId)
+                .Include(x => x.SierraInfo)
+                .Include(x => x.SierraInfo.adress)
+                .Include(x => x.LogItemsList)
+                .Include(x => x.AttachmentList)
+                .FirstOrDefault();
+
+            FillOutStuff(res);
+
+            return res;
+        }
 
         private void OnStatusChanged(OrderItemModel orderItem, int newStatusId)
         {

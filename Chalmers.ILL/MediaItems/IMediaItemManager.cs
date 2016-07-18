@@ -17,7 +17,7 @@ namespace Chalmers.ILL.MediaItems
         /// <param name="orderItemNodeId">The ID for the order item which the media item is connected to.</param>
         /// <param name="data">A stream containing the data for the media item.</param>
         /// <returns></returns>
-        MediaItemModel CreateMediaItem(string name, int orderItemNodeId, string orderId, Stream data);
+        MediaItemModel CreateMediaItem(string name, int orderItemNodeId, string orderId, Stream data, string contentType);
 
         /// <summary>
         /// Delete all media items that are older than a given date.
@@ -31,6 +31,6 @@ namespace Chalmers.ILL.MediaItems
         /// </summary>
         /// <param name="id">An integer that identifies the media item.</param>
         /// <returns></returns>
-        MediaItemModel GetOne(int id);
+        MediaItemModel GetOne(string id);
     }
 }

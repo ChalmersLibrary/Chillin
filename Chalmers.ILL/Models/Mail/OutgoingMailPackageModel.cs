@@ -15,6 +15,6 @@ namespace Chalmers.ILL.Models.Mail
         public int newCancellationReasonId { get; set; }
         public int newPurchasedMaterialId { get; set; }
         public string newFollowUpDate { get; set; }
-        public List<int> attachments { get; set; }
+        public List<string> attachments { get; set; }
     }
 }

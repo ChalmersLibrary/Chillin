@@ -21,7 +21,7 @@ namespace Chalmers.ILL.MediaItems
             _mediaService = mediaService;
         }
 
-        public MediaItemModel CreateMediaItem(string name, int orderItemNodeId, string orderId, Stream data)
+        public MediaItemModel CreateMediaItem(string name, int orderItemNodeId, string orderId, Stream data, string contentType)
         {
             MediaItemModel res = null;
 
@@ -50,7 +50,7 @@ namespace Chalmers.ILL.MediaItems
 
                         res = new MediaItemModel();
                         res.CreateDate = media.CreateDate;
-                        res.Id = media.Id;
+                        res.Id = media.Id.ToString();
                         res.Name = name;
                         res.OrderItemNodeId = orderItemNodeId;
                         res.Url = media.GetValue("file").ToString();
@@ -75,7 +75,7 @@ namespace Chalmers.ILL.MediaItems
             {
                 if (media.CreateDate < date)
                 {
-                    var idForRemovedMediaItem = media.Id;
+                    var idForRemovedMediaItem = media.Id.ToString();
                     var idForContentConnectedToRemovedMediaItem = media.GetValue<int>("orderItemNodeId");
                     _mediaService.Delete(media);
                     res.Add(new MediaItemIdAndOrderItemId(idForRemovedMediaItem, idForContentConnectedToRemovedMediaItem));
@@ -90,14 +90,14 @@ namespace Chalmers.ILL.MediaItems
             return res;
         }
 
-        public MediaItemModel GetOne(int id)
+        public MediaItemModel GetOne(string id)
         {
             MediaItemModel res = null;
-            var media = _mediaService.GetById(id);
+            var media = _mediaService.GetById(Convert.ToInt32(id));
             if (media != null)
             {
                 res = new MediaItemModel();
-                res.Id = media.Id;
+                res.Id = media.Id.ToString();
                 res.Name = media.Name;
                 res.CreateDate = media.CreateDate;
                 res.OrderItemNodeId = media.GetValue<int>("orderItemNodeId");

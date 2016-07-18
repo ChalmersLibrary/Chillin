@@ -29,7 +29,6 @@ namespace Chalmers.ILL.Mail
             var attachments = new Dictionary<string, byte[]>();
             if (mailModel.attachments != null)
             {
-                var originalFilenamePattern = new Regex(@"^cthb-[a-zA-Z0-9]+-[0-9]+-(.*\.(?:pdf|tif|tiff))", RegexOptions.IgnoreCase);
                 foreach (var mediaId in mailModel.attachments)
                 {
                     var mediaItem = _mediaItemManager.GetOne(mediaId);
@@ -37,16 +36,7 @@ namespace Chalmers.ILL.Mail
                     {
                         byte[] data = new byte[mediaItem.Data.Length];
                         mediaItem.Data.Read(data, 0, data.Length);
-
-                        var match = originalFilenamePattern.Match(mediaItem.Name);
-                        if (match.Groups.Count > 1)
-                        {
-                            attachments.Add(match.Groups[1].Value, data);
-                        }
-                        else
-                        {
-                            throw new Exception("Failed to extract file name for attachment " + mediaItem.Name + ". Can only send pdf, tif and tiff files.");
-                        }
+                        attachments.Add(mediaItem.Name, data);
                     }
                     else
                     {

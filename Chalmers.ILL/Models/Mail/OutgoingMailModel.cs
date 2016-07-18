@@ -11,7 +11,7 @@ namespace Chalmers.ILL.Models.Mail
         public string recipientName { get; set; }
         public string recipientEmail { get; set; }
         public string message { get; set; }
-        public List<int> attachments { get; set; }
+        public List<string> attachments { get; set; }
 
         public OutgoingMailModel()
         {

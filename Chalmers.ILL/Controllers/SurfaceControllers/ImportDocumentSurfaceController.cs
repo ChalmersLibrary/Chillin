@@ -65,10 +65,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
                 else
                 {
-                    var savedMediaItem = _mediaItemManager.CreateMediaItem(name, orderItem.NodeId, orderItem.OrderId, stream);
-
-                    // Dispose stream that is no longer needed. Handle this in some better way?
-                    savedMediaItem.Data.Dispose();
+                    var savedMediaItem = _mediaItemManager.CreateMediaItem(name, orderItem.NodeId, orderItem.OrderId, stream, fileResp.ContentType);
 
                     var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
                     _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.NodeId, savedMediaItem.Id, name, savedMediaItem.Url, eventId);
@@ -109,10 +106,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     var orderItem = _orderItemManager.GetOrderItem(orderItemNodeId);
 
-                    var savedMediaItem = _mediaItemManager.CreateMediaItem(filename, orderItem.NodeId, orderItem.OrderId, new MemoryStream(Convert.FromBase64String(Regex.Split(data, "base64[;,]")[1])));
+                    var dataArray = Regex.Split(data, "base64[;,]");
+                    var pattern = new Regex("^data:(.*)[,;]$");
+                    var contentType = pattern.Match(dataArray[0]).Groups[1].Value;
 
-                    // Dispose stream that is no longer needed. Handle this in some better way?
-                    savedMediaItem.Data.Dispose();
+                    var savedMediaItem = _mediaItemManager.CreateMediaItem(filename, orderItem.NodeId, orderItem.OrderId, new MemoryStream(Convert.FromBase64String(dataArray[1])), contentType);
 
                     var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
                     _orderItemManager.AddExistingMediaItemAsAnAttachment(orderItem.NodeId, savedMediaItem.Id, filename, savedMediaItem.Url, eventId);

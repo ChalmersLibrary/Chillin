@@ -225,7 +225,7 @@ namespace Chalmers.ILL.OrderItems
         }
 
 
-        public void AddExistingMediaItemAsAnAttachment(int orderNodeId, int mediaNodeId, string title, string link, string eventId, bool doReindex = true, bool doSignal = true)
+        public void AddExistingMediaItemAsAnAttachment(int orderNodeId, string mediaNodeId, string title, string link, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
 
@@ -293,7 +293,7 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
-        public void RemoveConnectionToMediaItem(int orderNodeId, int mediaNodeId, bool doReindex = true, bool doSignal = true)
+        public void RemoveConnectionToMediaItem(int orderNodeId, string mediaNodeId, bool doReindex = true, bool doSignal = true)
         {
             var contentNode = _contentService.GetById(orderNodeId);
             var attachmentList = JsonConvert.DeserializeObject<List<OrderAttachment>>(contentNode.GetValue<string>("attachments"));

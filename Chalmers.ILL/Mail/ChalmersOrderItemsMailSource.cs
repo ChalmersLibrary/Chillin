@@ -318,7 +318,7 @@ namespace Chalmers.ILL.Mail
                                 {
                                     foreach (var attachment in item.Attachments)
                                     {
-                                        var savedMediaItem = _mediaItemManager.CreateMediaItem(attachment.Title, item.OrderItemNodeId, item.OrderId, attachment.Data);
+                                        var savedMediaItem = _mediaItemManager.CreateMediaItem(attachment.Title, item.OrderItemNodeId, item.OrderId, attachment.Data, attachment.ContentType);
 
                                         // Dispose stream that is no longer needed. Handle this in some better way?
                                         savedMediaItem.Data.Dispose();

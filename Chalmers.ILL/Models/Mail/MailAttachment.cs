@@ -12,13 +12,15 @@ namespace Chalmers.ILL.Models.Mail
             // NOP
         }
 
-        public MailAttachment(string newTitle, System.IO.MemoryStream newData)
+        public MailAttachment(string newTitle, System.IO.MemoryStream newData, string contentType)
         {
             Title = newTitle;
             Data = newData;
+            ContentType = contentType;
         }
 
         public string Title { get; set; }
         public System.IO.MemoryStream Data { get; set; }
+        public string ContentType { get; set; }
     }
 }

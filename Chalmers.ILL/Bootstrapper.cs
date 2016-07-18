@@ -17,6 +17,7 @@ using System.Configuration;
 using Chalmers.ILL.Providers;
 using Chalmers.ILL.MediaItems;
 using Nest;
+using Chalmers.ILL.Configuration;
 
 namespace Chalmers.ILL
 {
@@ -42,7 +43,10 @@ namespace Chalmers.ILL
 
         public static void RegisterTypes(IUnityContainer container)
         {
-            var elasticClientSettings = new ConnectionSettings(new System.Uri("http://localhost:9200"));
+            container.RegisterType<IConfiguration, DefaultChillinConfiguration>();
+            var config = container.Resolve<IConfiguration>();
+
+            var elasticClientSettings = new ConnectionSettings(new System.Uri(config.ElasticSearchUrl));
             elasticClientSettings.DefaultIndex("chillin");
             var elasticClient = new ElasticClient(elasticClientSettings);
 
@@ -52,7 +56,7 @@ namespace Chalmers.ILL
 
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
-            container.RegisterType<IMediaItemManager, UmbracoMediaItemManager>();
+            container.RegisterType<IMediaItemManager, BlobStorageMediaItemManager>();
             container.RegisterType<IOrderItemSearcher, ElasticSearchOrderItemSearcher>();
 
             // Fetch all needed Examine search providers.

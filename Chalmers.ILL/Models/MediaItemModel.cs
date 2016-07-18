@@ -8,11 +8,12 @@ namespace Chalmers.ILL.Models
 {
     public class MediaItemModel
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
         public int OrderItemNodeId { get; set; }
         public DateTime CreateDate { get; set; }
         public string Url { get; set; }
         public Stream Data { get; set; }
+        public string ContentType { get; set; }
     }
 }

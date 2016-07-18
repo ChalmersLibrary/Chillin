@@ -126,7 +126,7 @@ namespace Chalmers.ILL.Mail
                             var fa = attachment as FileAttachment;
                             var memStream = new System.IO.MemoryStream();
                             fa.Load(memStream);
-                            attachmentList.Add(new MailAttachment(fa.Name, memStream));
+                            attachmentList.Add(new MailAttachment(fa.Name, memStream, fa.ContentType));
                         }
                     }
 

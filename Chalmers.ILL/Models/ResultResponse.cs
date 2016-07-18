@@ -11,6 +11,17 @@ namespace Chalmers.ILL.Models
     /// </summary>
     public class ResultResponse
     {
+        public ResultResponse()
+        {
+            // NOP
+        }
+
+        public ResultResponse(bool success, string message)
+        {
+            Success = success;
+            Message = message;
+        }
+
         [Required]
         public bool Success { get; set; }
         public string Message { get; set; }

@@ -13,7 +13,7 @@ namespace Chalmers.ILL.Models
         public Guid DbId { get; set; }
 
         [Required]
-        public int MediaItemNodeId { get; set; }
+        public string MediaItemNodeId { get; set; }
         public string Title { get; set; }
         public string Link { get; set; }
     }
