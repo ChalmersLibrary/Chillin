@@ -1,9 +1,8 @@
 ﻿using Chalmers.ILL.MediaItems;
-using Chalmers.ILL.Utilities;
-using Microsoft.Owin;
 using Owin;
 using System.Configuration;
-using Umbraco.Core.Logging;
+using System.Data.Entity.Migrations;
+using System.Linq;
 
 namespace Chalmers.ILL.EventHandlers
 {
@@ -16,6 +15,17 @@ namespace Chalmers.ILL.EventHandlers
                 ConfigurationManager.AppSettings["BlobStorageConnectionString"] == "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://localhost:10000/devstoreaccount1;TableEndpoint=http://localhost:10002/devstoreaccount1;QueueEndpoint=http://localhost:10001/devstoreaccount1;")
             {
                 AzureStorageEmulatorManager.Start();
+            }
+
+            // Should we check for pending database migrations and apply them?
+            if (bool.Parse(ConfigurationManager.AppSettings["checkForPendingDatabaseMigrations"]))
+            {
+                var configuration = new Migrations.Configuration();
+                var migrator = new DbMigrator(configuration);
+                if (migrator.GetPendingMigrations().Count() > 0)
+                {
+                    migrator.Update();
+                }
             }
 
             Bootstrapper.Initialise();
