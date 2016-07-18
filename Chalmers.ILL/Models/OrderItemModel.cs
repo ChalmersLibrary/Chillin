@@ -81,6 +81,7 @@ namespace Chalmers.ILL.Models
         public DateTime DueDate { get; set; }
         public DateTime DeliveryDate { get; set; }
         public string BookId { get; set; }
+        public bool ReadOnlyAtLibrary { get; set; }
 
         public List<LogItem> LogItemsList { get; set; }
         public List<OrderAttachment> AttachmentList { get; set; }

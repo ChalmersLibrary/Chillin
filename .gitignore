@@ -226,4 +226,4 @@ Chalmers.ILL/Scripts/dummy.txt
 Chalmers.ILL/UserControls
 *.backup
 deploy-to-test.bat
-.vs
+.vs/
