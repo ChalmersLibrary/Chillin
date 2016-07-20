@@ -10,6 +10,7 @@ namespace Chalmers.ILL.Configuration
     {
         string StorageConnectionString { get; }
         string ElasticSearchUrl { get; }
+        string ElasticSearchIndex { get; }
         string BaseUrl { get; }
     }
 }

@@ -47,7 +47,7 @@ namespace Chalmers.ILL
             var config = container.Resolve<IConfiguration>();
 
             var elasticClientSettings = new ConnectionSettings(new System.Uri(config.ElasticSearchUrl));
-            elasticClientSettings.DefaultIndex("chillin");
+            elasticClientSettings.DefaultIndex(config.ElasticSearchIndex);
             var elasticClient = new ElasticClient(elasticClientSettings);
 
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);

@@ -21,6 +21,14 @@ namespace Chalmers.ILL.Configuration
             }
         }
 
+        public string ElasticSearchIndex
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["ElasticSearchIndex"];
+            }
+        }
+
         public string StorageConnectionString
         {
             get
