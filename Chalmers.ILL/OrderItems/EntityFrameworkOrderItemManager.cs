@@ -85,12 +85,63 @@ namespace Chalmers.ILL.OrderItems
 
                     if (orderItems.Count() == 0)
                     {
-                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Couldn't find any node with the ID " + nodeId + " while querying with Examine.");
+                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Couldn't find any node with the ID " + nodeId + ".");
                     }
                     else if (orderItems.Count() > 1)
                     {
                         // should never happen
-                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Found more than one node with the ID " + nodeId + " while querying with Examine.");
+                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Found more than one node with the ID " + nodeId + ".");
+                    }
+                    else
+                    {
+                        res = orderItems.Single();
+
+                        FillOutStuff(res);
+                    }
+                }
+                catch (Exception e)
+                {
+                    LogHelper.Error<OrderItemManager>("Failed to query node.", e);
+                }
+
+                return res;
+            }
+            finally
+            {
+                DisposeDatabaseContext(true);
+            }
+        }
+
+        public OrderItemModel GetOrderItem(string orderId)
+        {
+            OrderItemModel res = null;
+            EnsureDatabaseContext();
+            try
+            {
+                try
+                {
+                    var orderItems = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
+                        .Where(x => x.OrderId == orderId)
+                        .Include(x => x.AttachmentList)
+                        .Include(x => x.LogItemsList)
+                        .Include(x => x.SierraInfo)
+                        .Include(x => x.SierraInfo.adress)
+                        .ToList();
+
+                    foreach (var orderItem in orderItems)
+                    {
+                        orderItem.AttachmentList = orderItem.AttachmentList.OrderBy(x => x.Title).ToList();
+                        orderItem.LogItemsList = orderItem.LogItemsList.OrderByDescending(x => x.CreateDate).ToList();
+                    }
+
+                    if (orderItems.Count() == 0)
+                    {
+                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Couldn't find any node with the order ID " + orderId + ".");
+                    }
+                    else if (orderItems.Count() > 1)
+                    {
+                        // should never happen
+                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Found more than one node with the order ID " + orderId + ".");
                     }
                     else
                     {
@@ -175,6 +226,47 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
+        public void AddExistingMediaItemAsAnAttachmentWithoutLogging(int orderNodeId, string mediaNodeId, string title, string link, bool doReindex = true, bool doSignal = true)
+        {
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
+                if (orderItem != null)
+                {
+                    if (!String.IsNullOrEmpty(title) && !String.IsNullOrEmpty(link))
+                    {
+                        if (orderItem.AttachmentList == null)
+                        {
+                            orderItem.AttachmentList = new List<OrderAttachment>();
+                        }
+
+                        var att = new OrderAttachment();
+                        att.Title = title;
+                        att.Link = link;
+                        att.MediaItemNodeId = mediaNodeId;
+                        orderItem.AttachmentList.Add(att);
+                        FillOutStuff(orderItem);
+
+                        MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                    }
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to add existing media item as an attachment without logging.");
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
         public void AddLogItem(int OrderItemNodeId, string Type, string Message, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
@@ -232,6 +324,29 @@ namespace Chalmers.ILL.OrderItems
             else
             {
                 AddLogItem(orderItemNodeId, "SIERRA", "Låntagaren hittades inte.", eventId, doReindex, doSignal);
+            }
+        }
+
+        public int CreateOrderItemInDbFromOrderItemModel(OrderItemModel orderItem, bool doReindex = true, bool doSignal = true)
+        {
+            EnsureDatabaseContext();
+
+            try
+            {
+                _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Add(orderItem);
+
+                MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+
+                return orderItem.NodeId;
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
             }
         }
 

@@ -57,6 +57,7 @@ namespace Chalmers.ILL
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
             container.RegisterType<IMediaItemManager, BlobStorageMediaItemManager>();
+            container.RegisterType<IMediaItemManager, UmbracoMediaItemManager>("Legacy");
             container.RegisterType<IOrderItemSearcher, ElasticSearchOrderItemSearcher>();
 
             // Fetch all needed Examine search providers.
@@ -68,6 +69,7 @@ namespace Chalmers.ILL
             var notifier = new Notifier();
             var umbraco = new UmbracoWrapper();
             var orderItemManager = new EntityFrameworkOrderItemManager(umbraco, container.Resolve<IOrderItemSearcher>());
+            var legacyOrderItemManager = new OrderItemManager(umbraco);
             var providerService = new ProviderService(container.Resolve<IOrderItemSearcher>());
             var bulkDataManager = new BulkDataManager(container.Resolve<IOrderItemSearcher>());
 
@@ -81,6 +83,7 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IUmbracoWrapper), umbraco);
             container.RegisterInstance(typeof(INotifier), notifier);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
+            container.RegisterInstance<IOrderItemManager>("Legacy", legacyOrderItemManager);
             container.RegisterInstance(typeof(ITemplateService), templateService);
             container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(container.Resolve<IOrderItemSearcher>(), templateService, orderItemManager, mailService));
             container.RegisterInstance(typeof(IMailService), mailService);

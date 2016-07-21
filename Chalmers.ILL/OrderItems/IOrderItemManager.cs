@@ -12,10 +12,12 @@ namespace Chalmers.ILL.OrderItems
     public interface IOrderItemManager
     {
         OrderItemModel GetOrderItem(int nodeId);
+        OrderItemModel GetOrderItem(string orderId);
         IEnumerable<OrderItemModel> GetLockedOrderItems(string memberId);
         List<LogItem> GetLogItems(int nodeId);
 
         void AddExistingMediaItemAsAnAttachment(int orderNodeId, string mediaNodeId, string title, string link, string eventId, bool doReindex = true, bool doSignal = true);
+        void AddExistingMediaItemAsAnAttachmentWithoutLogging(int orderNodeId, string mediaNodeId, string title, string link, bool doReindex = true, bool doSignal = true);
         void AddLogItem(int OrderItemNodeId, string Type, string Message, string eventId, bool doReindex = true, bool doSignal = true);
         void AddSierraDataToLog(int orderItemNodeId, SierraModel sm, string eventId, bool doReindex = true, bool doSignal = true);
 
@@ -60,6 +62,8 @@ namespace Chalmers.ILL.OrderItems
         /// <param name="doSignal">Should we signal other things about or save.</param>
         /// <returns>Created nodeId</returns>
         int CreateOrderItemInDbFromOrderItemSeedModel(OrderItemSeedModel model, bool doReindex = true, bool doSignal = true);
+
+        int CreateOrderItemInDbFromOrderItemModel(OrderItemModel model, bool doReindex = true, bool doSignal = true);
 
         /// <summary>
         /// Saves content without triggering events in Umbraco, then triggers redindexing of the 

@@ -926,6 +926,21 @@ namespace Chalmers.ILL.OrderItems
             return res;
         }
 
+        public OrderItemModel GetOrderItem(string orderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddExistingMediaItemAsAnAttachmentWithoutLogging(int orderNodeId, string mediaNodeId, string title, string link, bool doReindex = true, bool doSignal = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CreateOrderItemInDbFromOrderItemModel(OrderItemModel model, bool doReindex = true, bool doSignal = true)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }
