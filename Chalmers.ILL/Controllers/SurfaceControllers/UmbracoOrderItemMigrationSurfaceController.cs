@@ -71,26 +71,26 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                                 // Calculate the content type.
                                 string contentType = "";
-                                if (mediaItemToBeMoved.Name.EndsWith(".pdf"))
+                                if (attachmentToCopy.Title.EndsWith(".pdf"))
                                 {
                                     contentType = "application/pdf";
                                 }
-                                else if (mediaItemToBeMoved.Name.EndsWith(".txt"))
+                                else if (attachmentToCopy.Title.EndsWith(".txt"))
                                 {
                                     contentType = "text/plain";
                                 }
-                                else if (mediaItemToBeMoved.Name.EndsWith(".tif"))
+                                else if (attachmentToCopy.Title.EndsWith(".tif"))
                                 {
                                     contentType = "image/tiff";
                                 }
-                                else if (mediaItemToBeMoved.Name.EndsWith(".tiff"))
+                                else if (attachmentToCopy.Title.EndsWith(".tiff"))
                                 {
                                     contentType = "image/tiff";
                                 }
 
                                 if (!String.IsNullOrEmpty(contentType))
                                 {
-                                    var newMediaItem = _mediaItemManager.CreateMediaItem(mediaItemToBeMoved.Name, newOrderItem.NodeId, newOrderItem.OrderId, mediaItemToBeMoved.Data, contentType);
+                                    var newMediaItem = _mediaItemManager.CreateMediaItem(attachmentToCopy.Title, newOrderItem.NodeId, newOrderItem.OrderId, mediaItemToBeMoved.Data, contentType);
                                     newMediaItems.Add(newMediaItem);
                                 }
                                 else
@@ -107,7 +107,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             {
                                 foreach (var newMediaItem in newMediaItems)
                                 {
-                                    _orderItemManager.AddExistingMediaItemAsAnAttachmentWithoutLogging(newOrderItemNodeId, newMediaItem.Id, newMediaItem.Name, newMediaItem.Url, false, false);
+                                    _orderItemManager.AddExistingMediaItemAsAnAttachmentWithoutLogging(newOrderItemNodeId, newMediaItem.Id, newMediaItem.Name, newMediaItem.Url, true, false);
                                 }
                             }
                             else
