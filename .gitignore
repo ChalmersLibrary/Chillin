@@ -227,3 +227,5 @@ Chalmers.ILL/UserControls
 *.backup
 deploy-to-test.bat
 .vs/
+Migration/*.csv
+Migration/*.txt
