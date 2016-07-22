@@ -45,7 +45,7 @@ namespace Chalmers.ILL.MediaItems
             blockBlob.FetchAttributes();
             blockBlob.Metadata["name"] = name;
             blockBlob.Metadata["orderItemNodeId"] = orderItemNodeId.ToString();
-            blockBlob.Metadata["createDate"] = createDate.ToString();
+            blockBlob.Metadata["createDate"] = createDate.ToString("o");
             blockBlob.SetMetadata();
 
             blockBlob.Properties.ContentType = contentType;
