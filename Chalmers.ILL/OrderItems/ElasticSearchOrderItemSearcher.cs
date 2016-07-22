@@ -32,6 +32,8 @@ namespace Chalmers.ILL.OrderItems
         public IEnumerable<OrderItemModel> Search(string query)
         {
             return _elasticClient.Search<OrderItemModel>(s => s
+                .From(0)
+                .Size(10000)
                 .AllTypes()
                 .Query(q => q
                     .Bool(b => 
