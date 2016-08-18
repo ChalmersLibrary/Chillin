@@ -547,12 +547,19 @@ namespace Chalmers.ILL.OrderItems
 
         public void SaveWithoutEventsAndWithSynchronousReindexing(int nodeId, bool doReindex = true, bool doSignal = true)
         {
-            MaybeSaveToDatabase(doReindex, null);
-        }
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
 
-        public void SaveWithoutEventsAndWithSynchronousReindexing(IContent content, bool doReindex = true, bool doSignal = true)
-        {
-            MaybeSaveToDatabase(doReindex, null);
+                FillOutStuff(orderItem);
+
+                MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
         }
 
         public void SetBookId(int nodeId, string bookId, string eventId, bool doReindex = true, bool doSignal = true)

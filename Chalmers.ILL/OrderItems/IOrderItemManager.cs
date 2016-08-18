@@ -65,23 +65,6 @@ namespace Chalmers.ILL.OrderItems
 
         int CreateOrderItemInDbFromOrderItemModel(OrderItemModel model, bool doReindex = true, bool doSignal = true);
 
-        /// <summary>
-        /// Saves content without triggering events in Umbraco, then triggers redindexing of the 
-        /// content in Lucene and waits for its completion. After the reindexing is done it signals
-        /// the ChalmersILL clients using SignalR.
-        /// </summary>
-        /// <remarks>
-        /// This method will wait until all indexing jobs in the indexer queue are finished before exiting.
-        /// This should work fine with a few simultaneous users, but if there would be a lot of users
-        /// constantly requesting indexing operations the system could appear extremely slow and 
-        /// unresponsive.
-        /// </remarks>
-        /// <param name="cs">The ContentService which this method is called on as an extension.</param>
-        /// <param name="content">The content which should be saved.</param>
-        /// <param name="doReindex">Indicates if we should do a reindex operation of the saved node.</param>
-        /// <param name="doSignal">Indicates if we should emit Signal R events or not.</param>
-        void SaveWithoutEventsAndWithSynchronousReindexing(IContent content, bool doReindex = true, bool doSignal = true);
-
         void SaveWithoutEventsAndWithSynchronousReindexing(int nodeId, bool doReindex = true, bool doSignal = true);
 
         string GenerateEventId(int type);
