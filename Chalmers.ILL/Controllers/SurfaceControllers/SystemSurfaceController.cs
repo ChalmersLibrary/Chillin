@@ -150,8 +150,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 var query = @"nodeTypeAlias:ChalmersILLOrderItem AND 
-                    Status:03\:Beställd AND 
-                    FollowUpDate:[" + DateTime.Now.AddMinutes(-60).ToString("yyyyMMddHHmmssfff") + " TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]";
+                    status:03\:Beställd AND 
+                    followUpDate:[" + DateTime.Now.AddMinutes(-60).ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + " TO " + DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "]";
 
                 // Search for our items and signal the ones that have expired recently.
                 var results = _orderItemsSearcher.Search(query);
@@ -172,7 +172,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var query = @"nodeTypeAlias:ChalmersILLOrderItem AND 
                 Status:04\:Väntar AND 
-                FollowUpDate:[197501010000000 TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]";
+                FollowUpDate:[1975-01-01T00:00:00.000Z TO " + DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "]";
 
             // -1 means that we haven't checked edited by properly and should disregard it
             var memberId = -1;
