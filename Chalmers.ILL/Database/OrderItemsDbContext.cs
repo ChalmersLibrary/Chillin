@@ -39,8 +39,14 @@ namespace Chalmers.ILL.Database
             {
                 if (change.State == EntityState.Added)
                 {
-                    change.Entity.CreateDate = DateTime.Now;
-                    change.Entity.UpdateDate = DateTime.Now;
+                    if (change.Entity.CreateDate == DateTime.MinValue)
+                    {
+                        change.Entity.CreateDate = DateTime.Now;
+                    }
+                    if (change.Entity.UpdateDate == DateTime.MinValue)
+                    {
+                        change.Entity.UpdateDate = DateTime.Now;
+                    }
                     addedItems.Add(change.Entity);
                 }
                 else if (change.State == EntityState.Deleted)
