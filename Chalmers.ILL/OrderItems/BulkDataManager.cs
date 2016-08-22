@@ -19,9 +19,9 @@ namespace Chalmers.ILL.OrderItems
 
         public List<SimplifiedOrderItem> GetChillinDataForSierraPatron(int recordId, string lang)
         {
-            var searchResults = _orderItemsSearcher.Search("SierraPatronRecordId:\"" + recordId + "\" AND " +
-                "(Status:Ny OR Status:Åtgärda OR Status:Beställd OR Status:Väntar OR Status:Mottagen OR Status:Krävd OR Status:Utlånad OR Status:Transport OR " +
-                    "(Status:Levererad AND DeliveryDate:[" + DateTime.Now.AddDays(-7).ToString("yyyyMMddHHmmssfff") + " TO " + DateTime.Now.ToString("yyyyMMddHHmmssfff") + "]))");
+            var searchResults = _orderItemsSearcher.Search("sierraInfo.record_id:" + recordId + " AND " +
+                "(status:Ny OR status:Åtgärda OR status:Beställd OR status:Väntar OR status:Mottagen OR status:Krävd OR status:Utlånad OR status:Transport OR " +
+                    "(status:Levererad AND deliveryDate:[" + DateTime.Now.AddDays(-7).ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + " TO " + DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + "]))");
 
             var items = new List<SimplifiedOrderItem>();
 
