@@ -24,7 +24,7 @@ namespace Chalmers.ILL.Providers
             var res = new List<String>();
 
             // NOTE: Should probably only fetch orders that are not too old, to keep the numbers down and to keep the data relevant.
-            var allOrders = _orderItemsSearcher.Search("nodeTypeAlias:ChalmersILLOrderItem");
+            var allOrders = _orderItemsSearcher.Search("*:*");
 
             return allOrders.Where(x => x.ProviderName != "")
                 .Select(x => x.ProviderName)
