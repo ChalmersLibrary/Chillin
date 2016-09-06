@@ -1,5 +1,6 @@
 ﻿using Chalmers.ILL.Members;
 using Chalmers.ILL.Models.Page;
+using Chalmers.ILL.OrderItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +16,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
     public class ChalmersILLDiskPageController : RenderMvcController
     {
         IMemberInfoManager _memberInfoManager;
+        IOrderItemSearcher _searcher;
 
-        public ChalmersILLDiskPageController(IMemberInfoManager memberInfoManager)
+        public ChalmersILLDiskPageController(IMemberInfoManager memberInfoManager, IOrderItemSearcher searcher)
         {
             _memberInfoManager = memberInfoManager;
+            _searcher = searcher;
         }
 
         public override ActionResult Index(RenderModel model)
@@ -26,6 +29,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
             var customModel = new ChalmersILLDiskPageModel();
 
             _memberInfoManager.PopulateModelWithMemberData(Request, Response, customModel);
+
+            if (!String.IsNullOrEmpty(Request.QueryString["query"]))
+            {
+                customModel.OrderItems = _searcher.Search(Request.Params["query"]);
+            }
 
             return CurrentTemplate(customModel);
         }

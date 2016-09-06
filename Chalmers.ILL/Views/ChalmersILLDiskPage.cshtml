@@ -54,27 +54,10 @@
         </div>
         @{
             int loggedInMember = Model.CurrentMemberId;
-            if(!String.IsNullOrEmpty(Request.QueryString["query"]))
-            {
-                // Connect to an Examine Search Provider
-                var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
 
-                // Specify Search Criteria
-                var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-
-                // Specify the query
-                var query = searchCriteria.RawQuery(Request.Params["query"]);
-
-                // Loop trough results
-                var results = searcher.Search(query);
-
-                foreach(var item in results) {
-                    @RenderItems(loggedInMember, item.Id, DateTime.ParseExact(item.Fields.GetValueString("FollowUpDate"), "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, DateTimeStyles.None),
-                        item.Fields.GetValueString("PatronName"), item.Fields.GetValueString("DeliveryLibrary"), item.Fields.GetValueString("Status"),
-                        item.Fields.GetValueString("Type"), item.Fields.GetValueString("Reference"),
-                        item.Fields.GetValueString("DueDate"), item.Fields.GetValueString("BookId"), item.Fields.GetValueString("ReadOnlyAtLibrary"),
-                        item.Fields.GetValueString("PatronEmail"), item.Fields.GetValueString("PatronCardNo"));
-                }
+            foreach(var item in Model.OrderItems) {
+                @RenderItems(loggedInMember, item.OrderId, item.FollowUpDate, item.PatronName, item.DeliveryLibrary, item.Status,
+                    item.Type, item.Reference, item.DueDate, item.BookId, item.ReadOnlyAtLibrary, item.PatronEmail, item.PatronCardNo);
             }
         }
 
