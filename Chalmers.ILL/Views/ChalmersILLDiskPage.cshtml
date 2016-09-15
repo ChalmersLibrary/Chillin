@@ -56,8 +56,7 @@
             int loggedInMember = Model.CurrentMemberId;
 
             foreach(var item in Model.OrderItems) {
-                @RenderItems(loggedInMember, item.OrderId, item.FollowUpDate, item.PatronName, item.DeliveryLibrary, item.Status,
-                    item.Type, item.Reference, item.DueDate, item.BookId, item.ReadOnlyAtLibrary, item.PatronEmail, item.PatronCardNo);
+                @RenderItems(loggedInMember, item);
             }
         }
 
@@ -103,35 +102,44 @@
     @prevalue.Split(':').Last()
 }
 
-@helper RenderItems(int memberId, object Id, DateTime date, object patronName, object library, object status, object type, object reference, object dueDate, object bookId, object readOnlyAtLibrary, string patronEmail, object patronCardNumber)
+@helper RenderItems(int memberId, Chalmers.ILL.Models.OrderItemModel item)
 {
-    bool localLoan = false;
-    if(@readOnlyAtLibrary.ToString() == "1")
-    {
-        localLoan = true;
-    }
     <div class="row">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="row">
-                    <div class="col-sm-10">@patronName (@patronCardNumber | @patronEmail)</div>
-                    <div class="col-sm-2 text-right">Återlämning: @dueDate.ToString().Substring(0,8)</div>
+                    <div class="col-sm-10">@item.PatronName (@item.PatronCardNo | @item.PatronEmail)</div>
+                    <div class="col-sm-2 text-right">Återlämning: @item.DueDate.ToString("yyyy-MM-dd")</div>
                 </div>
             </div>
             <div class="panel-body">
-                @if (localLoan)
+                @if (item.ReadOnlyAtLibrary)
                 {
                     <div class="alert alert-danger" role="alert">OBS! Endast läsesalslån!</div>
                 }
-            Identifikator: <strong>@bookId</strong><br />
-                Referens: @reference
+            Identifikator: <strong>@item.BookId</strong><br />
+                Referens: @item.Reference
             </div>
             <div class="panel-footer">
                 <div class="row">
-                    <div class="col-sm-10">@ParseStatusPrevalue(status.ToString())</div>
+                    <div class="col-sm-10">@item.StatusString</div>
                     <div id="statusActions" class="col-sm-2 text-right">
-                        @if(ParseStatusPrevalue(status.ToString()).ToString() == "Transport") {
-                            <button type="submit" class="btn btn-success" onclick="receive(@Id)">Ta emot</button>
+                        @if (item.StatusString == "Transport")
+                        {
+                            <button type="submit" class="btn btn-success" onclick="receive(@item.OrderId)">Ta emot</button>
+                        }
+                        @if ((item.Type == "Bok" && item.StatusString == "Infodisk") || item.StatusString == "Utlånad")
+                        {
+                            <button type="submit" class="btn btn-success" onclick="alert('Not implemented!');">Returnera</button>
+                        }
+                        @if (item.StatusString == "Infodisk" && !item.ReadOnlyAtLibrary)
+                        {
+                            <button type="submit" class="btn btn-success" onclick="alert('Not implemented!');">Låna ut</button>
+                        }
+                        @if ((item.Type == "Artikel" && item.StatusString == "Infodisk"))
+                        {
+                            <button type="submit" class="btn btn-success" onclick="alert('Not implemented!');">Släng</button>
+                            <button type="submit" class="btn btn-success" onclick="alert('Not implemented!');">Lämna ut</button>
                         }
                     </div>
                 </div>
