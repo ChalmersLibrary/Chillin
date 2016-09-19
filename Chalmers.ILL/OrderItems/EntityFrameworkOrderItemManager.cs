@@ -206,9 +206,9 @@ namespace Chalmers.ILL.OrderItems
                         FillOutStuff(orderItem);
 
                         AddLogItem(orderNodeId, "ATTACHMENT", "Nytt dokument bundet till ordern.", eventId, false, false);
-
-                        MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                     }
+
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
                 else
                 {
@@ -247,9 +247,9 @@ namespace Chalmers.ILL.OrderItems
                         att.MediaItemNodeId = mediaNodeId;
                         orderItem.AttachmentList.Add(att);
                         FillOutStuff(orderItem);
-
-                        MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                     }
+
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
                 else
                 {
@@ -293,9 +293,9 @@ namespace Chalmers.ILL.OrderItems
 
                         orderItem.LogItemsList.Add(newLog);
                         FillOutStuff(orderItem);
-
-                        MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                     }
+
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
                 else
                 {
