@@ -30,7 +30,8 @@ namespace Chalmers.ILL.Models.PartialPage
             {19, "Tidsbaserad automatisk uppdatering av order"},
             {20, "Order skapad från maildata"},
             {21, "Mail från låntagare mottaget"},
-            {22, "Mail mottaget (ej låntagare)"}
+            {22, "Mail mottaget (ej låntagare)"},
+            {23, "Bok återlämnad och transporteras från filial." }
         };
 
         public ChalmersILLOrderItemModel(OrderItemModel orderItemModel) : base(orderItemModel) { }

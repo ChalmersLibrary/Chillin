@@ -98,6 +98,23 @@
                     unlockScreen();
                 });
             }
+
+            function returnBook(id) {
+                lockScreen();
+                $.post("/umbraco/surface/BookCirculationSurface/ReturnedAtBranch", {
+                    nodeId: id
+                }, function (json) {
+                    if (json.Success) {
+                        $("#statusActions").html("Bok återlämnad. Dags att skicka tillbaks den till Huvudbiblioteket.");
+                    } else {
+                        alert(json.Message);
+                    }
+                    unlockScreen();
+                }).fail(function (jqxhr, textStatus, error) {
+                    alert("Error: " + textStatus + " " + error);
+                    unlockScreen();
+                });
+            }
         </script>
     </body>
 

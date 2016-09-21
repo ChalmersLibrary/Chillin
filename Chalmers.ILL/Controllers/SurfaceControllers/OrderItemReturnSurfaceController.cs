@@ -13,7 +13,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [MemberAuthorize(AllowType = "Standard")]
     public class OrderItemReturnSurfaceController : SurfaceController
     {
-        public static int EVENT_TYPE { get { return 14; } }
+        public static int BOOK_RETURNED_HOME_EVENT_TYPE { get { return 14; } }
 
         IOrderItemManager _orderItemManager;
         IUmbracoWrapper _umbraco;
@@ -47,7 +47,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                var eventId = _orderItemManager.GenerateEventId(BOOK_RETURNED_HOME_EVENT_TYPE);
                 _orderItemManager.SetStatus(nodeId, "10:Återsänd", eventId);
 
                 json.Success = true;

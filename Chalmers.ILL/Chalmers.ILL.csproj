@@ -433,6 +433,7 @@
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Configuration\DefaultChillinConfiguration.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
+    <Compile Include="Controllers\SurfaceControllers\BookCirculationSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\MediaItemSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemClaimSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemPatronReturnDateSurfaceController.cs" />
