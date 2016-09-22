@@ -8,7 +8,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class BookCirculationSurfaceController : SurfaceController
     {
-        public static int BOOK_RETURNED_TO_FILIAL_EVENT_TYPE { get { return 23; } }
+        public static int BOOK_RETURNED_FROM_BORROWER_EVENT_TYPE { get { return 23; } }
 
         IOrderItemManager _orderItemManager;
 
@@ -18,13 +18,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpPost]
-        public ActionResult ReturnedAtBranch(int nodeId)
+        public ActionResult Returned(int nodeId)
         {
             var json = new ResultResponse();
 
             try
             {
-                var eventId = _orderItemManager.GenerateEventId(BOOK_RETURNED_TO_FILIAL_EVENT_TYPE);
+                var eventId = _orderItemManager.GenerateEventId(BOOK_RETURNED_FROM_BORROWER_EVENT_TYPE);
                 _orderItemManager.SetStatus(nodeId, "13:Transport", eventId);
 
                 json.Success = true;

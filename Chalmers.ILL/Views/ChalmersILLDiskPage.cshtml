@@ -81,13 +81,13 @@
         <script src="/scripts/chalmers.ill.js?r=@DateTime.Now.Ticks" type="text/javascript"></script>
 
         <script type="text/javascript">
-            function receive(id) {
+            function receiveBookAtBranch(id) {
                 lockScreen();
                 $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceivedAtBranch", {
                     nodeId: id
                 }, function (json) {
                     if (json.Success) {
-                        $("#statusActions").html("Boken mottagen.");
+                        $("#statusActions").html("Bok mottagen.");
                     }
                     else {
                         alert(json.Message);
@@ -99,13 +99,17 @@
                 });
             }
 
-            function returnBook(id) {
+            function returnBook(id, deliveryLibrary) {
                 lockScreen();
-                $.post("/umbraco/surface/BookCirculationSurface/ReturnedAtBranch", {
+                $.post("/umbraco/surface/BookCirculationSurface/Returned", {
                     nodeId: id
                 }, function (json) {
                     if (json.Success) {
-                        $("#statusActions").html("Bok återlämnad. Dags att skicka tillbaks den till Huvudbiblioteket.");
+                        if (deliveryLibrary === "Huvudbiblioteket") {
+                            $("#statusActions").html("Bok återlämnad. Den ska nu ställas i hyllan bakom disken.");
+                        } else {
+                            $("#statusActions").html("Bok återlämnad. Den ska nu transporteras tillbaks till fjärrlåneavdelningen.");
+                        }
                     } else {
                         alert(json.Message);
                     }
@@ -149,11 +153,11 @@
                     <div id="statusActions" class="col-sm-2 text-right">
                         @if (item.StatusString == "Transport")
                         {
-                            <button type="submit" class="btn btn-success" onclick="receive(@item.NodeId)">Ta emot</button>
+                            <button type="submit" class="btn btn-success" onclick="receiveBookAtBranch(@item.NodeId)">Ta emot</button>
                         }
                         @if ((item.Type == "Bok" && item.StatusString == "Infodisk") || item.StatusString == "Utlånad")
                         {
-                            <button type="submit" class="btn btn-success" onclick="alert('Not implemented!');">Returnera</button>
+                            <button type="submit" class="btn btn-success" onclick="returnBook(@item.NodeId,'@item.DeliveryLibrary');">Returnera</button>
                         }
                         @if (item.StatusString == "Infodisk" && !item.ReadOnlyAtLibrary)
                         {
