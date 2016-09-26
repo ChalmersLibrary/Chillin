@@ -170,7 +170,7 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-sm-10">@item.PatronName (@item.PatronCardNo | @item.PatronEmail)</div>
-                    <div class="col-sm-2 text-right">Återlämning: @item.DueDate.ToString("yyyy-MM-dd")</div>
+                    <div class="col-sm-2 text-right">@(item.DueDate != null ? "Återlämning: " + item.DueDate.ToString("yyyy-MM-dd") : "")</div>
                 </div>
             </div>
             <div class="panel-body">
