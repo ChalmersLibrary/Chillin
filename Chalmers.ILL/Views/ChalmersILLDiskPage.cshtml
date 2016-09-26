@@ -119,6 +119,23 @@
                     unlockScreen();
                 });
             }
+
+            function lendBook(id, deliveryLibrary) {
+                lockScreen();
+                $.post("/umbraco/surface/BookCirculationSurface/Loaned", {
+                    nodeId: id
+                }, function (json) {
+                    if (json.Success) {
+                        $("#statusActions").html("Bok utlånad.");
+                    } else {
+                        alert(json.Message);
+                    }
+                    unlockScreen();
+                }).fail(function (jqxhr, textStatus, error) {
+                    alert("Error: " + textStatus + " " + error);
+                    unlockScreen();
+                });
+            }
         </script>
     </body>
 
@@ -161,12 +178,7 @@
                         }
                         @if (item.StatusString == "Infodisk" && !item.ReadOnlyAtLibrary)
                         {
-                            <button type="submit" class="btn btn-success" onclick="alert('Not implemented!');">Låna ut</button>
-                        }
-                        @if ((item.Type == "Artikel" && item.StatusString == "Infodisk"))
-                        {
-                            <button type="submit" class="btn btn-success" onclick="alert('Not implemented!');">Släng</button>
-                            <button type="submit" class="btn btn-success" onclick="alert('Not implemented!');">Lämna ut</button>
+                            <button type="submit" class="btn btn-success" onclick="lendBook(@item.NodeId)">Låna ut</button>
                         }
                     </div>
                 </div>
