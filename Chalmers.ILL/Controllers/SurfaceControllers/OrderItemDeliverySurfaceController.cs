@@ -233,12 +233,56 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message, eventId);
 
                 res.Success = true;
-                res.Message = "Lyckades leverera via mail.";
+                res.Message = "Lyckades leverera.";
             }
             catch (Exception e)
             {
                 res.Success = false;
-                res.Message = "Fel vid leveransförsök via mail: " + e.Message;
+                res.Message = "Fel vid leveransförsök: " + e.Message;
+            }
+
+            return Json(res, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Set delivered status, log delivery type and send mail to user.
+        /// </summary>
+        /// <param name="nodeId">The node ID for the order item in question.</param>
+        /// <returns>JSON result</returns>
+        [HttpPost, ValidateInput(false)]
+        public ActionResult SetArticleAvailableForPickupAtBranch(int nodeId)
+        {
+            var res = new ResultResponse();
+
+            try
+            {
+                var orderItem = _orderItemManager.GetOrderItem(nodeId);
+
+                ArticleDelivered pack = new ArticleDelivered();
+                pack.mail = new OutgoingMailModel(orderItem.OrderId, orderItem.PatronName, orderItem.PatronEmail);
+                pack.nodeId = nodeId;
+
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                _orderItemManager.AddLogItem(pack.nodeId, "LEVERERAD", "Leveranstyp: Avhämtas i lånedisken.", eventId, false, false);
+                _orderItemManager.SetStatus(pack.nodeId, "05:Levererad", eventId, false, false);
+
+                // We save everything here first so that we get the new values injected into the message by the template service.
+                _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail, eventId);
+
+                // Overwrite the message with message from template service so that we get the new values injected.
+                pack.mail.message = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", _orderItemManager.GetOrderItem(pack.nodeId));
+
+                _mailService.SendMail(pack.mail);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, eventId, false, false);
+                _orderItemManager.AddLogItem(pack.nodeId, "MAIL", pack.mail.message, eventId);
+
+                res.Success = true;
+                res.Message = "Lyckades leverera.";
+            }
+            catch (Exception e)
+            {
+                res.Success = false;
+                res.Message = "Fel vid leveransförsök: " + e.Message;
             }
 
             return Json(res, JsonRequestBehavior.AllowGet);

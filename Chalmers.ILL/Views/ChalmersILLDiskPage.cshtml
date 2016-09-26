@@ -120,13 +120,30 @@
                 });
             }
 
-            function lendBook(id, deliveryLibrary) {
+            function lendBook(id) {
                 lockScreen();
                 $.post("/umbraco/surface/BookCirculationSurface/Loaned", {
                     nodeId: id
                 }, function (json) {
                     if (json.Success) {
                         $("#statusActions").html("Bok utlånad.");
+                    } else {
+                        alert(json.Message);
+                    }
+                    unlockScreen();
+                }).fail(function (jqxhr, textStatus, error) {
+                    alert("Error: " + textStatus + " " + error);
+                    unlockScreen();
+                });
+            }
+
+            function receiveArticleAtBranch(id) {
+                lockScreen();
+                $.post("/umbraco/surface/OrderItemDeliverySurface/SetArticleAvailableForPickupAtBranch", {
+                    nodeId: id
+                }, function (json) {
+                    if (json.Success) {
+                        $("#statusActions").html("Artikel levererad.");
                     } else {
                         alert(json.Message);
                     }
@@ -168,9 +185,13 @@
                 <div class="row">
                     <div class="col-sm-10">@item.StatusString</div>
                     <div id="statusActions" class="col-sm-2 text-right">
-                        @if (item.StatusString == "Transport")
+                        @if (item.Type == "Bok" && item.StatusString == "Transport")
                         {
                             <button type="submit" class="btn btn-success" onclick="receiveBookAtBranch(@item.NodeId)">Ta emot</button>
+                        }
+                        @if (item.Type == "Artikel" && item.StatusString == "Transport")
+                        {
+                            <button type="submit" class="btn btn-success" onclick="receiveArticleAtBranch(@item.NodeId)">Ta emot</button>
                         }
                         @if ((item.Type == "Bok" && item.StatusString == "Infodisk") || item.StatusString == "Utlånad")
                         {
