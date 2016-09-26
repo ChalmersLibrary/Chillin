@@ -1258,7 +1258,7 @@ namespace Chalmers.ILL.OrderItems
 
         private void OnTypeChanged(OrderItemModel orderItem, int newTypeId)
         {
-            SetDeliveryLibraryIfNewTypeIsArtikel(orderItem, newTypeId);
+            // NOP
         }
 
         private void UpdateLastDeliveryStatusWhenProper(OrderItemModel orderItem, int newStatusId)
