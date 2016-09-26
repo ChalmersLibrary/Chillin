@@ -79,6 +79,13 @@
             <br />
             <br />
             <br />
+            <div style="float:right">
+                @{
+                    string barcodeurl = "http://barcode.tec-it.com/barcode.ashx?translate-esc=off&data=" + Model.OrderItem.OrderId + "&code=Code128&unit=Fit&dpi=96&imagetype=Gif&rotation=0&color=000000&bgcolor=FFFFFF&qunit=Mm&quiet=0";
+                    //string barcodeurl = "http://barcodes4.me/barcode/c39/" + @Model.OrderItem.OrderId + ".png";
+                    <img width="300" src=@barcodeurl /><br />
+                }
+            </div>
             <img src="~/images/cth_logo.png" width="148pt" /><br />
             <br />
             <p>
