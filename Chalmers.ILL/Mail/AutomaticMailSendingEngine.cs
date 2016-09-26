@@ -1,10 +1,5 @@
-﻿using Examine;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Chalmers.ILL.Extensions;
-using System.Globalization;
 using Chalmers.ILL.Templates;
 using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.OrderItems;
@@ -89,18 +84,6 @@ namespace Chalmers.ILL.Mail
                         delayedMailOperation.ShouldBeProcessed = true;
                     }
                 }
-                else if (status.Contains("Transport"))
-                {
-                    if (now.Date >= deliveryDate.AddDays(2))
-                    {
-                        delayedMailOperation.LogMessages.Add(new LogMessage("LOG", "Transport antas vara genomförd."));
-                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", _orderItemManager.GetOrderItem(orderItem.NodeId));
-                        delayedMailOperation.LogMessages.Add(new LogMessage("MAIL_NOTE", "Skickat automatiskt leveransmail till " + delayedMailOperation.Mail.recipientEmail));
-                        delayedMailOperation.LogMessages.Add(new LogMessage("MAIL", delayedMailOperation.Mail.message));
-                        delayedMailOperation.NewStatus = "05:Levererad";
-                        delayedMailOperation.ShouldBeProcessed = true;
-                    }
-                }
 
                 if (delayedMailOperation.ShouldBeProcessed)
                 {
@@ -135,7 +118,7 @@ namespace Chalmers.ILL.Mail
 
         private IEnumerable<OrderItemModel> GetOrderItemsThatAreRelevantForAutomaticMailSending()
         {
-            return _orderItemSearcher.Search("Status:Utlånad OR Status:Krävd OR Status:Transport");
+            return _orderItemSearcher.Search("Status:Utlånad OR Status:Krävd");
         }
 
         private class LogMessage
