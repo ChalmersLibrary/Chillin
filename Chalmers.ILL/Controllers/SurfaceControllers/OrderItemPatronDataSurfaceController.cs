@@ -181,20 +181,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
-            if (orderItem.Type.Contains("Bok"))
+            if (sierraModel.home_library != null && sierraModel.home_library.Contains("hbib"))
             {
-                if (sierraModel.home_library != null && sierraModel.home_library.Contains("hbib"))
-                {
-                    _orderItemManager.SetDeliveryLibrary(nodeId, "Huvudbiblioteket", eventId, false, false);
-                }
-                else if (sierraModel.home_library != null && sierraModel.home_library.Contains("abib"))
-                {
-                    _orderItemManager.SetDeliveryLibrary(nodeId, "Arkitekturbiblioteket", eventId, false, false);
-                }
-                else if (sierraModel.home_library != null && sierraModel.home_library.Contains("lbib"))
-                {
-                    _orderItemManager.SetDeliveryLibrary(nodeId, "Lindholmenbiblioteket", eventId, false, false);
-                }
+                _orderItemManager.SetDeliveryLibrary(nodeId, "Huvudbiblioteket", eventId, false, false);
+            }
+            else if (sierraModel.home_library != null && sierraModel.home_library.Contains("abib"))
+            {
+                _orderItemManager.SetDeliveryLibrary(nodeId, "Arkitekturbiblioteket", eventId, false, false);
+            }
+            else if (sierraModel.home_library != null && sierraModel.home_library.Contains("lbib"))
+            {
+                _orderItemManager.SetDeliveryLibrary(nodeId, "Lindholmenbiblioteket", eventId, false, false);
             }
         }
 
