@@ -19,6 +19,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemReceiveBookSurfaceController : SurfaceController
     {
         public static int EVENT_TYPE { get { return 10; } }
+        public static int BOOK_RECEIVED_AT_BRANCH_EVENT_TYPE { get { return 25; } }
 
         IUmbracoWrapper _umbraco;
         IOrderItemManager _orderItemManager;
@@ -184,7 +185,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 pack.readOnlyAtLibrary = orderItem.ReadOnlyAtLibrary;
                 pack.mailData.recipientEmail = orderItem.PatronEmail;
 
-                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                var eventId = _orderItemManager.GenerateEventId(BOOK_RECEIVED_AT_BRANCH_EVENT_TYPE);
 
                 if (pack.readOnlyAtLibrary)
                 {

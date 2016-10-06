@@ -25,6 +25,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemDeliverySurfaceController : SurfaceController
     {
         public static int EVENT_TYPE { get { return 9; } }
+        public static int ARTICLE_SENT_TO_BRANCH_EVENT_TYPE { get { return 26; } }
 
         IOrderItemManager _orderItemManager;
         IUmbracoWrapper _umbraco;
@@ -186,7 +187,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                var eventId = _orderItemManager.GenerateEventId(ARTICLE_SENT_TO_BRANCH_EVENT_TYPE);
                 _orderItemManager.AddLogItem(nodeId, "LEVERERAD", "Leveranstyp: " + delivery, eventId, false, false);
                 _orderItemManager.AddLogItem(nodeId, "LOG", logEntry, eventId, false, false);
                 _orderItemManager.SetStatus(nodeId, "13:Transport", eventId);

@@ -31,8 +31,10 @@ namespace Chalmers.ILL.Models.PartialPage
             {20, "Order skapad från maildata"},
             {21, "Mail från låntagare mottaget"},
             {22, "Mail mottaget (ej låntagare)"},
-            {23, "Bok återlämnad av låntagare." },
-            {24, "Bok utlånad." }
+            {23, "Bok återlämnad av låntagare" },
+            {24, "Bok utlånad" },
+            {25, "Bok mottagen i lånedisk" },
+            {26, "Artikel skickad till filial" }
         };
 
         public ChalmersILLOrderItemModel(OrderItemModel orderItemModel) : base(orderItemModel) { }
