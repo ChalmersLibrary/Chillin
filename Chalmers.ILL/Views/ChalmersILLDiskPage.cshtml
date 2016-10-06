@@ -228,13 +228,13 @@
                         {
                             <button type="submit" class="btn btn-success" onclick="receiveArticleAtBranch(@item.NodeId)">Ta emot</button>
                         }
-                        @if ((item.Type == "Bok" && item.StatusString == "Infodisk") || item.StatusString == "Utlånad")
-                        {
-                            <button type="submit" class="btn btn-success" onclick="returnBook(@item.NodeId,'@item.DeliveryLibrary');">Returnera</button>
-                        }
                         @if (item.StatusString == "Infodisk" && !item.ReadOnlyAtLibrary)
                         {
                             <button type="submit" class="btn btn-success" onclick="lendBook(@item.NodeId)">Låna ut</button>
+                        }
+                        @if ((item.Type == "Bok" && item.StatusString == "Infodisk") || item.StatusString == "Utlånad")
+                        {
+                            <button type="submit" class="btn btn-success" onclick="returnBook(@item.NodeId,'@item.DeliveryLibrary');">Returnera</button>
                         }
                     </div>
                 </div>
