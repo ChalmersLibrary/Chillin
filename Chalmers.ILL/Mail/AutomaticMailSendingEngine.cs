@@ -25,8 +25,10 @@ namespace Chalmers.ILL.Mail
             _mailService = mailService;
         }
 
-        public void SendOutMailsThatAreDue()
+        public IEnumerable<MailOperationResult> SendOutMailsThatAreDue()
         {
+            var res = new List<MailOperationResult>();
+
             // Grab the date and use it for all e-mails during this run.
             var now = DateTime.Now;
 
@@ -93,25 +95,42 @@ namespace Chalmers.ILL.Mail
 
             // Send out all the delayed mails now, so that the IndexReader is not used and gets broken.
             foreach (var delayedMailOperation in delayedMailOperations) {
-                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
-
-                if (delayedMailOperation.Mail != null)
+                var mailOperationResult = new MailOperationResult()
                 {
-                    _mailService.SendMail(delayedMailOperation.Mail);
-                }
-
-                for (int i=0; i<delayedMailOperation.LogMessages.Count; i++)
+                    Success = true,
+                    Message = "Mail operation successfull.",
+                    MailOperation = delayedMailOperation
+                };
+                try
                 {
-                    var logMsg = delayedMailOperation.LogMessages[i];
-                    var shouldReindexAndSignal = String.IsNullOrWhiteSpace(delayedMailOperation.NewStatus) && i == delayedMailOperation.LogMessages.Count - 1;
-                    _orderItemManager.AddLogItem(delayedMailOperation.InternalOrderId, logMsg.type, logMsg.message, eventId, shouldReindexAndSignal, shouldReindexAndSignal);
-                }
+                    var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
 
-                if (!String.IsNullOrWhiteSpace(delayedMailOperation.NewStatus))
-                {
-                    _orderItemManager.SetStatus(delayedMailOperation.InternalOrderId, delayedMailOperation.NewStatus, eventId, true, true);
+                    if (delayedMailOperation.Mail != null)
+                    {
+                        _mailService.SendMail(delayedMailOperation.Mail);
+                    }
+
+                    for (int i = 0; i < delayedMailOperation.LogMessages.Count; i++)
+                    {
+                        var logMsg = delayedMailOperation.LogMessages[i];
+                        var shouldReindexAndSignal = String.IsNullOrWhiteSpace(delayedMailOperation.NewStatus) && i == delayedMailOperation.LogMessages.Count - 1;
+                        _orderItemManager.AddLogItem(delayedMailOperation.InternalOrderId, logMsg.type, logMsg.message, eventId, shouldReindexAndSignal, shouldReindexAndSignal);
+                    }
+
+                    if (!String.IsNullOrWhiteSpace(delayedMailOperation.NewStatus))
+                    {
+                        _orderItemManager.SetStatus(delayedMailOperation.InternalOrderId, delayedMailOperation.NewStatus, eventId, true, true);
+                    }
                 }
+                catch (Exception e)
+                {
+                    mailOperationResult.Success = false;
+                    mailOperationResult.Message = "Delayed mail operation failed: " + e.Message;
+                }
+                res.Add(mailOperationResult);
             }
+
+            return res;
         }
 
         #region Private methods.
@@ -119,39 +138,6 @@ namespace Chalmers.ILL.Mail
         private IEnumerable<OrderItemModel> GetOrderItemsThatAreRelevantForAutomaticMailSending()
         {
             return _orderItemSearcher.Search("Status:Utlånad OR Status:Krävd");
-        }
-
-        private class LogMessage
-        {
-            public string type { get; set; }
-            public string message { get; set; }
-
-            public LogMessage(string type, string message)
-            {
-                this.type = type;
-                this.message = message;
-            }
-        }
-
-        private class DelayedMailOperation
-        {
-            public int InternalOrderId { get; set; }
-            public OutgoingMailModel Mail { get; set; }
-            public List<LogMessage> LogMessages { get; set; }
-            public string NewStatus { get; set; }
-            public bool ShouldBeProcessed { get; set; }
-
-            public DelayedMailOperation(int internalOrderId, OutgoingMailModel mail)
-            {
-                this.InternalOrderId = internalOrderId;
-                this.Mail = mail;
-                LogMessages = new List<LogMessage>();
-                ShouldBeProcessed = false;
-            }
-
-            public DelayedMailOperation(int orderId) : this(orderId, null) {}
-            public DelayedMailOperation(int internalOrderId, string orderId, string patronName, string patronEmail) : 
-                this(internalOrderId, new OutgoingMailModel(orderId, patronName, patronEmail)) {}
         }
 
         #endregion

@@ -92,13 +92,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         [HttpPost]
         public ActionResult SendOutAutomaticMailsThatAreDue()
         {
-            var res = new ResultResponse();
+            var res = new ResultResponseWithData();
 
             try
             {
                 if (IsRequestAuthorized())
                 {
-                    _automaticMailSendingEngine.SendOutMailsThatAreDue();
+                    res.Data = _automaticMailSendingEngine.SendOutMailsThatAreDue();
                     res.Success = true;
                     res.Message = "Successfully sent out all the mail that should be sent out.";
                 }

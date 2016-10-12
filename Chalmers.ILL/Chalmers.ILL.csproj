@@ -471,10 +471,13 @@
     <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Mail\AutomaticMailSendingEngine.cs" />
+    <Compile Include="Mail\MailOperationResult.cs" />
     <Compile Include="Mail\ChalmersOrderItemsMailSource.cs" />
+    <Compile Include="Mail\DelayedMailOperation.cs" />
     <Compile Include="Mail\IAutomaticMailSendingEngine.cs" />
     <Compile Include="Mail\IExchangeMailWebApi.cs" />
     <Compile Include="Mail\IMailService.cs" />
+    <Compile Include="Mail\LogMessage.cs" />
     <Compile Include="Mail\MailService.cs" />
     <Compile Include="MediaItems\AzureStorageEmulatorManager.cs" />
     <Compile Include="MediaItems\BlobStorageMediaItemManager.cs" />
@@ -534,6 +537,7 @@
     <Compile Include="Models\PartialPage\Settings\ChangePassword.cs" />
     <Compile Include="Models\PartialPage\Settings\EditTemplates.cs" />
     <Compile Include="Models\PartialPage\Settings\ModifyProviderData.cs" />
+    <Compile Include="Models\ResultResponseWithData.cs" />
     <Compile Include="Models\ResultResponseWithStringData.cs" />
     <Compile Include="Models\Template.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLEditTemplatesModel.cs" />
