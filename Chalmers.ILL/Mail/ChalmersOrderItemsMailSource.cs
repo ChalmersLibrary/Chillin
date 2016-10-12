@@ -441,8 +441,7 @@ namespace Chalmers.ILL.Mail
             string ret = null;
 
             // Search for our items
-            var results = _orderItemSearcher.Search(@"nodeTypeAlias:ChalmersILLOrderItem AND 
-                (Status:01\:Ny OR Status:02\:Åtgärda OR Status:03\:Beställd OR Status:04\:Väntar OR Status:09\:Mottagen)");
+            var results = _orderItemSearcher.Search(@"status:01\:Ny OR status:02\:Åtgärda OR status:03\:Beställd OR status:04\:Väntar OR status:09\:Mottagen");
             string providerOrderId;
             string orderId;
             foreach (var result in results)

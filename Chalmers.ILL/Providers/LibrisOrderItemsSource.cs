@@ -221,8 +221,7 @@ namespace Chalmers.ILL.Providers
 
             var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
 
-            var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
-                SeedId:" + seedId);
+            var query = searchCriteria.RawQuery(@"seedId:" + seedId);
 
             return searcher.Search(query).Count() > 0;
         }
@@ -234,8 +233,7 @@ namespace Chalmers.ILL.Providers
 
             var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
 
-            var query = searchCriteria.RawQuery(@"nodeTypeAlias:ChalmersILLOrderItem AND 
-                (Status:01\:Ny OR 
+            var query = searchCriteria.RawQuery(@"(Status:01\:Ny OR 
                  Status:02\:Åtgärda OR
                  Status:03\:Beställd OR
                  Status:04\:Väntar OR
