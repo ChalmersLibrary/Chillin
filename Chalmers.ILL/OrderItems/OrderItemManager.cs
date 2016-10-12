@@ -880,7 +880,6 @@ namespace Chalmers.ILL.OrderItems
 
         private void OnTypeChanged(IContent content, int newTypeId)
         {
-            SetDeliveryLibraryIfNewTypeIsArtikel(content, newTypeId);
         }
 
         private void UpdateLastDeliveryStatusWhenProper(IContent content, int newStatusId)
@@ -904,13 +903,6 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
-        private void SetDeliveryLibraryIfNewTypeIsArtikel(IContent content, int newTypeId)
-        {
-            if (newTypeId == _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Artikel"))
-            {
-                content.SetValue("deliveryLibrary", _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket"));
-            }
-        }
 
         private string UrlDecodeAndEscapeAllLinks(string str)
         {
