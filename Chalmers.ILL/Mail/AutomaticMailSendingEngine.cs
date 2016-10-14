@@ -137,7 +137,7 @@ namespace Chalmers.ILL.Mail
 
         private IEnumerable<OrderItemModel> GetOrderItemsThatAreRelevantForAutomaticMailSending()
         {
-            return _orderItemSearcher.Search("Status:Utlånad OR Status:Krävd");
+            return _orderItemSearcher.Search("status:Utlånad OR status:Krävd");
         }
 
         #endregion

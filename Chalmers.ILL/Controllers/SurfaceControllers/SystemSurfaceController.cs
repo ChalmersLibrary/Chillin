@@ -98,9 +98,24 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 if (IsRequestAuthorized())
                 {
-                    res.Data = _automaticMailSendingEngine.SendOutMailsThatAreDue();
+                    var mailOperationResults = _automaticMailSendingEngine.SendOutMailsThatAreDue();
                     res.Success = true;
-                    res.Message = "Successfully sent out all the mail that should be sent out.";
+
+                    foreach (var mailOperationResult in mailOperationResults)
+                    {
+                        res.Success &= mailOperationResult.Success;
+                    }
+
+                    res.Data = mailOperationResults;
+
+                    if (res.Success)
+                    {
+                        res.Message = "Successfully processed all the pending mail operations.";
+                    }
+                    else
+                    {
+                        res.Message = "One or more mail operations failed.";
+                    }
                 }
                 else
                 {

@@ -35,7 +35,7 @@
                 </div>
             </div>
         </form>
-        <button class="btn btn-danger" type="button" onclick="lockScreen(); $.post('/umbraco/surface/SystemSurface/SendOutAutomaticMailsThatAreDue', {}, unlockScreen);">Skicka ut automatiska mail</button>
+        <button class="btn btn-danger" type="button" onclick="lockScreen(); $.post('/umbraco/surface/SystemSurface/SendOutAutomaticMailsThatAreDue', {}, function (data) { alert(JSON.stringify(data)); unlockScreen(); });">Skicka ut automatiska mail</button>
     }
 }
 
