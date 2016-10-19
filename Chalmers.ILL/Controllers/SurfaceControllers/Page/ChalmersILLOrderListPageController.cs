@@ -2,6 +2,7 @@
 using Chalmers.ILL.Models.Page;
 using Chalmers.ILL.OrderItems;
 using System;
+using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using Umbraco.Web.Models;
 using Umbraco.Web.Mvc;
@@ -27,7 +28,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
 
             if (!String.IsNullOrEmpty(Request.QueryString["query"]))
             {
-                customModel.PendingOrderItems = _orderItemSearcher.Search(Request.Params["query"].ToString());
+                var queryString = Request.QueryString["query"].Trim();
+
+                if (IsOrderId(queryString))
+                {
+                    queryString = "\"" + queryString + "\"";
+                }
+
+                customModel.PendingOrderItems = _orderItemSearcher.Search(queryString);
             }
             else
             {
@@ -38,5 +46,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
 
             return CurrentTemplate(customModel);
         }
+
+        #region Private methods
+
+        private bool IsOrderId(string text)
+        {
+            var orderIdPattern = new Regex("^cthb-[a-zA-Z0-9]{8}-[0-9]+$");
+
+            return orderIdPattern.IsMatch(text);
+        }
+
+        #endregion
     }
 }
