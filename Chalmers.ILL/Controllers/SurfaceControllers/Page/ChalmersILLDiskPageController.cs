@@ -32,7 +32,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
 
             if (!String.IsNullOrEmpty(Request.QueryString["query"]))
             {
-                customModel.OrderItems = _searcher.Search("\"" + Request.Params["query"] + "\"");
+                customModel.OrderItems = _searcher.Search("\"" + Request.Params["query"].Trim() + "\"");
             }
 
             return CurrentTemplate(customModel);
