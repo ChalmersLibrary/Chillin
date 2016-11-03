@@ -36,8 +36,9 @@ namespace Chalmers.ILL.MediaItems
             CloudBlobContainer container = blobClient.GetContainerReference(containerName);
             container.CreateIfNotExists();
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(id.ToString());
-            
+
             // Store the object.
+            data.Position = 0;
             blockBlob.UploadFromStream(data);
 
             // Store the metadata.
