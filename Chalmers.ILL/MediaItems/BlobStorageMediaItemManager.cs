@@ -43,7 +43,7 @@ namespace Chalmers.ILL.MediaItems
             // Store the metadata.
             var createDate = DateTime.Now;
             blockBlob.FetchAttributes();
-            blockBlob.Metadata["name"] = name;
+            blockBlob.Metadata["name"] = Uri.EscapeUriString(name);
             blockBlob.Metadata["orderItemNodeId"] = orderItemNodeId.ToString();
             blockBlob.Metadata["createDate"] = createDate.ToString("o");
             blockBlob.SetMetadata();

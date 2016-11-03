@@ -320,8 +320,10 @@ namespace Chalmers.ILL.Mail
                                     {
                                         var savedMediaItem = _mediaItemManager.CreateMediaItem(attachment.Title, item.OrderItemNodeId, item.OrderId, attachment.Data, attachment.ContentType);
 
-                                        // Dispose stream that is no longer needed. Handle this in some better way?
-                                        savedMediaItem.Data.Dispose();
+                                        if (attachment.Data != null)
+                                        {
+                                            attachment.Data.Dispose();
+                                        }
 
                                         _orderItemManager.AddExistingMediaItemAsAnAttachment(item.OrderItemNodeId, savedMediaItem.Id, attachment.Title, savedMediaItem.Url, eventId, false, false);
                                     }
