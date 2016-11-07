@@ -39,13 +39,14 @@ namespace Chalmers.ILL.OrderItems
         {
             var res = SimpleSearch("NOT status:(Ny OR Annullerad OR Inköpt OR Överförd) AND NOT providerName:(\"libris\" OR \"subito\" OR \"tib\")")
                 .Where(x => !String.IsNullOrWhiteSpace(x.ProviderName)).Select(x => x.ProviderName).ToList();
-            res.Add("Libris");
-            res.Add("Subito");
-            res.Add("TIB");
-            return res.GroupBy(x => x)
+            res = res.GroupBy(x => x)
                 .OrderByDescending(x => x.Count())
                 .Select(x => x.Key)
                 .ToList();
+            res.Insert(0, "TIB");
+            res.Insert(0, "Libris");
+            res.Insert(0, "Subito");
+            return res;
         }
 
         #region Private methods
