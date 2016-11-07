@@ -81,6 +81,11 @@ namespace Chalmers.ILL.OrderItems
                     {
                         orderItem.AttachmentList = orderItem.AttachmentList.OrderBy(x => x.Title).ToList();
                         orderItem.LogItemsList = orderItem.LogItemsList.OrderByDescending(x => x.CreateDate).ToList();
+
+                        if (String.IsNullOrWhiteSpace(orderItem.SierraInfo.home_library_pretty_name))
+                        {
+                            orderItem.SierraInfo.home_library_pretty_name = GetPrettyLibraryNameFromLibraryAbbreviation(orderItem.SierraInfo.home_library);
+                        }
                     }
 
                     if (orderItems.Count() == 0)
@@ -132,6 +137,11 @@ namespace Chalmers.ILL.OrderItems
                     {
                         orderItem.AttachmentList = orderItem.AttachmentList.OrderBy(x => x.Title).ToList();
                         orderItem.LogItemsList = orderItem.LogItemsList.OrderByDescending(x => x.CreateDate).ToList();
+
+                        if (String.IsNullOrWhiteSpace(orderItem.SierraInfo.home_library_pretty_name))
+                        {
+                            orderItem.SierraInfo.home_library_pretty_name = GetPrettyLibraryNameFromLibraryAbbreviation(orderItem.SierraInfo.home_library);
+                        }
                     }
 
                     if (orderItems.Count() == 0)
@@ -831,6 +841,7 @@ namespace Chalmers.ILL.OrderItems
                     orderItem.SierraInfo.email = newSierraInfo.email;
                     orderItem.SierraInfo.first_name = newSierraInfo.first_name;
                     orderItem.SierraInfo.home_library = newSierraInfo.home_library;
+                    orderItem.SierraInfo.home_library_pretty_name = GetPrettyLibraryNameFromLibraryAbbreviation(newSierraInfo.home_library);
                     orderItem.SierraInfo.id = newSierraInfo.id;
                     orderItem.SierraInfo.last_name = newSierraInfo.last_name;
                     orderItem.SierraInfo.mblock = newSierraInfo.mblock;
@@ -1430,6 +1441,24 @@ namespace Chalmers.ILL.OrderItems
             orderItem.ContentVersionsCount = 0;
 
             orderItem.DeliveryLibrarySameAsHomeLibrary = IsDeliveryLibrarySameAsHomeLibrary(orderItem);
+        }
+
+        private string GetPrettyLibraryNameFromLibraryAbbreviation(string libraryName)
+        {
+            var res = "Okänt bibliotek";
+            if (libraryName != null && libraryName.Contains("hbib"))
+            {
+                res = "Huvudbiblioteket";
+            }
+            else if (libraryName != null && libraryName.Contains("lbib"))
+            {
+                res = "Lindholmenbiblioteket";
+            }
+            else if (libraryName != null && libraryName.Contains("abib"))
+            {
+                res = "Arkitekturbiblioteket";
+            }
+            return res;
         }
 
         #endregion
