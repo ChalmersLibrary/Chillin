@@ -2,6 +2,7 @@
 using System.Linq;
 using Chalmers.ILL.Models;
 using Nest;
+using System;
 
 namespace Chalmers.ILL.OrderItems
 {
@@ -31,23 +32,38 @@ namespace Chalmers.ILL.OrderItems
 
         public IEnumerable<OrderItemModel> Search(string query)
         {
+            return SimpleSearch(query);
+        }
+
+        public IEnumerable<string> AggregatedProviders()
+        {
+            var res = SimpleSearch("NOT status:(Ny OR Annullerad OR Inköpt OR Överförd) AND NOT providerName:(\"libris\" OR \"subito\" OR \"tib\")")
+                .Where(x => !String.IsNullOrWhiteSpace(x.ProviderName)).Select(x => x.ProviderName).ToList();
+            res.Add("Libris");
+            res.Add("Subito");
+            res.Add("TIB");
+            return res.GroupBy(x => x)
+                .OrderByDescending(x => x.Count())
+                .Select(x => x.Key)
+                .ToList();
+        }
+
+        #region Private methods
+
+        private IEnumerable<OrderItemModel> SimpleSearch(string query)
+        {
             return _elasticClient.Search<OrderItemModel>(s => s
                 .From(0)
                 .Size(10000)
                 .AllTypes()
                 .Query(q => q
-                    .Bool(b => 
-                        b.Must(m => 
-                            m.QueryString(qs => 
+                    .Bool(b =>
+                        b.Must(m =>
+                            m.QueryString(qs =>
                                 qs.DefaultField("_all")
                                 .Query(query)))))).Hits.Select(x => x.Source);
         }
 
-        public IEnumerable<string> AggregatedProviders()
-        {
-            var res = _elasticClient.Search<OrderItemModel>(s => s.Aggregations(a => a.Terms("AggregatedProviders", st => st.Field(o => o.ProviderName).Size(10000))));
-
-            return res.Aggs.Terms("AggregatedProviders").Buckets.Select(x => x.Key);
-        }
+        #endregion
     }
 }
