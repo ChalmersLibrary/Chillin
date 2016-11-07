@@ -37,7 +37,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // Get a new OrderItem populated with values for this node
             var pageModel = new ChalmersILLActionProviderModel(_orderItemManager.GetOrderItem(nodeId));
 
-            pageModel.Providers = _providerService.FetchAndCreateListOfUsedProviders();
+            pageModel.Providers = _providerService.FetchAndCreateListOfUsedProviders().ToList();
             var deliveryTimeInHours = _providerService.GetSuggestedDeliveryTimeInHoursForProvider(pageModel.OrderItem.ProviderName);
             pageModel.EstimatedDeliveryCurrentProvider = DateTime.Now.AddHours(deliveryTimeInHours);
 

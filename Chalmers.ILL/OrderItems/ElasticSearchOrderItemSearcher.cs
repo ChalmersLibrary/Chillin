@@ -42,5 +42,12 @@ namespace Chalmers.ILL.OrderItems
                                 qs.DefaultField("_all")
                                 .Query(query)))))).Hits.Select(x => x.Source);
         }
+
+        public IEnumerable<string> AggregatedProviders()
+        {
+            var res = _elasticClient.Search<OrderItemModel>(s => s.Aggregations(a => a.Terms("AggregatedProviders", st => st.Field(o => o.ProviderName).Size(10000))));
+
+            return res.Aggs.Terms("AggregatedProviders").Buckets.Select(x => x.Key);
+        }
     }
 }

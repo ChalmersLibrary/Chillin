@@ -14,6 +14,11 @@ namespace Chalmers.ILL.OrderItems
             // Handled automatically by Umbraco.
         }
 
+        public IEnumerable<string> AggregatedProviders()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Deleted(OrderItemModel item)
         {
             // Handled automatically by Umbraco.

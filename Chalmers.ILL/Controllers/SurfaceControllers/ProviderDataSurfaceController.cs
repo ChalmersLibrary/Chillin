@@ -36,7 +36,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var pageModel = new Models.PartialPage.Settings.ModifyProviderData();
 
-            pageModel.Providers = _providerService.FetchAndCreateListOfUsedProviders();
+            pageModel.Providers = _providerService.FetchAndCreateListOfUsedProviders().ToList();
 
             return PartialView("Settings/ModifyProviderData", pageModel);
         }

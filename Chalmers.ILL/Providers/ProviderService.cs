@@ -19,19 +19,9 @@ namespace Chalmers.ILL.Providers
             _orderItemsSearcher = orderItemsSearcher;
         }
 
-        public List<String> FetchAndCreateListOfUsedProviders()
+        public IEnumerable<String> FetchAndCreateListOfUsedProviders()
         {
-            var res = new List<String>();
-
-            // NOTE: Should probably only fetch orders that are not too old, to keep the numbers down and to keep the data relevant.
-            var allOrders = _orderItemsSearcher.Search("*:*");
-
-            return allOrders.Where(x => x.ProviderName != "")
-                .Select(x => x.ProviderName)
-                .GroupBy(x => x)
-                .OrderByDescending(x => x.Count())
-                .Select(x => x.Key)
-                .ToList();
+            return _orderItemsSearcher.AggregatedProviders();
         }
 
         public int GetSuggestedDeliveryTimeInHoursForProvider(string providerName)
