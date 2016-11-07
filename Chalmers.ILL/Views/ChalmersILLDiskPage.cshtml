@@ -78,8 +78,16 @@
                             }
                             else if (firstOrderItem.Type == "Bok" && firstOrderItem.StatusString == "Utlånad")
                             {
-                                <h3>1. Välj "Returnera" på rätt bok i listan nedan.</h3>
-                                <h3>2. Skicka tillbaks boken till Huvudbiblioteket.</h3>
+                                if (firstOrderItem.DeliveryLibrary == "Huvudbiblioteket")
+                                {
+                                    <h3>1. Välj "Returnera" på rätt bok i listan nedan.</h3>
+                                    <h3>2. Ställ boken på hyllan för återlämnade fjärrlån.</h3>
+                                }
+                                else
+                                {
+                                    <h3>1. Välj "Returnera" på rätt bok i listan nedan.</h3>
+                                    <h3>2. Skicka tillbaks boken till Huvudbiblioteket. Bifoga returslip.</h3>
+                                }
                             }
                             else if (firstOrderItem.Type == "Artikel" && firstOrderItem.StatusString == "Transport")
                             {
@@ -158,11 +166,7 @@
                     nodeId: id
                 }, function (json) {
                     if (json.Success) {
-                        if (deliveryLibrary === "Huvudbiblioteket") {
-                            $("#statusActions").html("Bok återlämnad. Den ska nu ställas i återlämningshyllan.");
-                        } else {
-                            $("#statusActions").html("Bok återlämnad. Den ska nu transporteras tillbaks till fjärrlåneavdelningen.");
-                        }
+                        $("#statusActions").html("Bok återlämnad.");
                     } else {
                         alert(json.Message);
                     }
