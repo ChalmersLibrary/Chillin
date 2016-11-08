@@ -3,6 +3,7 @@ using System.Linq;
 using Chalmers.ILL.Models;
 using Nest;
 using System;
+using Newtonsoft.Json;
 
 namespace Chalmers.ILL.OrderItems
 {
@@ -17,17 +18,36 @@ namespace Chalmers.ILL.OrderItems
 
         public void Added(OrderItemModel item)
         {
-            _elasticClient.Index(item, x => x.Id(item.NodeId));
+            var indexResponse = _elasticClient.Index(item, x => x.Id(item.NodeId));
+
+            if (indexResponse.CallDetails == null || !indexResponse.CallDetails.Success)
+            {
+                throw new OrderItemSearchIndexingException("Failed to index added order item. Reason: " + indexResponse.DebugInformation + "; Data:" + JsonConvert.SerializeObject(item));
+            }                    
         }
 
         public void Deleted(OrderItemModel item)
         {
-            _elasticClient.Delete<OrderItemModel>(item.NodeId);
+            var deleteResponse = _elasticClient.Delete<OrderItemModel>(item.NodeId);
+
+            if (!deleteResponse.Found)
+            {
+                throw new OrderItemSearchIndexingException("Couldn't find order item for deletion from search index. Data:" + JsonConvert.SerializeObject(item));
+            }
+            else if (deleteResponse.CallDetails == null || !deleteResponse.CallDetails.Success)
+            {
+                throw new OrderItemSearchIndexingException("Failed to delete order item. Reason: " + deleteResponse.DebugInformation + "; Data:" + JsonConvert.SerializeObject(item));
+            }
         }
 
         public void Modified(OrderItemModel item)
         {
-            _elasticClient.Index(item, x => x.Id(item.NodeId));
+            var indexResponse = _elasticClient.Index(item, x => x.Id(item.NodeId));
+
+            if (indexResponse.CallDetails == null || !indexResponse.CallDetails.Success)
+            {
+                throw new OrderItemSearchIndexingException("Failed to index modified order item. Reason: " + indexResponse.DebugInformation + "; Data:" + JsonConvert.SerializeObject(item));
+            }
         }
 
         public IEnumerable<OrderItemModel> Search(string query)

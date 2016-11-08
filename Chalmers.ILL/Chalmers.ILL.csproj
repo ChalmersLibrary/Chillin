@@ -433,6 +433,7 @@
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Configuration\DefaultChillinConfiguration.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
+    <Compile Include="Controllers\OrderItemSearchSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\BookCirculationSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\MediaItemSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemClaimSurfaceController.cs" />
@@ -570,6 +571,7 @@
     <Compile Include="OrderItems\ISourceFactory.cs" />
     <Compile Include="OrderItems\BulkDataManager.cs" />
     <Compile Include="OrderItems\OrderItemNotFoundException.cs" />
+    <Compile Include="OrderItems\OrderItemSearchIndexingException.cs" />
     <Compile Include="OrderItems\SaveException.cs" />
     <Compile Include="OrderItems\SourcePollingException.cs" />
     <Compile Include="OrderItems\SourcePollingResult.cs" />
