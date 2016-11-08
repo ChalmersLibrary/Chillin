@@ -26,7 +26,7 @@ if (scalar @ARGV eq 2) {
     
     while (my $nodeId = <$fh>) {
         chomp $nodeId;
-        print_everywhere("Moving order item with ID = $nodeId...   ");
+        print_everywhere("Calling POST API method with value = $nodeId...   ");
         my $ua = LWP::UserAgent->new;
         my $res = $ua->request(POST $url, [nodeId => $nodeId]);
         if ($res->is_success) {
@@ -56,8 +56,8 @@ if (scalar @ARGV eq 2) {
 
 sub print_help {
     print "\n";
-    print "Usage: migration-from-legacy-storage.pl [URL] [FILE]\n";
-    print "Read node IDs from specified file and move them from legacy storage to new storage using the POST method at the given URL.\n";
+    print "Usage: [SCRIPT FILENAME] [URL] [FILE]\n";
+    print "Read values from specified file and call the POST API method at the given URL with each value.\n";
 }
 
 sub print_everywhere {
