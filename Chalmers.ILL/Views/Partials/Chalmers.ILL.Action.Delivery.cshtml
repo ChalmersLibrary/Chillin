@@ -23,12 +23,15 @@
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleByMailOrInternalMailDeliveryType" data-delivery-type="internpost" onclick="selectDeliveryType(this); event.preventDefault();">Direktleverans via internpost</a>
                         </li>
+                        @if(Model.OrderItem.SierraInfo.home_library == "hbib") {
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleInInfodiskDeliveryType" data-delivery-type="infodisk" onclick="selectDeliveryType(this); event.preventDefault();">Avhämtning i infodisk</a>
                         </li>
+                        } else { 
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleInTransitDeliveryType" data-delivery-type="transport" onclick="selectDeliveryType(this); event.preventDefault();">Internpost till filial</a>
                         </li>
+                        }
                     </ul>
                 </div>
             }
