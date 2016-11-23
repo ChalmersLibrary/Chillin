@@ -8,7 +8,7 @@ using System.Web.Mvc;
 using Umbraco.Core.Logging;
 using Umbraco.Web.Mvc;
 
-namespace Chalmers.ILL.Controllers
+namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class OrderItemSearchSurfaceController : SurfaceController
     {
