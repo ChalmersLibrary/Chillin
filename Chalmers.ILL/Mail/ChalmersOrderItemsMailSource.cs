@@ -110,18 +110,24 @@ namespace Chalmers.ILL.Mail
                                 item.OrderId = orderIdPattern.Match(item.Subject).Groups[1].Value;
                                 item.OrderItemNodeId = Convert.ToInt32(item.OrderId.Split('-').Last());
                                 item.Type = MailQueueType.REPLY;
+
+                                FixLegacyNodeIds(item);
                             }
                             else if (item.To.Contains("+cthb-"))
                             {
                                 item.OrderId = orderIdPattern.Match(item.To).Groups[1].Value;
                                 item.OrderItemNodeId = Convert.ToInt32(item.OrderId.Split('-').Last());
                                 item.Type = MailQueueType.REPLY;
+
+                                FixLegacyNodeIds(item);
                             }
                             else if (deliveryOrderId != null)
                             {
                                 item.OrderId = deliveryOrderId;
                                 item.OrderItemNodeId = Convert.ToInt32(deliveryOrderId.Split('-').Last());
                                 item.Type = MailQueueType.DELIVERY;
+
+                                FixLegacyNodeIds(item);
                             }
                             else
                             {
@@ -503,6 +509,15 @@ namespace Chalmers.ILL.Mail
                 }
             }
             return ret;
+        }
+
+        private void FixLegacyNodeIds(MailQueueModel mailModel)
+        {
+            if (mailModel.OrderItemNodeId < 100000)
+            {
+                var order = _orderItemManager.GetOrderItem(mailModel.OrderId);
+                mailModel.OrderItemNodeId = order.NodeId;
+            }
         }
     }
 }
