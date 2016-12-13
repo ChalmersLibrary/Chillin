@@ -11,10 +11,5 @@ namespace Chalmers.ILL.Migrations
         {
             AutomaticMigrationsEnabled = false;
         }
-
-        protected override void Seed(Chalmers.ILL.Database.OrderItemsDbContext context)
-        {
-            context.Database.ExecuteSqlCommand("DBCC CHECKIDENT('OrderItemModels', RESEED, 100000);");
-        }
     }
 }
