@@ -220,7 +220,7 @@ namespace Chalmers.ILL.Providers
 
         private bool OrderWithSeedIdAlreadyExists(string seedId)
         {
-            return _orderItemSearcher.Search(@"seedId:" + seedId).Count() > 0;
+            return _orderItemSearcher.Search("seedId:\"" + seedId + "\"").Count() > 0;
         }
 
         private IEnumerable<OrderItemModel> GetSearchResultsForAllActiveOrdersThatAreOrderedFromLibris()
