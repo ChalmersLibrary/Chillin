@@ -22,6 +22,7 @@ namespace Chalmers.ILL.Providers
         IUmbracoWrapper _umbraco;
         IOrderItemManager _orderItemManager;
         IPatronDataProvider _patronDataProvider;
+        IOrderItemSearcher _orderItemSearcher;
 
         private List<OrderItemSeedModel> _seeds;
         private SourcePollingResult _result;
@@ -33,11 +34,13 @@ namespace Chalmers.ILL.Providers
             }
         }
 
-        public LibrisOrderItemsSource(IUmbracoWrapper umbraco, IOrderItemManager orderItemManager, IPatronDataProvider patronDataProvider)
+        public LibrisOrderItemsSource(IUmbracoWrapper umbraco, IOrderItemManager orderItemManager, IPatronDataProvider patronDataProvider,
+            IOrderItemSearcher orderItemSearcher)
         {
             _umbraco = umbraco;
             _orderItemManager = orderItemManager;
             _patronDataProvider = patronDataProvider;
+            _orderItemSearcher = orderItemSearcher;
         }
 
         public SourcePollingResult Poll()
@@ -169,7 +172,7 @@ namespace Chalmers.ILL.Providers
 
                 foreach (var order in orders)
                 {
-                    var addressStr = ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/api/illrequests/Z/" + order.Fields["ProviderOrderId"].ToString();
+                    var addressStr = ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/api/illrequests/Z/" + order.ProviderOrderId;
 
                     var httpClient = new HttpClient();
                     httpClient.DefaultRequestHeaders.Add("api-key", ConfigurationManager.AppSettings["librisApiKey"]);
@@ -184,7 +187,7 @@ namespace Chalmers.ILL.Providers
                     if (illRequestsCount == 0)
                     {
                         _result.Errors++;
-                        _result.Messages.Add("Couldn't find any Libris ILL request with the ID: " + order.Fields["ProviderOrderId"].ToString());
+                        _result.Messages.Add("Couldn't find any Libris ILL request with the ID: " + order.ProviderOrderId);
                     }
                     else
                     {
@@ -192,17 +195,17 @@ namespace Chalmers.ILL.Providers
                         {
                             var req = illRequests[index];
 
-                            if (order.Fields["Status"] == "03:Beställd" && req.status_code.Value == "6") // Status code 6 is "Negativt svar" in Libris
+                            if (order.Status == "03:Beställd" && req.status_code.Value == "6") // Status code 6 is "Negativt svar" in Libris
                             {
                                 var eventId = _orderItemManager.GenerateEventId(UPDATE_ORDER_FROM_LIBRIS_DATA_EVENT_TYPE);
-                                _orderItemManager.SetStatus(order.Id, "02:Åtgärda", eventId, false, false);
-                                _orderItemManager.AddLogItem(order.Id, "LIBRIS", "Negativt svar. " + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=notfullfilled&id=" + req.request_id.Value, eventId);
+                                _orderItemManager.SetStatus(order.NodeId, "02:Åtgärda", eventId, false, false);
+                                _orderItemManager.AddLogItem(order.NodeId, "LIBRIS", "Negativt svar. " + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=notfullfilled&id=" + req.request_id.Value, eventId);
                             }
-                            else if (order.Fields["Status"] == "03:Beställd" && req.status_code.Value == "7") // Status code 7 is "Kan reserveras" in Libris
+                            else if (order.Status == "03:Beställd" && req.status_code.Value == "7") // Status code 7 is "Kan reserveras" in Libris
                             {
                                 var eventId = _orderItemManager.GenerateEventId(UPDATE_ORDER_FROM_LIBRIS_DATA_EVENT_TYPE);
-                                _orderItemManager.SetStatus(order.Id, "02:Åtgärda", eventId, false, false);
-                                _orderItemManager.AddLogItem(order.Id, "LIBRIS", "Kan reserveras." + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=may_reserve&id=" + req.request_id.Value, eventId);
+                                _orderItemManager.SetStatus(order.NodeId, "02:Åtgärda", eventId, false, false);
+                                _orderItemManager.AddLogItem(order.NodeId, "LIBRIS", "Kan reserveras." + ConfigurationManager.AppSettings["librisApiBaseAddress"] + "/lf.php?action=may_reserve&id=" + req.request_id.Value, eventId);
                             }
                         }
                     }
@@ -216,31 +219,17 @@ namespace Chalmers.ILL.Providers
 
         private bool OrderWithSeedIdAlreadyExists(string seedId)
         {
-            // TODO: Inject Examine or add this to OrderItemManager, which probably should be called something else.
-            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-
-            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-
-            var query = searchCriteria.RawQuery(@"seedId:" + seedId);
-
-            return searcher.Search(query).Count() > 0;
+            return _orderItemSearcher.Search(@"seedId:" + seedId).Count() > 0;
         }
 
-        private ISearchResults GetSearchResultsForAllActiveOrdersThatAreOrderedFromLibris()
+        private IEnumerable<OrderItemModel> GetSearchResultsForAllActiveOrdersThatAreOrderedFromLibris()
         {
-            // TODO: Inject Examine or add this to OrderItemManager, which probably should be called something else.
-            var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-
-            var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-
-            var query = searchCriteria.RawQuery(@"(Status:01\:Ny OR 
+            return _orderItemSearcher.Search(@"(Status:01\:Ny OR 
                  Status:02\:Åtgärda OR
                  Status:03\:Beställd OR
                  Status:04\:Väntar OR
                  Status:09\:Mottagen) AND
                  ProviderName:libris");
-
-            return searcher.Search(query);
         }
 
         private string ReplaceWithNotAvailableIfEmptyString(string val)

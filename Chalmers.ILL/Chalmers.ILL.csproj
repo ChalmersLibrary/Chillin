@@ -506,6 +506,10 @@
     <Compile Include="Migrations\201607181406146_AddReadOnlyAtLibrary.Designer.cs">
       <DependentUpon>201607181406146_AddReadOnlyAtLibrary.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201612131055240_AddSeedId.cs" />
+    <Compile Include="Migrations\201612131055240_AddSeedId.Designer.cs">
+      <DependentUpon>201612131055240_AddSeedId.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
     <Compile Include="Models\MediaItemIdAndOrderItemId.cs" />
@@ -622,6 +626,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201607181406146_AddReadOnlyAtLibrary.resx">
       <DependentUpon>201607181406146_AddReadOnlyAtLibrary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201612131055240_AddSeedId.resx">
+      <DependentUpon>201612131055240_AddSeedId.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

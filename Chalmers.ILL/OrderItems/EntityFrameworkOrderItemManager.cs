@@ -468,6 +468,7 @@ namespace Chalmers.ILL.OrderItems
                 newOrderItem.DeliveryDate = new DateTime(1970, 1, 1);
                 newOrderItem.BookId = "";
                 newOrderItem.ProviderInformation = "";
+                newOrderItem.SeedId = model.Id;
 
                 if (model.DeliveryLibrarySigel == "Z")
                 {

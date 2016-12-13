@@ -34,7 +34,7 @@ namespace Chalmers.ILL.OrderItems
         {
             var res = new List<ISource>();
             res.Add(new ChalmersOrderItemsMailSource(_exchangeMailWebApi, _orderItemManager, _notifier, _mediaItemManager, _patronDataProvider, _orderItemSearcher));
-            res.Add(new LibrisOrderItemsSource(_umbraco, _orderItemManager, _patronDataProvider));
+            res.Add(new LibrisOrderItemsSource(_umbraco, _orderItemManager, _patronDataProvider, _orderItemSearcher));
             return res;
         }
     }

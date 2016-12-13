@@ -86,5 +86,7 @@ namespace Chalmers.ILL.Models
         public List<LogItem> LogItemsList { get; set; }
         public List<OrderAttachment> AttachmentList { get; set; }
         public SierraModel SierraInfo { get; set; }
+
+        public string SeedId { get; set; }
     }
 }
