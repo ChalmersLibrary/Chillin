@@ -97,7 +97,8 @@ namespace Chalmers.ILL.Providers
                                 seed.Message = "Författare: " + ReplaceWithNotAvailableIfEmptyString(req.author.Value) + "\n" +
                                     "Titel: " + ReplaceWithNotAvailableIfEmptyString(req.title.Value) + "\n" +
                                     "Utgivning: " + ReplaceWithNotAvailableIfEmptyString(req.imprint.Value) + "\n" +
-                                    "ISBN/ISSN: " + ReplaceWithNotAvailableIfEmptyString(req.isxn.Value);
+                                    "ISBN/ISSN: " + ReplaceWithNotAvailableIfEmptyString(req.isxn.Value) + "\n" +
+                                    "Meddelande från låntagare: " + ReplaceWithNotAvailableIfEmptyString(req.user_message.Value);
                                 seed.MessagePrefix = "LIBRIS LÅNTAGARBESTÄLLNING" + "\n\n" +
                                     ConfigurationManager.AppSettings["librisApiBaseAddress"] + ConfigurationManager.AppSettings["librisApiUserRequestSuffix"] + "\n\n";
                                 _seeds.Add(seed);
