@@ -69,8 +69,7 @@
                             }
                             else if (firstOrderItem.Type == "Bok" && firstOrderItem.StatusString == "Transport" && firstOrderItem.LogItemsList.Where(x => x.Message.Contains("till Utlånad")).Count() > 0)
                             {
-                                <h3>Boken har redan varit utlånad och är nu redo för hemfärd till utlånande bibliotek.</h3>
-                                <h3>Kontakta fjärrlåneavdelningen om du anser att den skall förberedas för utlån igen.</h3>
+                                <h3>Boken har redan varit utlånad och skall åter till fjärrin på huvudbiblioteket.</h3>
                             }
                             else if (firstOrderItem.Type == "Bok" && firstOrderItem.StatusString == "Transport")
                             {
