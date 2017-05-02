@@ -225,12 +225,12 @@ namespace Chalmers.ILL.Providers
 
         private IEnumerable<OrderItemModel> GetSearchResultsForAllActiveOrdersThatAreOrderedFromLibris()
         {
-            return _orderItemSearcher.Search(@"(Status:01\:Ny OR 
-                 Status:02\:Åtgärda OR
-                 Status:03\:Beställd OR
-                 Status:04\:Väntar OR
-                 Status:09\:Mottagen) AND
-                 ProviderName:libris");
+            return _orderItemSearcher.Search(@"(status:01\:Ny OR 
+                 status:02\:Åtgärda OR
+                 status:03\:Beställd OR
+                 status:04\:Väntar OR
+                 status:09\:Mottagen) AND
+                 providerName:libris");
         }
 
         private string ReplaceWithNotAvailableIfEmptyString(string val)
