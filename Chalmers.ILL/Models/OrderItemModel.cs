@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,7 +9,15 @@ namespace Chalmers.ILL.Models
     // Main Order Item
     public class OrderItemModel
     {
-        public OrderItemModel()
+        public const string LIBRARY_Z_PRETTY_STRING = "Huvudbiblioteket";
+        public const string LIBRARY_ZL_PRETTY_STRING = "Kuggen";
+        public const string LIBRARY_ZA_PRETTY_STRING = "Arkitekturbiblioteket";
+
+        public const string LIBRARY_Z_UMBRACO_STRING = "Huvudbiblioteket";
+        public const string LIBRARY_ZL_UMBRACO_STRING = "Lindholmenbiblioteket";
+        public const string LIBRARY_ZA_UMBRACO_STRING = "Arkitekturbiblioteket";
+
+            public OrderItemModel()
         {
             StatusId = -1;
             PreviousStatusId = -1;
@@ -51,6 +60,27 @@ namespace Chalmers.ILL.Models
 
         public int DeliveryLibraryId { get; set; }
         public string DeliveryLibrary { get; set; }
+
+        [JsonIgnore]
+        public string DeliveryLibraryPrettyName
+        {
+            get
+            {
+                if (DeliveryLibrary == LIBRARY_Z_UMBRACO_STRING)
+                {
+                    return LIBRARY_Z_PRETTY_STRING;
+                }
+                else if (DeliveryLibrary == LIBRARY_ZL_UMBRACO_STRING)
+                {
+                    return LIBRARY_ZL_PRETTY_STRING;
+                }
+                else if (DeliveryLibrary == LIBRARY_ZA_UMBRACO_STRING)
+                {
+                    return LIBRARY_ZA_PRETTY_STRING;
+                }
+                return "Okänt bibliotek";
+            }
+        }
 
         public int CancellationReasonId { get; set; }
         public string CancellationReason { get; set; }

@@ -139,7 +139,7 @@
         int loggedInMember = Model.CurrentMemberId;
         foreach (var item in Model.PendingOrderItems.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.FollowUpDate))
         {          
-            @RenderOrderList(loggedInMember, item.NodeId, item.FollowUpDate, item.PatronName, item.DeliveryLibrary, item.Status,
+            @RenderOrderList(loggedInMember, item.NodeId, item.FollowUpDate, item.PatronName, item.DeliveryLibraryPrettyName, item.Status,
                 item.Type, item.Reference, item.EditedBy);
         }
             
