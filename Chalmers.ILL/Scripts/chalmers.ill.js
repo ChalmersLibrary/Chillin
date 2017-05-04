@@ -503,7 +503,7 @@ function updateFilterButtonCounters()
         }
     } else if ($("#library02-button").hasClass("active")) {
         // lbib
-        $("#order-list-title").text("Best\u00E4llningar - Lindholmenbiblioteket");
+        $("#order-list-title").text("Best\u00E4llningar - Kuggen");
         setCounterOrHide($("#status00-counter"), $(".order-list").find(".illedit > .Lindholmenbiblioteket").length);
         for (k = 1; k < (numberOfStatuses + 1) ; k++) {
             setCounterOrHide($("#status" + zeroPadFromLeft(k, 2) + "-counter"), $(".order-list").find("div > div > .status-" + zeroPadFromLeft(k, 2)).filter(function (item) {
@@ -1220,7 +1220,7 @@ function getSigelFromLibraryName(libraryName) {
         ret = "Z";
     } else if (libraryName == "Arkitekturbiblioteket") {
         ret = "Za";
-    } else if (libraryName == "Lindholmenbiblioteket") {
+    } else if (libraryName == "Lindholmenbiblioteket" || libraryName == "Kuggen") {
         ret = "Zl";
     }
 
