@@ -23,6 +23,9 @@
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleByMailOrInternalMailDeliveryType" data-delivery-type="internpost" onclick="selectDeliveryType(this); event.preventDefault();">Direktleverans via internpost</a>
                         </li>
+                        <li role="presentation">
+                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleFromProviderDeliveryType" data-delivery-type="provider" onclick="selectDeliveryType(this); event.preventDefault();">Direktleverans från leverantör</a>
+                        </li>
                         @if(Model.OrderItem.SierraInfo.home_library == "hbib") {
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleInInfodiskDeliveryType" data-delivery-type="infodisk" onclick="selectDeliveryType(this); event.preventDefault();">Avhämtning i infodisk</a>

@@ -114,6 +114,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return PartialView("DeliveryType/ArticleInTransit", pageModel);
         }
 
+        [HttpGet]
+        public ActionResult RenderArticleFromProviderDeliveryType(int nodeId)
+        {
+            var pageModel = new Models.PartialPage.DeliveryType.ArticleFromProvider(_orderItemManager.GetOrderItem(nodeId));
+            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            return PartialView("DeliveryType/ArticleFromProvider", pageModel);
+        }
+
         /// <summary>
         /// Render the Partial View for the book instant loan delivery type.
         /// </summary>
