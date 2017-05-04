@@ -1446,18 +1446,18 @@ namespace Chalmers.ILL.OrderItems
 
         private string GetPrettyLibraryNameFromLibraryAbbreviation(string libraryName)
         {
-            var res = "Okänt bibliotek";
+            var res = OrderItemModel.LIBRARY_UNKNOWN_PRETTY_STRING;
             if (libraryName != null && libraryName.Contains("hbib"))
             {
-                res = "Huvudbiblioteket";
+                res = OrderItemModel.LIBRARY_Z_PRETTY_STRING;
             }
             else if (libraryName != null && libraryName.Contains("lbib"))
             {
-                res = "Lindholmenbiblioteket";
+                res = OrderItemModel.LIBRARY_ZL_PRETTY_STRING;
             }
             else if (libraryName != null && libraryName.Contains("abib"))
             {
-                res = "Arkitekturbiblioteket";
+                res = OrderItemModel.LIBRARY_ZA_PRETTY_STRING;
             }
             return res;
         }

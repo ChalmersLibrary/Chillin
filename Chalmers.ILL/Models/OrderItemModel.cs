@@ -12,6 +12,7 @@ namespace Chalmers.ILL.Models
         public const string LIBRARY_Z_PRETTY_STRING = "Huvudbiblioteket";
         public const string LIBRARY_ZL_PRETTY_STRING = "Kuggen";
         public const string LIBRARY_ZA_PRETTY_STRING = "Arkitekturbiblioteket";
+        public const string LIBRARY_UNKNOWN_PRETTY_STRING = "Okänt bibliotek";
 
         public const string LIBRARY_Z_UMBRACO_STRING = "Huvudbiblioteket";
         public const string LIBRARY_ZL_UMBRACO_STRING = "Lindholmenbiblioteket";
@@ -78,7 +79,7 @@ namespace Chalmers.ILL.Models
                 {
                     return LIBRARY_ZA_PRETTY_STRING;
                 }
-                return "Okänt bibliotek";
+                return LIBRARY_UNKNOWN_PRETTY_STRING;
             }
         }
 
