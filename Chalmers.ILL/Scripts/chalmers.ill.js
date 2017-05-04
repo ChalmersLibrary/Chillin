@@ -1220,7 +1220,7 @@ function getSigelFromLibraryName(libraryName) {
         ret = "Z";
     } else if (libraryName == "Arkitekturbiblioteket") {
         ret = "Za";
-    } else if (libraryName == "Lindholmenbiblioteket" || libraryName == "Kuggen") {
+    } else if (libraryName == "Lindholmenbiblioteket") {
         ret = "Zl";
     }
 
