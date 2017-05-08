@@ -160,7 +160,8 @@
                 html: true
             });
 
-            $("#message").val($("#signatureStorage").html() + $("#historyStorage").html()).focus()[0].setSelectionRange(0, 0);
+            $("#message").val($("#signatureStorage").html() + $("#historyStorage").html())
+                .focus().scrollTop(0)[0].setSelectionRange(0, 0);
         });
 
         function updateSelectedStatus(newStatusId, newStatusText, cancellationReasonId, purchasedMaterialId) {
@@ -199,14 +200,16 @@
 
         function selectTemplate(templateId) {
             if (templateId == -1) {
-                $("#message").val($("#signatureStorage").html() + $("#historyStorage").html());
+                $("#message").val($("#signatureStorage").html() + $("#historyStorage").html())
+                    .focus().scrollTop(0)[0].setSelectionRange(0, 0);
             } else {
                 var templateData = "";
 
                 $.getJSON("/umbraco/surface/TemplatesSurface/GetPopulatedTemplateData", { templateId:templateId, orderItemNodeId:@Model.OrderItem.NodeId })
                     .done(function (json) {
                         if (json.Success) {
-                            $("#message").val(json.Data + $("#historyStorage").html());
+                            $("#message").val(json.Data + $("#historyStorage").html())
+                                .focus().scrollTop(0)[0].setSelectionRange(0, 0);
                         }
                         else {
                             alert(json.Message);
@@ -217,7 +220,6 @@
                         alert("Request Failed: " + err);
                     });
             }
-            $("#message").focus()[0].setSelectionRange(0, 0);
         }
     </script>
 </form>
