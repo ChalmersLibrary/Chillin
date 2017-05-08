@@ -28,10 +28,10 @@ namespace Chalmers.ILL.Templates
             var searchResult = _templateSearcher.Search(searchCriteria.NodeTypeAlias("ChalmersILLTemplate").Compile());
             foreach (var template in searchResult)
             {
-                if (/*template.Fields.ContainsKey("Automatic") && */
+                if (template.Fields.ContainsKey("Automatic") && 
                     template.Fields.ContainsKey("Description") && 
-                    template.Fields.ContainsKey("Data")/* && 
-                    !Convert.ToBoolean(Convert.ToInt32(template.Fields["Automatic"]))*/)
+                    template.Fields.ContainsKey("Data") && 
+                    !Convert.ToBoolean(Convert.ToInt32(template.Fields["Automatic"])))
                 res.Add(new Template
                 {
                     Id = template.Id,
