@@ -589,17 +589,18 @@ function loadOrderItemSummary(id)
                 statusClass = "chillin-status-" + json.Status.substring(0, 2);
             }
             if (json.Status.indexOf("01") == 0) {
-                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-success status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
+                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-danger status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
             else if (json.Status.indexOf("05") == 0 || 
                      json.Status.indexOf("06") == 0 || 
                      json.Status.indexOf("07") == 0 || 
                      json.Status.indexOf("08") == 0 ||
-                     json.Status.indexOf("10") == 0) {
-                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-info status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
+                     json.Status.indexOf("10") == 0 ||
+                     json.Status.indexOf("16") == 0) {
+                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-success status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
             else {
-                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-danger status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
+                $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-warning status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
 
             // Reference with links
