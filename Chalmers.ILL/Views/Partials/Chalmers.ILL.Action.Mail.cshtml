@@ -8,30 +8,61 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
+                <label for="">Mall</label>
+                <div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span id="currently-selected-template">Tom</span> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" id="orderitem-mail-templatelist" role="menu">
+                            <li><a href="#" onclick="selectTemplate(-1); event.preventDefault();">Tom</a></li>
+                            @foreach (var template in Model.Templates)
+                            {
+                                <li><a href="#" onclick="selectTemplate(@template.Id); event.preventDefault();">@template.Description</a></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
                 <label for="message">Meddelande</label>
                 <textarea class="form-control" rows="12" id="message" name="message">
+                </textarea>
+                <div id="signatureStorage" style="display:none;">
 
 
 @Model.SignatureTemplate
-                    @{
-                        if (Model.OrderItem.LogItemsList.Where(x => x.Type == "MAIL").Count() > 0)
+</div>
+                <div id="historyStorage" style="display:none;">@{
+                    if (Model.OrderItem.LogItemsList.Where(x => x.Type == "MAIL").Count() > 0)
+                    {
+                        foreach (var logItem in Model.OrderItem.LogItemsList.Where(x => x.Type == "MAIL"))
                         {
-                            foreach (var logItem in Model.OrderItem.LogItemsList.Where(x => x.Type == "MAIL"))
-                            {
-                                @Html.Raw("\n---\n" + logItem.Message)
-                                //We just want the first log entry
-                                break;
-                            }
-                        }
-                        else
-                        {
-                           @Html.Raw("\n---\n" + Model.OrderItem.OriginalOrder)
+                            @Html.Raw("\n---\n" + logItem.Message)
+                            //We just want the first log entry
+                            break;
                         }
                     }
-                </textarea>
+                    else
+                    {
+                        @Html.Raw("\n---\n" + Model.OrderItem.OriginalOrder)
+                    }
+                }</div>
             </div>
         </div>
         <div class="col-md-6">
+            <div class="form-group" style="visibility:hidden;">
+                <label>Inget</label>
+                <div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span>Inget</span> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                        </ul>
+                    </div>
+                </div>
+            </div>
             <div class="form-group">
                 <label for="recipientName">Mottagarens namn</label>
                 <input type="text" class="form-control" id="recipientName" name="recipientName" value="@Model.OrderItem.PatronName">
@@ -60,7 +91,7 @@
                         <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
                             <li><a href="#" onclick="updateSelectedStatus(-1, 'Ingen förändring', -1, -1); event.preventDefault();">Ingen förändring</a></li>
                             @{
-                                var allowedStatusValues = new List<String>(){ "Annullerad", "Inköpt" };
+                                var allowedStatusValues = new List<String>() { "Annullerad", "Inköpt" };
 
                                 if (Model.OrderItem.DeliveryDate.Year <= 1975)
                                 {
@@ -112,7 +143,9 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-success" onclick="submitMailDispatch(this); event.preventDefault();">Skicka e-post</button>
+            <div class="form-group">
+                <button class="btn btn-success" onclick="submitMailDispatch(this); event.preventDefault();">Skicka e-post</button>
+            </div>
         </div>
    </div>
     <script type="text/javascript">
@@ -126,6 +159,8 @@
                 placement: "top",
                 html: true
             });
+
+            $("#message").val($("#signatureStorage").html() + $("#historyStorage").html()).focus()[0].setSelectionRange(0, 0);
         });
 
         function updateSelectedStatus(newStatusId, newStatusText, cancellationReasonId, purchasedMaterialId) {
@@ -160,6 +195,29 @@
             } else {
                 alert("Du måste välja en status som skall sättas när mailet har skickats.");
             }
+        }
+
+        function selectTemplate(templateId) {
+            if (templateId == -1) {
+                $("#message").val($("#signatureStorage").html() + $("#historyStorage").html());
+            } else {
+                var templateData = "";
+
+                $.getJSON("/umbraco/surface/TemplatesSurface/GetPopulatedTemplateData", { templateId:templateId, orderItemNodeId:@Model.OrderItem.NodeId })
+                    .done(function (json) {
+                        if (json.Success) {
+                            $("#message").val(json.Data + $("#historyStorage").html());
+                        }
+                        else {
+                            alert(json.Message);
+                        }
+                    })
+                    .fail(function( jqxhr, textStatus, error ) {
+                        var err = textStatus + ", " + error;
+                        alert("Request Failed: " + err);
+                    });
+            }
+            $("#message").focus()[0].setSelectionRange(0, 0);
         }
     </script>
 </form>

@@ -21,6 +21,27 @@ namespace Chalmers.ILL.Templates
             _templateSearcher = templateSearcher;
         }
 
+        public IList<Template> GetManualTemplates()
+        {
+            var res = new List<Template>();
+            var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+            var searchResult = _templateSearcher.Search(searchCriteria.NodeTypeAlias("ChalmersILLTemplate").Compile());
+            foreach (var template in searchResult)
+            {
+                if (/*template.Fields.ContainsKey("Automatic") && */
+                    template.Fields.ContainsKey("Description") && 
+                    template.Fields.ContainsKey("Data")/* && 
+                    !Convert.ToBoolean(Convert.ToInt32(template.Fields["Automatic"]))*/)
+                res.Add(new Template
+                {
+                    Id = template.Id,
+                    Description = template.Fields["Description"],
+                    Data =  template.Fields["Data"]
+                });
+            }
+            return res;
+        }
+
         public string GetTemplateData(int nodeId)
         {
             var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
@@ -47,54 +68,26 @@ namespace Chalmers.ILL.Templates
             throw new TemplateServiceException("Hittade ingen mall med nodnamn=" + nodeName + ".");
         }
 
-        public string GetTemplateData(string nodeName, OrderItemModel orderItem)
+        public string GetTemplateData(int templateId, OrderItemModel orderItem)
         {
-            var template = new StringBuilder(GetTemplateData(nodeName));
+            var res = "Misslyckades med att ladda mall...";
+            var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+            var results = _templateSearcher.Search(searchCriteria.Id(templateId).Compile());
 
-            // Search for double moustaches in the template and replace these with the correct order item property value.
-            var moustachePattern = new Regex("{{([a-zA-Z0-9:]+)}}");
-            var matches = moustachePattern.Matches(template.ToString());
-
-            foreach (Match match in matches)
+            if (results.Count() > 0)
             {
-                var property = match.Groups[1].Value;
+                var templateName = results.First().Fields["nodeName"];
+                var templateString = results.First().Fields["Data"];
 
-                if (property.StartsWith("T:")) // Other templates that should be injected.
-                {
-                    var templateName = property.Split(':').Last() + "Template";
-                    if (templateName == nodeName) // Do not allow injection of template into itself.
-                    {
-                        template.Replace("{{" + property + "}}", "{{Injection of template into itself is not allowed}}");
-                    }
-                    else
-                    {
-                        template.Replace("{{" + property + "}}", GetTemplateData(templateName, orderItem));
-                    }
-                }
-                else if (property.StartsWith("S:")) // Special variables that exists in awkward places.
-                {
-                    var varName = property.Split(':').Last();
-                    if (varName == "HomeLibrary")
-                    {
-                        template.Replace("{{" + property + "}}", GetPrettyLibraryNameFromLibraryAbbreviation(orderItem.SierraInfo.home_library));
-                    }
-                }
-                else
-                {
-                    var value = orderItem.GetType().GetProperty(property).GetValue(orderItem);
-
-                    if (value is DateTime)
-                    {
-                        template.Replace("{{" + property + "}}", ((DateTime)value).ToString("yyyy-MM-dd"));
-                    }
-                    else
-                    {
-                        template.Replace("{{" + property + "}}", value.ToString());
-                    }
-                }
+                res = ReplaceMoustaches(templateName, templateString, orderItem);
             }
 
-            return template.ToString();
+            return res;
+        }
+
+        public string GetTemplateData(string nodeName, OrderItemModel orderItem)
+        {
+            return ReplaceMoustaches(nodeName, GetTemplateData(nodeName), orderItem);
         }
 
         public void SetTemplateData(int nodeId, string data)
@@ -141,5 +134,59 @@ namespace Chalmers.ILL.Templates
             }
             return res;
         }
+
+        #region Private methods
+
+        private string ReplaceMoustaches(string templateName, string templateString, OrderItemModel orderItem)
+        {
+            var template = new StringBuilder(templateString);
+
+            // Search for double moustaches in the template and replace these with the correct order item property value.
+            var moustachePattern = new Regex("{{([a-zA-Z0-9:]+)}}");
+            var matches = moustachePattern.Matches(template.ToString());
+
+            foreach (Match match in matches)
+            {
+                var property = match.Groups[1].Value;
+
+                if (property.StartsWith("T:")) // Other templates that should be injected.
+                {
+                    var injectedTemplateName = property.Split(':').Last() + "Template";
+                    if (injectedTemplateName == templateName) // Do not allow injection of template into itself.
+                    {
+                        template.Replace("{{" + property + "}}", "{{Injection of template into itself is not allowed}}");
+                    }
+                    else
+                    {
+                        template.Replace("{{" + property + "}}", GetTemplateData(injectedTemplateName, orderItem));
+                    }
+                }
+                else if (property.StartsWith("S:")) // Special variables that exists in awkward places.
+                {
+                    var varName = property.Split(':').Last();
+                    if (varName == "HomeLibrary")
+                    {
+                        template.Replace("{{" + property + "}}", GetPrettyLibraryNameFromLibraryAbbreviation(orderItem.SierraInfo.home_library));
+                    }
+                }
+                else
+                {
+                    var value = orderItem.GetType().GetProperty(property).GetValue(orderItem);
+
+                    if (value is DateTime)
+                    {
+                        template.Replace("{{" + property + "}}", ((DateTime)value).ToString("yyyy-MM-dd"));
+                    }
+                    else
+                    {
+                        template.Replace("{{" + property + "}}", value.ToString());
+                    }
+                }
+            }
+
+            return template.ToString();
+        }
+
+        #endregion
     }
 }
