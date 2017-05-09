@@ -15,10 +15,10 @@
                             <span id="currently-selected-template">Tom</span> <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" id="orderitem-mail-templatelist" role="menu">
-                            <li><a href="#" onclick="selectTemplate(-1); event.preventDefault();">Tom</a></li>
+                            <li><a href="#" onclick="selectTemplate(-1, 'Tom'); event.preventDefault();">Tom</a></li>
                             @foreach (var template in Model.Templates)
                             {
-                                <li><a href="#" onclick="selectTemplate(@template.Id); event.preventDefault();">@template.Description</a></li>
+                                <li><a href="#" onclick="selectTemplate(@template.Id, '@template.Description'); event.preventDefault();">@template.Description</a></li>
                             }
                         </ul>
                     </div>
@@ -198,7 +198,8 @@
             }
         }
 
-        function selectTemplate(templateId) {
+        function selectTemplate(templateId, templateDescription) {
+            $("#currently-selected-template").text(templateDescription);
             if (templateId == -1) {
                 $("#message").val($("#signatureStorage").html() + $("#historyStorage").html())
                     .focus().scrollTop(0)[0].setSelectionRange(0, 0);
