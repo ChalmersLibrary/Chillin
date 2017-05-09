@@ -55,6 +55,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _dataTypes.PopulateModelWithAvailableValues(model);
             model.SignatureTemplate = _templateService.GetTemplateData("SignatureTemplate", model.OrderItem);
             model.Templates = _templateService.GetManualTemplates();
+            model.Templates.OrderBy(x => x.Description);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Mail", model);
