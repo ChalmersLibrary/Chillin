@@ -2,6 +2,7 @@
 using Examine;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -38,6 +39,7 @@ namespace Chalmers.ILL.Templates
                     Data = data
                 });
             }
+            res.Sort((x1, x2) => String.Compare(x1.Description, x2.Description, true, new CultureInfo("sv-se")));
             return res;
         }
 
@@ -114,7 +116,7 @@ namespace Chalmers.ILL.Templates
                 list.Add(template);
             }
 
-            list.Sort((x1, x2) => x1.Description.CompareTo(x2.Description)); 
+            list.Sort((x1, x2) => String.Compare(x1.Description, x2.Description, true, new CultureInfo("sv-se")));
 
             return list;
         }
