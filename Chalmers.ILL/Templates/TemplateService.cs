@@ -28,15 +28,14 @@ namespace Chalmers.ILL.Templates
             var searchResult = _templateSearcher.Search(searchCriteria.NodeTypeAlias("ChalmersILLTemplate").Compile());
             foreach (var template in searchResult)
             {
-                if (template.Fields.ContainsKey("Automatic") && 
-                    template.Fields.ContainsKey("Description") && 
-                    template.Fields.ContainsKey("Data") && 
-                    !Convert.ToBoolean(Convert.ToInt32(template.Fields["Automatic"])))
+                var description = template.Fields.ContainsKey("Description") ? template.Fields["Description"] : "";
+                var data = template.Fields.ContainsKey("Data") ? template.Fields["Data"] : "";
+                if (template.Fields.ContainsKey("Automatic") && !Convert.ToBoolean(Convert.ToInt32(template.Fields["Automatic"])))
                 res.Add(new Template
                 {
                     Id = template.Id,
-                    Description = template.Fields["Description"],
-                    Data =  template.Fields["Data"]
+                    Description = description,
+                    Data = data
                 });
             }
             return res;
@@ -46,10 +45,11 @@ namespace Chalmers.ILL.Templates
         {
             var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
             var results = _templateSearcher.Search(searchCriteria.Id(nodeId).Compile());
-
+            
             if (results.Count() > 0)
             {
-                return results.First().Fields["Data"];
+                var template = results.First();
+                return template.Fields.ContainsKey("Data") ? template.Fields["Data"] : "";
             }
 
             throw new TemplateServiceException("Hittade ingen mall med ID=" + nodeId + ".");
@@ -62,7 +62,8 @@ namespace Chalmers.ILL.Templates
 
             if (results.Count() > 0)
             {
-                return results.First().Fields["Data"].ToString();
+                var template = results.First();
+                return template.Fields.ContainsKey("Data") ? template.Fields["Data"] : "";
             }
 
             throw new TemplateServiceException("Hittade ingen mall med nodnamn=" + nodeName + ".");
@@ -77,7 +78,8 @@ namespace Chalmers.ILL.Templates
             if (results.Count() > 0)
             {
                 var templateName = results.First().Fields["nodeName"];
-                var templateString = results.First().Fields["Data"];
+                var template = results.First();
+                var templateString = template.Fields.ContainsKey("Data") ? template.Fields["Data"] : "";
 
                 res = ReplaceMoustaches(templateName, templateString, orderItem);
             }
@@ -107,8 +109,8 @@ namespace Chalmers.ILL.Templates
             {
                 var template = new Template();
                 template.Id = result.Id;
-                template.Description = result.Fields["Description"];
-                template.Data = result.Fields["Data"];
+                template.Description = result.Fields.ContainsKey("Description") ? result.Fields["Description"] : "";
+                template.Data = result.Fields.ContainsKey("Data") ? result.Fields["Data"] : "";
                 list.Add(template);
             }
 
