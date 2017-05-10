@@ -56,7 +56,7 @@
                     <ul class="dropdown-menu" id="orderitem-typelist" role="menu">
                         @foreach (var type in Model.AvailableTypes)
                         {
-                            if (type.Id == Model.OrderItem.TypeId) 
+                            if (type.Id == Model.OrderItem.TypeId)
                             {
                                 <li><a href="#" class="disabled-link"><span class="current">@type.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                             }
@@ -76,13 +76,13 @@
                         </button>
                         <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
                             @{
-                                var allowedStatusValues = new List<String>(){"Annullerad", "Åtgärda", "Inköpt"};
+                                var allowedStatusValues = new List<String>() { "Annullerad", "Åtgärda", "Inköpt" };
 
                                 if (Model.OrderItem.StatusString.Contains("Åtgärda") && !Model.OrderItem.PreviousStatusString.Contains("Vänta"))
                                 {
                                     allowedStatusValues.Add(Model.OrderItem.PreviousStatusString);
                                 }
-                                
+
                                 if (Model.OrderItem.DeliveryDate.Year > 1975) // The book or article has been delivered
                                 {
                                     if (Model.OrderItem.Type == "Artikel")
@@ -168,9 +168,9 @@
                             }
                         </ul>
                     </div>
-                    
-                    if (Model.OrderItem.Type == "Inköpsförslag")
-                    {
+
+                                if (Model.OrderItem.Type == "Inköpsförslag")
+                                {
                         <!-- Delivery Library button -->
                         <div class="btn-group">
                             <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
@@ -180,7 +180,7 @@
                                 @{
                                     foreach (var library in Model.AvailableDeliveryLibraries)
                                     {
-                                        if (library.Id == Model.OrderItem.DeliveryLibraryId) 
+                                        if (library.Id == Model.OrderItem.DeliveryLibraryId)
                                         {
                                             <li><a href="#" class="disabled-link"><span class="current">@library.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                         }
@@ -192,8 +192,8 @@
                                 }
                             </ul>
                         </div>
-                    }
-                }
+                                        }
+                                    }
                     
                 @if (Model.OrderItem.TypeId > 0)
                 {
@@ -224,9 +224,9 @@
                 }
             </div>
 
-                // Lock OrderItem and set attributes in DOM
-                if (Model.OrderItem.EditedBy == "")
-                {
+                                    // Lock OrderItem and set attributes in DOM
+                                    if (Model.OrderItem.EditedBy == "")
+                                    {
                     <!-- Lock OrderItem to current Member -->
                     <script type="text/javascript">
                         $.getJSON("/umbraco/surface/OrderItemSurface/LockOrderItem?nodeId=@Model.OrderItem.NodeId", function (json) {
@@ -239,17 +239,17 @@
                             }
                         });
                     </script>
-                }
+                                    }
 
-                if (Model.OrderItem.EditedByCurrentMember)
-                {
+                                    if (Model.OrderItem.EditedByCurrentMember)
+                                    {
                     <script type="text/javascript">
                         $("#@Model.OrderItem.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
                         $("#action-buttons-@Model.OrderItem.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
                     </script>
-                }
+                                        }
 
-        }
+                                    }
     }
 </div>
 <!-- Action Section -->
@@ -292,7 +292,18 @@
         <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lt. - Kortnr.</span> @Model.OrderItem.PatronCardNo</span>
     </div>
     <div>
-        <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lev. - Namn</span> @Model.OrderItem.ProviderName</span>
+        @{
+            var notEmpty = !String.IsNullOrEmpty(Model.OrderItem.ProviderInformation);
+            var moreThanOneRow = Model.OrderItem.ProviderInformation.Contains("\n");
+        <span class="order-item-var-row">
+            <span class="label label-primary order-item-var-label">Lev. - Namn</span> 
+            @Model.OrderItem.ProviderName@(notEmpty && !moreThanOneRow ? " (" + Model.OrderItem.ProviderInformation + ")" : "")
+        </span>
+            if (notEmpty && moreThanOneRow)
+            {
+        <span class="glyphicon glyphicon-exclamation-sign" data-toggle="popover" data-content="@Model.OrderItem.ProviderInformation.Replace("\n", "<br/>")"></span>
+            }
+        }
     </div>
     <div>
         <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lev. - Order ID</span> @Model.OrderItem.ProviderOrderId</span>
