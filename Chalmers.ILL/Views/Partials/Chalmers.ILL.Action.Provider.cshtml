@@ -39,7 +39,11 @@
     <div class="row">
         <div class="col-md-6">
             <div class="form-group">
-                <button id="set-order-item-provider-button" class="btn btn-success" onclick="setOrderItemProvider(@Model.OrderItem.NodeId, this.form.providerName.value, this.form.providerOrderId.value, this.form.providerInformation.value, this.form.followUpDate.value)">Spara beställning</button>
+                <button id="set-order-item-provider-button" class="btn btn-success" onclick="setOrderItemProvider(@Model.OrderItem.NodeId, this.form.providerName.value, this.form.providerOrderId.value, this.form.providerInformation.value, this.form.followUpDate.value)">Genomför ny beställning</button>
+                @if (!String.IsNullOrEmpty(Model.OrderItem.DeliveryLibrary))
+                {
+                <button id="set-order-item-provider-button" class="btn btn-success" onclick="setOrderItemProvider(@Model.OrderItem.NodeId, this.form.providerName.value, this.form.providerOrderId.value, this.form.providerInformation.value, this.form.followUpDate.value, false)">Spara leverantörsdata utan att ändra status</button>
+                }
             </div>
         </div>
     </div>

@@ -808,15 +808,18 @@ function loadLogItems(id)
 
 /* Set new property values for Provider from form */
 
-function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInformation, followUpDate)
+function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInformation, followUpDate, updateStatusAndFollowUpDate)
 {
+    updateStatusAndFollowUpDate = typeof updateStatusAndFollowUpDate !== "undefined" ? updateStatusAndFollowUpDate : true;
+
     lockScreen();
     $.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider", {
         nodeId: nodeId,
         providerName: providerName,
         providerOrderId: providerOrderId.trim(),
         providerInformation: providerInformation,
-        newFollowUpDate: followUpDate
+        newFollowUpDate: followUpDate,
+        updateStatusAndFollowUpDate: updateStatusAndFollowUpDate
     }).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(nodeId);
