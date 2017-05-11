@@ -14,21 +14,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         [HttpGet]
         public ActionResult DeleteEverything(int parentId)
         {
-            LogHelper.Debug<TemporarySillySurfaceController>("Time to delete everything.");
+            LogHelper.Info<TemporarySillySurfaceController>("Time to delete everything.");
 
             var messages = new List<string>();
 
             var count = 0;
-            LogHelper.Debug<TemporarySillySurfaceController>("Enumerating all childs on parent node...");
+            LogHelper.Info<TemporarySillySurfaceController>("Enumerating all childs on parent node...");
             foreach (var child in Services.ContentService.GetChildren(parentId))
             {
                 try
                 {
                     var childId = child.Id;
-                    LogHelper.Debug<TemporarySillySurfaceController>("Removing child " + childId);
                     Services.ContentService.Delete(child);
                     count += 1;
-                    LogHelper.Debug<TemporarySillySurfaceController>("Removed child " + childId + ", total count = " + count);
+                    LogHelper.Info<TemporarySillySurfaceController>("Removed child " + childId + ", total count = " + count);
                 }
                 catch (Exception e)
                 {
@@ -39,11 +38,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                LogHelper.Debug<TemporarySillySurfaceController>("Removing parent " + parentId);
                 var parent = Services.ContentService.GetById(parentId);
                 Services.ContentService.Delete(parent);
                 count += 1;
-                LogHelper.Debug<TemporarySillySurfaceController>("Removed parent " + parentId + ", total count = " + count);
+                LogHelper.Info<TemporarySillySurfaceController>("Removed parent " + parentId + ", total count = " + count);
             }
             catch (Exception e)
             {
