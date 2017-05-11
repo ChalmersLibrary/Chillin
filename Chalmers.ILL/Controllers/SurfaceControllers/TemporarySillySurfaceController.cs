@@ -20,10 +20,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             var count = 0;
             LogHelper.Info<TemporarySillySurfaceController>("Enumerating all childs on parent node...");
-            foreach (var child in Services.ContentService.GetChildren(parentId))
+            var childIds = Services.ContentService.GetChildren(parentId).Select(x => x.Id).ToList();
+            LogHelper.Info<TemporarySillySurfaceController>("Deleting children...");
+            for (var i=childIds.Count()-1; i>=0; i--)
             {
                 try
                 {
+                    var child = Services.ContentService.GetById(childIds[i]);
                     var childId = child.Id;
                     Services.ContentService.Delete(child);
                     count += 1;
