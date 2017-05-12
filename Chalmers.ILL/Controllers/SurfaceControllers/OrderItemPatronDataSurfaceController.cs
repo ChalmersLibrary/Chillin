@@ -129,6 +129,58 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         /// <summary>
+        /// Retrieves the data from Sierra using Sierra identifier. After successfully fetching the data it binds it to 
+        /// the order item with the given id.
+        /// </summary>
+        /// <remarks>Cache storage expects sierra identifier with starting 'p' and ending control number. Non cache 
+        /// storage expects Sierra identifier without this.</remarks>
+        /// <param name="orderItemNodeId">Order item node identifier.</param>
+        /// <param name="sierraId">Sierra identifier.</param>
+        /// <param name="cache">If we should fetch data from cache or not.</param>
+        /// <returns>Result indicating how the request went.</returns>
+        [HttpGet]
+        public ActionResult FetchPatronDataUsingSierraId(int orderItemNodeId, string sierraId, bool cache = true)
+        {
+            var json = new ResultResponse();
+
+            try
+            {
+                var content = _orderItemManager.GetOrderItem(orderItemNodeId);
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
+                SierraModel sm = null;
+                if (cache)
+                {
+                    // Cache expects sierra identifier with starting 'p' and ending control number.
+                    sm = _patronDataProviderSierraCache.GetPatronInfoFromSierraId(sierraId);
+                }
+                else
+                {
+                    // Non cache expects sierra identifier without starting 'p' and ending control number.
+                    sm = _patronDataProviderSierra.GetPatronInfoFromSierraId(sierraId);
+                }
+
+                if (!String.IsNullOrEmpty(sm.id))
+                {
+                    _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library);
+                    UpdateDeliveryLibraryIfNeeded(content.NodeId, sm, eventId);
+                    _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content.NodeId, false, false);
+                }
+                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm, eventId);
+
+                json.Success = true;
+                json.Message = "Succcessfully loaded Sierra data using sierra identifier.";
+            }
+            catch (Exception e)
+            {
+                json.Success = false;
+                json.Message = "Failed to load Sierra data using sierra identifier: " + e.Message;
+            }
+
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
         /// Retrieves the data from Sierra using the library card number and binds the data to the order item
         /// with the given id.
         /// </summary>

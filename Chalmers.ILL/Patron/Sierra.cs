@@ -137,6 +137,39 @@ namespace Chalmers.ILL.Patron
             return model;
         }
 
+        public SierraModel GetPatronInfoFromSierraId(string sierraId)
+        {
+            SierraModel model = new SierraModel();
+
+            var runCount = 0;
+            var success = false;
+
+            while (runCount < 2 && !success)
+            {
+                runCount++;
+
+                try
+                {
+                    PopulateBasicPatronInfoFromSierraId(sierraId, model);
+
+                    success = true;
+                }
+                catch (Exception e)
+                {
+                    _umbraco.LogError<Sierra>("Failed to get patron info using sierra identifier " + sierraId + " from Sierra.", e);
+
+                    // If we fail the first time we reconnect and try to fetch the information one more time.
+                    if (runCount < 2)
+                    {
+                        Disconnect();
+                        Connect();
+                    }
+                }
+            }
+
+            return model;
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -167,6 +200,37 @@ namespace Chalmers.ILL.Patron
             {
                 command.Parameters.Add(new NpgsqlParameter("barcode", NpgsqlTypes.NpgsqlDbType.Text));
                 command.Parameters[0].Value = barcode.ToLower();
+
+                using (NpgsqlDataReader dr = command.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        model.id = dr["id"].ToString();
+                        model.barcode = dr["barcode"].ToString();
+                        model.ptype = Convert.ToInt32(dr["ptype_code"]);
+                        model.email = dr["email"].ToString();
+                        model.first_name = dr["first_name"].ToString();
+                        model.last_name = dr["last_name"].ToString();
+                        model.home_library = dr["home_library_code"].ToString();
+                        model.home_library_pretty_name = _templateService.GetPrettyLibraryNameFromLibraryAbbreviation(model.home_library);
+                        model.mblock = dr["mblock_code"].ToString();
+                        model.record_id = Convert.ToInt32(dr["record_num"].ToString());
+                    }
+                }
+            }
+        }
+
+        private void PopulateBasicPatronInfoFromSierraId(string sierraId, SierraModel model)
+        {
+            if (_connection.State != ConnectionState.Open)
+            {
+                throw new SierraConnectionException("Status på koppling mot Sierra är inte \"open\", det är: \"" + _connection.State.ToString() + "\".");
+            }
+
+            using (NpgsqlCommand command = new NpgsqlCommand("SELECT pv.id, pv.barcode, pv.ptype_code, pv.record_num, vv.field_content as email, first_name, last_name, home_library_code, mblock_code from sierra_view.patron_record_fullname fn, sierra_view.patron_view pv, sierra_view.varfield_view vv where pv.id=fn.patron_record_id and pv.id=vv.record_id and vv.varfield_type_code='z' and pv.record_num=:sierraId", _connection))
+            {
+                command.Parameters.Add(new NpgsqlParameter("sierraId", NpgsqlTypes.NpgsqlDbType.Integer));
+                command.Parameters[0].Value = Convert.ToInt32(sierraId);
 
                 using (NpgsqlDataReader dr = command.ExecuteReader())
                 {
