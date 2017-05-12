@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
 
 namespace Chalmers.ILL.Models
 {
@@ -43,6 +44,16 @@ namespace Chalmers.ILL.Models
 
         public string OriginalOrder { get; set; }
         public string Reference { get; set; }
+
+        [JsonIgnore]
+        public string OriginalOrderWithoutReferenceUrl
+        {
+            get
+            {
+                var refUrlRegex = new Regex(@"Referens \(radera ej\): http://[A-Za-z0-9\-\._~:/\?#\[\]@!\$&'\(\)\*\+,;=`%]+");
+                return refUrlRegex.Replace(OriginalOrder, "");
+            }
+        }
 
         public int TypeId { get; set; }
         public string Type { get; set; }
