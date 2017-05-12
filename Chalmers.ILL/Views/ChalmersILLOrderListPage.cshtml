@@ -104,8 +104,8 @@
         <div id="filter-buttons" class="btn-group" data-pending-filter-change="0">
             <button id="status00-button" type="button" value="" class="btn btn-default active" style="border-radius:0;">Alla <span id="status00-counter" class="badge">0</span></button>
             <button id="status01-button" type="button" value=".chillin-status-01" class="btn btn-default btn-danger hidden">Ny <span id="status01-counter" class="badge">0</span></button>
-            <button id="status09-button" type="button" value=".chillin-status-09" class="btn btn-default btn-warning hidden">Mottagen <span id="status09-counter" class="badge">0</span></button>
-            <button id="status02-button" type="button" value=".chillin-status-02" class="btn btn-default btn-warning hidden">Åtgärda <span id="status02-counter" class="badge">0</span></button>
+            <button id="status09-button" type="button" value=".chillin-status-09" class="btn btn-default btn-danger hidden">Mottagen <span id="status09-counter" class="badge">0</span></button>
+            <button id="status02-button" type="button" value=".chillin-status-02" class="btn btn-default btn-danger hidden">Åtgärda <span id="status02-counter" class="badge">0</span></button>
             <button id="status12-button" type="button" value=".chillin-status-12" class="btn btn-default btn-warning hidden">Krävd <span id="status12-counter" class="badge">0</span></button>
             <button id="status03-button" type="button" value=".chillin-status-03" class="btn btn-default btn-warning hidden">Beställd <span id="status03-counter" class="badge">0</span></button>
             <button id="status04-button" type="button" value=".chillin-status-04" class="btn btn-default btn-warning hidden">Väntar <span id="status04-counter" class="badge">0</span></button>
@@ -200,7 +200,9 @@ else
         <div class="col-sm-1 deliveryLibrary @library" data-column="deliveryLibrary">@GetSigelFromLibraryName(library.ToString())</div>
         <div class="col-sm-1" data-column="type">@type</div>
         <div class="col-sm-1" data-column="status" data-fud="@date.Ticks">
-            @if (status.ToString().StartsWith("01:"))
+            @if (status.ToString().StartsWith("01:") ||
+                 status.ToString().StartsWith("02:") ||
+                 status.ToString().StartsWith("09:"))
             {
                 <span class="order-item-status label label-danger status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
             }

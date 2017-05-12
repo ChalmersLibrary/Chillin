@@ -588,7 +588,9 @@ function loadOrderItemSummary(id)
             if (!$("#" + json.NodeId).hasClass("open") || statusClass === "") {
                 statusClass = "chillin-status-" + json.Status.substring(0, 2);
             }
-            if (json.Status.indexOf("01") == 0) {
+            if (json.Status.indexOf("01") == 0 ||
+                json.Status.indexOf("02") == 0 ||
+                json.Status.indexOf("09") == 0) {
                 $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-danger status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
             else if (json.Status.indexOf("05") == 0 || 
