@@ -982,6 +982,19 @@ function fetchDataFromSierraUsingLibraryCardNumber(orderItemNodeId, lcn, cache) 
     });
 }
 
+function fetchDataFromSierraUsingSierraId(orderItemNodeId, sierraId, cache) {
+    cache = typeof cache !== "undefined" ? cache : true;
+    lockScreen();
+    $.getJSON("/umbraco/surface/OrderItemPatronDataSurface/FetchPatronDataUsingSierraId", { orderItemNodeId: orderItemNodeId, sierraId: sierraId, cache: cache }).done(function (json) {
+        if (json.Success) {
+            loadOrderItemDetails(orderItemNodeId);
+        } else {
+            alert(json.Message);
+        }
+        unlockScreen();
+    });
+}
+
 /* Load Partial View with form for setting Provider details */
 function loadProviderAction(id) {
     $("#loading-partial-view").show();

@@ -11,13 +11,13 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="form-group">
-            @if (!String.IsNullOrEmpty(Model.SierraInfo.barcode))
+            @if (!String.IsNullOrEmpty(Model.SierraInfo.id))
             {
-                <button name="fetch-patron-data-button" type="button" class="btn btn-success" onclick="fetchDataFromSierraUsingLibraryCardNumber(@Model.NodeId, '@Model.SierraInfo.barcode.Split(';')[0]', false);">Uppdatera med nuvarande lånekortsnummer <span class="glyphicon glyphicon-refresh"></span></button>
+                <button name="fetch-patron-data-button" type="button" class="btn btn-success" onclick="fetchDataFromSierraUsingSierraId(@Model.NodeId, '@Model.SierraInfo.record_id', false);">Uppdatera nuvarande inläst användare direkt från Sierra <span class="glyphicon glyphicon-refresh"></span></button>
             }
             else
             {
-                <button name="fetch-patron-data-button" type="button" class="btn btn-success disabled">Uppdatera med nuvarande lånekortsnummer <span class="glyphicon glyphicon-refresh"></span></button>
+                <button name="fetch-patron-data-button" type="button" class="btn btn-success disabled">Uppdatera nuvarande inläst användare direkt från Sierra <span class="glyphicon glyphicon-refresh"></span></button>
             }
             </div>
         </div>
@@ -100,6 +100,7 @@
                         <div class='col-sm-2 patron-data-pnum'>" + data.pnum + "</div>\
                         <div class='col-sm-1 patron-data-ptype'>" + data.ptype + "</div>\
                         <div class='col-sm-2 patron-data-expdate'>" + dateStr + "</div>\
+                        <div class='patron-data-sierraid' style='display:none;'>" + data.recordnum + "</div>\
                     </div>")
                     });
                 } else {
@@ -115,9 +116,9 @@
         if (selectedItem.length == 0) {
             alert("Du måste välja någon beställardata i listan att läsa in.")
         } else {
-            var lcn = selectedItem.find(".patron-data-barcode").text().split(/[,;]/)[0];
+            var sierraId = selectedItem.find(".patron-data-sierraid").text();
             
-            fetchDataFromSierraUsingLibraryCardNumber(@Model.NodeId, lcn);
+            fetchDataFromSierraUsingSierraId(@Model.NodeId, sierraId, true);
         }
     }
 

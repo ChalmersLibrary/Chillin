@@ -14,5 +14,6 @@ namespace Chalmers.ILL.Patron
 
         SierraModel GetPatronInfoFromLibraryCardNumber(string barcode);
         SierraModel GetPatronInfoFromLibraryCardNumberOrPersonnummer(string barcode, string pnr);
+        SierraModel GetPatronInfoFromSierraId(string sierraId);
     }
 }

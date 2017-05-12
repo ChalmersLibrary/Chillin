@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Web;
+using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.Patron
 {
@@ -65,47 +66,7 @@ namespace Chalmers.ILL.Patron
 
                 if (json.response.numFound == 1)
                 {
-                    var address1 = BuildSierraAddressModel(((string)json.response.docs[0].address));
-                    var address2 = BuildSierraAddressModel(((string)json.response.docs[0].address2));
-                    var address3 = BuildSierraAddressModel(((string)json.response.docs[0].address3));
-                    string patronName = json.response.docs[0].pname;
-                    var patronNameParts = patronName.Split(',');
-                    string recordId = json.response.docs[0].recordnum;
-
-                    if (address1 != null)
-                    {
-                        ret.adress.Add(address1);
-                    }
-
-                    if (address2 != null)
-                    {
-                        ret.adress.Add(address2);
-                    }
-
-                    if (address3 != null)
-                    {
-                        ret.adress.Add(address3);
-                    }
-
-                    ret.barcode = json.response.docs[0].barcode;
-                    ret.home_library = ((string)json.response.docs[0].homelib).Trim();
-                    ret.home_library_pretty_name = _templateService.GetPrettyLibraryNameFromLibraryAbbreviation(ret.home_library);
-                    ret.id = "0";
-                    ret.email = json.response.docs[0].email;
-
-                    if (patronNameParts.Length == 2)
-                    {
-                        ret.first_name = patronNameParts[1].Trim();
-                        ret.last_name = patronNameParts[0].Trim();
-                    }
-                    else
-                    {
-                        ret.first_name = patronName;
-                    }
-
-                    ret.mblock = json.response.docs[0].mblock;
-                    ret.ptype = json.response.docs[0].ptype;
-                    ret.record_id = Convert.ToInt32(recordId.Remove(recordId.Length - 1).Remove(0, 1));
+                    FillInSierraModelFromSolrData(json.response.docs[0], ret);
                 }
 
             }
@@ -115,6 +76,82 @@ namespace Chalmers.ILL.Patron
             }
 
             return ret;
+        }
+
+        public SierraModel GetPatronInfoFromSierraId(string sierraId)
+        {
+            var ret = new Models.SierraModel();
+
+            try
+            {
+                var query = "recordnum:" + sierraId;
+
+                HttpWebRequest fileReq = (HttpWebRequest)HttpWebRequest.Create(ConfigurationManager.AppSettings["patronCacheSolrQueryUrl"] + query + "&wt=json");
+                fileReq.CookieContainer = new CookieContainer();
+                fileReq.AllowAutoRedirect = true;
+                HttpWebResponse fileResp = (HttpWebResponse)fileReq.GetResponse();
+                var outputStream = fileResp.GetResponseStream();
+
+                var sr = new StreamReader(outputStream);
+                var json = JsonConvert.DeserializeObject<dynamic>(sr.ReadToEnd());
+
+                if (json.response.numFound == 1)
+                {
+                    FillInSierraModelFromSolrData(json.response.docs[0], ret);
+                }
+
+            }
+            catch (Exception)
+            {
+                // NOP
+            }
+
+            return ret;
+        }
+
+        private void FillInSierraModelFromSolrData(dynamic recordData, /* out */ SierraModel result)
+        {
+            var address1 = BuildSierraAddressModel(((string)recordData.address));
+            var address2 = BuildSierraAddressModel(((string)recordData.address2));
+            var address3 = BuildSierraAddressModel(((string)recordData.address3));
+            string patronName = recordData.pname;
+            var patronNameParts = patronName.Split(',');
+            string recordId = recordData.recordnum;
+
+            if (address1 != null)
+            {
+                result.adress.Add(address1);
+            }
+
+            if (address2 != null)
+            {
+                result.adress.Add(address2);
+            }
+
+            if (address3 != null)
+            {
+                result.adress.Add(address3);
+            }
+
+            result.barcode = recordData.barcode;
+            result.home_library = ((string)recordData.homelib).Trim();
+            result.home_library_pretty_name = _templateService.GetPrettyLibraryNameFromLibraryAbbreviation(result.home_library);
+            result.id = "0";
+            result.email = recordData.email;
+
+            if (patronNameParts.Length == 2)
+            {
+                result.first_name = patronNameParts[1].Trim();
+                result.last_name = patronNameParts[0].Trim();
+            }
+            else
+            {
+                result.first_name = patronName;
+            }
+
+            result.mblock = recordData.mblock;
+            result.ptype = recordData.ptype;
+            result.record_id = Convert.ToInt32(recordId.Remove(recordId.Length - 1).Remove(0, 1));
         }
 
         private Models.SierraAddressModel BuildSierraAddressModel(string address)
