@@ -103,22 +103,22 @@
         <h2 id="order-list-title">Beställningar - Alla bibliotek</h2>  
         <div id="filter-buttons" class="btn-group" data-pending-filter-change="0">
             <button id="status00-button" type="button" value="" class="btn btn-default active" style="border-radius:0;">Alla <span id="status00-counter" class="badge">0</span></button>
-            <button id="status01-button" type="button" value=".chillin-status-01" class="btn btn-default btn-danger hidden">Ny <span id="status01-counter" class="badge">0</span></button>
+            <button id="status01-button" type="button" value=".chillin-status-01" class="btn btn-default btn-success hidden">Ny <span id="status01-counter" class="badge">0</span></button>
             <button id="status09-button" type="button" value=".chillin-status-09" class="btn btn-default btn-danger hidden">Mottagen <span id="status09-counter" class="badge">0</span></button>
             <button id="status02-button" type="button" value=".chillin-status-02" class="btn btn-default btn-danger hidden">Åtgärda <span id="status02-counter" class="badge">0</span></button>
-            <button id="status12-button" type="button" value=".chillin-status-12" class="btn btn-default btn-warning hidden">Krävd <span id="status12-counter" class="badge">0</span></button>
-            <button id="status03-button" type="button" value=".chillin-status-03" class="btn btn-default btn-warning hidden">Beställd <span id="status03-counter" class="badge">0</span></button>
-            <button id="status04-button" type="button" value=".chillin-status-04" class="btn btn-default btn-warning hidden">Väntar <span id="status04-counter" class="badge">0</span></button>
-            <button id="status13-button" type="button" value=".chillin-status-13" class="btn btn-default btn-warning hidden">Transport <span id="status13-counter" class="badge">0</span></button>
-            <button id="status14-button" type="button" value=".chillin-status-14" class="btn btn-default btn-warning hidden">Infodisk <span id="status14-counter" class="badge">0</span></button>
-            <button id="status11-button" type="button" value=".chillin-status-11" class="btn btn-default btn-warning hidden">Utlånad <span id="status11-counter" class="badge">0</span></button>
-            <button id="status15-button" type="button" value=".chillin-status-15" class="btn btn-default btn-warning hidden">Förlorad? <span id="status15-counter" class="badge">0</span></button>
-            <button id="status05-button" type="button" value=".chillin-status-05" class="btn btn-default btn-success hidden">Levererad <span id="status05-counter" class="badge">0</span></button>
-            <button id="status06-button" type="button" value=".chillin-status-06" class="btn btn-default btn-success hidden">Annullerad <span id="status06-counter" class="badge">0</span></button>
-            <button id="status07-button" type="button" value=".chillin-status-07" class="btn btn-default btn-success hidden">Överförd <span id="status07-counter" class="badge">0</span></button>
-            <button id="status08-button" type="button" value=".chillin-status-08" class="btn btn-default btn-success hidden">Inköpt <span id="status08-counter" class="badge">0</span></button>
-            <button id="status10-button" type="button" value=".chillin-status-10" class="btn btn-default btn-success hidden">Återsänd <span id="status10-counter" class="badge">0</span></button>
-            <button id="status16-button" type="button" value=".chillin-status-16" class="btn btn-default btn-success hidden" style="border-radius:0;">Förlorad <span id="status16-counter" class="badge">0</span></button>
+            <button id="status12-button" type="button" value=".chillin-status-12" class="btn btn-default btn-danger hidden">Krävd <span id="status12-counter" class="badge">0</span></button>
+            <button id="status03-button" type="button" value=".chillin-status-03" class="btn btn-default btn-danger hidden">Beställd <span id="status03-counter" class="badge">0</span></button>
+            <button id="status04-button" type="button" value=".chillin-status-04" class="btn btn-default btn-danger hidden">Väntar <span id="status04-counter" class="badge">0</span></button>
+            <button id="status13-button" type="button" value=".chillin-status-13" class="btn btn-default btn-danger hidden">Transport <span id="status13-counter" class="badge">0</span></button>
+            <button id="status14-button" type="button" value=".chillin-status-14" class="btn btn-default btn-danger hidden">Infodisk <span id="status14-counter" class="badge">0</span></button>
+            <button id="status11-button" type="button" value=".chillin-status-11" class="btn btn-default btn-danger hidden">Utlånad <span id="status11-counter" class="badge">0</span></button>
+            <button id="status15-button" type="button" value=".chillin-status-15" class="btn btn-default btn-danger hidden">Förlorad? <span id="status15-counter" class="badge">0</span></button>
+            <button id="status05-button" type="button" value=".chillin-status-05" class="btn btn-default btn-info hidden">Levererad <span id="status05-counter" class="badge">0</span></button>
+            <button id="status06-button" type="button" value=".chillin-status-06" class="btn btn-default btn-info hidden">Annullerad <span id="status06-counter" class="badge">0</span></button>
+            <button id="status07-button" type="button" value=".chillin-status-07" class="btn btn-default btn-info hidden">Överförd <span id="status07-counter" class="badge">0</span></button>
+            <button id="status08-button" type="button" value=".chillin-status-08" class="btn btn-default btn-info hidden">Inköpt <span id="status08-counter" class="badge">0</span></button>
+            <button id="status10-button" type="button" value=".chillin-status-10" class="btn btn-default btn-info hidden">Återsänd <span id="status10-counter" class="badge">0</span></button>
+            <button id="status16-button" type="button" value=".chillin-status-16" class="btn btn-default btn-info hidden" style="border-radius:0;">Förlorad <span id="status16-counter" class="badge">0</span></button>
         </div>
     </div>
 
@@ -200,11 +200,9 @@ else
         <div class="col-sm-1 deliveryLibrary @library" data-column="deliveryLibrary">@GetSigelFromLibraryName(library.ToString())</div>
         <div class="col-sm-1" data-column="type">@type</div>
         <div class="col-sm-1" data-column="status" data-fud="@date.Ticks">
-            @if (status.ToString().StartsWith("01:") ||
-                 status.ToString().StartsWith("02:") ||
-                 status.ToString().StartsWith("09:"))
+            @if (status.ToString().StartsWith("01:"))
             {
-                <span class="order-item-status label label-danger status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
+                <span class="order-item-status label label-success status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
             }
             else if (status.ToString().StartsWith("05:") ||
                      status.ToString().StartsWith("06:") ||
@@ -213,11 +211,11 @@ else
                      status.ToString().StartsWith("10:") ||
                      status.ToString().StartsWith("16:"))
             {
-                <span class="order-item-status label label-success status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
+                <span class="order-item-status label label-info status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
             }
             else
             {
-                <span class="order-item-status label label-warning status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
+                <span class="order-item-status label label-danger status-@status.ToString().Split(':').First() chillin-status-@status.ToString().Split(':').First()">@ParseStatusPrevalue(status.ToString())</span>
             }
         </div>
     </div>
