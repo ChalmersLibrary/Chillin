@@ -48,7 +48,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                ids = _orderItemsSearcher.Search("ProviderName:\"" + providerName + "\"")
+                ids = _orderItemsSearcher.Search("providerName:\"" + providerName + "\"")
                     .Where(x => x.ProviderName == providerName)
                     .Select(x => x.NodeId)
                     .ToList();
