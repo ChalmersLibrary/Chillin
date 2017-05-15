@@ -31,12 +31,14 @@ namespace Chalmers.ILL.Templates
             {
                 var description = template.Fields.ContainsKey("Description") ? template.Fields["Description"] : "";
                 var data = template.Fields.ContainsKey("Data") ? template.Fields["Data"] : "";
+                var acquisition = template.Fields.ContainsKey("Acquisition") ? Convert.ToBoolean(Convert.ToInt32(template.Fields["Acquisition"])) : false;
                 if (template.Fields.ContainsKey("Automatic") && !Convert.ToBoolean(Convert.ToInt32(template.Fields["Automatic"])))
                 res.Add(new Template
                 {
                     Id = template.Id,
                     Description = description,
-                    Data = data
+                    Data = data,
+                    Acquisition = acquisition
                 });
             }
             res.Sort((x1, x2) => String.Compare(x1.Description, x2.Description, true, new CultureInfo("sv-se")));
