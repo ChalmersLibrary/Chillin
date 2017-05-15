@@ -16,10 +16,24 @@
                         </button>
                         <ul class="dropdown-menu" id="orderitem-mail-templatelist" role="menu">
                             <li><a href="#" onclick="selectTemplate(-1, 'Tom'); event.preventDefault();">Tom</a></li>
-                            @foreach (var template in Model.Templates)
-                            {
-                                <li><a href="#" onclick="selectTemplate(@template.Id, '@template.Description'); event.preventDefault();">@template.Description</a></li>
-                            }
+                            <li class="dropdown-submenu">
+                                <a href="#">Fjärrlån</a>
+                                <ul class="dropdown-menu">
+                                    @foreach (var template in Model.Templates.Where(x => !x.Acquisition))
+                                    {
+                                        <li><a href="#" onclick="selectTemplate(@template.Id, '@template.Description'); event.preventDefault();">@template.Description</a></li>
+                                    }
+                                </ul>
+                            </li>
+                            <li class="dropdown-submenu">
+                                <a href="#">Förvärv</a>
+                                <ul class="dropdown-menu">
+                                    @foreach (var template in Model.Templates.Where(x => x.Acquisition))
+                                    {
+                                        <li><a href="#" onclick="selectTemplate(@template.Id, '@template.Description'); event.preventDefault();">@template.Description</a></li>
+                                    }
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                 </div>
