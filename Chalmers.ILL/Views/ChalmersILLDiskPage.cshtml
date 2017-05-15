@@ -77,8 +77,16 @@
                             }
                             else if (firstOrderItem.Type == "Bok" && firstOrderItem.StatusString == "Infodisk")
                             {
-                                <h3>1. Kolla lånekort.</h3>
-                                <h3>2. Välj "Låna ut" på rätt bok i listan nedan.</h3>
+                                if (!firstOrderItem.ReadOnlyAtLibrary)
+                                {
+                                    <h3>1. Kolla lånekort.</h3>
+                                    <h3>2. Välj "Låna ut" på rätt bok i listan nedan.</h3>
+                                }
+                                else
+                                {
+                                    <h3>1. Kolla lånekort.</h3>
+                                    <h3>2. Ej hemlån. Registreras ej.</h3>
+                                }
                             }
                             else if (firstOrderItem.Type == "Bok" && firstOrderItem.StatusString == "Utlånad")
                             {

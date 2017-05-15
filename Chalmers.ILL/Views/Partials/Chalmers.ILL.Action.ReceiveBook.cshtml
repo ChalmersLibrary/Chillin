@@ -44,7 +44,7 @@
                 {
                     <div class="alert alert-success" role="alert">Automatiskt mailutskick kommer att levereras till <span id="patron-email" class="content-editable" contenteditable>@Model.OrderItem.PatronEmail</span> <span class="glyphicon glyphicon-pencil"></span></div>
                     <button class="btn btn-success" onclick="deliver(false, true)">Ta emot för vanligt lån</button>
-                    <button class="btn btn-success" onclick="deliver(true, false)">Ta emot för läsesalslån</button>
+                    <button class="btn btn-success" onclick="deliver(true, true)">Ta emot för läsesalslån</button>
                 }
             </div>
         </div>
@@ -53,7 +53,7 @@
         <div id="printDiv" class="print">
             <h3 style="float:right" class="dueDatePlaceHolder"></h3><br />
             <strong style="font-size:2em">@Model.OrderItem.SierraInfo.last_name @Model.OrderItem.SierraInfo.first_name</strong><br />
-            <h2>Fjärrlån</h2>
+            <h2>Fjärrlån <span class="hidden readlibrary">Läsesalslån. Ej hemlån</span></h2>
             <div style="font-size:1.5em"><strong>@Model.OrderItem.DeliveryLibraryPrettyName</strong> Infodisk, tag ut och läs!</div>
             <br />
             <br />
@@ -68,10 +68,15 @@
                     <p>&nbsp;</p>
                 }
             }
-            <p style="font-size:1.4em">
+            <p class="readlibrary" style="font-size:1.4em">
                 OBS! När du lånar ut boken<br />
                 1.	Sök boken i Chillin med bifogad streckkod.<br />
                 2.	Följ instruktionerna<br />
+            </p>
+            <p class="readlibrary hidden" style="font-size:1.4em">
+                OBS! Läsesalslån EJ HEMLÅN!<br />
+                1. Kolla lånekort.<br />
+                2. Registreras ej i Chillin.<br />
             </p>
             <p>&nbsp;</p>
             <p>&nbsp;</p>
@@ -117,6 +122,10 @@
     });
 
     function deliver(localLoan, print) {
+        if (localLoan) {
+            confirm("Lägg i röd slip EJ HEMLÅN i boken");
+            $('.readlibrary').toggleClass('hidden');
+        }
         if (hasProviderInfoBeenEdited || confirm("Du har inte ändrat leverantörsdata. Är du säker på att du vill fortsätta?")) {
             $('#container #printDiv').insertAfter('#container');
             var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
@@ -149,6 +158,10 @@
     }
 
     function transport(localLoan, print) {
+        if (localLoan) {
+            confirm("Lägg i röd slip EJ HEMLÅN i boken");
+            $('.readlibrary').toggleClass('hidden');
+        }
         if (hasProviderInfoBeenEdited || confirm("Du har inte ändrat leverantörsdata. Är du säker på att du vill fortsätta?")) {
             $('#container #printDiv').insertAfter('#container');
             var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
