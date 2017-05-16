@@ -50,7 +50,7 @@ namespace Chalmers.ILL.Models
         {
             get
             {
-                var refUrlRegex = new Regex(@"Referens \(radera ej\): http://[A-Za-z0-9\-\._~:/\?#\[\]@!\$&'\(\)\*\+,;=`%]+");
+                var refUrlRegex = new Regex(@"Referens \(radera ej\): https?://[A-Za-z0-9\-\._~:/\?#\[\]@!\$&'\(\)\*\+,;=`%]+.*");
                 return refUrlRegex.Replace(OriginalOrder, "");
             }
         }
