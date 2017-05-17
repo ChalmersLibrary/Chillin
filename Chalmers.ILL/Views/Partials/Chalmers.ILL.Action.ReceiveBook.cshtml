@@ -27,13 +27,13 @@
         </div>
         <div class="row">
             <div class="form-group col-sm-12">
-                @if (Model.OrderItem.SierraInfo.home_library == "lbib" || Model.OrderItem.SierraInfo.home_library == "abib")
+                @if (Model.OrderItem.DeliveryLibraryPrettyName == "Kuggen" || Model.OrderItem.DeliveryLibraryPrettyName == "Arkitekturbiblioteket")
                 {
-                    if (Model.OrderItem.SierraInfo.home_library == "lbib")
+                    if (Model.OrderItem.DeliveryLibraryPrettyName == "Kuggen")
                     {
                         <div class="alert alert-info">Boken skall skickas till Kuggen.</div>
                     }
-                    else if (Model.OrderItem.SierraInfo.home_library == "abib")
+                    else if (Model.OrderItem.DeliveryLibraryPrettyName == "Arkitekturbiblioteket")
                     {
                         <div class="alert alert-info">Boken skall skickas till Arkitekturbiblioteket.</div>
                     }
