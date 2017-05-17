@@ -30,7 +30,7 @@
                     </div>
                 }
                 
-                @if (Model.OrderItem.Type == "Bok" && !Model.OrderItem.DeliveryLibrarySameAsHomeLibrary)
+                @if (!Model.OrderItem.DeliveryLibrarySameAsHomeLibrary)
                 {
                     <div class="panel panel-danger">
                         <div class="panel-heading">
