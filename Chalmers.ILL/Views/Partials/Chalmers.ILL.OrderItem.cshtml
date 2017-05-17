@@ -292,6 +292,9 @@
         <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lt. - Kortnr.</span> @Model.OrderItem.PatronCardNo</span>
     </div>
     <div>
+        <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lt. - Valt bibl.</span> @Model.OrderItem.DeliveryLibraryPrettyName</span>
+    </div>
+    <div>
         @{
             var notEmpty = !String.IsNullOrEmpty(Model.OrderItem.ProviderInformation);
             var moreThanOneRow = Model.OrderItem.ProviderInformation.Contains("\n");
