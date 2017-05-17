@@ -31,7 +31,11 @@
                         <label for="recipientLibNr">Bibliotekskortsnummer</label>
                         <input type="text" class="form-control" id="recipientLibNr" name="recipientLibNr" value="">
                     </div>
-                    <button class="btn btn-success" onclick="sendMailForNewOrder(this.form.message.value.toString().trim(), this.form.recipientName.value.toString().trim(), this.form.recipientEmail.value.toString().trim(), this.form.recipientLibNr.value.toString().trim());">Skicka in beställning</button>
+                    <div class="form-group">
+                        <label for="deliveryLibrary">Bibliotek</label>
+                        <input type="text" class="form-control" id="deliveryLibrary" name="deliveryLibrary" value="Z" />
+                    </div>
+                    <button class="btn btn-success" onclick="sendMailForNewOrder(this.form.message.value.toString().trim(), this.form.recipientName.value.toString().trim(), this.form.recipientEmail.value.toString().trim(), this.form.recipientLibNr.value.toString().trim(), this.form.deliveryLibrary.value.toString().trim());">Skicka in beställning</button>
                 </div>
             </div>
         </form>

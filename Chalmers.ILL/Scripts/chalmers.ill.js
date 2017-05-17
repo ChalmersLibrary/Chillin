@@ -894,10 +894,10 @@ function setOrderItemTransport(nodeId, logEntry, delivery) {
     });
 }
 
-function sendMailForNewOrder(body, name, mail, libCardNr) {
+function sendMailForNewOrder(body, name, mail, libCardNr, delLibrary) {
     lockScreen();
-    if (body && name && mail && libCardNr) {
-        $.post("/umbraco/surface/OrderItemMailSurface/SendMailForNewOrder", { message: body, name: name, mail: mail, libraryCardNumber: libCardNr }).done(function (json) {
+    if (body && name && mail && libCardNr && delLibrary) {
+        $.post("/umbraco/surface/OrderItemMailSurface/SendMailForNewOrder", { message: body, name: name, mail: mail, libraryCardNumber: libCardNr, deliveryLibrary: delLibrary }).done(function (json) {
             if (json.Success) {
                 alert("Successfully sent new order!");
             }
@@ -922,6 +922,9 @@ function sendMailForNewOrder(body, name, mail, libCardNr) {
         }
         if (libCardNr == "") {
             alert("Du m\u00E5ste skriva ditt bibliotekskortsnummer.");
+        }
+        if (delLibrary == "") {
+            alert("Du måste skriva in levererande bibliotek.");
         }
 
         unlockScreen();

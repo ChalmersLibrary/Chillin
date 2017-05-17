@@ -36,6 +36,8 @@ namespace Chalmers.ILL.Models.Mail
 
         public bool IsPurchaseRequest { get; set; }
 
+        public string DeliveryLibrary { get; set; }
+
         public string OrderId { get; set; }
         public int OrderItemNodeId { get; set; }
 
