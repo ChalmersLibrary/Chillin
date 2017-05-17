@@ -26,15 +26,16 @@
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleFromProviderDeliveryType" data-delivery-type="provider" onclick="selectDeliveryType(this); event.preventDefault();">Direktleverans från leverantör</a>
                         </li>
-                        @if(Model.OrderItem.SierraInfo.home_library == "hbib" || String.IsNullOrEmpty(Model.OrderItem.SierraInfo.home_library)) {
-                        <li role="presentation">
-                            <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleInInfodiskDeliveryType" data-delivery-type="infodisk" onclick="selectDeliveryType(this); event.preventDefault();">Avhämtning i infodisk</a>
-                        </li>
-                        }
-                        @if(Model.OrderItem.SierraInfo.home_library != "hbib") { 
+                        @if(Model.OrderItem.DeliveryLibraryPrettyName != "Huvudbiblioteket") { 
                         <li role="presentation">
                             <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleInTransitDeliveryType" data-delivery-type="transport" onclick="selectDeliveryType(this); event.preventDefault();">Internpost till filial</a>
                         </li>
+                        }
+                        else
+                        {
+                            <li role="presentation">
+                                <a role="menuitem" tabindex="-1" href="#" data-render-method="RenderArticleInInfodiskDeliveryType" data-delivery-type="infodisk" onclick="selectDeliveryType(this); event.preventDefault();">Avhämtning i infodisk</a>
+                            </li>
                         }
                     </ul>
                 </div>

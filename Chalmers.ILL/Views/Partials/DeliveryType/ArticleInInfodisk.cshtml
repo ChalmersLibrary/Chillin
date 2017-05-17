@@ -35,15 +35,7 @@
         </div>
         <div class="row">
             <div class="form-group col-sm-12">
-                @if (String.IsNullOrWhiteSpace(Model.OrderItem.SierraInfo.home_library))
-                {
-                    <div class="panel panel-danger">
-                        <div class="panel-heading">
-                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Låntagardata för hembibliotek saknas!</h3>
-                        </div>
-                    </div>
-                }
-                else if (Model.OrderItem.SierraInfo.home_library.Contains("lbib") || Model.OrderItem.SierraInfo.home_library.Contains("abib"))
+                @if (Model.OrderItem.DeliveryLibraryPrettyName == "Kuggen"  || Model.OrderItem.DeliveryLibraryPrettyName == "Arkitekturbiblioteket" )
                 {
                     <div class="panel panel-danger">
                         <div class="panel-heading">
