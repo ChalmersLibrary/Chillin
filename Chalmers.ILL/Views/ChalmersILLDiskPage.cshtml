@@ -67,14 +67,26 @@
                             {
                                 <h3>Scanna in boken eller artikelns streckkod.</h3>
                             }
+                            else if (firstOrderItem.Type == "Bok" && firstOrderItem.StatusString == "Transport" && firstOrderItem.LogItemsList.Where(x => x.Message.Contains("till Utlånad")).Count() > 0)
+                            {
+                                <h3>Boken har redan varit utlånad och skall åter till fjärrin på huvudbiblioteket.</h3>
+                            }
                             else if (firstOrderItem.Type == "Bok" && firstOrderItem.StatusString == "Transport")
                             {
                                 <h3>Välj "Ta emot" på rätt bok i listan nedan.</h3>
                             }
                             else if (firstOrderItem.Type == "Bok" && firstOrderItem.StatusString == "Infodisk")
                             {
-                                <h3>1. Kolla lånekort.</h3>
-                                <h3>2. Välj "Låna ut" på rätt bok i listan nedan.</h3>
+                                if (!firstOrderItem.ReadOnlyAtLibrary)
+                                {
+                                    <h3>1. Kolla lånekort.</h3>
+                                    <h3>2. Välj "Låna ut" på rätt bok i listan nedan.</h3>
+                                }
+                                else
+                                {
+                                    <h3>1. Kolla lånekort.</h3>
+                                    <h3>2. Ej hemlån. Registreras ej.</h3>
+                                }
                             }
                             else if (firstOrderItem.Type == "Bok" && firstOrderItem.StatusString == "Utlånad")
                             {
@@ -242,7 +254,7 @@
                 <div class="row">
                     <div class="col-sm-10"></div>
                     <div id="statusActions" class="col-sm-2 text-right">
-                        @if (item.Type == "Bok" && item.StatusString == "Transport")
+                        @if (item.Type == "Bok" && item.StatusString == "Transport" && item.LogItemsList.Where(x => x.Message.Contains("till Utlånad")).Count() == 0)
                         {
                             <button type="submit" class="btn btn-success" onclick="receiveBookAtBranch(@item.NodeId)">Ta emot</button>
                         }
@@ -261,8 +273,7 @@
                         @if (item.Type == "Bok" && item.StatusString == "Krävd")
                         {
                             <button type="submit" class="btn btn-success" onclick="returnBook(@item.NodeId,'@item.DeliveryLibrary');">Returnera</button>
-                        }
-                    </div>
+                        }                    </div>
                 </div>
             </div>
         </div>

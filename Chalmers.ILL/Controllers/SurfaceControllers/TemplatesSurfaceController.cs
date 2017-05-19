@@ -8,6 +8,7 @@ using System.Net;
 using System.Web.Mvc;
 using Umbraco.Core.Services;
 using Umbraco.Web.Mvc;
+using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -15,10 +16,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class TemplatesSurfaceController : SurfaceController
     {
         ITemplateService _templateService;
+        IOrderItemManager _orderItemManager;
 
-        public TemplatesSurfaceController(ITemplateService templateService)
+        public TemplatesSurfaceController(ITemplateService templateService, IOrderItemManager orderItemManager)
         {
             _templateService = templateService;
+            _orderItemManager = orderItemManager;
         }
 
         [HttpGet]
@@ -47,6 +50,27 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 json.Success = false;
                 json.Message = "Misslyckades med att hitta malldata: " + e.Message;
+            }
+
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public ActionResult GetPopulatedTemplateData(int templateId, int orderItemNodeId)
+        {
+            var json = new ResultResponseWithStringData();
+
+            try
+            {
+                var orderItem = _orderItemManager.GetOrderItem(orderItemNodeId);
+                json.Success = true;
+                json.Message = "Populerade malldata.";
+                json.Data = _templateService.GetTemplateData(templateId, orderItem);
+            }
+            catch (Exception e)
+            {
+                json.Success = false;
+                json.Message = "Misslyckades med att populera malldata: " + e.Message;
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);

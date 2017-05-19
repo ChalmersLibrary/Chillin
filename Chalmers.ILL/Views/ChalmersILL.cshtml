@@ -74,6 +74,13 @@
                         </div>
                         <div class="btn-group">
                             <button type="submit" class="btn btn-default">Sök</button>
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href='?query=status:"15:Förlorad?"'>Ordrar med status <span class="order-item-status label label-danger">Förlorad?</span></a></li>
+                            </ul>
                         </div>
                     </form>
 
@@ -92,7 +99,7 @@
                                 <ul class="dropdown-menu">
                                     <li><a href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoRootContentDocumentType"]).First().Url">Hjälp</a></li>
                                     <li><a href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoSettingsPageContentDocumentType"]).First().Url">Inställningar</a></li>
-                                    <li><a href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoStatisticsPageContentDocumentType"]).First().Url">Statistik</a></li>
+                                    <li><a href="@ConfigurationManager.AppSettings["statisticsUrl"]">Statistik</a></li>
                                     <li><a href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoLogoutPageContentDocumentType"]).First().Url">Logga ut</a></li>
                                 </ul>
                             </li>

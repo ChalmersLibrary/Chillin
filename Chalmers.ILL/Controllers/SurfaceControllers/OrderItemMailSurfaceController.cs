@@ -54,6 +54,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             _dataTypes.PopulateModelWithAvailableValues(model);
             model.SignatureTemplate = _templateService.GetTemplateData("SignatureTemplate", model.OrderItem);
+            model.Templates = _templateService.GetManualTemplates();
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Mail", model);
@@ -146,7 +147,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="newStatus">Change OrderItem status</param>
         /// <returns>JSON result</returns>
         [HttpPost, ValidateInput(false)]
-        public ActionResult SendMailForNewOrder(string message, string name, string mail, string libraryCardNumber)
+        public ActionResult SendMailForNewOrder(string message, string name, string mail, string libraryCardNumber, string deliveryLibrary)
         {
             var json = new ResultResponse();
 
@@ -158,6 +159,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                         "<div id='PatronEmail'>" + mail + "</div>\n" +
                         "<div id='PatronCardNo'>" + libraryCardNumber + "</div>\n" +
                         "<div id='Purchase'>False</div>\n" +
+                        "<div id='DeliveryLibrary'>" + deliveryLibrary + "</div>\n" +
                     "</div>\n";
                 _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
                 _exchangeMailWebApi.SendPlainMailMessage(body, "New request from TEST #new", ConfigurationManager.AppSettings["chalmersIllSenderAddress"]);

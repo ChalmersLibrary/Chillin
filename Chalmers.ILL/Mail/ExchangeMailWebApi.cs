@@ -115,6 +115,7 @@ namespace Chalmers.ILL.Mail
                         {
                             m.IsPurchaseRequest = false;
                         }
+                        m.DeliveryLibrary = htmlDoc.GetElementbyId("DeliveryLibrary").InnerText;
                     }
 
                     // Load all attachments

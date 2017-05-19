@@ -14,7 +14,7 @@ namespace Chalmers.ILL.EventHandlers
             if (ConfigurationManager.AppSettings["BlobStorageConnectionString"] == "UseDevelopmentStorage=true" ||
                 ConfigurationManager.AppSettings["BlobStorageConnectionString"] == "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://localhost:10000/devstoreaccount1;TableEndpoint=http://localhost:10002/devstoreaccount1;QueueEndpoint=http://localhost:10001/devstoreaccount1;")
             {
-                AzureStorageEmulatorManager.Start();
+                //AzureStorageEmulatorManager.Start(); // We start Azure Storage Emulator manually instead.
             }
 
             // Should we check for pending database migrations and apply them?

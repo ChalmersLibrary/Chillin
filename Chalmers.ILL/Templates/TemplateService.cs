@@ -2,6 +2,7 @@
 using Examine;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -21,14 +22,38 @@ namespace Chalmers.ILL.Templates
             _templateSearcher = templateSearcher;
         }
 
+        public IList<Template> GetManualTemplates()
+        {
+            var res = new List<Template>();
+            var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+            var searchResult = _templateSearcher.Search(searchCriteria.NodeTypeAlias("ChalmersILLTemplate").Compile());
+            foreach (var template in searchResult)
+            {
+                var description = template.Fields.ContainsKey("Description") ? template.Fields["Description"] : "";
+                var data = template.Fields.ContainsKey("Data") ? template.Fields["Data"] : "";
+                var acquisition = template.Fields.ContainsKey("Acquisition") ? Convert.ToBoolean(Convert.ToInt32(template.Fields["Acquisition"])) : false;
+                if (template.Fields.ContainsKey("Automatic") && !Convert.ToBoolean(Convert.ToInt32(template.Fields["Automatic"])))
+                res.Add(new Template
+                {
+                    Id = template.Id,
+                    Description = description,
+                    Data = data,
+                    Acquisition = acquisition
+                });
+            }
+            res.Sort((x1, x2) => String.Compare(x1.Description, x2.Description, true, new CultureInfo("sv-se")));
+            return res;
+        }
+
         public string GetTemplateData(int nodeId)
         {
             var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
             var results = _templateSearcher.Search(searchCriteria.Id(nodeId).Compile());
-
+            
             if (results.Count() > 0)
             {
-                return results.First().Fields["Data"];
+                var template = results.First();
+                return template.Fields.ContainsKey("Data") ? template.Fields["Data"] : "";
             }
 
             throw new TemplateServiceException("Hittade ingen mall med ID=" + nodeId + ".");
@@ -41,15 +66,86 @@ namespace Chalmers.ILL.Templates
 
             if (results.Count() > 0)
             {
-                return results.First().Fields["Data"].ToString();
+                var template = results.First();
+                return template.Fields.ContainsKey("Data") ? template.Fields["Data"] : "";
             }
 
             throw new TemplateServiceException("Hittade ingen mall med nodnamn=" + nodeName + ".");
         }
 
+        public string GetTemplateData(int templateId, OrderItemModel orderItem)
+        {
+            var res = "Misslyckades med att ladda mall...";
+            var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+            var results = _templateSearcher.Search(searchCriteria.Id(templateId).Compile());
+
+            if (results.Count() > 0)
+            {
+                var templateName = results.First().Fields["nodeName"];
+                var template = results.First();
+                var templateString = template.Fields.ContainsKey("Data") ? template.Fields["Data"] : "";
+
+                res = ReplaceMoustaches(templateName, templateString, orderItem);
+            }
+
+            return res;
+        }
+
         public string GetTemplateData(string nodeName, OrderItemModel orderItem)
         {
-            var template = new StringBuilder(GetTemplateData(nodeName));
+            return ReplaceMoustaches(nodeName, GetTemplateData(nodeName), orderItem);
+        }
+
+        public void SetTemplateData(int nodeId, string data)
+        {
+            var template = _contentService.GetById(nodeId);
+
+            template.SetValue("data", data);
+            _contentService.Save(template);
+        }
+
+        public List<Template> PopulateTemplateList(List<Template> list)
+        {
+            var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
+            var results = _templateSearcher.Search(searchCriteria.NodeTypeAlias("ChalmersILLTemplate").Compile());
+
+            foreach (var result in results)
+            {
+                var template = new Template();
+                template.Id = result.Id;
+                template.Description = result.Fields.ContainsKey("Description") ? result.Fields["Description"] : "";
+                template.Data = result.Fields.ContainsKey("Data") ? result.Fields["Data"] : "";
+                list.Add(template);
+            }
+
+            list.Sort((x1, x2) => String.Compare(x1.Description, x2.Description, true, new CultureInfo("sv-se")));
+
+            return list;
+        }
+
+        public string GetPrettyLibraryNameFromLibraryAbbreviation(string libraryName)
+        {
+            var res = OrderItemModel.LIBRARY_UNKNOWN_PRETTY_STRING;
+            if (libraryName != null && libraryName.Contains("hbib"))
+            {
+                res = OrderItemModel.LIBRARY_Z_PRETTY_STRING;
+            }
+            else if (libraryName != null && libraryName.Contains("lbib"))
+            {
+                res = OrderItemModel.LIBRARY_ZL_PRETTY_STRING;
+            }
+            else if (libraryName != null && libraryName.Contains("abib"))
+            {
+                res = OrderItemModel.LIBRARY_ZA_PRETTY_STRING;
+            }
+            return res;
+        }
+
+        #region Private methods
+
+        private string ReplaceMoustaches(string templateName, string templateString, OrderItemModel orderItem)
+        {
+            var template = new StringBuilder(templateString);
 
             // Search for double moustaches in the template and replace these with the correct order item property value.
             var moustachePattern = new Regex("{{([a-zA-Z0-9:]+)}}");
@@ -61,14 +157,14 @@ namespace Chalmers.ILL.Templates
 
                 if (property.StartsWith("T:")) // Other templates that should be injected.
                 {
-                    var templateName = property.Split(':').Last() + "Template";
-                    if (templateName == nodeName) // Do not allow injection of template into itself.
+                    var injectedTemplateName = property.Split(':').Last() + "Template";
+                    if (injectedTemplateName == templateName) // Do not allow injection of template into itself.
                     {
                         template.Replace("{{" + property + "}}", "{{Injection of template into itself is not allowed}}");
                     }
                     else
                     {
-                        template.Replace("{{" + property + "}}", GetTemplateData(templateName, orderItem));
+                        template.Replace("{{" + property + "}}", GetTemplateData(injectedTemplateName, orderItem));
                     }
                 }
                 else if (property.StartsWith("S:")) // Special variables that exists in awkward places.
@@ -97,49 +193,6 @@ namespace Chalmers.ILL.Templates
             return template.ToString();
         }
 
-        public void SetTemplateData(int nodeId, string data)
-        {
-            var template = _contentService.GetById(nodeId);
-
-            template.SetValue("data", data);
-            _contentService.Save(template);
-        }
-
-        public List<Template> PopulateTemplateList(List<Template> list)
-        {
-            var searchCriteria = _templateSearcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-            var results = _templateSearcher.Search(searchCriteria.NodeTypeAlias("ChalmersILLTemplate").Compile());
-
-            foreach (var result in results)
-            {
-                var template = new Template();
-                template.Id = result.Id;
-                template.Description = result.Fields["Description"];
-                template.Data = result.Fields["Data"];
-                list.Add(template);
-            }
-
-            list.Sort((x1, x2) => x1.Description.CompareTo(x2.Description)); 
-
-            return list;
-        }
-
-        public string GetPrettyLibraryNameFromLibraryAbbreviation(string libraryName)
-        {
-            var res = "Okänt bibliotek";
-            if (libraryName != null && libraryName.Contains("hbib"))
-            {
-                res = "Huvudbiblioteket";
-            }
-            else if (libraryName != null && libraryName.Contains("lbib"))
-            {
-                res = "Lindholmenbiblioteket";
-            }
-            else if (libraryName != null && libraryName.Contains("abib"))
-            {
-                res = "Arkitekturbiblioteket";
-            }
-            return res;
-        }
+        #endregion
     }
 }

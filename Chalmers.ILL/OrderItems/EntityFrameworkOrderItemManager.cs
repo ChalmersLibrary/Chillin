@@ -391,20 +391,19 @@ namespace Chalmers.ILL.OrderItems
                 newOrderItem.BookId = "";
                 newOrderItem.ProviderInformation = "";
 
-                if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
+                switch (model.DeliveryLibrary) 
                 {
-                    if (model.SierraPatronInfo.home_library.ToLower() == "abib")
-                    {
-                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
-                    }
-                    else if (model.SierraPatronInfo.home_library.ToLower() == "lbib")
-                    {
-                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
-                    }
-                    else
-                    {
+                    case "Z":
                         newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
-                    }
+                        break;
+                    case "Za":
+                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
+                        break;
+                    case "Zl":
+                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
+                        break;
+                    default:
+                        break;
                 }
 
                 // Set Type directly if "IsPurchaseRequest" is true
@@ -1446,18 +1445,18 @@ namespace Chalmers.ILL.OrderItems
 
         private string GetPrettyLibraryNameFromLibraryAbbreviation(string libraryName)
         {
-            var res = "Okänt bibliotek";
+            var res = OrderItemModel.LIBRARY_UNKNOWN_PRETTY_STRING;
             if (libraryName != null && libraryName.Contains("hbib"))
             {
-                res = "Huvudbiblioteket";
+                res = OrderItemModel.LIBRARY_Z_PRETTY_STRING;
             }
             else if (libraryName != null && libraryName.Contains("lbib"))
             {
-                res = "Lindholmenbiblioteket";
+                res = OrderItemModel.LIBRARY_ZL_PRETTY_STRING;
             }
             else if (libraryName != null && libraryName.Contains("abib"))
             {
-                res = "Arkitekturbiblioteket";
+                res = OrderItemModel.LIBRARY_ZA_PRETTY_STRING;
             }
             return res;
         }

@@ -389,6 +389,7 @@
     <Content Include="Views\Partials\Settings\ModifyProviderData.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.ReceiveBook.cshtml" />
     <Content Include="Views\ChalmersILLDiskPage.cshtml" />
+    <Content Include="Views\Partials\DeliveryType\ArticleFromProvider.cshtml" />
     <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />
     <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
@@ -467,6 +468,7 @@
     <Compile Include="Controllers\SurfaceControllers\StatisticsSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\TemplatesSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\TemporarySillySurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\UmbracoOrderItemMigrationSurfaceController.cs" />
     <Compile Include="Database\OrderItemsDbContext.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
@@ -535,6 +537,7 @@
     <Compile Include="Models\PartialPage\ChalmersILLActionReturnModel.cs" />
     <Compile Include="Models\PartialPage\DeliveryType\ArticleByEmail.cs" />
     <Compile Include="Models\PartialPage\DeliveryType\ArticleByMailOrInternalMail.cs" />
+    <Compile Include="Models\PartialPage\DeliveryType\ArticleFromProvider.cs" />
     <Compile Include="Models\PartialPage\DeliveryType\ArticleInInfodisk.cs" />
     <Compile Include="Models\PartialPage\DeliveryType\ArticleInTransit.cs" />
     <Compile Include="Models\PartialPage\DeliveryType\BookInstantLoan.cs" />

@@ -121,7 +121,7 @@ $(function () {
                     bStatus = parseInt(bStatusMatch[1]);
                 }
                 
-                var sortingWeights = [1, 2, 4, 6, 7, 10, 11, 12, 13, 3, 14, 9, 5, 8, 0];
+                var sortingWeights = [1, 2, 4, 6, 7, 10, 11, 12, 13, 3, 14, 9, 5, 8, 0, 15, 16];
 
                 var result = sortingWeights[aStatus] - sortingWeights[bStatus];
                 if (result == 0) {
@@ -489,7 +489,7 @@ function applyLibraryListFilter(filter, animate)
 
 function updateFilterButtonCounters()
 {
-    var numberOfStatuses = 14;
+    var numberOfStatuses = 16;
 
     // TODO: AAAAAHHHH!! MY EYES!!! Rewrite this method.
     if ($("#library01-button").hasClass("active")) {
@@ -503,7 +503,7 @@ function updateFilterButtonCounters()
         }
     } else if ($("#library02-button").hasClass("active")) {
         // lbib
-        $("#order-list-title").text("Best\u00E4llningar - Lindholmenbiblioteket");
+        $("#order-list-title").text("Best\u00E4llningar - Kuggen");
         setCounterOrHide($("#status00-counter"), $(".order-list").find(".illedit > .Lindholmenbiblioteket").length);
         for (k = 1; k < (numberOfStatuses + 1) ; k++) {
             setCounterOrHide($("#status" + zeroPadFromLeft(k, 2) + "-counter"), $(".order-list").find("div > div > .status-" + zeroPadFromLeft(k, 2)).filter(function (item) {
@@ -531,14 +531,20 @@ function updateFilterButtonCounters()
 
 function updateLibraryFilterButtonCounters()
 {
-    $("#allaBibliotek").text($(".order-list").find(".deliveryLibrary").length.toString());
-    $("#Huvudbiblioteket").text($(".order-list").find(".Huvudbiblioteket").length.toString());
-    $("#Lindholmenbiblioteket").text($(".order-list").find(".Lindholmenbiblioteket").length.toString());
-    $("#Arkitekturbiblioteket").text($(".order-list").find(".Arkitekturbiblioteket").length.toString());
+    var allCount = $(".order-list").find(".deliveryLibrary").length.toString();
+    var zCount = $(".order-list").find(".Huvudbiblioteket").length.toString();
+    var zlCount = $(".order-list").find(".Lindholmenbiblioteket").length.toString();
+    var zaCount = $(".order-list").find(".Arkitekturbiblioteket").length.toString();
+    $("#allaBibliotek").text(allCount).parent().toggleClass("hidden", allCount == 0);
+    $("#Huvudbiblioteket").text(zCount).parent().toggleClass("hidden", zCount == 0);
+    $("#Lindholmenbiblioteket").text(zlCount).parent().toggleClass("hidden", zlCount == 0);
+    $("#Arkitekturbiblioteket").text(zaCount).parent().toggleClass("hidden", zaCount == 0);
+
 }
 
 function setCounterOrHide(elem, count) {
     elem.text(count.toString());
+    elem.parent().toggleClass("hidden", count == 0);
 }
 
 // Load OrderItem Summary (first row in list)
@@ -589,7 +595,8 @@ function loadOrderItemSummary(id)
                      json.Status.indexOf("06") == 0 || 
                      json.Status.indexOf("07") == 0 || 
                      json.Status.indexOf("08") == 0 ||
-                     json.Status.indexOf("10") == 0) {
+                     json.Status.indexOf("10") == 0 ||
+                     json.Status.indexOf("16") == 0) {
                 $("#" + json.NodeId + " div[data-column='status']").html("<span class=\"order-item-status label label-info status-" + json.Status.substring(0, 2) + " " + statusClass + "\">" + json.StatusString + "</span>");
             }
             else {
@@ -801,15 +808,18 @@ function loadLogItems(id)
 
 /* Set new property values for Provider from form */
 
-function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInformation, followUpDate)
+function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInformation, followUpDate, updateStatusAndFollowUpDate)
 {
+    updateStatusAndFollowUpDate = typeof updateStatusAndFollowUpDate !== "undefined" ? updateStatusAndFollowUpDate : true;
+
     lockScreen();
     $.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider", {
         nodeId: nodeId,
         providerName: providerName,
         providerOrderId: providerOrderId.trim(),
         providerInformation: providerInformation,
-        newFollowUpDate: followUpDate
+        newFollowUpDate: followUpDate,
+        updateStatusAndFollowUpDate: updateStatusAndFollowUpDate
     }).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(nodeId);
@@ -884,10 +894,10 @@ function setOrderItemTransport(nodeId, logEntry, delivery) {
     });
 }
 
-function sendMailForNewOrder(body, name, mail, libCardNr) {
+function sendMailForNewOrder(body, name, mail, libCardNr, delLibrary) {
     lockScreen();
-    if (body && name && mail && libCardNr) {
-        $.post("/umbraco/surface/OrderItemMailSurface/SendMailForNewOrder", { message: body, name: name, mail: mail, libraryCardNumber: libCardNr }).done(function (json) {
+    if (body && name && mail && libCardNr && delLibrary) {
+        $.post("/umbraco/surface/OrderItemMailSurface/SendMailForNewOrder", { message: body, name: name, mail: mail, libraryCardNumber: libCardNr, deliveryLibrary: delLibrary }).done(function (json) {
             if (json.Success) {
                 alert("Successfully sent new order!");
             }
@@ -912,6 +922,9 @@ function sendMailForNewOrder(body, name, mail, libCardNr) {
         }
         if (libCardNr == "") {
             alert("Du m\u00E5ste skriva ditt bibliotekskortsnummer.");
+        }
+        if (delLibrary == "") {
+            alert("Du måste skriva in levererande bibliotek.");
         }
 
         unlockScreen();

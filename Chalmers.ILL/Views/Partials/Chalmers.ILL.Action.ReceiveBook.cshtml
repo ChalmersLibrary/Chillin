@@ -27,13 +27,13 @@
         </div>
         <div class="row">
             <div class="form-group col-sm-12">
-                @if (Model.OrderItem.SierraInfo.home_library == "lbib" || Model.OrderItem.SierraInfo.home_library == "abib")
+                @if (Model.OrderItem.DeliveryLibraryPrettyName == "Kuggen" || Model.OrderItem.DeliveryLibraryPrettyName == "Arkitekturbiblioteket")
                 {
-                    if (Model.OrderItem.SierraInfo.home_library == "lbib")
+                    if (Model.OrderItem.DeliveryLibraryPrettyName == "Kuggen")
                     {
-                        <div class="alert alert-info">Boken skall skickas till Lindholmenbiblioteket.</div>
+                        <div class="alert alert-info">Boken skall skickas till Kuggen.</div>
                     }
-                    else if (Model.OrderItem.SierraInfo.home_library == "abib")
+                    else if (Model.OrderItem.DeliveryLibraryPrettyName == "Arkitekturbiblioteket")
                     {
                         <div class="alert alert-info">Boken skall skickas till Arkitekturbiblioteket.</div>
                     }
@@ -44,23 +44,39 @@
                 {
                     <div class="alert alert-success" role="alert">Automatiskt mailutskick kommer att levereras till <span id="patron-email" class="content-editable" contenteditable>@Model.OrderItem.PatronEmail</span> <span class="glyphicon glyphicon-pencil"></span></div>
                     <button class="btn btn-success" onclick="deliver(false, true)">Ta emot för vanligt lån</button>
-                    <button class="btn btn-success" onclick="deliver(true, false)">Ta emot för läsesalslån</button>
+                    <button class="btn btn-success" onclick="deliver(true, true)">Ta emot för läsesalslån</button>
                 }
             </div>
         </div>
     </div>
     <div class="col-md-6">
         <div id="printDiv" class="print">
-            <h1>Fjärrlån</h1>
             <h3 style="float:right" class="dueDatePlaceHolder"></h3><br />
-            <div style="font-size:1.5em">@Model.OrderItem.SierraInfo.home_library_pretty_name Infodisk, tag ut och läs!</div>
-            <strong style="font-size:1.5em">@Model.OrderItem.SierraInfo.last_name @Model.OrderItem.SierraInfo.first_name</strong><br />
+            <strong style="font-size:2em">@Model.OrderItem.SierraInfo.last_name @Model.OrderItem.SierraInfo.first_name</strong><br />
+            <h2>Fjärrlån <span class="hidden readlibrary">Läsesalslån. Ej hemlån</span></h2>
+            <div style="font-size:1.5em"><strong>@Model.OrderItem.DeliveryLibraryPrettyName</strong> Infodisk, tag ut och läs!</div>
             <br />
             <br />
-            <p style="font-size:1.4em">
-                OBS! Innan du lånar ut boken<br />
+            @{
+                if (Model.OrderItem.SierraInfo.home_library != "hbib")
+                {
+                    <p style="font-size:1.4em">
+                        När boken anländer<br />
+                        1.	Sök boken i Chillin med bifogad streckkod.<br />
+                        2.	Följ instruktionerna<br />
+                    </p>
+                    <p>&nbsp;</p>
+                }
+            }
+            <p class="readlibrary" style="font-size:1.4em">
+                OBS! När du lånar ut boken<br />
                 1.	Sök boken i Chillin med bifogad streckkod.<br />
-                2.	Följ instruktionerna i Chillin.<br />
+                2.	Följ instruktionerna<br />
+            </p>
+            <p class="readlibrary hidden" style="font-size:1.4em">
+                OBS! Läsesalslån EJ HEMLÅN!<br />
+                1. Kolla lånekort.<br />
+                2. Registreras ej i Chillin.<br />
             </p>
             <p>&nbsp;</p>
             <p>&nbsp;</p>
@@ -68,15 +84,7 @@
             <p>&nbsp;</p>
             <p>&nbsp;</p>
             <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
+
             <div style="float:right">
                 @{
                     string barcodeurl = "http://barcode.tec-it.com/barcode.ashx?translate-esc=off&data=" + Model.OrderItem.OrderId + "&code=Code128&unit=Fit&dpi=96&imagetype=Gif&rotation=0&color=000000&bgcolor=FFFFFF&qunit=Mm&quiet=0";
@@ -84,6 +92,18 @@
                     <img width="300" src=@barcodeurl /><br />
                 }
             </div>
+            <img src="~/images/cth_logo.png" width="148pt" /><br />
+            <br />
+            <p>
+                Chalmers tekniska högskola<br />
+                Biblioteket<br />
+                412 96  Göteborg<br />
+                <br />
+                031-772 3737<br />
+                <br />
+                www.lib.chalmers.se<br />
+                support.lib@chalmers.se<br />
+            </p>
         </div>
         <div class="form-group">
             <label for="log-message">Skriv till logg (valfritt)</label>
@@ -102,6 +122,10 @@
     });
 
     function deliver(localLoan, print) {
+        if (localLoan) {
+            confirm("Lägg i röd slip EJ HEMLÅN i boken");
+            $('.readlibrary').toggleClass('hidden');
+        }
         if (hasProviderInfoBeenEdited || confirm("Du har inte ändrat leverantörsdata. Är du säker på att du vill fortsätta?")) {
             $('#container #printDiv').insertAfter('#container');
             var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
@@ -134,6 +158,10 @@
     }
 
     function transport(localLoan, print) {
+        if (localLoan) {
+            confirm("Lägg i röd slip EJ HEMLÅN i boken");
+            $('.readlibrary').toggleClass('hidden');
+        }
         if (hasProviderInfoBeenEdited || confirm("Du har inte ändrat leverantörsdata. Är du säker på att du vill fortsätta?")) {
             $('#container #printDiv').insertAfter('#container');
             var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");

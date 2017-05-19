@@ -35,15 +35,7 @@
         </div>
         <div class="row">
             <div class="form-group col-sm-12">
-                @if (String.IsNullOrWhiteSpace(Model.OrderItem.SierraInfo.home_library))
-                {
-                    <div class="panel panel-danger">
-                        <div class="panel-heading">
-                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Låntagardata för hembibliotek saknas!</h3>
-                        </div>
-                    </div>
-                }
-                else if (Model.OrderItem.SierraInfo.home_library.Contains("lbib") || Model.OrderItem.SierraInfo.home_library.Contains("abib"))
+                @if (Model.OrderItem.DeliveryLibraryPrettyName == "Kuggen"  || Model.OrderItem.DeliveryLibraryPrettyName == "Arkitekturbiblioteket" )
                 {
                     <div class="panel panel-danger">
                         <div class="panel-heading">
@@ -61,39 +53,32 @@
             <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
         </div>
         <div id="printDiv" class="print">
-            <p style="font-size:1.5em">
-            Artikel för avhämtning på Chalmers @Model.OrderItem.SierraInfo.home_library_pretty_name<br />
-            Article for pickup at Chalmers @Model.OrderItem.SierraInfo.home_library_pretty_name</p>
-            <p></p>
-            <p></p>
             <strong style="font-size:1.5em">@Model.OrderItem.SierraInfo.last_name @Model.OrderItem.SierraInfo.first_name</strong>
+            <p></p>
+            <p style="font-size:1.2em">
+            Artikel för avhämtning på Chalmers <strong>@Model.OrderItem.DeliveryLibraryPrettyName</strong><br />
+            <p></p>
+            <p></p>
             <br />
             <br />
-            <ol style="font-size:1.5em">
-                <li>Sök artikeln i Chillin med streckkod nedan.</li>
-                <li>Följ instruktionerna i Chillin.</li>
-            </ol>
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
-            <br />
+            <h3>Vid avhämtning:</h3>
+            <p style="font-size:1.5em">
+                Lämna ut artikeln. Ingen registrering behövs.
+            </p>
             <br />
             <br />
             <br />
             <br />
             <br />
             <br />
-            <div style="float:right">
-                @{
-                    string barcodeurl = "http://barcode.tec-it.com/barcode.ashx?translate-esc=off&data=" + Model.OrderItem.OrderId + "&code=Code128&unit=Fit&dpi=96&imagetype=Gif&rotation=0&color=000000&bgcolor=FFFFFF&qunit=Mm&quiet=0";
-                    //string barcodeurl = "http://barcodes4.me/barcode/c39/" + @Model.OrderItem.OrderId + ".png";
-                    <img width="300" src=@barcodeurl /><br />
-                }
-            </div>
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
             <img src="~/images/cth_logo.png" width="148pt"/><br />
             <br />
             <p>

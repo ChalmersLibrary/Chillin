@@ -1,0 +1,21 @@
+﻿@model Chalmers.ILL.Models.PartialPage.DeliveryType.ArticleFromProvider
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="row">
+            <div class="form-group col-sm-12">
+                <label for="log-message">Skriv till logg (valfritt)</label>
+                <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
+            </div>
+            <div class="form-group col-sm-12">
+                <button class="btn btn-success" onclick="deliver()">Leverera!</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function deliver() {
+        setOrderItemDelivery(@Model.OrderItem.NodeId, $('#log-message').val(), "Direktleverans från leverantör");
+    }
+</script>

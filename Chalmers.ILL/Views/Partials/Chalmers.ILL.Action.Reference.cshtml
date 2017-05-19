@@ -18,4 +18,9 @@
             <button class="btn btn-success" onclick="setOrderItemReference(@Model.NodeId, this.form.reference.value)">Spara referens</button>
         </div>
     </div>
+    <script>
+        $(function () {
+            $("#reference").focus().scrollTop(0)[0].setSelectionRange(0, 0);
+        });
+    </script>
 </form>

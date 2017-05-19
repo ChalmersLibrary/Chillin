@@ -1,14 +1,25 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
 
 namespace Chalmers.ILL.Models
 {
     // Main Order Item
     public class OrderItemModel
     {
-        public OrderItemModel()
+        public const string LIBRARY_Z_PRETTY_STRING = "Huvudbiblioteket";
+        public const string LIBRARY_ZL_PRETTY_STRING = "Kuggen";
+        public const string LIBRARY_ZA_PRETTY_STRING = "Arkitekturbiblioteket";
+        public const string LIBRARY_UNKNOWN_PRETTY_STRING = "Okänt bibliotek";
+
+        public const string LIBRARY_Z_UMBRACO_STRING = "Huvudbiblioteket";
+        public const string LIBRARY_ZL_UMBRACO_STRING = "Lindholmenbiblioteket";
+        public const string LIBRARY_ZA_UMBRACO_STRING = "Arkitekturbiblioteket";
+
+            public OrderItemModel()
         {
             StatusId = -1;
             PreviousStatusId = -1;
@@ -34,6 +45,16 @@ namespace Chalmers.ILL.Models
         public string OriginalOrder { get; set; }
         public string Reference { get; set; }
 
+        [JsonIgnore]
+        public string OriginalOrderWithoutReferenceUrl
+        {
+            get
+            {
+                var refUrlRegex = new Regex(@"Referens \(radera ej\): https?://[A-Za-z0-9\-\._~:/\?#\[\]@!\$&'\(\)\*\+,;=`%]+.*");
+                return refUrlRegex.Replace(OriginalOrder, "");
+            }
+        }
+
         public int TypeId { get; set; }
         public string Type { get; set; }
 
@@ -51,6 +72,27 @@ namespace Chalmers.ILL.Models
 
         public int DeliveryLibraryId { get; set; }
         public string DeliveryLibrary { get; set; }
+
+        [JsonIgnore]
+        public string DeliveryLibraryPrettyName
+        {
+            get
+            {
+                if (DeliveryLibrary == LIBRARY_Z_UMBRACO_STRING)
+                {
+                    return LIBRARY_Z_PRETTY_STRING;
+                }
+                else if (DeliveryLibrary == LIBRARY_ZL_UMBRACO_STRING)
+                {
+                    return LIBRARY_ZL_PRETTY_STRING;
+                }
+                else if (DeliveryLibrary == LIBRARY_ZA_UMBRACO_STRING)
+                {
+                    return LIBRARY_ZA_PRETTY_STRING;
+                }
+                return LIBRARY_UNKNOWN_PRETTY_STRING;
+            }
+        }
 
         public int CancellationReasonId { get; set; }
         public string CancellationReason { get; set; }

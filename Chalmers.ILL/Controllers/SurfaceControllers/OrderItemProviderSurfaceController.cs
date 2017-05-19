@@ -21,6 +21,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemProviderSurfaceController : SurfaceController
     {
         public static int EVENT_TYPE { get { return 7; } }
+        public static int PROVIDER_DATA_UPDATED_EVENT_TYPE { get { return 27; } }
 
         IOrderItemManager _orderItemManager;
         IProviderService _providerService;
@@ -46,18 +47,34 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
-        public ActionResult SetProvider(int nodeId, string providerName, string providerOrderId, string providerInformation, string newFollowUpDate)
+        public ActionResult SetProvider(int nodeId, string providerName, string providerOrderId, string providerInformation, string newFollowUpDate, bool updateStatusAndFollowUpDate = true)
         {
             var json = new ResultResponse();
 
             try
             {
-                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
-                _orderItemManager.SetFollowUpDate(nodeId, Convert.ToDateTime(newFollowUpDate), eventId, false, false);
+                var eventType = PROVIDER_DATA_UPDATED_EVENT_TYPE;
+                if (updateStatusAndFollowUpDate)
+                {
+                    eventType = EVENT_TYPE;
+                }
+
+                var eventId = _orderItemManager.GenerateEventId(eventType);
+                if (updateStatusAndFollowUpDate)
+                {
+                    _orderItemManager.SetFollowUpDate(nodeId, Convert.ToDateTime(newFollowUpDate), eventId, false, false);
+                }
+
                 _orderItemManager.SetProviderName(nodeId, providerName, eventId, false, false);
                 _orderItemManager.SetProviderOrderId(nodeId, providerOrderId, eventId, false, false);
                 _orderItemManager.SetProviderInformation(nodeId, providerInformation, eventId, false, false);
-                _orderItemManager.SetStatus(nodeId, "03:Beställd", eventId);
+
+                if (updateStatusAndFollowUpDate)
+                {
+                    _orderItemManager.SetStatus(nodeId, "03:Beställd", eventId, false, false);
+                }
+
+                _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(nodeId);
 
                 json.Success = true;
                 json.Message = "Sparade data för beställning.";
