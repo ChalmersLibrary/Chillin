@@ -468,7 +468,6 @@
     <Compile Include="Controllers\SurfaceControllers\StatisticsSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\TemplatesSurfaceController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\TemporarySillySurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\UmbracoOrderItemMigrationSurfaceController.cs" />
     <Compile Include="Database\OrderItemsDbContext.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
