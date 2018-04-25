@@ -62,8 +62,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 HttpWebRequest fileReq = (HttpWebRequest)HttpWebRequest.Create(ConfigurationManager.AppSettings["patronCacheSolrQueryUrl"] + query + "&wt=json");
+
+                if (!String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthUsername"]) && !String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthPassword"]))
+                    fileReq.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthUsername"] + ":" + ConfigurationManager.AppSettings["patronCacheSolrBasicAuthPassword"])));
+
                 fileReq.CookieContainer = new CookieContainer();
                 fileReq.AllowAutoRedirect = true;
+
                 HttpWebResponse fileResp = (HttpWebResponse)fileReq.GetResponse();
                 var outputStream = fileResp.GetResponseStream();
 
