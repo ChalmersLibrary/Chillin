@@ -20,7 +20,7 @@ namespace Chalmers.ILL.OrderItems
         {
             var indexResponse = _elasticClient.Index(item, x => x.Id(item.NodeId));
 
-            if (indexResponse.CallDetails == null || !indexResponse.CallDetails.Success)
+            if (indexResponse.ApiCall == null || !indexResponse.ApiCall.Success)
             {
                 throw new OrderItemSearchIndexingException("Failed to index added order item. Reason: " + indexResponse.DebugInformation + "; Data:" + JsonConvert.SerializeObject(item));
             }                    
@@ -30,11 +30,7 @@ namespace Chalmers.ILL.OrderItems
         {
             var deleteResponse = _elasticClient.Delete<OrderItemModel>(item.NodeId);
 
-            if (!deleteResponse.Found)
-            {
-                throw new OrderItemSearchIndexingException("Couldn't find order item for deletion from search index. Data:" + JsonConvert.SerializeObject(item));
-            }
-            else if (deleteResponse.CallDetails == null || !deleteResponse.CallDetails.Success)
+            if (deleteResponse.ApiCall == null || !deleteResponse.ApiCall.Success)
             {
                 throw new OrderItemSearchIndexingException("Failed to delete order item. Reason: " + deleteResponse.DebugInformation + "; Data:" + JsonConvert.SerializeObject(item));
             }
@@ -44,7 +40,7 @@ namespace Chalmers.ILL.OrderItems
         {
             var indexResponse = _elasticClient.Index(item, x => x.Id(item.NodeId));
 
-            if (indexResponse.CallDetails == null || !indexResponse.CallDetails.Success)
+            if (indexResponse.ApiCall == null || !indexResponse.ApiCall.Success)
             {
                 throw new OrderItemSearchIndexingException("Failed to index modified order item. Reason: " + indexResponse.DebugInformation + "; Data:" + JsonConvert.SerializeObject(item));
             }
