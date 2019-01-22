@@ -51,7 +51,7 @@ namespace Chalmers.ILL.Templates
             var templates = SimpleSearch("nodeName:" + nodeName);
             if (templates.Count() > 0)
             {
-                res = templates.First().Description;
+                res = templates.First().Data;
             }
             else
             {
