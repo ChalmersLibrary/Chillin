@@ -28,7 +28,7 @@ namespace Chalmers.ILL.Providers
         {
             int res = 168;
 
-            if (!String.IsNullOrWhiteSpace(providerName) && providerName.ToLower().Contains("subito"))
+            if (!String.IsNullOrWhiteSpace(providerName) && (providerName.ToLower().Contains("subito") || providerName.ToLower().Contains("reprints desk")))
             {
                 res = 24;
             }
