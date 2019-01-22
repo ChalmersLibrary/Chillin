@@ -59,13 +59,12 @@ namespace Chalmers.ILL
             container.RegisterType<IMediaItemManager, BlobStorageMediaItemManager>();
             container.RegisterType<IMediaItemManager, UmbracoMediaItemManager>("Legacy");
             container.RegisterType<IOrderItemSearcher, ElasticSearchOrderItemSearcher>();
+            container.RegisterType<ITemplateService, ElasticsearchTemplateService>();
 
-            // Fetch all needed Examine search providers.
-            var templatesSearcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLTemplatesSearcher"];
+            var templateService = container.Resolve<ITemplateService>();
 
             // Create all our singleton type instances.
             var mailService = new MailService(container.Resolve<IMediaItemManager>(), container.Resolve<IExchangeMailWebApi>());
-            var templateService = new TemplateService(ApplicationContext.Current.Services.ContentService, templatesSearcher);
             var notifier = new Notifier();
             var umbraco = new UmbracoWrapper();
             var orderItemManager = new EntityFrameworkOrderItemManager(umbraco, container.Resolve<IOrderItemSearcher>());
@@ -84,12 +83,10 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(INotifier), notifier);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
             container.RegisterInstance<IOrderItemManager>("Legacy", legacyOrderItemManager);
-            container.RegisterInstance(typeof(ITemplateService), templateService);
             container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(container.Resolve<IOrderItemSearcher>(), templateService, orderItemManager, mailService));
             container.RegisterInstance(typeof(IMailService), mailService);
             container.RegisterInstance(typeof(IProviderService), providerService);
             container.RegisterInstance(typeof(IBulkDataManager), bulkDataManager);
-            container.RegisterInstance<ISearcher>("TemplatesSearcher", templatesSearcher);
             container.RegisterInstance<IPatronDataProvider>(new SierraCache(umbraco, templateService).Connect());
             container.RegisterInstance<IPatronDataProvider>("Sierra", new Sierra(umbraco, templateService, ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
         }

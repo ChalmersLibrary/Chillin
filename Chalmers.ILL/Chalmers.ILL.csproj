@@ -597,6 +597,7 @@
     <Compile Include="Statistics\IStatisticsCalculator.cs" />
     <Compile Include="Statistics\IStatisticsManager.cs" />
     <Compile Include="Mail\ExchangeMailWebApi.cs" />
+    <Compile Include="Templates\ElasticsearchTemplateService.cs" />
     <Compile Include="Templates\ITemplateService.cs" />
     <Compile Include="Templates\TemplateService.cs" />
     <Compile Include="Templates\TemplateServiceException.cs" />
