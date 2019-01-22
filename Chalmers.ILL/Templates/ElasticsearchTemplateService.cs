@@ -87,13 +87,17 @@ namespace Chalmers.ILL.Templates
             {
                 var template = templates.First();
                 template.Data = data;
-                _elasticClient.IndexDocument(template);
+                var result = _elasticClient.Index(template, i => i
+                    .Index(_config.ElasticSearchTemplatesIndex)
+                    .Type("_doc")
+                    .Id(nodeId));
             }
         }
 
         public List<Template> PopulateTemplateList(List<Template> list)
         {
-            return GetAllTemplates().ToList();
+            list.AddRange(GetAllTemplates());
+            return list;
         }
 
         public string GetPrettyLibraryNameFromLibraryAbbreviation(string libraryName)
@@ -183,12 +187,13 @@ namespace Chalmers.ILL.Templates
 
         private IEnumerable<Template> GetAllTemplates()
         {
-            return _elasticClient.Search<Template>(s => s
+            var response = _elasticClient.Search<Template>(s => s
                 .From(0)
                 .Size(10000)
                 .Index(_config.ElasticSearchTemplatesIndex)
                 .AllTypes()
-                .Query(q => q.MatchAll())).Hits.Select(x => x.Source);
+                .Query(q => q.MatchAll()));
+            return response.Hits.Select(x => x.Source);
         }
 
         #endregion
