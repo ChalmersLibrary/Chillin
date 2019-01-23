@@ -17,10 +17,10 @@ namespace Chalmers.ILL.Patron
 
             var fixedPnum = FixPersonNumber(pnum);
 
-            if (!String.IsNullOrEmpty(pnum))
+            if (!String.IsNullOrEmpty(fixedPnum))
             {
                 // Only search on first barcode if there are multiple. Only search on exact pnr with or without dash.
-                var query = "pernum:" + pnum;
+                var query = "pernum:" + fixedPnum;
 
                 try
                 {
