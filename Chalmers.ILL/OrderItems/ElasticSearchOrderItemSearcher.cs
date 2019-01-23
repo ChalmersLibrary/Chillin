@@ -75,12 +75,11 @@ namespace Chalmers.ILL.OrderItems
             return _elasticClient.Search<OrderItemModel>(s => s
                 .From(0)
                 .Size(10000)
-                .AllTypes()
+                .Type("orderitemmodel")
                 .Query(q => q
                     .Bool(b =>
                         b.Must(m =>
-                            m.QueryString(qs =>
-                                qs.DefaultField("_all")
+                            m.QueryString(qs => qs
                                 .Query(query)))))).Hits.Select(x => x.Source);
         }
 
