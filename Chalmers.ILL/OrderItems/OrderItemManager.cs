@@ -484,7 +484,7 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
-        public void SetPatronData(int nodeId, string sierraInfo, int sierraPatronRecordId, int pType, string homeLibrary, bool doReindex = true, bool doSignal = true)
+        public void SetPatronData(int nodeId, string sierraInfo, int sierraPatronRecordId, int pType, string homeLibrary, string aff, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
             var currentSierraInfo = content.GetValue<string>("sierraInfo");

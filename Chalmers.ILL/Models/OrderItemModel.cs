@@ -19,7 +19,7 @@ namespace Chalmers.ILL.Models
         public const string LIBRARY_ZL_UMBRACO_STRING = "Lindholmenbiblioteket";
         public const string LIBRARY_ZA_UMBRACO_STRING = "Arkitekturbiblioteket";
 
-            public OrderItemModel()
+        public OrderItemModel()
         {
             StatusId = -1;
             PreviousStatusId = -1;
@@ -29,6 +29,7 @@ namespace Chalmers.ILL.Models
             CancellationReasonId = -1;
             PurchasedMaterialId = -1;
             SierraInfo = new SierraModel();
+            PatronAffiliation = "Ej hämtad";
         }
 
         public string OrderId { get; set; }
@@ -103,6 +104,7 @@ namespace Chalmers.ILL.Models
         public string PatronName { get; set; }
         public string PatronEmail { get; set; }
         public string PatronCardNo { get; set; }
+        public string PatronAffiliation { get; set; }
 
         public string ProviderName { get; set; }
         public string ProviderOrderId { get; set; }

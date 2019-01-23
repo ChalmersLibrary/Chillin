@@ -38,7 +38,7 @@ namespace Chalmers.ILL.OrderItems
         void SetStatus(int orderNodeId, string statusPrevalue, string eventId, bool doReindex = true, bool doSignal = true);
         void SetType(int orderNodeId, int typeId, string eventId, bool doReindex = true, bool doSignal = true);
         void SetBookId(int nodeId, string bookId, string eventId, bool doReindex = true, bool doSignal = true);
-        void SetPatronData(int nodeId, string sierraInfo, int sierraPatronRecordId, int pType, string homeLibrary, bool doReindex = true, bool doSignal = true);
+        void SetPatronData(int nodeId, string sierraInfo, int sierraPatronRecordId, int pType, string homeLibrary, string aff, bool doReindex = true, bool doSignal = true);
         void SetPatronEmail(int nodeId, string email, string eventId, bool doReindex = true, bool doSignal = true);
         void SetProviderName(int nodeId, string providerName, string eventId, bool doReindex = true, bool doSignal = true);
         void SetProviderOrderId(int nodeId, string providerOrderId, string eventId, bool doReindex = true, bool doSignal = true);

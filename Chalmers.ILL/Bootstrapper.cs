@@ -60,8 +60,10 @@ namespace Chalmers.ILL
             container.RegisterType<IMediaItemManager, UmbracoMediaItemManager>("Legacy");
             container.RegisterType<IOrderItemSearcher, ElasticSearchOrderItemSearcher>();
             container.RegisterType<ITemplateService, ElasticsearchTemplateService>();
+            container.RegisterType<IAffiliationDataProvider, SolrLibcdksAffiliationDataProvider>();
 
             var templateService = container.Resolve<ITemplateService>();
+            var affiliationDataProvider = container.Resolve<IAffiliationDataProvider>();
 
             // Create all our singleton type instances.
             var mailService = new MailService(container.Resolve<IMediaItemManager>(), container.Resolve<IExchangeMailWebApi>());
@@ -87,7 +89,7 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IMailService), mailService);
             container.RegisterInstance(typeof(IProviderService), providerService);
             container.RegisterInstance(typeof(IBulkDataManager), bulkDataManager);
-            container.RegisterInstance<IPatronDataProvider>(new SierraCache(umbraco, templateService).Connect());
+            container.RegisterInstance<IPatronDataProvider>(new SierraCache(umbraco, templateService, affiliationDataProvider).Connect());
             container.RegisterInstance<IPatronDataProvider>("Sierra", new Sierra(umbraco, templateService, ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
         }
     }

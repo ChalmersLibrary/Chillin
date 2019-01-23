@@ -511,6 +511,18 @@
     <Compile Include="Migrations\201612131055240_AddSeedId.Designer.cs">
       <DependentUpon>201612131055240_AddSeedId.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201901230658356_AddPatronAffiliation.cs" />
+    <Compile Include="Migrations\201901230658356_AddPatronAffiliation.Designer.cs">
+      <DependentUpon>201901230658356_AddPatronAffiliation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201901230733453_AddPnumToPatronData.cs" />
+    <Compile Include="Migrations\201901230733453_AddPnumToPatronData.Designer.cs">
+      <DependentUpon>201901230733453_AddPnumToPatronData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201901230823510_AddAffToPatronData.cs" />
+    <Compile Include="Migrations\201901230823510_AddAffToPatronData.Designer.cs">
+      <DependentUpon>201901230823510_AddAffToPatronData.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
     <Compile Include="Models\MediaItemIdAndOrderItemId.cs" />
@@ -582,9 +594,11 @@
     <Compile Include="OrderItems\SourcePollingException.cs" />
     <Compile Include="OrderItems\SourcePollingResult.cs" />
     <Compile Include="OrderItems\UmbracoOrderItemSearcher.cs" />
+    <Compile Include="Patron\IAffiliationDataProvider.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />
     <Compile Include="Patron\SierraCache.cs" />
     <Compile Include="Patron\SierraConnectionException.cs" />
+    <Compile Include="Patron\SolrLibcdksAffiliationDataProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\IProviderService.cs" />
     <Compile Include="Providers\LibrisOrderItemsSource.cs" />
@@ -632,6 +646,15 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201612131055240_AddSeedId.resx">
       <DependentUpon>201612131055240_AddSeedId.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201901230658356_AddPatronAffiliation.resx">
+      <DependentUpon>201901230658356_AddPatronAffiliation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201901230733453_AddPnumToPatronData.resx">
+      <DependentUpon>201901230733453_AddPnumToPatronData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201901230823510_AddAffToPatronData.resx">
+      <DependentUpon>201901230823510_AddAffToPatronData.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

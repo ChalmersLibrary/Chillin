@@ -115,7 +115,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 if (!String.IsNullOrEmpty(sm.id))
                 {
-                    _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library);
+                    _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library, sm.aff);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content.NodeId, false, false);
                 }
                 _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm, eventId);
@@ -166,7 +166,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 if (!String.IsNullOrEmpty(sm.id))
                 {
-                    _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library);
+                    _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library, sm.aff);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content.NodeId, false, false);
                 }
                 _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm, eventId);
@@ -212,7 +212,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 if (!String.IsNullOrEmpty(sm.id))
                 {
-                    _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library);
+                    _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library, sm.aff);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content.NodeId, false, false);
                 }
                 _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm, eventId);

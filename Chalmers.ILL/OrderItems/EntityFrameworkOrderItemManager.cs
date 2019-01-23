@@ -379,6 +379,7 @@ namespace Chalmers.ILL.OrderItems
                 newOrderItem.PatronName = model.PatronName;
                 newOrderItem.PatronEmail = model.PatronEmail;
                 newOrderItem.PatronCardNo = model.PatronCardNo;
+                newOrderItem.PatronAffiliation = model.SierraPatronInfo.aff;
                 newOrderItem.FollowUpDate = DateTime.Now;
                 newOrderItem.EditedBy = "";
                 newOrderItem.StatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny");
@@ -827,7 +828,7 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
-        public void SetPatronData(int nodeId, string sierraInfo, int sierraPatronRecordId, int pType, string homeLibrary, bool doReindex = true, bool doSignal = true)
+        public void SetPatronData(int nodeId, string sierraInfo, int sierraPatronRecordId, int pType, string homeLibrary, string aff, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
             try
@@ -847,6 +848,8 @@ namespace Chalmers.ILL.OrderItems
                     orderItem.SierraInfo.mblock = newSierraInfo.mblock;
                     orderItem.SierraInfo.ptype = newSierraInfo.ptype;
                     orderItem.SierraInfo.record_id = newSierraInfo.record_id;
+                    orderItem.SierraInfo.aff = aff;
+                    orderItem.PatronAffiliation = aff;
                     orderItem.SierraInfoStr = JsonConvert.SerializeObject(orderItem.SierraInfo);
                     MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
