@@ -161,8 +161,7 @@
                         </ul>
                     </div>
 
-                            if (Model.OrderItem.Type == "Inköpsförslag")
-                            {
+
                         <!-- Delivery Library button -->
                         <div class="btn-group">
                             <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
@@ -174,17 +173,18 @@
                                     {
                                         if (library.Id == Model.OrderItem.DeliveryLibraryId)
                                         {
-                                            <li><a href="#" class="disabled-link"><span class="current">@library.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
+                                            <li><a href="#" class="disabled-link"><span class="current">@( library.Value == "Lindholmenbiblioteket" ? "Kuggen" : library.Value ) </span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                         }
                                         else
                                         {
-                                            <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.OrderItem.NodeId, @library.Id); event.preventDefault();">@library.Value</a></li>
+                                            <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.OrderItem.NodeId, @library.Id); event.preventDefault();">@( library.Value == "Lindholmenbiblioteket" ? "Kuggen" : library.Value )</a></li>
                                         }
                                     }
                                 }
                             </ul>
                         </div>
-
+                                    if (Model.OrderItem.Type == "Inköpsförslag")
+                                    {
                         <!-- Purchase Library button -->
                         <div class="btn-group">
                             <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
