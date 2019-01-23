@@ -655,7 +655,7 @@ namespace Chalmers.ILL.OrderItems
                     if (currentDeliveryLibrary != deliveryLibraryId)
                     {
                         orderItem.DeliveryLibraryId = deliveryLibraryId;
-                        AddLogItem(orderNodeId, "BIBLIOTEK", "Leveransbibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), eventId, false, false);
+                        AddLogItem(orderNodeId, "BIBLIOTEK", "Leveransbibliotek ändrat från " + (currentDeliveryLibrary != -1 ? (umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last()=="Lindholmenbiblioteket"?"Kuggen": umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last()) : "Odefinierad") + " till " + (umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last() == "Lindholmenbiblioteket" ? "Kuggen" : umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last()), eventId, false, false);
                     }
                     MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
