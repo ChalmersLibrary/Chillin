@@ -32,7 +32,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
 
             if (!String.IsNullOrEmpty(Request.QueryString["query"]))
             {
-                customModel.OrderItems = _searcher.Search("((type:Bok AND status:(Infodisk OR Utlånad OR Transport OR Krävd OR Förlorad OR Förlorad\?)) OR (type:Artikel AND status:Transport)) AND " + 
+                customModel.OrderItems = _searcher.Search("((type:Bok AND status:(Infodisk OR Utlånad OR Transport OR Krävd OR Förlorad OR Förlorad\\?)) OR (type:Artikel AND status:Transport)) AND " + 
                     "\"" + Request.Params["query"].Trim() + "\"");
             }
 
