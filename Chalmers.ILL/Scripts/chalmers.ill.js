@@ -552,6 +552,8 @@ function loadOrderItemSummary(id)
 {
     $.getJSON("/umbraco/surface/OrderItemSurface/GetOrderItem?nodeId=" + id, function (json) {
         if (json.NodeId && $("#" + json.NodeId).length > 0) {
+            // Move this somewhere else...
+            var purchaseLibraries = ['HB', 'ACE'];
 
             // Update follow up date.
             // TODO: Fix culture sensitive date string creation.
@@ -559,7 +561,7 @@ function loadOrderItemSummary(id)
             $("#" + json.NodeId + " div[data-column='createDate']").text(followUpDate.getFullYear() + "-" + ("00" + (followUpDate.getMonth() + 1)).substr(-2) + "-" + ("00" + followUpDate.getDate()).substr(-2));
 
             // Update type
-            $("#" + json.NodeId + " div[data-column='type']").text(json.Type);
+            $("#" + json.NodeId + " div[data-column='type']").text((json.Type.toString().toLowerCase().indexOf('inköpsförslag') > -1 ? purchaseLibraries[json.PurchaseLibrary] + ' ' + json.Type : json.Type));
 
             // Update delivery library
             var delLibDiv = $("#" + json.NodeId + " div[data-column='deliveryLibrary']");
@@ -692,6 +694,22 @@ function setOrderItemType(node, type) {
 function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
     lockScreen();
     $.getJSON("/umbraco/surface/OrderItemDeliveryLibrarySurface/SetOrderItemDeliveryLibrary?orderNodeId=" + node + "&deliveryLibraryId=" + deliveryLibrary, function (json) {
+        if (json.Success) {
+            loadOrderItemDetails(node);
+        }
+        else {
+            alert(json.Message);
+        }
+        unlockScreen();
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
+}
+
+function setOrderItemPurchaseLibrary(node, purchaseLibrary) {
+    lockScreen();
+    $.getJSON("/umbraco/surface/OrderItemPurchaseLibrarySurface/SetOrderItemPurchaseLibrary?orderNodeId=" + node + "&purchaseLibrary=" + purchaseLibrary, function (json) {
         if (json.Success) {
             loadOrderItemDetails(node);
         }

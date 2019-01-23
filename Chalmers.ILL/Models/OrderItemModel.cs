@@ -19,6 +19,8 @@ namespace Chalmers.ILL.Models
         public const string LIBRARY_ZL_UMBRACO_STRING = "Lindholmenbiblioteket";
         public const string LIBRARY_ZA_UMBRACO_STRING = "Arkitekturbiblioteket";
 
+        public enum PurchaseLibraries { HB, ACE }
+
         public OrderItemModel()
         {
             StatusId = -1;
@@ -100,6 +102,7 @@ namespace Chalmers.ILL.Models
 
         public int PurchasedMaterialId { get; set; }
         public string PurchasedMaterial { get; set; }
+        public PurchaseLibraries PurchaseLibrary { get; set; }
 
         public string PatronName { get; set; }
         public string PatronEmail { get; set; }

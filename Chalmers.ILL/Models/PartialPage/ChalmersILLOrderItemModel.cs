@@ -11,7 +11,7 @@ namespace Chalmers.ILL.Models.PartialPage
         {
             {1, "Snabbändring av typ"},
             {2, "Snabbändring av status"},
-            {3, "Snabbändring av tillhörande bibliotek"},
+            {3, "Snabbändring av leveransbibliotek"},
             {4, "Referens ändrad"},
             {5, "Beställardata uppdaterad"},
             {6, "Mail skickat"},
@@ -35,7 +35,8 @@ namespace Chalmers.ILL.Models.PartialPage
             {24, "Bok utlånad" },
             {25, "Bok mottagen i lånedisk" },
             {26, "Artikel skickad till filial" },
-            {27, "Leverantörsdata uppdaterad" }
+            {27, "Leverantörsdata uppdaterad" },
+            {28, "Snabbändring av inköpsbibliotek" }
         };
 
         public ChalmersILLOrderItemModel(OrderItemModel orderItemModel) : base(orderItemModel) { }

@@ -933,6 +933,11 @@ namespace Chalmers.ILL.OrderItems
             throw new NotImplementedException();
         }
 
+        public void SetPurchaseLibrary(int orderNodeId, OrderItemModel.PurchaseLibraries library, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

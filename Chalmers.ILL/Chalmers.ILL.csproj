@@ -434,6 +434,7 @@
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Configuration\DefaultChillinConfiguration.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemPurchaseLibrarySurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemSearchSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\BookCirculationSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\MediaItemSurfaceController.cs" />
@@ -522,6 +523,10 @@
     <Compile Include="Migrations\201901230823510_AddAffToPatronData.cs" />
     <Compile Include="Migrations\201901230823510_AddAffToPatronData.Designer.cs">
       <DependentUpon>201901230823510_AddAffToPatronData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201901230959428_AddPurchaseLibrary.cs" />
+    <Compile Include="Migrations\201901230959428_AddPurchaseLibrary.Designer.cs">
+      <DependentUpon>201901230959428_AddPurchaseLibrary.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
@@ -655,6 +660,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201901230823510_AddAffToPatronData.resx">
       <DependentUpon>201901230823510_AddAffToPatronData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201901230959428_AddPurchaseLibrary.resx">
+      <DependentUpon>201901230959428_AddPurchaseLibrary.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

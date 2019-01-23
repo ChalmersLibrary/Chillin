@@ -144,7 +144,7 @@
             foreach (var item in Model.PendingOrderItems.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.FollowUpDate))
             {          
                 @RenderOrderList(loggedInMember, item.NodeId, item.FollowUpDate, item.PatronName, item.DeliveryLibrary, item.Status,
-                    item.Type, item.Reference, item.EditedBy);
+                    item.Type, item.Reference, item.EditedBy, item.PurchaseLibrary);
             }
             
             // Add debug message
@@ -172,7 +172,8 @@ else
     @prevalue.Split(':').Last()
 }
 
-@helper RenderOrderList(int memberId, object Id, DateTime date, object patronName, object library, object status, object type, object reference, object editorID)
+@helper RenderOrderList(int memberId, object Id, DateTime date, object patronName, object library, object status, object type, 
+    object reference, object editorID, object purchaseLibrary)
 {
     string css_class = "";
     string data_attribute = "";
@@ -198,7 +199,7 @@ else
         <div class="col-sm-7" data-column="reference">@Html.Raw(reference.ToString().Replace("\n", "<br />"))</div>
         <div class="col-sm-2" data-column="patronName">@patronName</div>
         <div class="col-sm-1 deliveryLibrary @library" data-column="deliveryLibrary">@GetSigelFromLibraryName(library.ToString())</div>
-        <div class="col-sm-1" data-column="type">@type</div>
+        <div class="col-sm-1" data-column="type">@(type.ToString().ToLower().Contains("inköpsförslag") ? (purchaseLibrary.ToString() + " " + type) : type)</div>
         <div class="col-sm-1" data-column="status" data-fud="@date.Ticks">
             @if (status.ToString().StartsWith("01:"))
             {

@@ -1,6 +1,7 @@
 ﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.PartialPage.ChalmersILLOrderItemModel>
 @using System.Globalization;
 @using Chalmers.ILL.Extensions;
+@using Chalmers.ILL.Models;
 
 <div class="col-sm-12 order-details">
 
@@ -169,12 +170,12 @@
                         </ul>
                     </div>
 
-                                if (Model.OrderItem.Type == "Inköpsförslag")
-                                {
+                            if (Model.OrderItem.Type == "Inköpsförslag")
+                            {
                         <!-- Delivery Library button -->
                         <div class="btn-group">
                             <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
-                                Bibliotek <span class="caret"></span>
+                                Leveransbibliotek <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
                                 @{
@@ -187,6 +188,28 @@
                                         else
                                         {
                                             <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.OrderItem.NodeId, @library.Id); event.preventDefault();">@library.Value</a></li>
+                                        }
+                                    }
+                                }
+                            </ul>
+                        </div>
+
+                        <!-- Purchase Library button -->
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                                Inköpsbibliotek <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
+                                @{
+                                    foreach (var library in Enum.GetValues(typeof(OrderItemModel.PurchaseLibraries)).Cast<OrderItemModel.PurchaseLibraries>())
+                                    {
+                                        if (library == Model.OrderItem.PurchaseLibrary)
+                                        {
+                                            <li><a href="#" class="disabled-link"><span class="current">@library.ToString()</span> <span class="glyphicon glyphicon-ok"></span></a></li>
+                                        }
+                                        else
+                                        {
+                                            <li><a href="#" onclick="setOrderItemPurchaseLibrary(@Model.OrderItem.NodeId, @Convert.ToInt32(library)); event.preventDefault();">@library.ToString()</a></li>
                                         }
                                     }
                                 }

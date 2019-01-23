@@ -16,6 +16,7 @@ using System.Configuration;
 using Umbraco.Core.Logging;
 using Chalmers.ILL.SignalR;
 using System.Threading;
+using static Chalmers.ILL.Models.OrderItemModel;
 
 namespace Chalmers.ILL.OrderItems
 {
@@ -654,7 +655,39 @@ namespace Chalmers.ILL.OrderItems
                     if (currentDeliveryLibrary != deliveryLibraryId)
                     {
                         orderItem.DeliveryLibraryId = deliveryLibraryId;
-                        AddLogItem(orderNodeId, "BIBLIOTEK", "Bibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), eventId, false, false);
+                        AddLogItem(orderNodeId, "BIBLIOTEK", "Leveransbibliotek ändrat från " + (currentDeliveryLibrary != -1 ? umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last(), eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set delivery library.");
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
+        public void SetPurchaseLibrary(int orderNodeId, PurchaseLibraries purchaseLibrary, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = GetOrderItemFromEntityFramework(orderNodeId);
+                if (orderItem != null)
+                {
+                    var currentPurchaseLibrary = orderItem.PurchaseLibrary;
+                    if (currentPurchaseLibrary != purchaseLibrary)
+                    {
+                        orderItem.PurchaseLibrary = purchaseLibrary;
+                        AddLogItem(orderNodeId, "BIBLIOTEK", "Inköpsbibliotek ändrat från " + currentPurchaseLibrary.ToString() + " till " + purchaseLibrary.ToString() + ".", eventId, false, false);
                     }
                     MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
