@@ -30,15 +30,6 @@
                         </div>
                     </div>
                 }
-                
-                @if (!Model.OrderItem.DeliveryLibrarySameAsHomeLibrary)
-                {
-                    <div class="panel panel-danger">
-                        <div class="panel-heading">
-                            <h3 class="panel-title text-center"><span class="glyphicon glyphicon-exclamation-sign"></span> Låntagarens hembibliotek stämmer ej överrens med leveransbibliotek!</h3>
-                        </div>
-                    </div>
-                }
 
                 @if (String.IsNullOrEmpty(Model.OrderItem.SierraInfo.id))
                 {
@@ -350,9 +341,6 @@
     </div>
     <div>
         <span class="label label-primary order-item-var-label">Sierra - E-post</span> @Model.OrderItem.SierraInfo.email
-    </div>
-    <div>
-        <span class="label label-primary order-item-var-label">Sierra - Hbib</span> @Model.OrderItem.SierraInfo.home_library
     </div>
     <div>
         <span class='label @((String.IsNullOrEmpty(Model.OrderItem.SierraInfo.mblock) || Model.OrderItem.SierraInfo.mblock=="-") ? "label-primary" : "label-danger") order-item-var-label'>Sierra - M-block</span> @Model.OrderItem.SierraInfo.mblock
