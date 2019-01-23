@@ -97,6 +97,9 @@ namespace Chalmers.ILL.Templates
         public List<Template> PopulateTemplateList(List<Template> list)
         {
             list.AddRange(GetAllTemplates());
+
+            list.Sort((x1, x2) => String.Compare(x1.Description, x2.Description, true, new CultureInfo("sv-se")));
+
             return list;
         }
 
