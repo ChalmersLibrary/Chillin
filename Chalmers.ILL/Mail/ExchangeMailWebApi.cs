@@ -98,7 +98,7 @@ namespace Chalmers.ILL.Mail
 
                     // Load Message Body as HTML with HtmlAgilityPack
                     HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
-                    htmlDoc.LoadHtml(String.IsNullOrEmpty(message.Body.Text) ? "" : message.Body.Text);
+                    htmlDoc.LoadHtml(MailBodyFixer.RemoveHtmlAroundLinks(message.Body.Text));
 
                     // Query for OrderItem properties in MailQueueModel
                     if (htmlDoc.DocumentNode.HasChildNodes && htmlDoc.GetElementbyId("chalmers.ill.orderitem") != null)
