@@ -474,6 +474,7 @@
     <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Mail\AutomaticMailSendingEngine.cs" />
+    <Compile Include="Mail\MailBodyFixer.cs" />
     <Compile Include="Mail\MailOperationResult.cs" />
     <Compile Include="Mail\ChalmersOrderItemsMailSource.cs" />
     <Compile Include="Mail\DelayedMailOperation.cs" />

@@ -1,0 +1,79 @@
+﻿<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=Windows-1252">
+<style type="text/css" style="display:none;"><!-- P {margin-top:0;margin-bottom:0;} --></style>
+</head>
+<body dir="ltr">
+<div id="divtagdefaultwrapper" style="font-size:12pt;color:#000000;font-family:Calibri,Helvetica,sans-serif;" dir="ltr">
+<p><br>
+</p>
+<br>
+<br>
+<div style="color: rgb(0, 0, 0);">
+<hr tabindex="-1" style="display:inline-block; width:98%">
+<div id="divRplyFwdMsg" dir="ltr"><font face="Calibri, sans-serif" color="#000000" style="font-size:11pt"><b>Från:</b> Reprints Desk Customer Support &lt;customersupport@reprintsdesk.com&gt;<br>
+<b>Skickat:</b> den 23 januari 2019 16:14<br>
+<b>Till:</b> Lib Docdel<br>
+<b>Ämne:</b> Reprints Desk message: Important Information about your Order #5746842 / Ref: cthb-d3cdc67e-123228.</font>
+<div>&nbsp;</div>
+</div>
+<div>
+<p>The article you requested (OrderID: 5746842) is not immediately available from the Reprints Desk Academic A-Z Collection. However, we should be able to acquire this item for you from our print sources. The order may take a bit longer to fill and the service
+ fee will increase from $6.00 to $21.00. </p>
+<p><a href="http://www.reprintsdesk.com/landing/fs.aspx?o=5746842&amp;r=283992341">Click here to approve or cancel your order</a></p>
+<p>OR - You can simply reply to this email with your OK if you’d like us to get the article from our other sources. We’ll be happy to help and will let you know if there’s a problem.</p>
+<p>Please refer to the OrderID number when making inquiries about this request.</p>
+<p>Request details are below:</p>
+<p></p>
+<table border="1">
+<tbody>
+<tr>
+<td style="font-weight: bold;">Article Title</td>
+<td>Processing methods of polyester fibers with deep-coloring</td>
+</tr>
+<tr>
+<td style="font-weight: bold;">Author</td>
+<td>Liu</td>
+</tr>
+<tr>
+<td rowspan="2" style="font-weight: bold;">Publication</td>
+<td>Chemical Fibers International</td>
+</tr>
+<tr>
+<td>2012 62(1):37-40</td>
+</tr>
+<tr>
+<td style="font-weight: bold;">DOI</td>
+<td></td>
+</tr>
+<tr>
+<td style="font-weight: bold;">PubMedID</td>
+<td></td>
+</tr>
+<tr>
+<td style="font-weight: bold;">Your Reference Number</td>
+<td>cthb-d3cdc67e-123228</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+<p>Requested Delivery Method is Email to the following address:</p>
+<p></p>
+<table border="1">
+<tbody>
+<tr>
+<td style="font-weight: bold;">Email</td>
+<td>anna.palme@chalmers.se</td>
+</tr>
+</tbody>
+</table>
+<p></p>
+<p>Thanks again for your order. We look forward to providing best-in-class service to you.</p>
+<hr>
+<p>The Reprints Desk - One Stop Reprint Solutions</p>
+<p>(3100-1)</p>
+</div>
+</div>
+</div>
+</body>
+</html>
