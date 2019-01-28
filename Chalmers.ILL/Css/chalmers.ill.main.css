@@ -388,3 +388,19 @@ tr:nth-child(odd) {
 .chat-item-message {
     white-space: pre-line;
 }
+
+.auto-mail-notification {
+    margin-bottom: 0;
+}
+
+.auto-mail-notification-body-toggle {
+    color: rgb(60, 118, 61);
+}
+
+.auto-mail-notification-body-container {
+    margin-bottom: 1em;
+}
+
+.hidden {
+    display: none;
+}

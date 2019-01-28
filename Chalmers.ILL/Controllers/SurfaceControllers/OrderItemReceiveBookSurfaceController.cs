@@ -40,7 +40,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var pageModel = new ChalmersILLActionReceiveBookModel(_orderItemManager.GetOrderItem(nodeId));
             _umbraco.PopulateModelWithAvailableValues(pageModel);
-            pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate", pageModel.OrderItem);
+            pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate");
             return PartialView("Chalmers.ILL.Action.ReceiveBook", pageModel);
         }
 
@@ -86,12 +86,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Overwrite the message with message from template service so that we get the new values injected.
                 if (pack.readOnlyAtLibrary)
                 {
-                    pack.mailData.message = _templateService.GetTemplateData("BookAvailableForReadingAtLibraryMailTemplate", _orderItemManager.GetOrderItem(pack.orderNodeId));
+                    pack.mailData.message = _templateService.ReplaceMoustaches("BookAvailableForReadingAtLibraryMailTemplate", 
+                        pack.mailData.message,  _orderItemManager.GetOrderItem(pack.orderNodeId));
                     _orderItemManager.SetReadOnlyAtLibrary(pack.orderNodeId, true, eventId, false, false);
                 }
                 else
                 {
-                    pack.mailData.message = _templateService.GetTemplateData("BookAvailableMailTemplate", _orderItemManager.GetOrderItem(pack.orderNodeId));
+                    pack.mailData.message = _templateService.ReplaceMoustaches("BookAvailableMailTemplate", 
+                        pack.mailData.message, _orderItemManager.GetOrderItem(pack.orderNodeId));
                     _orderItemManager.SetReadOnlyAtLibrary(pack.orderNodeId, false, eventId, false, false);
                 }
 

@@ -64,7 +64,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var pageModel = new Models.PartialPage.DeliveryType.ArticleByEmail(_orderItemManager.GetOrderItem(nodeId));
             _umbraco.PopulateModelWithAvailableValues(pageModel);
-            pageModel.ArticleDeliveryByMailTemplate = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", pageModel.OrderItem);
+            pageModel.ArticleDeliveryByMailTemplate = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate");
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
             return PartialView("DeliveryType/ArticleByEmail", pageModel);
         }
@@ -235,7 +235,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail, eventId);
 
                 // Overwrite the message with message from template service so that we get the new values injected.
-                pack.mail.message = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", _orderItemManager.GetOrderItem(pack.nodeId));
+                pack.mail.message = _templateService.ReplaceMoustaches("ArticleAvailableInInfodiskMailTemplate", 
+                    pack.mail.message, _orderItemManager.GetOrderItem(pack.nodeId));
 
                 _mailService.SendMail(pack.mail);
                 _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, eventId, false, false);
@@ -320,7 +321,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetPatronEmail(pack.nodeId, pack.mail.recipientEmail, eventId);
 
                 // Overwrite the message with message from template service so that we get the new values injected.
-                pack.mail.message = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate", _orderItemManager.GetOrderItem(pack.nodeId));
+                pack.mail.message = _templateService.ReplaceMoustaches("ArticleDeliveryByMailTemplate", 
+                    pack.mail.message, _orderItemManager.GetOrderItem(pack.nodeId));
 
                 _mailService.SendMail(pack.mail);
                 _orderItemManager.AddLogItem(pack.nodeId, "MAIL_NOTE", "Skickat mail till " + pack.mail.recipientEmail, eventId, false, false);

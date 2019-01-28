@@ -1270,3 +1270,17 @@ function getSigelFromLibraryName(libraryName) {
 
     return ret;
 }
+
+function toggleMailEdit() {
+    let mailBodyToggle = $('.auto-mail-notification-body-toggle');
+    let mailBodyEdit = $('.auto-mail-notification-body');
+    if (mailBodyEdit.hasClass('hidden')) {
+        mailBodyEdit.removeClass('hidden');
+        mailBodyToggle.removeClass('glyphicon-chevron-down');
+        mailBodyToggle.addClass('glyphicon-chevron-up');
+    } else {
+        mailBodyEdit.addClass('hidden');
+        mailBodyToggle.removeClass('glyphicon-chevron-up');
+        mailBodyToggle.addClass('glyphicon-chevron-down');
+    }
+}

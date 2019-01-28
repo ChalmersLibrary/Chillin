@@ -121,9 +121,7 @@ namespace Chalmers.ILL.Templates
             return res;
         }
 
-        #region Private methods
-
-        private string ReplaceMoustaches(string templateName, string templateString, OrderItemModel orderItem)
+        public string ReplaceMoustaches(string templateName, string templateString, OrderItemModel orderItem)
         {
             var template = new StringBuilder(templateString);
 
@@ -172,6 +170,8 @@ namespace Chalmers.ILL.Templates
 
             return template.ToString();
         }
+
+        #region Private methods
 
         private IEnumerable<Template> SimpleSearch(string query)
         {

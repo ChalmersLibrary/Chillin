@@ -17,5 +17,7 @@ namespace Chalmers.ILL.Templates
         void SetTemplateData(int nodeId, string data);
         List<Template> PopulateTemplateList(List<Template> list);
         string GetPrettyLibraryNameFromLibraryAbbreviation(string libraryName);
+
+        string ReplaceMoustaches(string templateName, string templateString, OrderItemModel orderItem);
     }
 }
