@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace Chalmers.ILL.Mail
 {
@@ -13,7 +10,7 @@ namespace Chalmers.ILL.Mail
             var res = "";
             if (!String.IsNullOrEmpty(htmlText))
             {
-                res = Regex.Replace(htmlText, @"<a[^>]*href=""([^""]*)""[^>]*>([^<]*)</a>", "$2 ($1)");
+                res = Regex.Replace(htmlText, @"<a[^>]*href=""([^""]*)""[^>]*>([^<]*)</a>", "$2 ( $1 )");
             }
             return res;
         }

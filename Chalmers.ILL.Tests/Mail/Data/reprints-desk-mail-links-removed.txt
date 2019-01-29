@@ -20,7 +20,7 @@
 <div>
 <p>The article you requested (OrderID: 5746842) is not immediately available from the Reprints Desk Academic A-Z Collection. However, we should be able to acquire this item for you from our print sources. The order may take a bit longer to fill and the service
  fee will increase from $6.00 to $21.00. </p>
-<p>Click here to approve or cancel your order (http://www.reprintsdesk.com/landing/fs.aspx?o=5746842&amp;r=283992341)</p>
+<p>Click here to approve or cancel your order ( http://www.reprintsdesk.com/landing/fs.aspx?o=5746842&amp;r=283992341 )</p>
 <p>OR - You can simply reply to this email with your OK if you’d like us to get the article from our other sources. We’ll be happy to help and will let you know if there’s a problem.</p>
 <p>Please refer to the OrderID number when making inquiries about this request.</p>
 <p>Request details are below:</p>
