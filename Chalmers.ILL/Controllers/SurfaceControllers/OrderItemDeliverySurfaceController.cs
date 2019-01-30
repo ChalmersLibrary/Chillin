@@ -1,22 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using Chalmers.ILL.Mail;
+using Chalmers.ILL.Models;
+using Chalmers.ILL.Models.Mail;
+using Chalmers.ILL.Models.PartialPage;
+using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Templates;
+using Chalmers.ILL.UmbracoApi;
+using Newtonsoft.Json;
+using System;
 using System.Web.Mvc;
 using Umbraco.Web.Mvc;
-using umbraco.cms.businesslogic.member;
-using Chalmers.ILL.Models;
-using Chalmers.ILL.Utilities;
-using Chalmers.ILL.Extensions;
-using Microsoft.Exchange.WebServices.Data;
-using System.Configuration;
-using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.UmbracoApi;
-using Chalmers.ILL.Models.PartialPage;
-using Chalmers.ILL.Templates;
-using Chalmers.ILL.Mail;
-using Chalmers.ILL.Models.Mail;
-using Newtonsoft.Json;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -79,6 +71,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var pageModel = new Models.PartialPage.DeliveryType.ArticleByMailOrInternalMail(_orderItemManager.GetOrderItem(nodeId));
             _umbraco.PopulateModelWithAvailableValues(pageModel);
+            pageModel.ArticleDeliveryByPostTemplate = _templateService.GetTemplateData("ArticleDeliveryByPostTemplate");
+            pageModel.ArticleDeliveryByInternpostTemplate = _templateService.GetTemplateData("ArticleDeliveryByInternpostTemplate");
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
             return PartialView("DeliveryType/ArticleByMailOrInternalMail", pageModel);
         }

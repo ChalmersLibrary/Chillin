@@ -105,13 +105,13 @@
     }
 
     function selectDeliveryType(obj) {
-        renderDeliveryTypePartial($(obj).data("render-method"));
+        renderDeliveryTypePartial($(obj).data("render-method"), $(obj).data("delivery-type"));
         $("#active-delivery-type").html($(obj).html()).data("delivery-type", $(obj).data("delivery-type"));
     }
 
-    function renderDeliveryTypePartial(renderApiMethod) {
+    function renderDeliveryTypePartial(renderApiMethod, type) {
         $("#loading-delivery-type-partial-view").show();
-        $("#delivery-type-view").html("").show().load("/umbraco/surface/OrderItemDeliverySurface/" + renderApiMethod + "?nodeId=" + @Model.OrderItem.NodeId,
+        $("#delivery-type-view").html("").show().load("/umbraco/surface/OrderItemDeliverySurface/" + renderApiMethod + "?nodeId=" + @Model.OrderItem.NodeId + "&deliveryType=" + type,
             function (responseText, textStatus, req) {
                 $("#loading-delivery-type-partial-view").hide();
             }
