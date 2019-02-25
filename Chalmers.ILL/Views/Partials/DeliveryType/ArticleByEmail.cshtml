@@ -99,7 +99,7 @@
                     OrderId: "@Model.OrderItem.OrderId",
                     recipientEmail: $("#patron-email").text().toString().trim(),
                     recipientName: "@Model.OrderItem.PatronName",
-                    message: "", // The message doesn't matter, it is overwritten using correct template on server.
+                    message: $("#mail-message").val(),
                     attachments: attachmentIds
                 }
             })
