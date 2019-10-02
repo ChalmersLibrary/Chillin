@@ -316,5 +316,10 @@ namespace Chalmers.ILL.Patron
                 }
             }
         }
+
+        public IList<SierraModel> GetPatrons(string query)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

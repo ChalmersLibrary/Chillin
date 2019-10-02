@@ -50,6 +50,29 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         /// <summary>
+        /// Query data from FOLIO
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult QueryPatronDataFromFolio(string query)
+        {
+            var json = new ResultResponse();
+
+            try
+            {
+                
+            }
+            catch (Exception e)
+            {
+                json.Message = e.Message;
+                json.Success = false;
+            }
+
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
         /// Query data from our Solr cache.
         /// </summary>
         /// <param name="pnr">The query string.</param>
