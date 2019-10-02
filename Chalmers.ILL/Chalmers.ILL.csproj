@@ -600,7 +600,9 @@
     <Compile Include="OrderItems\SourcePollingException.cs" />
     <Compile Include="OrderItems\SourcePollingResult.cs" />
     <Compile Include="OrderItems\UmbracoOrderItemSearcher.cs" />
+    <Compile Include="Patron\FolioPatronDataProvider.cs" />
     <Compile Include="Patron\IAffiliationDataProvider.cs" />
+    <Compile Include="Patron\InvalidTokenException.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />
     <Compile Include="Patron\SierraCache.cs" />
     <Compile Include="Patron\SierraConnectionException.cs" />
