@@ -89,8 +89,7 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IMailService), mailService);
             container.RegisterInstance(typeof(IProviderService), providerService);
             container.RegisterInstance(typeof(IBulkDataManager), bulkDataManager);
-            container.RegisterInstance<IPatronDataProvider>(new SierraCache(umbraco, templateService, affiliationDataProvider).Connect());
-            container.RegisterInstance<IPatronDataProvider>("Sierra", new Sierra(umbraco, templateService, ConfigurationManager.AppSettings["sierraConnectionString"]).Connect());
+            container.RegisterInstance<IPatronDataProvider>(new FolioPatronDataProvider(templateService, affiliationDataProvider).Connect());
         }
     }
 }

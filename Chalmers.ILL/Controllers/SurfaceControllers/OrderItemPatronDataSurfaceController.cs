@@ -32,7 +32,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IUmbracoWrapper _umbraco;
 
         public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProviderSierraCache, 
-            [Dependency("Sierra")] IPatronDataProvider patronDataProviderSierra, IUmbracoWrapper umbraco)
+            IPatronDataProvider patronDataProviderSierra, IUmbracoWrapper umbraco)
         {
             _orderItemManager = orderItemManager;
             _patronDataProviderSierraCache = patronDataProviderSierraCache;
@@ -49,28 +49,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return PartialView("Chalmers.ILL.Action.PatronData", orderItem);
         }
 
-        /// <summary>
-        /// Query data from FOLIO
-        /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
-        [HttpGet]
-        public ActionResult QueryPatronDataFromFolio(string query)
-        {
-            var json = new ResultResponse();
-
-            try
-            {
-                
-            }
-            catch (Exception e)
-            {
-                json.Message = e.Message;
-                json.Success = false;
-            }
-
-            return Json(json, JsonRequestBehavior.AllowGet);
-        }
 
         /// <summary>
         /// Query data from our Solr cache.
@@ -84,19 +62,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                HttpWebRequest fileReq = (HttpWebRequest)HttpWebRequest.Create(ConfigurationManager.AppSettings["patronCacheSolrQueryUrl"] + query + "&wt=json");
-
-                if (!String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthUsername"]) && !String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthPassword"]))
-                    fileReq.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthUsername"] + ":" + ConfigurationManager.AppSettings["patronCacheSolrBasicAuthPassword"])));
-
-                fileReq.CookieContainer = new CookieContainer();
-                fileReq.AllowAutoRedirect = true;
-
-                HttpWebResponse fileResp = (HttpWebResponse)fileReq.GetResponse();
-                var outputStream = fileResp.GetResponseStream();
-
-                var sr = new StreamReader(outputStream);
-                json.Message = sr.ReadToEnd();
+                json.Message = JsonConvert.SerializeObject(_patronDataProviderSierraCache.GetPatrons(query));
                 json.Success = true;
             }
             catch (Exception e)

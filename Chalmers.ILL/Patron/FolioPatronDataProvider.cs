@@ -8,6 +8,7 @@ using System.Configuration;
 using System.IO;
 using Newtonsoft.Json;
 using Chalmers.ILL.Templates;
+using System.Text;
 
 namespace Chalmers.ILL.Patron
 {
@@ -33,9 +34,16 @@ namespace Chalmers.ILL.Patron
         {
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(_folioApiBaseAddress + "/authn/login");
 
-            request.Headers.Add("Content-Type", "application/json");
-            request.Headers.Add("x-okapi-tenant", _tenant);
+            request.Accept = "application/json";
+            request.ContentType = "application/json";
+            request.Headers["x-okapi-tenant"] = _tenant;
             request.Method = "POST";
+
+            UTF8Encoding encoding = new UTF8Encoding();
+            var bodyBytes = encoding.GetBytes("{ \"username\": \"" + _username + "\", \"password\": \"" + _password + "\" }");
+            request.ContentLength = bodyBytes.Length;
+            var requestStream = request.GetRequestStream();
+            requestStream.Write(bodyBytes, 0, bodyBytes.Length);
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             _token = response.Headers.Get("x-okapi-token");
@@ -138,12 +146,15 @@ namespace Chalmers.ILL.Patron
         {
             dynamic res = null;
 
+            query = "(personal.mail=\"" + query + "*\" or barcode=\"" +  query + "*\" or username=\"" + query + "*\")";
+
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(_folioApiBaseAddress + "/users?" + 
                 (limitToOne ? "limit=1&" : "") + "query=" + HttpUtility.UrlEncode(query));
 
-            request.Headers.Add("Content-Type", "application/json");
-            request.Headers.Add("x-okapi-tenant", _tenant);
-            request.Headers.Add("x-okapi-token", _token);
+            request.Accept = "application/json";
+            request.ContentType = "application/json";
+            request.Headers["x-okapi-tenant"] = _tenant;
+            request.Headers["x-okapi-token"] = _token;
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             var outputStream = response.GetResponseStream();
