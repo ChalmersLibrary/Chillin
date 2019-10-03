@@ -63,7 +63,7 @@ namespace Chalmers.ILL.Patron
 
             var json = GetDataFromFolioWithRetries("barcode=" + barcode);
 
-            if (json != null && json.users != null && json.users.length == 1)
+            if (json != null && json.users != null && json.users.Count == 1)
             {
                 FillInSierraModelFromFolioData(json.users[0], res);
             }
@@ -77,7 +77,7 @@ namespace Chalmers.ILL.Patron
 
             var json = GetDataFromFolioWithRetries("username=" + pnr + " or barcode=" + barcode);
 
-            if (json != null && json.users != null && json.users.length == 1)
+            if (json != null && json.users != null && json.users.Count == 1)
             {
                 FillInSierraModelFromFolioData(json.users[0], res);
             }
@@ -91,7 +91,7 @@ namespace Chalmers.ILL.Patron
 
             var json = GetDataFromFolioWithRetries("id=" + sierraId);
 
-            if (json != null && json.users != null && json.users.length == 1)
+            if (json != null && json.users != null && json.users.Count == 1)
             {
                 FillInSierraModelFromFolioData(json.users[0], res);
             }
@@ -102,6 +102,8 @@ namespace Chalmers.ILL.Patron
         public IList<SierraModel> GetPatrons(string query)
         {
             var res = new List<SierraModel>();
+
+            query = "(personal.email=\"" + query + "*\" or barcode=\"" + query + "*\" or username=\"" + query + "*\")";
 
             var json = GetDataFromFolioWithRetries(query, false);
 
@@ -146,10 +148,8 @@ namespace Chalmers.ILL.Patron
         {
             dynamic res = null;
 
-            query = "(personal.mail=\"" + query + "*\" or barcode=\"" +  query + "*\" or username=\"" + query + "*\")";
-
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(_folioApiBaseAddress + "/users?" + 
-                (limitToOne ? "limit=1&" : "") + "query=" + HttpUtility.UrlEncode(query));
+                (limitToOne ? "limit=1&" : "") + "query=" + Uri.EscapeDataString(query));
 
             request.Accept = "application/json";
             request.ContentType = "application/json";
@@ -174,8 +174,8 @@ namespace Chalmers.ILL.Patron
         private void FillInSierraModelFromFolioData(dynamic recordData, /* out */ SierraModel result)
         {
             result.barcode = recordData.barcode;
-            result.id = "0";
-            if (recordData.personal)
+            result.id = recordData.id;
+            if (recordData.personal != null)
             {
                 result.email = recordData.personal.email;
                 result.first_name = recordData.personal.firstName;
@@ -184,7 +184,9 @@ namespace Chalmers.ILL.Patron
 
             //result.mblock = recordData.mblock;
             //result.ptype = recordData.ptype;
-            result.aff = _affiliationDataProvider.GetAffiliationFromPersonNumber(recordData.username);
+            result.expdate = recordData.expirationDate;
+            result.pnum = recordData.username;
+            result.aff = _affiliationDataProvider.GetAffiliationFromPersonNumber(Convert.ToString(recordData.username));
         }
 
         #endregion

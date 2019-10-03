@@ -19,12 +19,14 @@ namespace Chalmers.ILL.Models
 
         public string id { get; set; }
         public string barcode { get; set; }
+        public string pnum { get; set; }
         public int ptype { get; set; }
         public string email { get; set; }
         public string first_name { get; set; }
         public string last_name { get; set; }
         public string mblock { get; set; }
         public string home_library { get; set; }
+        public string expdate { get; set; }
         public string home_library_pretty_name { get; set; }
         public int record_id { get; set; }
         public string aff { get; set; }

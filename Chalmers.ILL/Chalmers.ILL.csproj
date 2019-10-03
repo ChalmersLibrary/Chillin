@@ -529,6 +529,10 @@
     <Compile Include="Migrations\201901230959428_AddPurchaseLibrary.Designer.cs">
       <DependentUpon>201901230959428_AddPurchaseLibrary.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201910030614091_ExpandedSierraModel.cs" />
+    <Compile Include="Migrations\201910030614091_ExpandedSierraModel.Designer.cs">
+      <DependentUpon>201910030614091_ExpandedSierraModel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
     <Compile Include="Models\MediaItemIdAndOrderItemId.cs" />
@@ -666,6 +670,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201901230959428_AddPurchaseLibrary.resx">
       <DependentUpon>201901230959428_AddPurchaseLibrary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201910030614091_ExpandedSierraModel.resx">
+      <DependentUpon>201910030614091_ExpandedSierraModel.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

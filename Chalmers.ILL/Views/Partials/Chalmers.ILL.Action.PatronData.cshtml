@@ -12,7 +12,7 @@
         <div class="col-sm-12">
             <div class="input-group col-sm-6">
                 <div id="patron-data-query-count" class="input-group-addon wide">0</div>
-                <input type="text" class="form-control" id="patron-data-query-input" name="patron-data-query-input" value="@Model.PatronName">
+                <input type="text" class="form-control" id="patron-data-query-input" name="patron-data-query-input" value="@Model.PatronEmail">
             </div>
         </div>
     </div>
@@ -57,17 +57,17 @@
                     var list = $("#patron-data-search-result-list");
                     list.html("");
                 
-                    $("#patron-data-query-count").text(data.response.numFound);
+                    $("#patron-data-query-count").text(data.length);
 
-                    if (data.response.numFound > 0 && data.response.numFound < 10) {
+                    if (data.length > 0 && data.length < 10) {
                         $("#patron-data-query-count").removeClass("alert-warning alert-danger").addClass("alert-success");
-                    } else if (data.response.numFound >= 10 && data.response.numFound < 50) {
+                    } else if (data.length >= 10 && data.length < 50) {
                         $("#patron-data-query-count").removeClass("alert-success alert-danger").addClass("alert-warning");
                     } else {
                         $("#patron-data-query-count").removeClass("alert-success alert-warning").addClass("alert-danger");
                     }
 
-                    data.response.docs.forEach(function (data) {
+                    data.forEach(function (data) {
                         var date = new Date(data.expdate);
                         var dateStr = date.getFullYear() + "-" + 
                             ("00" + (date.getMonth() + 1)).substr(-2) + "-" + 
@@ -75,13 +75,13 @@
                             ("00" + date.getHours()).substr(-2) + ":" + 
                             ("00" + date.getMinutes()).substr(-2);
                         list.append("<div class='row' onclick='selectPatron(this);'>\
-                        <div class='col-sm-2 patron-data-pname'>" + data.pname + "</div>\
+                        <div class='col-sm-2 patron-data-pname'>" + data.first_name + " " + data.last_name + "</div>\
                         <div class='col-sm-3 patron-data-email'>" + splitAndFix(data.email) + "</div>\
                         <div class='col-sm-2 patron-data-barcode'>" + splitAndFix(data.barcode) + "</div>\
                         <div class='col-sm-2 patron-data-pnum'>" + data.pnum + "</div>\
                         <div class='col-sm-1 patron-data-ptype'>" + data.ptype + "</div>\
                         <div class='col-sm-2 patron-data-expdate'>" + dateStr + "</div>\
-                        <div class='patron-data-sierraid' style='display:none;'>" + data.recordnum + "</div>\
+                        <div class='patron-data-sierraid' style='display:none;'>" + data.id + "</div>\
                     </div>")
                     });
                 } else {
