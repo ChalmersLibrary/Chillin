@@ -61,11 +61,12 @@ namespace Chalmers.ILL.Patron
         {
             SierraModel res = new SierraModel();
 
-            var json = GetDataFromFolioWithRetries("barcode=" + barcode);
+            var json = GetDataFromFolioWithRetries("/users?limit=1&query=" + Uri.EscapeDataString("barcode=" + barcode));
 
             if (json != null && json.users != null && json.users.Count == 1)
             {
-                FillInSierraModelFromFolioData(json.users[0], res);
+                var mblockJson = GetDataFromFolioWithRetries("/manualblocks?query=userId=" + json.users[0].id);
+                FillInSierraModelFromFolioData(json.users[0], mblockJson, res);
             }
 
             return res;
@@ -75,11 +76,12 @@ namespace Chalmers.ILL.Patron
         {
             SierraModel res = new SierraModel();
 
-            var json = GetDataFromFolioWithRetries("username=" + pnr + " or barcode=" + barcode);
+            var json = GetDataFromFolioWithRetries("/users?limit=1&query=" + Uri.EscapeDataString("username=" + pnr + " or barcode=" + barcode));
 
             if (json != null && json.users != null && json.users.Count == 1)
             {
-                FillInSierraModelFromFolioData(json.users[0], res);
+                var mblockJson = GetDataFromFolioWithRetries("/manualblocks?query=userId=" + json.users[0].id);
+                FillInSierraModelFromFolioData(json.users[0], mblockJson, res);
             }
 
             return res;
@@ -89,11 +91,12 @@ namespace Chalmers.ILL.Patron
         {
             SierraModel res = new SierraModel();
 
-            var json = GetDataFromFolioWithRetries("id=" + sierraId);
+            var json = GetDataFromFolioWithRetries("/users?limit=1&query=" + Uri.EscapeDataString("id=" + sierraId));
 
             if (json != null && json.users != null && json.users.Count == 1)
             {
-                FillInSierraModelFromFolioData(json.users[0], res);
+                var mblockJson = GetDataFromFolioWithRetries("/manualblocks?query=userId=" + json.users[0].id);
+                FillInSierraModelFromFolioData(json.users[0], mblockJson, res);
             }
 
             return res;
@@ -105,14 +108,15 @@ namespace Chalmers.ILL.Patron
 
             query = "(personal.email=\"" + query + "*\" or barcode=\"" + query + "*\" or username=\"" + query + "*\")";
 
-            var json = GetDataFromFolioWithRetries(query, false);
+            var json = GetDataFromFolioWithRetries("/users?query=" + Uri.EscapeDataString(query));
 
             if (json != null && json.users != null)
             {
                 foreach (var user in json.users)
                 {
                     var sierraModelForUser = new SierraModel();
-                    FillInSierraModelFromFolioData(user, sierraModelForUser);
+                    var mblockJson = GetDataFromFolioWithRetries("/manualblocks?query=userId=" + user.id);
+                    FillInSierraModelFromFolioData(user, mblockJson, sierraModelForUser);
                     res.Add(sierraModelForUser);
                 }
             }
@@ -122,7 +126,7 @@ namespace Chalmers.ILL.Patron
 
         #region Private methods
 
-        private dynamic GetDataFromFolioWithRetries(string query, bool limitToOne = true)
+        private dynamic GetDataFromFolioWithRetries(string path)
         {
             dynamic res = null;
             var retry = true;
@@ -131,7 +135,7 @@ namespace Chalmers.ILL.Patron
             {
                 try
                 {
-                    res = GetDataFromFolio(query, false);
+                    res = GetDataFromFolio(path);
                     retry = false;
                 }
                 catch (InvalidTokenException)
@@ -144,12 +148,11 @@ namespace Chalmers.ILL.Patron
             return res;
         }
 
-        private dynamic GetDataFromFolio(string query, bool limitToOne = true)
+        private dynamic GetDataFromFolio(string pathAndQuery)
         {
             dynamic res = null;
 
-            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(_folioApiBaseAddress + "/users?" + 
-                (limitToOne ? "limit=1&" : "") + "query=" + Uri.EscapeDataString(query));
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(_folioApiBaseAddress + pathAndQuery);
 
             request.Accept = "application/json";
             request.ContentType = "application/json";
@@ -171,7 +174,7 @@ namespace Chalmers.ILL.Patron
             return res;
         }
 
-        private void FillInSierraModelFromFolioData(dynamic recordData, /* out */ SierraModel result)
+        private void FillInSierraModelFromFolioData(dynamic recordData, dynamic mblockData, /* out */ SierraModel result)
         {
             result.barcode = recordData.barcode;
             result.id = recordData.id;
@@ -182,11 +185,58 @@ namespace Chalmers.ILL.Patron
                 result.last_name = recordData.personal.lastName;
             }
 
-            //result.mblock = recordData.mblock;
-            //result.ptype = recordData.ptype;
+            result.mblock = CalculateMblock(mblockData, recordData.id.ToString());
+            result.ptype = ConvertToSierraPtype(recordData.patronGroup.ToString());
             result.expdate = recordData.expirationDate;
             result.pnum = recordData.username;
             result.aff = _affiliationDataProvider.GetAffiliationFromPersonNumber(Convert.ToString(recordData.username));
+        }
+
+        private int ConvertToSierraPtype(string uuid)
+        {
+            var res = 50;
+            if (uuid == "c568f50b-a7f3-44ac-9f19-335da89ec6bc" || uuid == "f336c902-ff8b-438f-b4c8-efbe435a7304") // Student
+            {
+                res = 20;
+            }
+            if (uuid == "5464cbd9-2c7d-4286-8e89-20c75980884b" || uuid == "32bf8ce6-555d-47a7-ab40-de17b40edded" ||
+                uuid == "a7528187-78fe-4e33-a89c-c82bd407fcf3") // Anställd
+            {
+                res = 10;
+            }
+            return res;
+        }
+
+        private string CalculateMblock(dynamic manualblocksResult, string userId)
+        {
+            var borrowing = false;
+            var renewals = false;
+            var requests = false;
+            for (var i=0; i<manualblocksResult.manualblocks.Count; i++)
+            {
+                var blockItem = manualblocksResult.manualblocks[i];
+                if (blockItem.userId == userId)
+                {
+                    borrowing |= Convert.ToBoolean(blockItem.borrowing);
+                    renewals |= Convert.ToBoolean(blockItem.renewals);
+                    requests |= Convert.ToBoolean(blockItem.requests);
+                }
+            }
+
+            var blockStrings = new List<string>();
+            if (borrowing)
+            {
+                blockStrings.Add("borrowing");
+            }
+            if (renewals)
+            {
+                blockStrings.Add("renewals");
+            }
+            if (requests)
+            {
+                blockStrings.Add("requests");
+            }
+            return String.Join(", ", blockStrings);
         }
 
         #endregion
