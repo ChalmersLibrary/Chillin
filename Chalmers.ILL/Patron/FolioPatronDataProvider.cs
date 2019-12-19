@@ -106,7 +106,8 @@ namespace Chalmers.ILL.Patron
         {
             var res = new List<SierraModel>();
 
-            query = "(personal.email=\"" + query + "*\" or barcode=\"" + query + "*\" or username=\"" + query + "*\")";
+            query = "(personal.email=\"" + query + "*\" or barcode=\"" + query + "*\" or username=\"" + query + "*\" or personal.firstName=\"" + query + 
+                "*\" or personal.lastName=\"" + query + "*\")";
 
             var json = GetDataFromFolioWithRetries("/users?query=" + Uri.EscapeDataString(query));
 
@@ -115,8 +116,7 @@ namespace Chalmers.ILL.Patron
                 foreach (var user in json.users)
                 {
                     var sierraModelForUser = new SierraModel();
-                    var mblockJson = GetDataFromFolioWithRetries("/manualblocks?query=userId=" + user.id);
-                    FillInSierraModelFromFolioData(user, mblockJson, sierraModelForUser);
+                    FillInSierraModelFromFolioData(user, null, sierraModelForUser);
                     res.Add(sierraModelForUser);
                 }
             }
@@ -185,7 +185,7 @@ namespace Chalmers.ILL.Patron
                 result.last_name = recordData.personal.lastName;
             }
 
-            result.mblock = CalculateMblock(mblockData, recordData.id.ToString());
+            result.mblock = mblockData != null ? CalculateMblock(mblockData, recordData.id.ToString()) : "";
             result.ptype = ConvertToSierraPtype(recordData.patronGroup.ToString());
             result.expdate = recordData.expirationDate;
             result.pnum = recordData.username;
