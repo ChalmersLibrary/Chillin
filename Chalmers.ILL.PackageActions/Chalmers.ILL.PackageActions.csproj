@@ -35,10 +35,10 @@
       <HintPath>..\Chalmers.ILL\bin\businesslogic.dll</HintPath>
     </Reference>
     <Reference Include="cms">
-      <HintPath>..\..\Chalmers.ILL\Chalmers.ILL\bin\cms.dll</HintPath>
+      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\cms.dll</HintPath>
     </Reference>
     <Reference Include="interfaces">
-      <HintPath>..\..\Chalmers.ILL\Chalmers.ILL\bin\interfaces.dll</HintPath>
+      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\interfaces.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -49,10 +49,10 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="umbraco">
-      <HintPath>..\..\Chalmers.ILL\Chalmers.ILL\bin\umbraco.dll</HintPath>
+      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\umbraco.dll</HintPath>
     </Reference>
     <Reference Include="Umbraco.Core">
-      <HintPath>..\..\Chalmers.ILL\Chalmers.ILL\bin\Umbraco.Core.dll</HintPath>
+      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Umbraco.Core.dll</HintPath>
     </Reference>
     <Reference Include="umbraco.DataLayer">
       <HintPath>..\Chalmers.ILL\bin\umbraco.DataLayer.dll</HintPath>
