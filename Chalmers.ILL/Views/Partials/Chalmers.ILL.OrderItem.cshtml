@@ -334,19 +334,19 @@
 </div>
 <div class="col-sm-4 order-details">
     <div>
-        <span class="label label-primary order-item-var-label">Sierra - Namn</span> @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name
+        <span class="label label-primary order-item-var-label">Folio - Namn</span> @Model.OrderItem.SierraInfo.first_name @Model.OrderItem.SierraInfo.last_name
     </div>
     <div>
-        <span class="label label-primary order-item-var-label">Sierra - Kortnr.</span> @Model.OrderItem.SierraInfo.barcode
+        <span class="label label-primary order-item-var-label">Folio - Kortnr.</span> @Model.OrderItem.SierraInfo.barcode
     </div>
     <div>
-        <span class="label label-primary order-item-var-label">Sierra - P-typ</span> @(!String.IsNullOrEmpty(Model.OrderItem.SierraInfo.barcode) ? Model.OrderItem.SierraInfo.ptype.ToString() : "")
+        <span class="label label-primary order-item-var-label">Folio - P-typ</span> @(!String.IsNullOrEmpty(Model.OrderItem.SierraInfo.barcode) ? Model.OrderItem.SierraInfo.ptype.ToString() : "")
     </div>
     <div>
-        <span class="label label-primary order-item-var-label">Sierra - E-post</span> @Model.OrderItem.SierraInfo.email
+        <span class="label label-primary order-item-var-label">Folio - E-post</span> @Model.OrderItem.SierraInfo.email
     </div>
     <div>
-        <span class='label @((String.IsNullOrEmpty(Model.OrderItem.SierraInfo.mblock) || Model.OrderItem.SierraInfo.mblock=="-") ? "label-primary" : "label-danger") order-item-var-label'>Sierra - M-block</span> @Model.OrderItem.SierraInfo.mblock
+        <span class='label @((String.IsNullOrEmpty(Model.OrderItem.SierraInfo.mblock) || Model.OrderItem.SierraInfo.mblock=="-") ? "label-primary" : "label-danger") order-item-var-label'>Folio - M-block</span> @Model.OrderItem.SierraInfo.mblock
     </div>
 </div>
 
