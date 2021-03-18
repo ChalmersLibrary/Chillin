@@ -7,21 +7,12 @@
 <div id="delivery-to-circulation" class="row">
     <div class="col-md-6">
         <div class="form-group">
-            <label for="providerInformation">Leverantörsinformation</label><br />
-            <textarea class="form-control" cols="80" rows="5" id="providerInformation" name="providerInformation" onchange="providerInfoHasBeenEdited();">@Model.OrderItem.ProviderInformation</textarea>
+            <label for="titleToFolio">Folio/EDS titel</label><br/>
+            <textarea class="form-control" cols="80" rows="5" id="titleToFolio" onchange="titleToFolioHasBeenEdited()" name="titleToFolio"> @Model.OrderItem.Reference </textarea>
         </div>
         <div class="form-group">
             <label for="bookId">Inklistrad streckkod för fjärrlån</label>
             <input type="text" class="form-control" id="bookId" name="bookId" value="@Model.OrderItem.BookId">
-        </div>
-        <div class="form-group">
-            <label for="dueDate">Återlämningsdatum</label>
-            <div class="input-group date datetimepicker">
-                <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-calendar"></span>
-                </span>
-            </div>
         </div>
         <div class="row">
             <div class="form-group col-sm-12">
@@ -35,20 +26,30 @@
                     {
                         <div class="alert alert-info">Boken skall skickas till Arkitekturbiblioteket.</div>
                     }
-                    <button class="btn btn-success" onclick="transport(false, true)">Transport till filial</button>
-                    <button class="btn btn-success" onclick="transport(true, true)">Transport till filial för läsesalslån</button>
                 }
-                else
-                {
-                    <div class="alert alert-success auto-mail-notification" role="alert">Automatiskt mailutskick kommer att levereras till <span id="patron-email" class="content-editable" contenteditable>@Model.OrderItem.PatronEmail</span> <span class="glyphicon glyphicon-pencil"></span> <a href="pull-right" onclick="toggleMailEdit(); event.preventDefault();"><span class="glyphicon glyphicon-chevron-down pull-right auto-mail-notification-body-toggle"></span></a></div>
-                    <div class="auto-mail-notification-body-container"><textarea class="form-control auto-mail-notification-body hidden" rows="8" id="mail-message" name="mail-message">@Model.BookAvailableMailTemplate</textarea></div>
-                    <button class="btn btn-success" onclick="deliver(false, true)">Ta emot för vanligt lån</button>
-                    <button class="btn btn-success" onclick="deliver(true, true)">Ta emot för läsesalslån</button>
-                }
+                <button class="btn btn-success" onclick="sendToFolio(false, true)">Ta emot för vanligt lån</button>
+                <button class="btn btn-success" onclick="sendToFolio(true, true)">Ta emot för läsesalslån</button>
             </div>
         </div>
     </div>
     <div class="col-md-6">
+        <div class="form-group">
+            <label for="providerInformation">Leverantörsinformation</label><br />
+            <textarea class="form-control" cols="80" rows="5" id="providerInformation" name="providerInformation" onchange="providerInfoHasBeenEdited();">@Model.OrderItem.ProviderInformation</textarea>
+        </div>
+        <div class="form-group">
+            <label for="dueDate">Återlämningsdatum</label>
+            <div class="input-group date datetimepicker">
+                <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="log-message">Skriv till logg (valfritt)</label>
+            <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
+        </div>
         <div id="printDiv" class="print">
             <h3 style="float:right" class="dueDatePlaceHolder"></h3><br />
             <strong style="font-size:2em">@Model.OrderItem.SierraInfo.last_name @Model.OrderItem.SierraInfo.first_name</strong><br />
@@ -104,15 +105,12 @@
                 support.lib@chalmers.se<br />
             </p>
         </div>
-        <div class="form-group">
-            <label for="log-message">Skriv till logg (valfritt)</label>
-            <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
-        </div>
     </div>
 </div>
 
 <script type="text/javascript">
     var hasProviderInfoBeenEdited = false;
+    var hasTitleToFolioBeenEdited = false;
 
     $(function () {
         $(".datetimepicker").datetimepicker({
@@ -192,7 +190,51 @@
         }
     }
 
+    function sendToFolio(localLoan, print) {
+        if (localLoan) {
+            confirm("Lägg i röd slip EJ HEMLÅN i boken");
+        }
+        if (hasTitleToFolioBeenEdited || confirm("Du har inte ändrat Folio/EDS titeln. Är du säker på att du vill fortsätta?")) {
+            $('#container #printDiv').insertAfter('#container');
+            var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
+            $('.dueDatePlaceHolder').html(dueDate);
+
+            var r = true;
+            if (print) {
+                window.print();
+                r = window.confirm("Skrevs bokslippen ut korrekt?");
+            }
+            if (r) {
+                // Send book to Folio
+
+                // If successfull
+                lendBook(@Model.OrderItem.NodeId)
+            }
+        }
+    }
+
+    function lendBook(id) {
+        lockScreen();
+        $.post("/umbraco/surface/BookCirculationSurface/Loaned", {
+            nodeId: id,
+        }, function (json) {
+            if (json.Success) {
+                $("#statusActions").html("Bok utlånad.");
+            } else {
+                alert(json.Message);
+            }
+            unlockScreen();
+        }).fail(function (jqxhr, textStatus, error) {
+            alert("Error: " + textStatus + " " + error);
+            unlockScreen();
+        });
+    }
+
     function providerInfoHasBeenEdited() {
         hasProviderInfoBeenEdited = true;
+    }
+
+    function titleToFolioHasBeenEdited() {
+        hasTitleToFolioBeenEdited = true;
     }
 </script>
