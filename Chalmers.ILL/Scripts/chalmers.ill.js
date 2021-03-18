@@ -745,7 +745,7 @@ function setOrderItemArticleAvailableForPickup(node, maildata, logMsg) {
     });
 }
 
-function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
+function TEMPsetOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
     lockScreen();
     $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceived", {
         packJson: JSON.stringify({
@@ -771,6 +771,34 @@ function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation
     });
 }
 
+function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, logMsg, readOnlyAtLibrary, title, orderId, pickUpServicePoint) {
+  lockScreen();
+  $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceived", {
+    packJson: JSON.stringify({
+      orderNodeId: node,
+      bookId: bookId,
+      dueDate: dueDate,
+      providerInformation: providerInformation,
+      logMsg: logMsg,
+      readOnlyAtLibrary: readOnlyAtLibrary,
+      title: title,
+      orderId: orderId,
+      pickUpServicePoint: pickUpServicePoint
+    })
+  }, function (json) {
+    if (json.Success) {
+      loadOrderItemDetails(node);
+    }
+    else {
+      alert(json.Message);
+    }
+    unlockScreen();
+  }).fail(function (jqxhr, textStatus, error) {
+    alert("Error: " + textStatus + " " + error);
+    unlockScreen();
+  });
+}
+
 function setOrderItemDeliveryReceivedAtBranch(nodeId) {
     lockScreen();
     $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceivedAtBranch", {
@@ -778,32 +806,6 @@ function setOrderItemDeliveryReceivedAtBranch(nodeId) {
     }, function (json) {
         if (json.Success) {
             alert(json.Message);
-        }
-        else {
-            alert(json.Message);
-        }
-        unlockScreen();
-    }).fail(function (jqxhr, textStatus, error) {
-        alert("Error: " + textStatus + " " + error);
-        unlockScreen();
-    });
-}
-
-function setOrderItemDeliveryReceivedForTransport(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
-    lockScreen();
-    $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceivedForTransport", {
-        packJson: JSON.stringify({
-            orderNodeId: node,
-            bookId: bookId,
-            dueDate: dueDate,
-            providerInformation: providerInformation,
-            mailData: maildata,
-            logMsg: logMsg,
-            readOnlyAtLibrary: readOnlyAtLibrary
-        })
-    }, function (json) {
-        if (json.Success) {
-            loadOrderItemDetails(node);
         }
         else {
             alert(json.Message);

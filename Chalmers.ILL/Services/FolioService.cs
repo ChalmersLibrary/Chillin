@@ -3,8 +3,10 @@ using Chalmers.ILL.Patron;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 
@@ -40,14 +42,13 @@ namespace Chalmers.ILL.Services
         }
 
 
-        public void InitFolio(InstanceBasic instanceBasic, string barcode)
+        public void InitFolio(InstanceBasic instanceBasic, string barcode, string pickUpServicePoint)
         {
             var resInstance = CreateInstance(instanceBasic);
             var resHolding = CreateHolding(resInstance.Id);
             var resItem = CreateItem(resHolding.Id, barcode);
             //RequesterId
-            //PickupServicePointId
-           //var resCiruclation = CreateCirculation(resItem.Id, , ,barcode);
+         //   var resCiruclation = CreateCirculation(resItem.Id, ,pickUpServicePoint ,barcode);
         }
 
         private Instance CreateInstance(InstanceBasic instanceBasic)
@@ -102,29 +103,29 @@ namespace Chalmers.ILL.Services
             return data;
         }
 
-        //private Request CreateCirculation(string itemId, string requesterId, string pickupServicePointId, string barCode)
-        //{
-        //    var requestBasic = new CirculationBasic
-        //    {
-        //        ItemId = itemId,
-        //        RequestDate = DateTime.Now.ToString(),
-        //        RequesterId = requesterId,
-        //        RequestType = "Page",
-        //        FulFilmentPreference = "Hold Shelf",
-        //        Status = "Open - Not yet filled",
-        //        PickupServicePointId = ,
-        //        Item = new CircualtionBasicItem { Barcode = barCode }
-        //    };
-        //    //var settings = new JsonSerializerSettings
-        //    //{
-        //    //    ContractResolver = new CamelCasePropertyNamesContractResolver()
-        //    //};
-        //    //var body = JsonConvert.SerializeObject(requestBasic, settings);
-        //    var body = SerializeObject(requestBasic);
-        //    var response = GetDataFromFolioWithRetries("/circulation/requests", "POST", body);
-        //    var data = JsonConvert.DeserializeObject<Request>(response);
-        //    return data;
-        //}
+        private Request CreateCirculation(string itemId, string requesterId, string pickupServicePoint, string barCode)
+        {
+            var requestBasic = new CirculationBasic
+            {
+                ItemId = itemId,
+                RequestDate = DateTime.Now.ToString(),
+                RequesterId = requesterId,
+                RequestType = "Page",
+                FulFilmentPreference = "Hold Shelf",
+                Status = "Open - Not yet filled",
+                PickupServicePointId = ServicePoints()[pickupServicePoint],
+                Item = new CircualtionBasicItem { Barcode = barCode }
+            };
+            //var settings = new JsonSerializerSettings
+            //{
+            //    ContractResolver = new CamelCasePropertyNamesContractResolver()
+            //};
+            //var body = JsonConvert.SerializeObject(requestBasic, settings);
+            var body = SerializeObject(requestBasic);
+            var response = GetDataFromFolioWithRetries("/circulation/requests", "POST", body);
+            var data = JsonConvert.DeserializeObject<Request>(response);
+            return data;
+        }
 
         private string SerializeObject(dynamic data)
         {
@@ -186,5 +187,13 @@ namespace Chalmers.ILL.Services
 
             return resultString;
         }
+
+        private Dictionary<string, string> ServicePoints() =>
+            new Dictionary<string, string>()
+            {
+                { "Huvudbiblioteket", "3a40852d-49fd-4df2-a1f9-6e2641a6e91f" },
+                { "Lindholmenbiblioteket", "c4c90014-c8c9-4ade-8f24-b5e313319f4b" },
+                { "Arkitekturbiblioteket", "7c5abc9f-f3d7-4856-b8d7-6712462ca007"}
+            };
     }
 }

@@ -7,6 +7,6 @@
         public string InstanceTypeId { get; set; }
         public bool DiscoverySuppress { get; set; }
         public string StatusId { get; set; }
-        public Identifier Identifiers { get; set; }
+        public Identifier[] Identifiers { get; set; }
     }
 }

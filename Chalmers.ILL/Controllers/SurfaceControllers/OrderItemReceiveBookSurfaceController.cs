@@ -71,15 +71,22 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 //FOLIO
                 var instance = new InstanceBasic
                 {
-                    Title = "Chillin kalle kula vilda äventyr",
+                    Title = pack.Title,
                     Source = "External",
                     StatusId = "daf2681c-25af-4202-a3fa-e58fdf806183",
                     DiscoverySuppress = true,
                     InstanceTypeId = "30fffe0e-e985-4144-b2e2-1e8179bdb41f",
-                    Identifiers = new Identifier[] { new Identifier { Value = , IdentifierTypeId = "2e8b3b6c-0e7d-4e48-bca2-b0b23b376af5" } }
+                    Identifiers = new Identifier[] 
+                    { 
+                        new Identifier 
+                        { 
+                            Value = pack.OrderId, 
+                            IdentifierTypeId = "2e8b3b6c-0e7d-4e48-bca2-b0b23b376af5" 
+                        } 
+                    }
                 };
 
-                 _folioService.InitFolio(instance, pack.bookId); //Lägga till servicePointPickUp
+                 _folioService.InitFolio(instance, pack.bookId, pack.PickUpServicePoint);
 
                 //---
 
@@ -135,55 +142,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return Json(json, JsonRequestBehavior.AllowGet);
         }
 
-        /// <summary>
-        /// Set that the order item is received and ready for transport.
-        /// </summary>
-        /// <param name="orderNodeId">OrderItem Node Id</param>
-        /// <param name="bookId">Delivery Library Book Id</param>
-        /// <param name="dueDate">Delivery Library Due Date</param>
-        /// <param name="providerInformation">Information about the provider</param>
-        /// <returns>MVC ActionResult with JSON</returns>
-        [HttpPost, ValidateInput(false)]
-        public ActionResult SetOrderItemDeliveryReceivedForTransport(string packJson)
-        {
-            var json = new ResultResponse();
-
-            try
-            {
-                DeliveryReceivedPackage pack = JsonConvert.DeserializeObject<DeliveryReceivedPackage>(packJson);
-
-                var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
-
-                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
-
-                if (pack.readOnlyAtLibrary)
-                {
-                    _orderItemManager.AddLogItem(pack.orderNodeId, "TRANSPORT", "Transporttyp: Ej hemlån.", eventId, false, false);
-                    _orderItemManager.SetReadOnlyAtLibrary(pack.orderNodeId, true, eventId, false, false);
-                }
-                else
-                {
-                    _orderItemManager.AddLogItem(pack.orderNodeId, "TRANSPORT", "Transporttyp: Avhämtning i infodisk.", eventId, false, false);
-                    _orderItemManager.SetReadOnlyAtLibrary(pack.orderNodeId, false, eventId, false, false);
-                }
-                _orderItemManager.SetDueDate(pack.orderNodeId, pack.dueDate, eventId, false, false);
-                _orderItemManager.SetProviderDueDate(pack.orderNodeId, pack.dueDate, eventId, false, false);
-                _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, eventId, false, false);
-                _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, eventId, false, false);
-                _orderItemManager.SetStatus(pack.orderNodeId, "13:Transport", eventId, false, false);
-                _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, eventId, true, true);
-                
-                json.Success = true;
-                json.Message = "Transport till filial påbörjad.";
-            }
-            catch (Exception e)
-            {
-                json.Success = false;
-                json.Message = "Error: " + e.Message;
-            }
-
-            return Json(json, JsonRequestBehavior.AllowGet);
-        }
 
         /// <summary>
         /// Set that the order item is received at branch and ready for the patron to fetch.
@@ -201,13 +159,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             try
             {
                 DeliveryReceivedPackage pack = new DeliveryReceivedPackage();
-                pack.mailData = new OutgoingMailPackageModel();
                 pack.orderNodeId = nodeId;
 
                 var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
 
                 pack.readOnlyAtLibrary = orderItem.ReadOnlyAtLibrary;
-                pack.mailData.recipientEmail = orderItem.PatronEmail;
 
                 var eventId = _orderItemManager.GenerateEventId(BOOK_RECEIVED_AT_BRANCH_EVENT_TYPE);
 
@@ -257,9 +213,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             public string bookId { get; set; }
             public DateTime dueDate { get; set; }
             public string providerInformation { get; set; }
-            public OutgoingMailPackageModel mailData { get; set; }
             public string logMsg { get; set; }
             public bool readOnlyAtLibrary { get; set; }
+            public string Title { get; set; }
+            public string OrderId { get; set; }
+            public string PickUpServicePoint { get; set; }
+            public OutgoingMailPackageModel mailData { get; set; }
         }
     }
 }

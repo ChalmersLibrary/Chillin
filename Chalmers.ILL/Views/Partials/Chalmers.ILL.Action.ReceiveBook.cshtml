@@ -205,10 +205,24 @@
                 r = window.confirm("Skrevs bokslippen ut korrekt?");
             }
             if (r) {
-                // Send book to Folio
+                setOrderItemDeliveryReceived(
+                    @Model.OrderItem.NodeId,
+                    $('#bookId').val(),
+                    $('#dueDate').val(),
+                    $('#providerInformation').val(),
+                    $("#log-message").val(),
+                    localLoan,
+                    $("#titleToFolio").val(),
+                    @Model.OrderItem.OrderId,
+                    @Model.OrderItem.DeliveryLibrary
+                );
 
-                // If successfull
+                $("#printDiv").remove();
                 lendBook(@Model.OrderItem.NodeId)
+            } else {
+                alert("Leveransfunktionen kommer laddas om, försök därefter igen.");
+                $("#printDiv").remove();
+                loadReceiveBookAction(@Model.OrderItem.NodeId);
             }
         }
     }
