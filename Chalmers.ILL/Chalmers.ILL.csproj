@@ -534,6 +534,14 @@
       <DependentUpon>201910030614091_ExpandedSierraModel.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\CircualtionBasic.cs" />
+    <Compile Include="Models\Circulation.cs" />
+    <Compile Include="Models\Holding.cs" />
+    <Compile Include="Models\HoldingBasic.cs" />
+    <Compile Include="Models\Instance.cs" />
+    <Compile Include="Models\InstanceBasic.cs" />
+    <Compile Include="Models\Item.cs" />
+    <Compile Include="Models\ItemBasic.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
     <Compile Include="Models\MediaItemIdAndOrderItemId.cs" />
     <Compile Include="Models\MediaItemModel.cs" />
@@ -566,6 +574,8 @@
     <Compile Include="Models\PartialPage\Settings\ChangePassword.cs" />
     <Compile Include="Models\PartialPage\Settings\EditTemplates.cs" />
     <Compile Include="Models\PartialPage\Settings\ModifyProviderData.cs" />
+    <Compile Include="Models\Request.cs" />
+    <Compile Include="Models\RequestBasic.cs" />
     <Compile Include="Models\ResultResponseWithData.cs" />
     <Compile Include="Models\ResultResponseWithStringData.cs" />
     <Compile Include="Models\Template.cs" />
@@ -615,6 +625,8 @@
     <Compile Include="Providers\IProviderService.cs" />
     <Compile Include="Providers\LibrisOrderItemsSource.cs" />
     <Compile Include="Providers\ProviderService.cs" />
+    <Compile Include="Services\FolioService.cs" />
+    <Compile Include="Services\IFolioService.cs" />
     <Compile Include="SignalR\INotifier.cs" />
     <Compile Include="SignalR\NotificationHub.cs" />
     <Compile Include="SignalR\Notifier.cs" />

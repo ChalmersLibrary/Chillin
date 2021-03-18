@@ -229,3 +229,5 @@ deploy-to-test.bat
 .vs/
 Migration/*.csv
 Migration/*.txt
+/Chalmers.ILL/.vscode
+/.vscode

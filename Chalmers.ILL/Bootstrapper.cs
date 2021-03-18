@@ -18,6 +18,8 @@ using Chalmers.ILL.Providers;
 using Chalmers.ILL.MediaItems;
 using Nest;
 using Chalmers.ILL.Configuration;
+using Chalmers.ILL.Services;
+using System.Net.Http;
 
 namespace Chalmers.ILL
 {
@@ -90,6 +92,8 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IProviderService), providerService);
             container.RegisterInstance(typeof(IBulkDataManager), bulkDataManager);
             container.RegisterInstance<IPatronDataProvider>(new FolioPatronDataProvider(templateService, affiliationDataProvider).Connect());
+
+            container.RegisterInstance<IFolioService>(new FolioService().Connect());
         }
     }
 }

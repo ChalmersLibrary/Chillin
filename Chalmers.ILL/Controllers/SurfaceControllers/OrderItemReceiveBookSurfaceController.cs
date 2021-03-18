@@ -3,6 +3,7 @@ using Chalmers.ILL.Models;
 using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Services;
 using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
 using Newtonsoft.Json;
@@ -21,18 +22,24 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public static int EVENT_TYPE { get { return 10; } }
         public static int BOOK_RECEIVED_AT_BRANCH_EVENT_TYPE { get { return 25; } }
 
-        IUmbracoWrapper _umbraco;
-        IOrderItemManager _orderItemManager;
-        ITemplateService _templateService;
-        IMailService _mailService;
+        private readonly IUmbracoWrapper _umbraco;
+        private readonly IOrderItemManager _orderItemManager;
+        private readonly ITemplateService _templateService;
+        private readonly IMailService _mailService;
+        private readonly IFolioService _folioService;
 
-        public OrderItemReceiveBookSurfaceController(IUmbracoWrapper umbraco, IOrderItemManager orderItemManager, ITemplateService templateService, 
-            IMailService mailService)
+        public OrderItemReceiveBookSurfaceController(
+            IUmbracoWrapper umbraco, 
+            IOrderItemManager orderItemManager, 
+            ITemplateService templateService, 
+            IMailService mailService,
+            IFolioService folioService)
         {
             _orderItemManager = orderItemManager;
             _templateService = templateService;
             _mailService = mailService;
             _umbraco = umbraco;
+            _folioService = folioService;
         }
 
         [HttpGet]
@@ -61,8 +68,23 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 DeliveryReceivedPackage pack = JsonConvert.DeserializeObject<DeliveryReceivedPackage>(packJson);
 
-                var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
+                //FOLIO
+                var instance = new InstanceBasic
+                {
+                    Title = "Chillin kalle kula vilda äventyr",
+                    Source = "External",
+                    StatusId = "daf2681c-25af-4202-a3fa-e58fdf806183",
+                    DiscoverySuppress = true,
+                    InstanceTypeId = "30fffe0e-e985-4144-b2e2-1e8179bdb41f",
+                    Identifiers = new Identifier[] { new Identifier { Value = , IdentifierTypeId = "2e8b3b6c-0e7d-4e48-bca2-b0b23b376af5" } }
+                };
 
+                 _folioService.InitFolio(instance, pack.bookId); //Lägga till servicePointPickUp
+
+                //---
+
+                var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
+                    
                 var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
 
                 if (pack.readOnlyAtLibrary)
