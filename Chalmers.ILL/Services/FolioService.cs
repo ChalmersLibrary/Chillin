@@ -41,11 +41,11 @@ namespace Chalmers.ILL.Services
         }
 
 
-        public void InitFolio(InstanceBasic instanceBasic, string barcode, string pickUpServicePoint)
+        public void InitFolio(InstanceBasic instanceBasic, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary)
         {
             var resInstance = CreateInstance(instanceBasic);
             var resHolding = CreateHolding(resInstance.Id);
-            var resItem = CreateItem(resHolding.Id, barcode);
+            var resItem = CreateItem(resHolding.Id, barcode, readOnlyAtLibrary);
             //RequesterId
          //   var resCiruclation = CreateCirculation(resItem.Id, ,pickUpServicePoint ,barcode);
         }
@@ -67,7 +67,7 @@ namespace Chalmers.ILL.Services
             return JsonConvert.DeserializeObject<Holding>(response);
         }
 
-        private Item CreateItem(string holdingId, string barCode)
+        private Item CreateItem(string holdingId, string barCode, bool readOnlyAtLibrary)
         {
             var data = new ItemBasic
             {
@@ -77,6 +77,20 @@ namespace Chalmers.ILL.Services
                 Barcode = barCode,
                 Status = new Status { Name = "Available" }
             };
+
+            if (readOnlyAtLibrary)
+            {
+                data.CirculationNotes = new CirculationNotes[]
+                {
+                    new CirculationNotes
+                    {
+                        NoteType = "Check out",
+                        Note = "Ej hemlån",
+                        StaffOnly = true
+                    }
+                };
+            }
+
             var response = GetDataFromFolioWithRetries("/item-storage/items", "POST", SerializeObject(data));
             return JsonConvert.DeserializeObject<Item>(response);
         }

@@ -7,10 +7,18 @@
         public string HoldingsRecordId { get; set; }
         public Status Status { get; set; }
         public string Barcode { get; set; }
+        public CirculationNotes[] CirculationNotes { get; set; }
     }
 
     public class Status
     {
         public string Name { get; set; }
+    }
+
+    public class CirculationNotes
+    {
+        public string NoteType { get; set; }
+        public string Note { get; set; }
+        public bool StaffOnly { get; set; }
     }
 }

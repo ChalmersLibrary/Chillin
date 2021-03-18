@@ -83,7 +83,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     }
                 };
 
-                 _folioService.InitFolio(instance, pack.bookId, pack.PickUpServicePoint);
+                 _folioService.InitFolio(instance, pack.bookId, pack.PickUpServicePoint, pack.readOnlyAtLibrary);
 
                 //---
 
