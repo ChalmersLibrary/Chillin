@@ -8,9 +8,6 @@ using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using Umbraco.Web.Mvc;
 
@@ -109,26 +106,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetStatus(pack.orderNodeId, "14:Infodisk", eventId, false, false);
                 _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, eventId, false, false);
 
-                // We save everything here first so that we get the new values injected into the message by the template service.
-                _orderItemManager.SetPatronEmail(pack.orderNodeId, pack.mailData.recipientEmail, eventId);
-
                 // Overwrite the message with message from template service so that we get the new values injected.
                 if (pack.readOnlyAtLibrary)
                 {
-                    pack.mailData.message = _templateService.ReplaceMoustaches("BookAvailableForReadingAtLibraryMailTemplate", 
-                        pack.mailData.message,  _orderItemManager.GetOrderItem(pack.orderNodeId));
                     _orderItemManager.SetReadOnlyAtLibrary(pack.orderNodeId, true, eventId, false, false);
                 }
                 else
                 {
-                    pack.mailData.message = _templateService.ReplaceMoustaches("BookAvailableMailTemplate", 
-                        pack.mailData.message, _orderItemManager.GetOrderItem(pack.orderNodeId));
                     _orderItemManager.SetReadOnlyAtLibrary(pack.orderNodeId, false, eventId, false, false);
                 }
-
-                _mailService.SendMail(new OutgoingMailModel(orderItem.OrderId, pack.mailData));
-                _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL_NOTE", "Skickat mail till " + pack.mailData.recipientEmail, eventId, false, false);
-                _orderItemManager.AddLogItem(pack.orderNodeId, "MAIL", pack.mailData.message, eventId);
 
                 json.Success = true;
                 json.Message = "Leverans till infodisk genomförd.";
