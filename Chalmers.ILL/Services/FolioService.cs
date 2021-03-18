@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 
@@ -51,40 +50,26 @@ namespace Chalmers.ILL.Services
          //   var resCiruclation = CreateCirculation(resItem.Id, ,pickUpServicePoint ,barcode);
         }
 
-        private Instance CreateInstance(InstanceBasic instanceBasic)
+        private Instance CreateInstance(InstanceBasic data)
         {
-            //var settings = new JsonSerializerSettings
-            //{
-            //    ContractResolver = new CamelCasePropertyNamesContractResolver()
-            //};
-            //var body = JsonConvert.SerializeObject(instanceBasic, settings);
-            var body = SerializeObject(instanceBasic);
-            var response = GetDataFromFolioWithRetries("/instance-storage/instances", "POST", body);
-            var data = JsonConvert.DeserializeObject<Instance>(response);
-            return data;
+            var response = GetDataFromFolioWithRetries("/instance-storage/instances", "POST", SerializeObject(data));
+            return JsonConvert.DeserializeObject<Instance>(response);
         }
 
         private Holding CreateHolding(string instanceId)
         {
-            var holdingBasic = new HoldingBasic
+            var data = new HoldingBasic
             {
                 InstanceId = instanceId,
                 PermanentLocationId = "fcd64ce1-6995-48f0-840e-89ffa2288371"
             };
-            //var settings = new JsonSerializerSettings
-            //{
-            //    ContractResolver = new CamelCasePropertyNamesContractResolver()
-            //};
-            //var body = JsonConvert.SerializeObject(holdingBasic, settings);
-            var body = SerializeObject(holdingBasic);
-            var response = GetDataFromFolioWithRetries("/holdings-storage/holdings", "POST", body);
-            var data = JsonConvert.DeserializeObject<Holding>(response);
-            return data;
+            var response = GetDataFromFolioWithRetries("/holdings-storage/holdings", "POST", SerializeObject(data));
+            return JsonConvert.DeserializeObject<Holding>(response);
         }
 
         private Item CreateItem(string holdingId, string barCode)
         {
-            var itemBasic = new ItemBasic
+            var data = new ItemBasic
             {
                 MaterialTypeId = "1a54b431-2e4f-452d-9cae-9cee66c9a892",
                 PermanentLoanTypeId = "2b94c631-fca9-4892-a730-03ee529ffe27",
@@ -92,20 +77,23 @@ namespace Chalmers.ILL.Services
                 Barcode = barCode,
                 Status = new Status { Name = "Available" }
             };
-            //var settings = new JsonSerializerSettings
-            //{
-            //    ContractResolver = new CamelCasePropertyNamesContractResolver()
-            //};
-            //var body = JsonConvert.SerializeObject(itemBasic, settings);
-            var body = SerializeObject(itemBasic);
-            var response = GetDataFromFolioWithRetries("/item-storage/items", "POST", body);
-            var data = JsonConvert.DeserializeObject<Item>(response);
-            return data;
+            var response = GetDataFromFolioWithRetries("/item-storage/items", "POST", SerializeObject(data));
+            return JsonConvert.DeserializeObject<Item>(response);
         }
 
-        private Request CreateCirculation(string itemId, string requesterId, string pickupServicePoint, string barCode)
+        private Request CreateRequest()
         {
-            var requestBasic = new CirculationBasic
+            var data = new RequestBasic
+            {
+
+            };
+            var response = GetDataFromFolioWithRetries("/circulation/requests", "POST", SerializeObject(data));
+            return JsonConvert.DeserializeObject<Circulation>(response);
+        }
+
+        private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint, string barCode)
+        {
+            var data = new CirculationBasic
             {
                 ItemId = itemId,
                 RequestDate = DateTime.Now.ToString(),
@@ -116,15 +104,8 @@ namespace Chalmers.ILL.Services
                 PickupServicePointId = ServicePoints()[pickupServicePoint],
                 Item = new CircualtionBasicItem { Barcode = barCode }
             };
-            //var settings = new JsonSerializerSettings
-            //{
-            //    ContractResolver = new CamelCasePropertyNamesContractResolver()
-            //};
-            //var body = JsonConvert.SerializeObject(requestBasic, settings);
-            var body = SerializeObject(requestBasic);
-            var response = GetDataFromFolioWithRetries("/circulation/requests", "POST", body);
-            var data = JsonConvert.DeserializeObject<Request>(response);
-            return data;
+            var response = GetDataFromFolioWithRetries("/circulation/requests", "POST", SerializeObject(data));
+            return JsonConvert.DeserializeObject<Circulation>(response);
         }
 
         private string SerializeObject(dynamic data)
