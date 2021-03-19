@@ -105,7 +105,7 @@ namespace Chalmers.ILL.Services
                     new CirculationNotes
                     {
                         NoteType = "Check in",
-                        Note = "Vid återlämning - ska till HBs fjärr-in-skrivbord",
+                        Note = "NÄR LÅNTAGARE ÅTERLÄMNAR: Lägg på hyllan fär återlämnade fjärrlån på HB",
                         StaffOnly = true
                     }
                 }
