@@ -73,7 +73,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     Source = "External",
                     StatusId = ConfigurationManager.AppSettings["instanceStatusId"].ToString(),
                     DiscoverySuppress = true,
-                    InstanceTypeId = ConfigurationManager.AppSettings["instanceTypeId"].ToString(),
+                    InstanceTypeId = ConfigurationManager.AppSettings["instanceResourceTypeId"].ToString(),
                     ModeOfIssuanceId = ConfigurationManager.AppSettings["instanceModesOfIssuance"].ToString(),
                     Identifiers = new Identifier[] 
                     { 
