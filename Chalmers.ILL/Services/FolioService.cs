@@ -63,6 +63,7 @@ namespace Chalmers.ILL.Services
                 DiscoverySuppress = true,
                 InstanceId = instanceId,
                 PermanentLocationId = ConfigurationManager.AppSettings["holdingPermanentLocationId"].ToString(),
+                CallNumberTypeId = ConfigurationManager.AppSettings["holdingCallNumberTypeId"].ToString(),
                 StatisticalCodeIds = new string[]
                 {
                     ConfigurationManager.AppSettings["chillinStatisticalCodeId"].ToString()

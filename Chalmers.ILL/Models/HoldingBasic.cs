@@ -6,5 +6,6 @@
         public string InstanceId { get; set; }
         public string PermanentLocationId { get; set; }
         public string[] StatisticalCodeIds { get; set; }
+        public string CallNumberTypeId { get; set; }
     }
 }
