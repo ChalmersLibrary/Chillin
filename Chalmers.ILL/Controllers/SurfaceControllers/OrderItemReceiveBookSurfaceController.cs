@@ -71,15 +71,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     Title = pack.Title,
                     Source = "External",
-                    StatusId = ConfigurationManager.AppSettings["statusId"].ToString(),
+                    StatusId = ConfigurationManager.AppSettings["instanceStatusId"].ToString(),
                     DiscoverySuppress = true,
                     InstanceTypeId = ConfigurationManager.AppSettings["instanceTypeId"].ToString(),
+                    ModeOfIssuanceId = ConfigurationManager.AppSettings["instanceModesOfIssuance"].ToString(),
                     Identifiers = new Identifier[] 
                     { 
                         new Identifier 
                         { 
                             Value = pack.OrderId, 
-                            IdentifierTypeId = ConfigurationManager.AppSettings["identifierTypeId"].ToString()
+                            IdentifierTypeId = ConfigurationManager.AppSettings["instanceIdentifierTypeId"].ToString()
                         } 
                     }
                 };

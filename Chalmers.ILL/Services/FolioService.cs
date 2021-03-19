@@ -62,7 +62,7 @@ namespace Chalmers.ILL.Services
             {
                 DiscoverySuppress = true,
                 InstanceId = instanceId,
-                PermanentLocationId = ConfigurationManager.AppSettings["permanentLocationId"].ToString()
+                PermanentLocationId = ConfigurationManager.AppSettings["holdingPermanentLocationId"].ToString()
             };
             var response = GetDataFromFolioWithRetries("/holdings-storage/holdings", "POST", SerializeObject(data));
             return JsonConvert.DeserializeObject<Holding>(response);
@@ -73,8 +73,8 @@ namespace Chalmers.ILL.Services
             var data = new ItemBasic
             {
                 DiscoverySuppress = true,
-                MaterialTypeId = ConfigurationManager.AppSettings["materialTypeId"].ToString(),
-                PermanentLoanTypeId = ConfigurationManager.AppSettings["permanentLoanTypeId"].ToString(),
+                MaterialTypeId = ConfigurationManager.AppSettings["itemMaterialTypeId"].ToString(),
+                PermanentLoanTypeId = ConfigurationManager.AppSettings["itemPermanentLoanTypeId"].ToString(),
                 HoldingsRecordId = holdingId,
                 Barcode = barCode,
                 Status = new Status { Name = "Available" }
@@ -188,9 +188,9 @@ namespace Chalmers.ILL.Services
         private Dictionary<string, string> ServicePoints() =>
             new Dictionary<string, string>()
             {
-                { "Huvudbiblioteket", ConfigurationManager.AppSettings["huvudbiblioteketId"].ToString() },
-                { "Lindholmenbiblioteket", ConfigurationManager.AppSettings["lindholmenbiblioteketId"].ToString() },
-                { "Arkitekturbiblioteket", ConfigurationManager.AppSettings["arkitekturbiblioteketId"].ToString()}
+                { "Huvudbiblioteket", ConfigurationManager.AppSettings["servicePointHuvudbiblioteketId"].ToString() },
+                { "Lindholmenbiblioteket", ConfigurationManager.AppSettings["servicePointLindholmenbiblioteketId"].ToString() },
+                { "Arkitekturbiblioteket", ConfigurationManager.AppSettings["servicePointArkitekturbiblioteketId"].ToString()}
             };
     }
 }
