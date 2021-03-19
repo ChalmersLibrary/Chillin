@@ -536,6 +536,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\CircualtionBasic.cs" />
     <Compile Include="Models\Circulation.cs" />
+    <Compile Include="Models\FolioUser.cs" />
     <Compile Include="Models\Holding.cs" />
     <Compile Include="Models\HoldingBasic.cs" />
     <Compile Include="Models\Instance.cs" />

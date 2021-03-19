@@ -46,8 +46,8 @@ namespace Chalmers.ILL.Services
             var resInstance = CreateInstance(instanceBasic);
             var resHolding = CreateHolding(resInstance.Id);
             var resItem = CreateItem(resHolding.Id, barcode, readOnlyAtLibrary);
-            //RequesterId
-         //   var resCiruclation = CreateCirculation(resItem.Id, ,pickUpServicePoint ,barcode);
+            var userId = UserId(barcode);
+         //   var resCiruclation = CreateCirculation(resItem.Id, userId ,pickUpServicePoint ,barcode);
         }
 
         private Instance CreateInstance(InstanceBasic data)
@@ -113,6 +113,13 @@ namespace Chalmers.ILL.Services
             return JsonConvert.DeserializeObject<Item>(response);
         }
 
+        private string UserId(string barcode)
+        {
+            var response = GetDataFromFolioWithRetries($"/users?query=(barcode={barcode})", "GET");
+            var data = JsonConvert.DeserializeObject<FolioUser>(response);
+            return data.Users[0].Id;
+        }
+
         private Request CreateRequest()
         {
             var data = new RequestBasic
@@ -149,7 +156,7 @@ namespace Chalmers.ILL.Services
             return JsonConvert.SerializeObject(data, settings);
         }
 
-        private dynamic GetDataFromFolioWithRetries(string path, string method, string body)
+        private dynamic GetDataFromFolioWithRetries(string path, string method, string body = null)
         {
             dynamic res = null;
             var retry = true;
@@ -181,11 +188,14 @@ namespace Chalmers.ILL.Services
             request.Headers["x-okapi-token"] = _token;
             request.Method = method;
 
-            UTF8Encoding encoding = new UTF8Encoding();
-            var bodyBytes = encoding.GetBytes(body);
-            request.ContentLength = bodyBytes.Length;
-            var requestStream = request.GetRequestStream();
-            requestStream.Write(bodyBytes, 0, bodyBytes.Length);
+            if (string.IsNullOrEmpty(body) == false)
+            {
+                UTF8Encoding encoding = new UTF8Encoding();
+                var bodyBytes = encoding.GetBytes(body);
+                request.ContentLength = bodyBytes.Length;
+                var requestStream = request.GetRequestStream();
+                requestStream.Write(bodyBytes, 0, bodyBytes.Length);
+            }
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             var outputStream = response.GetResponseStream();
