@@ -2,6 +2,7 @@
 {
     public class ItemBasic
     {
+        public bool DiscoverySuppress { get; set; }
         public string MaterialTypeId { get; set; }
         public string PermanentLoanTypeId { get; set; }
         public string HoldingsRecordId { get; set; }

@@ -60,6 +60,7 @@ namespace Chalmers.ILL.Services
         {
             var data = new HoldingBasic
             {
+                DiscoverySuppress = true,
                 InstanceId = instanceId,
                 PermanentLocationId = "fcd64ce1-6995-48f0-840e-89ffa2288371"
             };
@@ -71,6 +72,7 @@ namespace Chalmers.ILL.Services
         {
             var data = new ItemBasic
             {
+                DiscoverySuppress = true,
                 MaterialTypeId = "1a54b431-2e4f-452d-9cae-9cee66c9a892",
                 PermanentLoanTypeId = "2b94c631-fca9-4892-a730-03ee529ffe27",
                 HoldingsRecordId = holdingId,
