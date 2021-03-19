@@ -60,8 +60,9 @@ namespace Chalmers.ILL.Services
         {
             var data = new HoldingBasic
             {
+                DiscoverySuppress = true,
                 InstanceId = instanceId,
-                PermanentLocationId = "fcd64ce1-6995-48f0-840e-89ffa2288371"
+                PermanentLocationId = ConfigurationManager.AppSettings["permanentLocationId"].ToString()
             };
             var response = GetDataFromFolioWithRetries("/holdings-storage/holdings", "POST", SerializeObject(data));
             return JsonConvert.DeserializeObject<Holding>(response);
@@ -71,8 +72,9 @@ namespace Chalmers.ILL.Services
         {
             var data = new ItemBasic
             {
-                MaterialTypeId = "1a54b431-2e4f-452d-9cae-9cee66c9a892",
-                PermanentLoanTypeId = "2b94c631-fca9-4892-a730-03ee529ffe27",
+                DiscoverySuppress = true,
+                MaterialTypeId = ConfigurationManager.AppSettings["materialTypeId"].ToString(),
+                PermanentLoanTypeId = ConfigurationManager.AppSettings["permanentLoanTypeId"].ToString(),
                 HoldingsRecordId = holdingId,
                 Barcode = barCode,
                 Status = new Status { Name = "Available" }
@@ -186,9 +188,9 @@ namespace Chalmers.ILL.Services
         private Dictionary<string, string> ServicePoints() =>
             new Dictionary<string, string>()
             {
-                { "Huvudbiblioteket", "3a40852d-49fd-4df2-a1f9-6e2641a6e91f" },
-                { "Lindholmenbiblioteket", "c4c90014-c8c9-4ade-8f24-b5e313319f4b" },
-                { "Arkitekturbiblioteket", "7c5abc9f-f3d7-4856-b8d7-6712462ca007"}
+                { "Huvudbiblioteket", ConfigurationManager.AppSettings["huvudbiblioteketId"].ToString() },
+                { "Lindholmenbiblioteket", ConfigurationManager.AppSettings["lindholmenbiblioteketId"].ToString() },
+                { "Arkitekturbiblioteket", ConfigurationManager.AppSettings["arkitekturbiblioteketId"].ToString()}
             };
     }
 }

@@ -2,13 +2,10 @@
 
 namespace Chalmers.ILL.Models
 {
-
     public class HoldingBasic
     {
-        [JsonProperty("instanceId")]
+        public bool DiscoverySuppress { get; set; }
         public string InstanceId { get; set; }
-
-        [JsonProperty("permanentLocationId")]
         public string PermanentLocationId { get; set; }
     }
 }
