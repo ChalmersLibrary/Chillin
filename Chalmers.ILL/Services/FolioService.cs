@@ -41,13 +41,26 @@ namespace Chalmers.ILL.Services
         }
 
 
-        public void InitFolio(InstanceBasic instanceBasic, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary)
+        public void InitFolio(InstanceBasic instanceBasic, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary, string patronCardNumber)
         {
+            var userId = UserId(patronCardNumber);
             var resInstance = CreateInstance(instanceBasic);
             var resHolding = CreateHolding(resInstance.Id);
             var resItem = CreateItem(resHolding.Id, barcode, readOnlyAtLibrary);
-            var userId = UserId(barcode);
-         //   var resCiruclation = CreateCirculation(resItem.Id, userId ,pickUpServicePoint ,barcode);
+          //  var resCiruclation = CreateCirculation(resItem.Id, userId, pickUpServicePoint, barcode);
+        }
+
+        private string UserId(string barcode)
+        {
+            var response = GetDataFromFolioWithRetries($"/users?query=(barcode={barcode})", "GET");
+            var data = JsonConvert.DeserializeObject<FolioUser>(response);
+
+            if (data.Users.Length == 0)
+            {
+                throw new FolioUserException("Användaren hittades inte i FOLIO");
+            }
+
+            return data.Users[0].Id;
         }
 
         private Instance CreateInstance(InstanceBasic data)
@@ -113,12 +126,7 @@ namespace Chalmers.ILL.Services
             return JsonConvert.DeserializeObject<Item>(response);
         }
 
-        private string UserId(string barcode)
-        {
-            var response = GetDataFromFolioWithRetries($"/users?query=(barcode={barcode})", "GET");
-            var data = JsonConvert.DeserializeObject<FolioUser>(response);
-            return data.Users[0].Id;
-        }
+
 
         private Request CreateRequest()
         {
@@ -135,7 +143,7 @@ namespace Chalmers.ILL.Services
             var data = new CirculationBasic
             {
                 ItemId = itemId,
-                RequestDate = DateTime.Now.ToString(),
+                RequestDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffK"),
                 RequesterId = requesterId,
                 RequestType = "Page",
                 FulFilmentPreference = "Hold Shelf",

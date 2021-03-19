@@ -771,7 +771,24 @@ function TEMPsetOrderItemDeliveryReceived(node, bookId, dueDate, providerInforma
     });
 }
 
-function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, logMsg, readOnlyAtLibrary, title, orderId, pickUpServicePoint) {
+function lendBook(id) {
+  lockScreen();
+  $.post("/umbraco/surface/BookCirculationSurface/Loaned", {
+    nodeId: id,
+  }, function (json) {
+    if (json.Success) {
+      $("#statusActions").html("Bok utlånad.");
+    } else {
+      alert(json.Message);
+    }
+    unlockScreen();
+  }).fail(function (jqxhr, textStatus, error) {
+    alert("Error: " + textStatus + " " + error);
+    unlockScreen();
+  });
+}
+
+function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, logMsg, readOnlyAtLibrary, title, orderId, pickUpServicePoint, patronCardNumber) {
   lockScreen();
   $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceived", {
     packJson: JSON.stringify({
@@ -783,11 +800,13 @@ function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation
       readOnlyAtLibrary: readOnlyAtLibrary,
       title: title,
       orderId: orderId,
-      pickUpServicePoint: pickUpServicePoint
+      pickUpServicePoint: pickUpServicePoint,
+      patronCardNumber: patronCardNumber
     })
   }, function (json) {
     if (json.Success) {
       loadOrderItemDetails(node);
+      lendBook(node);
     }
     else {
       alert(json.Message);
@@ -805,7 +824,7 @@ function setOrderItemDeliveryReceivedAtBranch(nodeId) {
         nodeId: nodeId
     }, function (json) {
         if (json.Success) {
-            alert(json.Message);
+          alert(json.Message);
         }
         else {
             alert(json.Message);

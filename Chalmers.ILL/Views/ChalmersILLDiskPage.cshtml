@@ -191,23 +191,6 @@
                 });
             }
 
-            function lendBook(id) {
-                lockScreen();
-                $.post("/umbraco/surface/BookCirculationSurface/Loaned", {
-                    nodeId: id
-                }, function (json) {
-                    if (json.Success) {
-                        $("#statusActions").html("Bok utlånad.");
-                    } else {
-                        alert(json.Message);
-                    }
-                    unlockScreen();
-                }).fail(function (jqxhr, textStatus, error) {
-                    alert("Error: " + textStatus + " " + error);
-                    unlockScreen();
-                });
-            }
-
             function receiveArticleAtBranch(id) {
                 lockScreen();
                 $.post("/umbraco/surface/OrderItemDeliverySurface/SetArticleAvailableForPickupAtBranch", {

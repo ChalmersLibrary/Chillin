@@ -206,34 +206,17 @@
                     localLoan,
                     $("#titleToFolio").val(),
                     "@Model.OrderItem.OrderId",
-                    "@Model.OrderItem.DeliveryLibrary"
+                    "@Model.OrderItem.DeliveryLibrary",
+                    "@Model.OrderItem.PatronCardNo"
                 );
 
                 $("#printDiv").remove();
-                lendBook(@Model.OrderItem.NodeId)
             } else {
                 alert("Leveransfunktionen kommer laddas om, försök därefter igen.");
                 $("#printDiv").remove();
                 loadReceiveBookAction(@Model.OrderItem.NodeId);
             }
         }
-    }
-
-    function lendBook(id) {
-        lockScreen();
-        $.post("/umbraco/surface/BookCirculationSurface/Loaned", {
-            nodeId: id,
-        }, function (json) {
-            if (json.Success) {
-                $("#statusActions").html("Bok utlånad.");
-            } else {
-                alert(json.Message);
-            }
-            unlockScreen();
-        }).fail(function (jqxhr, textStatus, error) {
-            alert("Error: " + textStatus + " " + error);
-            unlockScreen();
-        });
     }
 
     function providerInfoHasBeenEdited() {

@@ -627,6 +627,7 @@
     <Compile Include="Providers\LibrisOrderItemsSource.cs" />
     <Compile Include="Providers\ProviderService.cs" />
     <Compile Include="Services\FolioService.cs" />
+    <Compile Include="Services\FolioUserException.cs" />
     <Compile Include="Services\IFolioService.cs" />
     <Compile Include="SignalR\INotifier.cs" />
     <Compile Include="SignalR\NotificationHub.cs" />
