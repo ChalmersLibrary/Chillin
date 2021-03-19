@@ -8,6 +8,7 @@ using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
 using Newtonsoft.Json;
 using System;
+using System.Configuration;
 using System.Web.Mvc;
 using Umbraco.Web.Mvc;
 
@@ -70,15 +71,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     Title = pack.Title,
                     Source = "External",
-                    StatusId = "daf2681c-25af-4202-a3fa-e58fdf806183",
+                    StatusId = ConfigurationManager.AppSettings["statusId"].ToString(),
                     DiscoverySuppress = true,
-                    InstanceTypeId = "30fffe0e-e985-4144-b2e2-1e8179bdb41f",
+                    InstanceTypeId = ConfigurationManager.AppSettings["instanceTypeId"].ToString(),
                     Identifiers = new Identifier[] 
                     { 
                         new Identifier 
                         { 
                             Value = pack.OrderId, 
-                            IdentifierTypeId = "2e8b3b6c-0e7d-4e48-bca2-b0b23b376af5" 
+                            IdentifierTypeId = ConfigurationManager.AppSettings["identifierTypeId"].ToString()
                         } 
                     }
                 };
