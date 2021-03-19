@@ -7,7 +7,7 @@
 <div id="delivery-to-circulation" class="row">
     <div class="col-md-6">
         <div class="form-group">
-            <label for="titleToFolio">Folio/EDS titel</label><br/>
+            <label for="titleToFolio">Ändra till endast titel här!!!!</label><br/>
             <textarea class="form-control" cols="80" rows="5" id="titleToFolio" onchange="titleToFolioHasBeenEdited()" name="titleToFolio"> @Model.OrderItem.Reference </textarea>
         </div>
         <div class="form-group">
@@ -16,19 +16,7 @@
         </div>
         <div class="row">
             <div class="form-group col-sm-12">
-                @if (Model.OrderItem.DeliveryLibraryPrettyName == "Kuggen" || Model.OrderItem.DeliveryLibraryPrettyName == "Arkitekturbiblioteket")
-                {
-                    if (Model.OrderItem.DeliveryLibraryPrettyName == "Kuggen")
-                    {
-                        <div class="alert alert-info">Boken skall skickas till Kuggen.</div>
-                    }
-                    else if (Model.OrderItem.DeliveryLibraryPrettyName == "Arkitekturbiblioteket")
-                    {
-                        <div class="alert alert-info">Boken skall skickas till Arkitekturbiblioteket.</div>
-                    }
-                }
-                <button class="btn btn-success" onclick="sendToFolio(false, true)">Ta emot för vanligt lån</button>
-                <button class="btn btn-success" onclick="sendToFolio(true, true)">Ta emot för läsesalslån</button>
+                <div class="alert alert-info">Glöm inte checka in den i Folio</div>
             </div>
         </div>
     </div>
@@ -105,6 +93,10 @@
                 support.lib@chalmers.se<br />
             </p>
         </div>
+    </div>
+    <div class="col-md-12">
+        <button class="btn btn-success" onclick="sendToFolio(false, true)">Ta emot för vanligt lån</button>
+        <button class="btn btn-success" onclick="sendToFolio(true, true)">Ta emot för läsesalslån</button>
     </div>
 </div>
 
