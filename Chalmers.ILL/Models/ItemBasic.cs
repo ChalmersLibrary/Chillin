@@ -1,4 +1,6 @@
-﻿namespace Chalmers.ILL.Models
+﻿using System.Collections.Generic;
+
+namespace Chalmers.ILL.Models
 {
     public class ItemBasic
     {
@@ -8,7 +10,8 @@
         public string HoldingsRecordId { get; set; }
         public Status Status { get; set; }
         public string Barcode { get; set; }
-        public CirculationNotes[] CirculationNotes { get; set; }
+        public List<CirculationNotes> CirculationNotes { get; set; }
+        public string[] StatisticalCodeIds { get; set; }
     }
 
     public class Status

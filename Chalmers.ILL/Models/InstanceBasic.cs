@@ -9,5 +9,6 @@
         public string StatusId { get; set; }
         public string ModeOfIssuanceId { get; set; }
         public Identifier[] Identifiers { get; set; }
+        public string[] StatisticalCodeIds { get; set; }
     }
 }

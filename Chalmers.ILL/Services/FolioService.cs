@@ -62,7 +62,11 @@ namespace Chalmers.ILL.Services
             {
                 DiscoverySuppress = true,
                 InstanceId = instanceId,
-                PermanentLocationId = ConfigurationManager.AppSettings["holdingPermanentLocationId"].ToString()
+                PermanentLocationId = ConfigurationManager.AppSettings["holdingPermanentLocationId"].ToString(),
+                StatisticalCodeIds = new string[]
+                {
+                    ConfigurationManager.AppSettings["chillinStatisticalCodeId"].ToString()
+                }
             };
             var response = GetDataFromFolioWithRetries("/holdings-storage/holdings", "POST", SerializeObject(data));
             return JsonConvert.DeserializeObject<Holding>(response);
@@ -77,20 +81,31 @@ namespace Chalmers.ILL.Services
                 PermanentLoanTypeId = ConfigurationManager.AppSettings["itemPermanentLoanTypeId"].ToString(),
                 HoldingsRecordId = holdingId,
                 Barcode = barCode,
-                Status = new Status { Name = "Available" }
+                Status = new Status { Name = "Available" },
+                StatisticalCodeIds = new string[]
+                {
+                    ConfigurationManager.AppSettings["chillinStatisticalCodeId"].ToString()
+                },
+                CirculationNotes = new List<CirculationNotes>
+                {
+                    new CirculationNotes
+                    {
+                        NoteType = "Check in",
+                        Note = "Vid återlämning - ska till HBs fjärr-in-skrivbord",
+                        StaffOnly = true
+                    }
+                }
             };
 
             if (readOnlyAtLibrary)
             {
-                data.CirculationNotes = new CirculationNotes[]
-                {
+                data.CirculationNotes.Add(
                     new CirculationNotes
                     {
                         NoteType = "Check out",
                         Note = "Ej hemlån",
                         StaffOnly = true
-                    }
-                };
+                    });
             }
 
             var response = GetDataFromFolioWithRetries("/item-storage/items", "POST", SerializeObject(data));

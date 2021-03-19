@@ -82,6 +82,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                             Value = pack.OrderId, 
                             IdentifierTypeId = ConfigurationManager.AppSettings["instanceIdentifierTypeId"].ToString()
                         } 
+                    },
+                    StatisticalCodeIds = new string[]
+                    {
+                        ConfigurationManager.AppSettings["chillinStatisticalCodeId"].ToString()
                     }
                 };
 
