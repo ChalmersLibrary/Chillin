@@ -76,7 +76,7 @@ namespace Chalmers.ILL.Services
                 DiscoverySuppress = true,
                 InstanceId = instanceId,
                 PermanentLocationId = ConfigurationManager.AppSettings["holdingPermanentLocationId"].ToString(),
-                CallNumberTypeId = ConfigurationManager.AppSettings["holdingCallNumberTypeId"].ToString(),
+                CallNumber = "Interlibrary-in-loan",
                 StatisticalCodeIds = new string[]
                 {
                     ConfigurationManager.AppSettings["chillinStatisticalCodeId"].ToString()
