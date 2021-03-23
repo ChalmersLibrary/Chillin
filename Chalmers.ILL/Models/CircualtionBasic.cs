@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace Chalmers.ILL.Models
+﻿namespace Chalmers.ILL.Models
 {
     public class CirculationBasic
     {
@@ -9,15 +7,6 @@ namespace Chalmers.ILL.Models
         public string RequestType { get; set; }
         public string RequestDate { get; set; }
         public string FulFilmentPreference { get; set; }
-        public string Status { get; set; }
-
-        [JsonProperty("item")]
-        public CircualtionBasicItem Item { get; set; }
         public string PickupServicePointId { get; set; }
-    }
-
-    public class CircualtionBasicItem
-    {
-        public string Barcode { get; set; }
     }
 }

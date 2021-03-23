@@ -47,7 +47,7 @@ namespace Chalmers.ILL.Services
             var resInstance = CreateInstance(instanceBasic);
             var resHolding = CreateHolding(resInstance.Id);
             var resItem = CreateItem(resHolding.Id, barcode, readOnlyAtLibrary);
-          //  var resCiruclation = CreateCirculation(resItem.Id, userId, pickUpServicePoint, barcode);
+            var resCiruclation = CreateCirculation(resItem.Id, userId, pickUpServicePoint, barcode);
         }
 
         private string UserId(string barcode)
@@ -105,7 +105,7 @@ namespace Chalmers.ILL.Services
                     new CirculationNotes
                     {
                         NoteType = "Check in",
-                        Note = "NÄR LÅNTAGARE ÅTERLÄMNAR: Lägg på hyllan fär återlämnade fjärrlån på HB",
+                        Note = "NÄR LÅNTAGARE ÅTERLÄMNAR: Lägg på hyllan för återlämnade fjärrlån på HB",
                         StaffOnly = true
                     }
                 }
@@ -126,8 +126,6 @@ namespace Chalmers.ILL.Services
             return JsonConvert.DeserializeObject<Item>(response);
         }
 
-
-
         private Request CreateRequest()
         {
             var data = new RequestBasic
@@ -143,13 +141,11 @@ namespace Chalmers.ILL.Services
             var data = new CirculationBasic
             {
                 ItemId = itemId,
-                RequestDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffK"),
+                RequestDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                 RequesterId = requesterId,
                 RequestType = "Page",
                 FulFilmentPreference = "Hold Shelf",
-                Status = "Open - Not yet filled",
-                PickupServicePointId = ServicePoints()[pickupServicePoint],
-                Item = new CircualtionBasicItem { Barcode = barCode }
+                PickupServicePointId = ServicePoints()[pickupServicePoint]
             };
             var response = GetDataFromFolioWithRetries("/circulation/requests", "POST", SerializeObject(data));
             return JsonConvert.DeserializeObject<Circulation>(response);

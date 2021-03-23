@@ -70,7 +70,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 var instance = new InstanceBasic
                 {
                     Title = pack.Title,
-                    Source = "External",
+                    Source = "FOLIO",
                     StatusId = ConfigurationManager.AppSettings["instanceStatusId"].ToString(),
                     DiscoverySuppress = true,
                     InstanceTypeId = ConfigurationManager.AppSettings["instanceResourceTypeId"].ToString(),
