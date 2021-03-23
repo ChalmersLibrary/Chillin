@@ -7,7 +7,7 @@
 <div id="delivery-to-circulation" class="row">
     <div class="col-md-6">
         <div class="form-group">
-            <label for="titleToFolio">Ändra till endast titel här!!!!</label><br/>
+            <label for="titleToFolio">Kort titelinformation + [befintlig infotext till MyAccount]</label><br/>
             <textarea class="form-control" cols="80" rows="5" id="titleToFolio" onchange="titleToFolioHasBeenEdited()" name="titleToFolio">@Model.OrderItem.Reference [INTERLIBRARY LOAN: Contact docdel.lib@chalmers.se for information]</textarea>
         </div>
         <div class="form-group">
@@ -16,7 +16,7 @@
         </div>
         <div class="row">
             <div class="form-group col-sm-12">
-                <div class="alert alert-info">Glöm inte checka in den i Folio</div>
+                <div class="alert alert-info">Glöm inte checka in den i FOLIO</div>
             </div>
         </div>
     </div>
@@ -26,7 +26,7 @@
             <textarea class="form-control" cols="80" rows="5" id="providerInformation" name="providerInformation" onchange="providerInfoHasBeenEdited();">@Model.OrderItem.ProviderInformation</textarea>
         </div>
         <div class="form-group">
-            <label for="dueDate">Återlämningsdatum</label>
+            <label for="dueDate">Utlånande biblioteks förfallodatum</label>
             <div class="input-group date datetimepicker">
                 <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
                 <span class="input-group-addon">
