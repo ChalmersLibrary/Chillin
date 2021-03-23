@@ -12,7 +12,7 @@
         </div>
         <div class="form-group">
             <label for="bookId">Inklistrad streckkod för fjärrlån</label>
-            <input type="text" class="form-control" id="bookId" name="bookId" value="@Model.OrderItem.BookId">
+            <input type="text" class="form-control" id="bookId" onchange="barcodeToFolioHasBeenEdited()" name="bookId" value="@Model.OrderItem.BookId">
         </div>
         <div class="row">
             <div class="form-group col-sm-12">
@@ -103,6 +103,7 @@
 <script type="text/javascript">
     var hasProviderInfoBeenEdited = false;
     var hasTitleToFolioBeenEdited = false;
+    var hasBarcodeToFolioBeenEdited = false;
 
     $(function () {
         $(".datetimepicker").datetimepicker({
@@ -187,34 +188,38 @@
             confirm("Lägg i röd slip EJ HEMLÅN i boken");
         }
         if (hasTitleToFolioBeenEdited || confirm("Du har inte ändrat Folio/EDS titeln. Är du säker på att du vill fortsätta?")) {
-            $('#container #printDiv').insertAfter('#container');
-            var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
-            $('.dueDatePlaceHolder').html(dueDate);
+            if (hasBarcodeToFolioBeenEdited || confirm("Du har inte ändrat streckkoden för boken. Är du säker på att du vill fortsätta?")) {
+                if (hasProviderInfoBeenEdited || confirm("Du har inte ändrat leverantörsdata. Är du säker på att du vill fortsätta?")) {
+                    $('#container #printDiv').insertAfter('#container');
+                    var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
+                    $('.dueDatePlaceHolder').html(dueDate);
 
-            var r = true;
-            if (print) {
-                window.print();
-                r = window.confirm("Skrevs bokslippen ut korrekt?");
-            }
-            if (r) {
-                setOrderItemDeliveryReceived(
-                    @Model.OrderItem.NodeId,
-                    $('#bookId').val(),
-                    $('#dueDate').val(),
-                    $('#providerInformation').val(),
-                    $("#log-message").val(),
-                    localLoan,
-                    $("#titleToFolio").val(),
-                    "@Model.OrderItem.OrderId",
-                    "@Model.OrderItem.DeliveryLibrary",
-                    "@Model.OrderItem.PatronCardNo"
-                );
+                    var r = true;
+                    if (print) {
+                        window.print();
+                        r = window.confirm("Skrevs bokslippen ut korrekt?");
+                    }
+                    if (r) {
+                        setOrderItemDeliveryReceived(
+                            @Model.OrderItem.NodeId,
+                            $('#bookId').val(),
+                            $('#dueDate').val(),
+                            $('#providerInformation').val(),
+                            $("#log-message").val(),
+                            localLoan,
+                            $("#titleToFolio").val(),
+                            "@Model.OrderItem.OrderId",
+                            "@Model.OrderItem.DeliveryLibrary",
+                            "@Model.OrderItem.PatronCardNo"
+                        );
 
-                $("#printDiv").remove();
-            } else {
-                alert("Leveransfunktionen kommer laddas om, försök därefter igen.");
-                $("#printDiv").remove();
-                loadReceiveBookAction(@Model.OrderItem.NodeId);
+                        $("#printDiv").remove();
+                    } else {
+                        alert("Leveransfunktionen kommer laddas om, försök därefter igen.");
+                        $("#printDiv").remove();
+                        loadReceiveBookAction(@Model.OrderItem.NodeId);
+                    }
+                }
             }
         }
     }
@@ -226,4 +231,9 @@
     function titleToFolioHasBeenEdited() {
         hasTitleToFolioBeenEdited = true;
     }
+
+    function barcodeToFolioHasBeenEdited() {
+        hasBarcodeToFolioBeenEdited = true;
+    }
+
 </script>
