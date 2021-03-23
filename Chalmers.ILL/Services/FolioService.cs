@@ -47,7 +47,7 @@ namespace Chalmers.ILL.Services
             var resInstance = CreateInstance(instanceBasic);
             var resHolding = CreateHolding(resInstance.Id);
             var resItem = CreateItem(resHolding.Id, barcode, readOnlyAtLibrary);
-            var resCiruclation = CreateCirculation(resItem.Id, userId, pickUpServicePoint, barcode);
+            var resCiruclation = CreateCirculation(resItem.Id, userId, pickUpServicePoint);
         }
 
         private string UserId(string barcode)
@@ -136,7 +136,7 @@ namespace Chalmers.ILL.Services
             return JsonConvert.DeserializeObject<Circulation>(response);
         }
 
-        private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint, string barCode)
+        private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint)
         {
             var data = new CirculationBasic
             {
