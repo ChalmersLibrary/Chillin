@@ -6,7 +6,7 @@
         public string RequesterId { get; set; }
         public string RequestType { get; set; }
         public string RequestDate { get; set; }
-        public string FulFilmentPreference { get; set; }
+        public string FulfilmentPreference { get; set; }
         public string PickupServicePointId { get; set; }
     }
 }

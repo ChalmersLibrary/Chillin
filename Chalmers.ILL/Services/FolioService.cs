@@ -144,7 +144,7 @@ namespace Chalmers.ILL.Services
                 RequestDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                 RequesterId = requesterId,
                 RequestType = "Page",
-                FulFilmentPreference = "Hold Shelf",
+                FulfilmentPreference = "Hold Shelf",
                 PickupServicePointId = ServicePoints()[pickupServicePoint]
             };
             var response = GetDataFromFolioWithRetries("/circulation/requests", "POST", SerializeObject(data));
