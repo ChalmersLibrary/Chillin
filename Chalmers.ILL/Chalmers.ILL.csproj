@@ -575,8 +575,6 @@
     <Compile Include="Models\PartialPage\Settings\ChangePassword.cs" />
     <Compile Include="Models\PartialPage\Settings\EditTemplates.cs" />
     <Compile Include="Models\PartialPage\Settings\ModifyProviderData.cs" />
-    <Compile Include="Models\Request.cs" />
-    <Compile Include="Models\RequestBasic.cs" />
     <Compile Include="Models\ResultResponseWithData.cs" />
     <Compile Include="Models\ResultResponseWithStringData.cs" />
     <Compile Include="Models\Template.cs" />
