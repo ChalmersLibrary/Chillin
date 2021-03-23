@@ -42,11 +42,23 @@ namespace Chalmers.ILL.Services
 
         public void InitFolio(InstanceBasic instanceBasic, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary, string patronCardNumber)
         {
+            VerifyBarCode(barcode);
             var userId = UserId(patronCardNumber);
             var resInstance = CreateInstance(instanceBasic);
             var resHolding = CreateHolding(resInstance.Id);
             var resItem = CreateItem(resHolding.Id, barcode, readOnlyAtLibrary);
             var resCiruclation = CreateCirculation(resItem.Id, userId, pickUpServicePoint);
+        }
+
+        private void VerifyBarCode(string barcode)
+        {
+            var response = GetDataFromFolioWithRetries($"/item-storage/items?query=(barcode={barcode})", "GET");
+            BarCodeQuery data = JsonConvert.DeserializeObject<BarCodeQuery>(response);
+
+            if (data.TotalRecords > 0)
+            {
+                throw new BarCodeException("Streckkoden finns redan i FOLIO");
+            }
         }
 
         private string UserId(string barcode)

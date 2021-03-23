@@ -6,6 +6,6 @@ namespace Chalmers.ILL.Services
     {
         public FolioUserException() : base() { }
         public FolioUserException(string msg) : base(msg) { }
-        public FolioUserException(string msg, System.Exception inner) : base(msg, inner) { }
+        public FolioUserException(string msg, Exception inner) : base(msg, inner) { }
     }
 }

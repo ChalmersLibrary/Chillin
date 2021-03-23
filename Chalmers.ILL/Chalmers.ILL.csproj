@@ -543,6 +543,7 @@
     <Compile Include="Models\InstanceBasic.cs" />
     <Compile Include="Models\Item.cs" />
     <Compile Include="Models\ItemBasic.cs" />
+    <Compile Include="Models\BarCodeQuery.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
     <Compile Include="Models\MediaItemIdAndOrderItemId.cs" />
     <Compile Include="Models\MediaItemModel.cs" />
@@ -624,6 +625,7 @@
     <Compile Include="Providers\IProviderService.cs" />
     <Compile Include="Providers\LibrisOrderItemsSource.cs" />
     <Compile Include="Providers\ProviderService.cs" />
+    <Compile Include="Services\BarCodeException.cs" />
     <Compile Include="Services\FolioService.cs" />
     <Compile Include="Services\FolioUserException.cs" />
     <Compile Include="Services\IFolioService.cs" />
