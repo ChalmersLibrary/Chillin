@@ -40,7 +40,6 @@ namespace Chalmers.ILL.Services
             return this;
         }
 
-
         public void InitFolio(InstanceBasic instanceBasic, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary, string patronCardNumber)
         {
             var userId = UserId(patronCardNumber);
@@ -124,16 +123,6 @@ namespace Chalmers.ILL.Services
 
             var response = GetDataFromFolioWithRetries("/item-storage/items", "POST", SerializeObject(data));
             return JsonConvert.DeserializeObject<Item>(response);
-        }
-
-        private Request CreateRequest()
-        {
-            var data = new RequestBasic
-            {
-
-            };
-            var response = GetDataFromFolioWithRetries("/circulation/requests", "POST", SerializeObject(data));
-            return JsonConvert.DeserializeObject<Circulation>(response);
         }
 
         private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint)
@@ -220,7 +209,7 @@ namespace Chalmers.ILL.Services
             {
                 { "Huvudbiblioteket", ConfigurationManager.AppSettings["servicePointHuvudbiblioteketId"].ToString() },
                 { "Lindholmenbiblioteket", ConfigurationManager.AppSettings["servicePointLindholmenbiblioteketId"].ToString() },
-                { "Arkitekturbiblioteket", ConfigurationManager.AppSettings["servicePointArkitekturbiblioteketId"].ToString()}
+                { "Arkitekturbiblioteket", ConfigurationManager.AppSettings["servicePointArkitekturbiblioteketId"].ToString() }
             };
     }
 }
