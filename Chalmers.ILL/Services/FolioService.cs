@@ -152,6 +152,28 @@ namespace Chalmers.ILL.Services
             return JsonConvert.DeserializeObject<Circulation>(response);
         }
 
+        public void SetItemToWithdrawn(string barcode)
+        {
+            var response = GetItemByBarCode(barcode);
+            if (response.TotalRecords > 0 && response.Items[0].Barcode == barcode)
+            {
+                response.Items[0].Status.Name = "Withdrawn";
+                PostItem(response.Items[0]);
+            }
+            //TODO - Slänga fel om det inte blir satt?
+        }
+
+        private BarCodeQuery GetItemByBarCode(string barcode)
+        {
+            var response = GetDataFromFolioWithRetries($"/item-storage/items?query=(barcode={barcode})", "GET");
+            return JsonConvert.DeserializeObject<BarCodeQuery>(response);
+        }
+
+        private void PostItem(Item item)
+        {
+            _ = Put($"/item-storage/items/{item.Id}", SerializeObject(item));
+        }
+
         private string SerializeObject(dynamic data)
         {
             var settings = new JsonSerializerSettings
@@ -201,6 +223,36 @@ namespace Chalmers.ILL.Services
                 var requestStream = request.GetRequestStream();
                 requestStream.Write(bodyBytes, 0, bodyBytes.Length);
             }
+
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            var outputStream = response.GetResponseStream();
+
+            var sr = new StreamReader(outputStream);
+            var resultString = sr.ReadToEnd();
+
+            if (resultString.ToLower().Contains("invalid token"))
+            {
+                throw new InvalidTokenException();
+            }
+
+            return resultString;
+        }
+
+        private dynamic Put(string path, string body)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_folioApiBaseAddress + path);
+
+            request.Accept = "text/plain";
+            request.ContentType = "application/json";
+            request.Headers["x-okapi-tenant"] = _tenant;
+            request.Headers["x-okapi-token"] = _token;
+            request.Method = "PUT";
+
+            UTF8Encoding encoding = new UTF8Encoding();
+            var bodyBytes = encoding.GetBytes(body);
+            request.ContentLength = bodyBytes.Length;
+            var requestStream = request.GetRequestStream();
+            requestStream.Write(bodyBytes, 0, bodyBytes.Length);
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
             var outputStream = response.GetResponseStream();

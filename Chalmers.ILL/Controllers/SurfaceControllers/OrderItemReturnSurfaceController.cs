@@ -1,6 +1,7 @@
 ﻿using Chalmers.ILL.Models;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Services;
 using Chalmers.ILL.UmbracoApi;
 using System;
 using System.Collections.Generic;
@@ -18,10 +19,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IOrderItemManager _orderItemManager;
         IUmbracoWrapper _umbraco;
 
-        public OrderItemReturnSurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco)
+        private readonly IFolioService _folioService;
+
+        public OrderItemReturnSurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco, IFolioService folioService)
         {
             _orderItemManager = orderItemManager;
             _umbraco = umbraco;
+            _folioService = folioService;
         }
 
         /// <summary>
@@ -41,12 +45,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpPost]
-        public ActionResult ReturnItem(int nodeId)
+        public ActionResult ReturnItem(int nodeId, string bookId)
         {
             var json = new ResultResponse();
 
             try
             {
+                _folioService.SetItemToWithdrawn(bookId);
                 var eventId = _orderItemManager.GenerateEventId(BOOK_RETURNED_HOME_EVENT_TYPE);
                 _orderItemManager.SetStatus(nodeId, "10:Återsänd", eventId);
 
