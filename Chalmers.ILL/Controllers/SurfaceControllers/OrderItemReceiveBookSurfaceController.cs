@@ -89,7 +89,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     }
                 };
 
-                 _folioService.InitFolio(instance, pack.bookId, pack.PickUpServicePoint, pack.readOnlyAtLibrary, pack.PatronCardNumber);
+                 _folioService.InitFolio(instance, pack.bookId, pack.PickUpServicePoint, pack.readOnlyAtLibrary, pack.FolioUserId);
 
                 //---
 
@@ -210,7 +210,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             public string Title { get; set; }
             public string OrderId { get; set; }
             public string PickUpServicePoint { get; set; }
-            public string PatronCardNumber { get; set; }
+            public string FolioUserId { get; set; }
             public OutgoingMailPackageModel mailData { get; set; }
         }
     }

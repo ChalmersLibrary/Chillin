@@ -788,7 +788,7 @@ function lendBook(id) {
   });
 }
 
-function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, logMsg, readOnlyAtLibrary, title, orderId, pickUpServicePoint, patronCardNumber) {
+function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, logMsg, readOnlyAtLibrary, title, orderId, pickUpServicePoint, folioUserId) {
   lockScreen();
   $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceived", {
     packJson: JSON.stringify({
@@ -801,7 +801,7 @@ function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation
       title: title,
       orderId: orderId,
       pickUpServicePoint: pickUpServicePoint,
-      patronCardNumber: patronCardNumber
+      folioUserId: folioUserId
     })
   }, function (json) {
     if (json.Success) {

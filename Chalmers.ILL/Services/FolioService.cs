@@ -40,14 +40,14 @@ namespace Chalmers.ILL.Services
             return this;
         }
 
-        public void InitFolio(InstanceBasic instanceBasic, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary, string patronCardNumber)
+        public void InitFolio(InstanceBasic instanceBasic, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary, string folioUserId)
         {
+
             VerifyBarCode(barcode);
-            var userId = UserId(patronCardNumber);
             var resInstance = CreateInstance(instanceBasic);
             var resHolding = CreateHolding(resInstance.Id);
             var resItem = CreateItem(resHolding.Id, barcode, readOnlyAtLibrary);
-            var resCiruclation = CreateCirculation(resItem.Id, userId, pickUpServicePoint);
+            var resCiruclation = CreateCirculation(resItem.Id, folioUserId, pickUpServicePoint);
         }
 
         private void VerifyBarCode(string barcode)
@@ -59,19 +59,6 @@ namespace Chalmers.ILL.Services
             {
                 throw new BarCodeException("Streckkoden finns redan i FOLIO");
             }
-        }
-
-        private string UserId(string barcode)
-        {
-            var response = GetDataFromFolioWithRetries($"/users?query=(barcode={barcode})", "GET");
-            var data = JsonConvert.DeserializeObject<FolioUser>(response);
-
-            if (data.Users.Length == 0)
-            {
-                throw new FolioUserException("Användaren hittades inte i FOLIO");
-            }
-
-            return data.Users[0].Id;
         }
 
         private Instance CreateInstance(InstanceBasic data)
