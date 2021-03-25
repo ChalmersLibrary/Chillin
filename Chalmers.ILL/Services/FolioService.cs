@@ -90,7 +90,9 @@ namespace Chalmers.ILL.Services
             {
                 DiscoverySuppress = true,
                 MaterialTypeId = ConfigurationManager.AppSettings["itemMaterialTypeId"].ToString(),
-                PermanentLoanTypeId = ConfigurationManager.AppSettings["itemPermanentLoanTypeId"].ToString(),
+                PermanentLoanTypeId = readOnlyAtLibrary ? 
+                    ConfigurationManager.AppSettings["itemPermanentLoanTypeIdInHouse"].ToString() : 
+                    ConfigurationManager.AppSettings["itemPermanentLoanTypeId"].ToString(),
                 HoldingsRecordId = holdingId,
                 Barcode = barCode,
                 Status = new Status { Name = "Available" },
