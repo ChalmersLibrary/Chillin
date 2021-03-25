@@ -171,7 +171,7 @@ namespace Chalmers.ILL.Services
 
         private void PostItem(Item item)
         {
-            _ = Put($"/item-storage/items/{item.Id}", SerializeObject(item));
+            Put($"/item-storage/items/{item.Id}", SerializeObject(item));
         }
 
         private string SerializeObject(dynamic data)
