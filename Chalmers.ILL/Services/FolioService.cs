@@ -111,16 +111,16 @@ namespace Chalmers.ILL.Services
                 }
             };
 
-            if (readOnlyAtLibrary)
-            {
-                data.CirculationNotes.Add(
-                    new CirculationNotes
-                    {
-                        NoteType = "Check out",
-                        Note = "Ej hemlån",
-                        StaffOnly = true
-                    });
-            }
+            //if (readOnlyAtLibrary)
+            //{
+            //    data.CirculationNotes.Add(
+            //        new CirculationNotes
+            //        {
+            //            NoteType = "Check out",
+            //            Note = "Ej hemlån",
+            //            StaffOnly = true
+            //        });
+            //}
 
             var response = GetDataFromFolioWithRetries("/item-storage/items", "POST", SerializeObject(data));
             return JsonConvert.DeserializeObject<Item>(response);
