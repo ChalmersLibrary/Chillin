@@ -107,7 +107,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetProviderDueDate(pack.orderNodeId, pack.dueDate, eventId, false, false);
                 _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, eventId, false, false);
                 _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, eventId, false, false);
-                _orderItemManager.SetStatus(pack.orderNodeId, "14:Infodisk", eventId, false, false);
+                _orderItemManager.SetStatus(pack.orderNodeId, "17:FOLIO", eventId, false, false);
 
                 // Overwrite the message with message from template service so that we get the new values injected.
                 if (pack.readOnlyAtLibrary)

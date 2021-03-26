@@ -28,7 +28,7 @@
         <div class="form-group">
             <label for="dueDate">Utlånande biblioteks förfallodatum</label>
             <div class="input-group date datetimepicker">
-                <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.DueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
+                <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.ProviderDueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
                 <span class="input-group-addon">
                     <span class="glyphicon glyphicon-calendar"></span>
                 </span>
