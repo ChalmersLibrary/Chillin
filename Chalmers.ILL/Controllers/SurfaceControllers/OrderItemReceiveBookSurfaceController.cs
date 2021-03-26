@@ -20,11 +20,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public static int EVENT_TYPE { get { return 10; } }
         public static int BOOK_RECEIVED_AT_BRANCH_EVENT_TYPE { get { return 25; } }
 
-        private readonly IUmbracoWrapper _umbraco;
-        private readonly IOrderItemManager _orderItemManager;
-        private readonly ITemplateService _templateService;
-        private readonly IMailService _mailService;
-        private readonly IFolioService _folioService;
+        private  IUmbracoWrapper _umbraco;
+        private  IOrderItemManager _orderItemManager;
+        private  ITemplateService _templateService;
+        private  IMailService _mailService;
+        private  IFolioService _folioService;
 
         public OrderItemReceiveBookSurfaceController(
             IUmbracoWrapper umbraco, 
