@@ -806,7 +806,6 @@ function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation
   }, function (json) {
     if (json.Success) {
       loadOrderItemDetails(node);
-      lendBook(node);
     }
     else {
       alert(json.Message);
