@@ -105,6 +105,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
                 _orderItemManager.SetDueDate(pack.orderNodeId, pack.dueDate, eventId, false, false);
                 _orderItemManager.SetProviderDueDate(pack.orderNodeId, pack.dueDate, eventId, false, false);
+                _orderItemManager.SetDeliveryDateWithoutLogging(pack.orderNodeId, DateTime.Now, eventId, false, false);
                 _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, eventId, false, false);
                 _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, eventId, false, false);
                 _orderItemManager.SetStatus(pack.orderNodeId, "17:FOLIO", eventId, false, false);

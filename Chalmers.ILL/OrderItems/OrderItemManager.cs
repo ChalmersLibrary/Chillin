@@ -374,6 +374,16 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
+        public void SetDeliveryDateWithoutLogging(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            var content = _contentService.GetById(nodeId);
+            if (GetDateTimeFromContent(content, "deliveryeDate") != date)
+            {
+                SetContentValue(content, "deliveryDate", date);
+            }
+            SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
+        }
+
         public void SetCancellationReason(int orderNodeId, int cancellationReasonId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(orderNodeId);
@@ -885,7 +895,7 @@ namespace Chalmers.ILL.OrderItems
         private void UpdateLastDeliveryStatusWhenProper(IContent content, int newStatusId)
         {
             var statusStr = umbraco.library.GetPreValueAsString(newStatusId).Split(':').Last();
-            if (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport") || statusStr.Contains("Infodisk"))
+            if (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport") || statusStr.Contains("Infodisk") || statusStr.Contains("FOLIO"))
             {
                 content.SetValue("lastDeliveryStatus", newStatusId);
             }
@@ -897,7 +907,7 @@ namespace Chalmers.ILL.OrderItems
             var deliveryDate = deliveryDateStr == "" ? new DateTime(1970, 1, 1) : Convert.ToDateTime(deliveryDateStr);
             var statusStr = umbraco.library.GetPreValueAsString(newStatusId).Split(':').Last();
             if (deliveryDate.Year == 1970 && (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport") || 
-                    statusStr.Contains("Infodisk")))
+                    statusStr.Contains("Infodisk") || statusStr.Contains("FOLIO")))
             {
                 content.SetValue("deliveryDate", DateTime.Now);
             }

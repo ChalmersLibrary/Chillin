@@ -964,6 +964,37 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
+
+        public void SetDeliveryDateWithoutLogging(int nodeId, DateTime date, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
+                if (orderItem != null)
+                {
+                    if (orderItem.DeliveryDate != date)
+                    {
+                        orderItem.DeliveryDate = date;
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set delivery date.");
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
         public void SetProviderInformation(int nodeId, string providerInformation, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();
