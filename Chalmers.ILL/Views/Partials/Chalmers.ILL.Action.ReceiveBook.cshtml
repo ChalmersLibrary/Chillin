@@ -28,7 +28,7 @@
         <div class="form-group">
             <label for="dueDate">Utlånande biblioteks förfallodatum</label>
             <div class="input-group date datetimepicker">
-                <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem.ProviderDueDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
+                <input type="text" class="form-control" id="dueDate" name="dueDate" value="@Model.OrderItem. .ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)">
                 <span class="input-group-addon">
                     <span class="glyphicon glyphicon-calendar"></span>
                 </span>
@@ -38,60 +38,24 @@
             <label for="log-message">Skriv till logg (valfritt)</label>
             <textarea class="form-control" rows="6" id="log-message" name="log-message"></textarea>
         </div>
-        <div id="printDiv" class="print">
-            <h3 style="float:right" class="dueDatePlaceHolder"></h3><br />
-            <strong style="font-size:2em">@Model.OrderItem.SierraInfo.last_name @Model.OrderItem.SierraInfo.first_name</strong><br />
-            <h2>Fjärrlån <span class="hidden readlibrary">Läsesalslån. Ej hemlån</span></h2>
-            <div style="font-size:1.5em"><strong>@Model.OrderItem.DeliveryLibraryPrettyName</strong> Infodisk, tag ut och läs!</div>
-            <br />
-            <br />
-            @{
-                if (Model.OrderItem.DeliveryLibrary != Chalmers.ILL.Models.OrderItemModel.LIBRARY_Z_UMBRACO_STRING)
-                {
-                    <p style="font-size:1.4em">
-                        När boken anländer<br />
-                        1.	Sök boken i Chillin med bifogad streckkod.<br />
-                        2.	Följ instruktionerna<br />
-                    </p>
-                    <p>&nbsp;</p>
-                }
-            }
-            <p class="readlibrary" style="font-size:1.4em">
-                OBS! När du lånar ut boken<br />
-                1.	Sök boken i Chillin med bifogad streckkod.<br />
-                2.	Följ instruktionerna<br />
-            </p>
-            <p class="readlibrary hidden" style="font-size:1.4em">
-                OBS! Läsesalslån EJ HEMLÅN!<br />
-                1. Kolla lånekort.<br />
-                2. Registreras ej i Chillin.<br />
-            </p>
+        <div id="printDiv" class="print" style="height: 100vh;">
+            <strong style="font-size:2em;">Inter library loan- Chalmers Library</strong>
+            <div style="font-size:2em" id="printTitle">@Model.OrderItem.Reference [INTERLIBRARY LOAN: Contact docdel.lib@chalmers.se for information]</div>
             <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p style="font-size:1.5em;">Check your e-mailed receipt for due date.</p>
+            <p>&nbsp;</p>
+            <p style="font-size:1.5em;">
+                You cannot renew this loan yourself.<br />
+                Please email docdel.lib@chalmers.se if you need to extend the loan period.
+            </p>
             <p>&nbsp;</p>
             <p>&nbsp;</p>
             <p>&nbsp;</p>
             <p>&nbsp;</p>
             <p>&nbsp;</p>
 
-            <div style="float:right">
-                @{
-                    string barcodeurl = "http://barcode.tec-it.com/barcode.ashx?translate-esc=off&data=" + Model.OrderItem.OrderId + "&code=Code128&unit=Fit&dpi=96&imagetype=Gif&rotation=0&color=000000&bgcolor=FFFFFF&qunit=Mm&quiet=0";
-                    //string barcodeurl = "http://barcodes4.me/barcode/c39/" + @Model.OrderItem.OrderId + ".png";
-                    <img width="300" src=@barcodeurl /><br />
-                }
-            </div>
-            <img src="~/images/cth_logo.png" width="148pt" /><br />
-            <br />
-            <p>
-                Chalmers tekniska högskola<br />
-                Biblioteket<br />
-                412 96  Göteborg<br />
-                <br />
-                031-772 3737<br />
-                <br />
-                www.lib.chalmers.se<br />
-                support.lib@chalmers.se<br />
-            </p>
+            <img src="~/images/cth_logo.png" style="position: fixed; bottom:2em;"width="148pt"/><br />
         </div>
     </div>
     <div class="col-md-12">
@@ -99,6 +63,17 @@
         <button class="btn btn-success" onclick="sendToFolio(true, true)">Ta emot för läsesalslån</button>
     </div>
 </div>
+
+<style type="text/css" media="print">
+    @@page {
+    size: auto;
+    margin: 0mm;
+    }
+
+    #printDiv {
+        padding: 10mm;
+    }
+</style>
 
 <script type="text/javascript">
     var hasProviderInfoBeenEdited = false;
@@ -196,7 +171,12 @@
 
                     var r = true;
                     if (print) {
+                        let titleElem = document.getElementById('titleToFolio');
+                        let printElem = document.getElementById('printTitle');
+                        printElem.innerText = titleElem.value;
+                        console.log(`Title: ${titleElem.value} Print: ${printElem.value}`);
                         window.print();
+                        
                         r = window.confirm("Skrevs bokslippen ut korrekt?");
                     }
                     if (r) {
