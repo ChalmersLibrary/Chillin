@@ -66,6 +66,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 DeliveryReceivedPackage pack = JsonConvert.DeserializeObject<DeliveryReceivedPackage>(packJson);
 
+                var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
+                    
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
                 //FOLIO
                 var instance = new InstanceBasic
                 {
@@ -75,13 +79,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     DiscoverySuppress = true,
                     InstanceTypeId = ConfigurationManager.AppSettings["instanceResourceTypeId"].ToString(),
                     ModeOfIssuanceId = ConfigurationManager.AppSettings["instanceModesOfIssuance"].ToString(),
-                    Identifiers = new Identifier[] 
-                    { 
-                        new Identifier 
-                        { 
-                            Value = pack.OrderId, 
+                    Identifiers = new Identifier[]
+                    {
+                        new Identifier
+                        {
+                            Value = orderItem.OrderId,
                             IdentifierTypeId = ConfigurationManager.AppSettings["instanceIdentifierTypeId"].ToString()
-                        } 
+                        }
                     },
                     StatisticalCodeIds = new string[]
                     {
@@ -89,13 +93,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     }
                 };
 
-                 _folioService.InitFolio(instance, pack.bookId, pack.PickUpServicePoint, pack.readOnlyAtLibrary, pack.FolioUserId);
-
-                //---
-
-                var orderItem = _orderItemManager.GetOrderItem(pack.orderNodeId);
-                    
-                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+                _folioService.InitFolio(instance, pack.bookId, pack.PickUpServicePoint, pack.readOnlyAtLibrary, pack.FolioUserId);
 
                 if (pack.readOnlyAtLibrary)
                 {
@@ -110,7 +108,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.SetBookId(pack.orderNodeId, pack.bookId, eventId, false, false);
                 _orderItemManager.SetProviderInformation(pack.orderNodeId, pack.providerInformation, eventId, false, false);
                 _orderItemManager.SetStatus(pack.orderNodeId, "14:Infodisk", eventId, false, false);
-                _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, eventId, false, false);
 
                 // Overwrite the message with message from template service so that we get the new values injected.
                 if (pack.readOnlyAtLibrary)
@@ -121,6 +118,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     _orderItemManager.SetReadOnlyAtLibrary(pack.orderNodeId, false, eventId, false, false);
                 }
+                _orderItemManager.AddLogItem(pack.orderNodeId, "LOG", pack.logMsg, eventId);
 
                 json.Success = true;
                 json.Message = "Leverans till infodisk genomförd.";
