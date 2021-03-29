@@ -63,21 +63,8 @@ namespace Chalmers.ILL.Services
             return _folioInstanceService.Post(data);
         }
 
-        private Holding CreateHolding(string instanceId)
-        {
-            var data = new HoldingBasic
-            {
-                DiscoverySuppress = true,
-                InstanceId = instanceId,
-                PermanentLocationId = ConfigurationManager.AppSettings["holdingPermanentLocationId"].ToString(),
-                CallNumber = "Interlibrary-in-loan",
-                StatisticalCodeIds = new string[]
-                {
-                    ConfigurationManager.AppSettings["chillinStatisticalCodeId"].ToString()
-                }
-            };
-            return _folioHoldingService.Post(data);
-        }
+        private Holding CreateHolding(string instanceId) => 
+            _folioHoldingService.Post(new HoldingBasic(instanceId));
 
         private Item CreateItem(string holdingId, string barCode, bool readOnlyAtLibrary)
         {
