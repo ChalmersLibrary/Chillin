@@ -10,7 +10,7 @@ namespace Chalmers.ILL.Models
         public string HoldingsRecordId { get; set; }
         public Status Status { get; set; }
         public string Barcode { get; set; }
-        public List<CirculationNotes> CirculationNotes { get; set; }
+        public List<CirculationNote> CirculationNotes { get; set; }
         public string[] StatisticalCodeIds { get; set; }
     }
 
@@ -19,7 +19,7 @@ namespace Chalmers.ILL.Models
         public string Name { get; set; }
     }
 
-    public class CirculationNotes
+    public class CirculationNote
     {
         public string NoteType { get; set; }
         public string Note { get; set; }

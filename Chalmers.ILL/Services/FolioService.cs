@@ -95,9 +95,9 @@ namespace Chalmers.ILL.Services
                 {
                     ConfigurationManager.AppSettings["chillinStatisticalCodeId"].ToString()
                 },
-                CirculationNotes = new List<CirculationNotes>
+                CirculationNotes = new List<CirculationNote>
                 {
-                    new CirculationNotes
+                    new CirculationNote
                     {
                         NoteType = "Check in",
                         Note = "NÄR LÅNTAGARE ÅTERLÄMNAR: Lägg på hyllan för återlämnade fjärrlån på HB",
