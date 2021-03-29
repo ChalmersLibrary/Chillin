@@ -20,6 +20,8 @@ using Nest;
 using Chalmers.ILL.Configuration;
 using Chalmers.ILL.Services;
 using System.Net.Http;
+using System;
+using Chalmers.ILL.Repositories;
 
 namespace Chalmers.ILL
 {
@@ -64,6 +66,14 @@ namespace Chalmers.ILL
             container.RegisterType<ITemplateService, ElasticsearchTemplateService>();
             container.RegisterType<IAffiliationDataProvider, SolrLibcdksAffiliationDataProvider>();
 
+            container.RegisterType<IJsonService, JsonService>();
+            container.RegisterType<IFolioItemService, FolioItemService>();
+            container.RegisterType<IFolioRepository, FolioRepository>();
+            container.RegisterType<IFolioService, FolioService>();
+            container.RegisterType<IFolioInstanceService, FolioInstanceService>();
+            container.RegisterType<IFolioHoldingService, FolioHoldingService>();
+            container.RegisterType<IFolioCirculationService, FolioCirculationService>();
+
             var templateService = container.Resolve<ITemplateService>();
             var affiliationDataProvider = container.Resolve<IAffiliationDataProvider>();
 
@@ -92,8 +102,6 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IProviderService), providerService);
             container.RegisterInstance(typeof(IBulkDataManager), bulkDataManager);
             container.RegisterInstance<IPatronDataProvider>(new FolioPatronDataProvider(templateService, affiliationDataProvider).Connect());
-
-            container.RegisterInstance<IFolioService>(new FolioService().Connect());
         }
     }
 }

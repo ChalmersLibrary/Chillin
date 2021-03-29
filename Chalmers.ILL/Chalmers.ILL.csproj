@@ -534,6 +534,7 @@
       <DependentUpon>201910030614091_ExpandedSierraModel.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\ItemQuery.cs" />
     <Compile Include="Models\CircualtionBasic.cs" />
     <Compile Include="Models\Circulation.cs" />
     <Compile Include="Models\FolioUser.cs" />
@@ -625,10 +626,23 @@
     <Compile Include="Providers\IProviderService.cs" />
     <Compile Include="Providers\LibrisOrderItemsSource.cs" />
     <Compile Include="Providers\ProviderService.cs" />
+    <Compile Include="Repositories\FolioRepository.cs" />
+    <Compile Include="Models\FolioRequest.cs" />
+    <Compile Include="Repositories\IFolioRepository.cs" />
     <Compile Include="Services\BarCodeException.cs" />
+    <Compile Include="Services\FolioCirculationService.cs" />
+    <Compile Include="Services\FolioHoldingService.cs" />
+    <Compile Include="Services\FolioInstanceService.cs" />
+    <Compile Include="Services\FolioItemService.cs" />
     <Compile Include="Services\FolioService.cs" />
     <Compile Include="Services\FolioUserException.cs" />
+    <Compile Include="Services\IFolioCirculationService.cs" />
+    <Compile Include="Services\IFolioHoldingService.cs" />
+    <Compile Include="Services\IFolioInstanceService.cs" />
+    <Compile Include="Services\IFolioItemService.cs" />
     <Compile Include="Services\IFolioService.cs" />
+    <Compile Include="Services\IJsonService.cs" />
+    <Compile Include="Services\JsonService.cs" />
     <Compile Include="SignalR\INotifier.cs" />
     <Compile Include="SignalR\NotificationHub.cs" />
     <Compile Include="SignalR\Notifier.cs" />
@@ -650,6 +664,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Start\" />
+    <Folder Include="Exceptions\" />
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="Startup\" />
     <Folder Include="Views\Home\" />
