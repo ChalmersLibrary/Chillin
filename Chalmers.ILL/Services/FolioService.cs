@@ -81,42 +81,19 @@ namespace Chalmers.ILL.Services
 
         private Item CreateItem(string holdingId, string barCode, bool readOnlyAtLibrary)
         {
-            var data = new ItemBasic
+            var item = new ItemBasic(barCode, holdingId, readOnlyAtLibrary);
+
+            if (readOnlyAtLibrary)
             {
-                DiscoverySuppress = true,
-                MaterialTypeId = ConfigurationManager.AppSettings["itemMaterialTypeId"].ToString(),
-                PermanentLoanTypeId = readOnlyAtLibrary ? 
-                    ConfigurationManager.AppSettings["itemPermanentLoanTypeIdInHouse"].ToString() : 
-                    ConfigurationManager.AppSettings["itemPermanentLoanTypeId"].ToString(),
-                HoldingsRecordId = holdingId,
-                Barcode = barCode,
-                Status = new Status { Name = "Available" },
-                StatisticalCodeIds = new string[]
-                {
-                    ConfigurationManager.AppSettings["chillinStatisticalCodeId"].ToString()
-                },
-                CirculationNotes = new List<CirculationNote>
-                {
+                item.CirculationNotes.Add(
                     new CirculationNote
                     {
-                        NoteType = "Check in",
-                        Note = "NÄR LÅNTAGARE ÅTERLÄMNAR: Lägg på hyllan för återlämnade fjärrlån på HB",
-                        StaffOnly = true
-                    }
-                }
-            };
+                        NoteType = "Check out",
+                        Note = "Ej hemlån",
+                    });
+            }
 
-            //if (readOnlyAtLibrary)
-            //{
-            //    data.CirculationNotes.Add(
-            //        new CirculationNotes
-            //        {
-            //            NoteType = "Check out",
-            //            Note = "Ej hemlån",
-            //            StaffOnly = true
-            //        });
-            //}
-            return _folioItemService.Post(data);
+            return _folioItemService.Post(item);
         }
 
         private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint)
