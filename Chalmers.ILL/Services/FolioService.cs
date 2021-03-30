@@ -83,19 +83,8 @@ namespace Chalmers.ILL.Services
             return _folioItemService.Post(item);
         }
 
-        private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint)
-        {
-            var data = new CirculationBasic
-            {
-                ItemId = itemId,
-                RequestDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                RequesterId = requesterId,
-                RequestType = "Page",
-                FulfilmentPreference = "Hold Shelf",
-                PickupServicePointId = ServicePoints()[pickupServicePoint]
-            };
-            return _folioCirculationService.Post(data);
-        }
+        private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint) => 
+            _folioCirculationService.Post(new CirculationBasic(itemId, requesterId, ServicePoints()[pickupServicePoint]));
 
         private Dictionary<string, string> ServicePoints() =>
             new Dictionary<string, string>()
