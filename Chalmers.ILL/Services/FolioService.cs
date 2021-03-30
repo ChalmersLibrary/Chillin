@@ -37,11 +37,10 @@ namespace Chalmers.ILL.Services
             //TODO - Slänga fel om det inte blir satt?
         }
 
-        public void InitFolio(InstanceBasic instanceBasic, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary, string folioUserId)
+        public void InitFolio(string title, string orderId, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary, string folioUserId)
         {
-
             VerifyBarCode(barcode);
-            var resInstance = CreateInstance(instanceBasic);
+            var resInstance = CreateInstance(title, orderId);
             var resHolding = CreateHolding(resInstance.Id);
             var resItem = CreateItem(resHolding.Id, barcode, readOnlyAtLibrary);
             var resCiruclation = CreateCirculation(resItem.Id, folioUserId, pickUpServicePoint);
@@ -49,6 +48,11 @@ namespace Chalmers.ILL.Services
 
         private void VerifyBarCode(string barcode)
         {
+            if (string.IsNullOrEmpty(barcode))
+            {
+                throw new ArgumentNullException(nameof(barcode));
+            }
+
             var response = _folioItemService.ByQuery($"barcode={barcode}");
 
             if (response.TotalRecords > 0)
@@ -57,11 +61,8 @@ namespace Chalmers.ILL.Services
             }
         }
 
-        private Instance CreateInstance(InstanceBasic data)
-        {
-            //Skapa upp instanceBasic här i stället för i controllen.
-            return _folioInstanceService.Post(data);
-        }
+        private Instance CreateInstance(string title, string orderId) =>
+            _folioInstanceService.Post(new InstanceBasic(title, orderId));
 
         private Holding CreateHolding(string instanceId) => 
             _folioHoldingService.Post(new HoldingBasic(instanceId));

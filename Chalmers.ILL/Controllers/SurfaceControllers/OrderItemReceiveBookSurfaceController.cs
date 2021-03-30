@@ -70,30 +70,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     
                 var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
 
-                //FOLIO
-                var instance = new InstanceBasic
-                {
-                    Title = pack.Title,
-                    Source = "FOLIO",
-                    StatusId = ConfigurationManager.AppSettings["instanceStatusId"].ToString(),
-                    DiscoverySuppress = true,
-                    InstanceTypeId = ConfigurationManager.AppSettings["instanceResourceTypeId"].ToString(),
-                    ModeOfIssuanceId = ConfigurationManager.AppSettings["instanceModesOfIssuance"].ToString(),
-                    Identifiers = new Identifier[]
-                    {
-                        new Identifier
-                        {
-                            Value = orderItem.OrderId,
-                            IdentifierTypeId = ConfigurationManager.AppSettings["instanceIdentifierTypeId"].ToString()
-                        }
-                    },
-                    StatisticalCodeIds = new string[]
-                    {
-                        ConfigurationManager.AppSettings["chillinStatisticalCodeId"].ToString()
-                    }
-                };
-
-                _folioService.InitFolio(instance, pack.bookId, pack.PickUpServicePoint, pack.readOnlyAtLibrary, pack.FolioUserId);
+                _folioService.InitFolio(pack.Title, orderItem.OrderId, pack.bookId, pack.PickUpServicePoint, pack.readOnlyAtLibrary, pack.FolioUserId);
 
                 if (pack.readOnlyAtLibrary)
                 {
