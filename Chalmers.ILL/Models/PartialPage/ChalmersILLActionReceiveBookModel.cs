@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace Chalmers.ILL.Models.PartialPage
+﻿namespace Chalmers.ILL.Models.PartialPage
 {
     public class ChalmersILLActionReceiveBookModel : OrderItemPageModelBase
     {
         public string BookAvailableMailTemplate { get; set; }
+        public string StandardTitleText { get; set; }
 
-        public ChalmersILLActionReceiveBookModel(OrderItemModel orderItemModel) : base(orderItemModel) { }
+        public ChalmersILLActionReceiveBookModel(OrderItemModel orderItemModel, string standardTitleText) : base(orderItemModel) 
+        {
+            StandardTitleText = standardTitleText;
+        }
     }
 }

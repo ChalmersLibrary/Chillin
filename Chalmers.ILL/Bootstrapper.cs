@@ -1,27 +1,23 @@
-using System.Web.Mvc;
-using Microsoft.Practices.Unity;
-using Unity.Mvc4;
-using System.Web.Http;
-using Umbraco.Web;
+using Chalmers.ILL.Configuration;
+using Chalmers.ILL.Mail;
+using Chalmers.ILL.MediaItems;
 using Chalmers.ILL.Members;
 using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Patron;
+using Chalmers.ILL.Providers;
+using Chalmers.ILL.Repositories;
+using Chalmers.ILL.Services;
 using Chalmers.ILL.SignalR;
-using Chalmers.ILL.Mail;
+using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
+using Microsoft.Practices.Unity;
+using Nest;
+using System.Web.Http;
+using System.Web.Mvc;
 using Umbraco.Core;
 using Umbraco.Core.Services;
-using Chalmers.ILL.Templates;
-using Examine;
-using Chalmers.ILL.Patron;
-using System.Configuration;
-using Chalmers.ILL.Providers;
-using Chalmers.ILL.MediaItems;
-using Nest;
-using Chalmers.ILL.Configuration;
-using Chalmers.ILL.Services;
-using System.Net.Http;
-using System;
-using Chalmers.ILL.Repositories;
+using Umbraco.Web;
+using Unity.Mvc4;
 
 namespace Chalmers.ILL
 {
@@ -73,6 +69,7 @@ namespace Chalmers.ILL
             container.RegisterType<IFolioInstanceService, FolioInstanceService>();
             container.RegisterType<IFolioHoldingService, FolioHoldingService>();
             container.RegisterType<IFolioCirculationService, FolioCirculationService>();
+            container.RegisterType<IChillinTextRepository, ChillinTextRepository>();
 
             var templateService = container.Resolve<ITemplateService>();
             var affiliationDataProvider = container.Resolve<IAffiliationDataProvider>();

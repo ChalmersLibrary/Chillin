@@ -1,0 +1,40 @@
+﻿@model Chalmers.ILL.Models.PartialPage.Settings.ChillinTextDto
+
+<div class="col-log-12">
+    <h3>Ändra text</h3>
+</div>
+
+<div class="col-md-12">
+    <div class="form-group">
+        <label for="checkInNote">Check in note</label>
+        <input class="form-control" type="text" id="checkInNote" value="@Model.Source.CheckInNote" />
+    </div>
+    <div class="form-group">
+        <label for="checkOutNote">Check out note</label>
+        <input class="form-control" type="text" id="checkOutNote" value="@Model.Source.CheckOutNote" />
+    </div>
+    <div class="form-group">
+        <label for="standardTitleText">Standardtext som titletillägg</label>
+        <input class="form-control" type="text" id="standardTitleText" value="@Model.Source.StandardTitleText" />
+    </div>
+    <button class="btn btn-success" onclick="save();">Spara</button>
+</div>
+
+<script type="text/javascript">
+    function save() {
+        lockScreen();
+        $.post("/umbraco/surface/ChillinTextSurface/Save", {
+            id: "@Model.Id",
+            chillinText: JSON.stringify({
+                checkInNote: $("#checkInNote").val(),
+                checkOutNote: $("#checkOutNote").val(),
+                standardTitleText: $("#standardTitleText").val()
+            })
+        }).done(function (json) {
+            if (!json.Success) {
+                alert(json.Message);
+            }
+            unlockScreen();
+        });
+    }
+</script>

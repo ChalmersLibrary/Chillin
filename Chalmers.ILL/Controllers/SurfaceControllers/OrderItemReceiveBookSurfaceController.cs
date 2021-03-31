@@ -3,12 +3,12 @@ using Chalmers.ILL.Models;
 using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.OrderItems;
+using Chalmers.ILL.Repositories;
 using Chalmers.ILL.Services;
 using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
 using Newtonsoft.Json;
 using System;
-using System.Configuration;
 using System.Web.Mvc;
 using Umbraco.Web.Mvc;
 
@@ -25,25 +25,29 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         private  ITemplateService _templateService;
         private  IMailService _mailService;
         private  IFolioService _folioService;
+        private readonly IChillinTextRepository _chillinTextRepository;
 
         public OrderItemReceiveBookSurfaceController(
             IUmbracoWrapper umbraco, 
             IOrderItemManager orderItemManager, 
             ITemplateService templateService, 
             IMailService mailService,
-            IFolioService folioService)
+            IFolioService folioService,
+            IChillinTextRepository chillinTextRepository)
         {
             _orderItemManager = orderItemManager;
             _templateService = templateService;
             _mailService = mailService;
             _umbraco = umbraco;
             _folioService = folioService;
+            _chillinTextRepository = chillinTextRepository;
         }
 
         [HttpGet]
         public ActionResult RenderReceiveBookAction(int nodeId)
         {
-            var pageModel = new ChalmersILLActionReceiveBookModel(_orderItemManager.GetOrderItem(nodeId));
+            var standardTextTitle = _chillinTextRepository.ByTextField("standardTitleText");
+            var pageModel = new ChalmersILLActionReceiveBookModel(_orderItemManager.GetOrderItem(nodeId), standardTextTitle.StandardTitleText);
             _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate");
             return PartialView("Chalmers.ILL.Action.ReceiveBook", pageModel);

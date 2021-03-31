@@ -11,6 +11,7 @@
             <li role="presentation" class="active"><a href="#" onclick="showPasswordSettings(this); event.preventDefault();">Lösenord</a></li>
             <li role="presentation"><a href="#" onclick="showTemplateSettings(this); event.preventDefault();">Mallar</a></li>
             <li role="presentation"><a id="provider-settings-link" href="#" onclick="showProviderSettings(this); event.preventDefault();">Leverantörsdata</a></li>
+            <li role="presentation"><a href="#" onclick="showChillinTextSettings(this); event.preventDefault();">Text</a></li>
         </ul>
     </div>
 </div>
@@ -39,6 +40,11 @@
     function showProviderSettings(btn) {
         clearActiveSettingAndSetNewActiveButton(btn);
         renderSettingsPartialView("/umbraco/surface/ProviderDataSurface/RenderModifyProviderDataAction");
+    }
+
+    function showChillinTextSettings(btn) {
+        clearActiveSettingAndSetNewActiveButton(btn);
+        renderSettingsPartialView("/umbraco/surface/ChillinTextSurface/RenderChillinTextsAction")
     }
 
     function clearActiveSettingAndSetNewActiveButton(clickedButton) {

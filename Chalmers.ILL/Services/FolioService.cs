@@ -1,7 +1,7 @@
 ﻿using Chalmers.ILL.Models;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
+using static System.Configuration.ConfigurationManager;
 
 namespace Chalmers.ILL.Services
 {
@@ -67,22 +67,8 @@ namespace Chalmers.ILL.Services
         private Holding CreateHolding(string instanceId) => 
             _folioHoldingService.Post(new HoldingBasic(instanceId));
 
-        private Item CreateItem(string holdingId, string barCode, bool readOnlyAtLibrary)
-        {
-            var item = new ItemBasic(barCode, holdingId, readOnlyAtLibrary);
-
-            if (readOnlyAtLibrary)
-            {
-                item.CirculationNotes.Add(
-                    new CirculationNote
-                    {
-                        NoteType = "Check out",
-                        Note = "Ej hemlån",
-                    });
-            }
-
-            return _folioItemService.Post(item);
-        }
+        private Item CreateItem(string holdingId, string barCode, bool readOnlyAtLibrary) => 
+            _folioItemService.Post(new ItemBasic(barCode, holdingId, readOnlyAtLibrary), readOnlyAtLibrary);
 
         private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint) => 
             _folioCirculationService.Post(new CirculationBasic(itemId, requesterId, ServicePoints()[pickupServicePoint]));
@@ -90,9 +76,9 @@ namespace Chalmers.ILL.Services
         private Dictionary<string, string> ServicePoints() =>
             new Dictionary<string, string>()
             {
-                { "Huvudbiblioteket", ConfigurationManager.AppSettings["servicePointHuvudbiblioteketId"].ToString() },
-                { "Lindholmenbiblioteket", ConfigurationManager.AppSettings["servicePointLindholmenbiblioteketId"].ToString() },
-                { "Arkitekturbiblioteket", ConfigurationManager.AppSettings["servicePointArkitekturbiblioteketId"].ToString() }
+                { "Huvudbiblioteket", AppSettings["servicePointHuvudbiblioteketId"] },
+                { "Lindholmenbiblioteket", AppSettings["servicePointLindholmenbiblioteketId"] },
+                { "Arkitekturbiblioteket", AppSettings["servicePointArkitekturbiblioteketId"] }
             };
     }
 }

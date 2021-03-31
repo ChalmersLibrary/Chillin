@@ -12,14 +12,7 @@ namespace Chalmers.ILL.Models
         public string PermanentLoanTypeId { get; set; }
         public string HoldingsRecordId { get; set; }
         public Status Status { get; set; } = new Status();
-        public List<CirculationNote> CirculationNotes { get; set; } = new List<CirculationNote>
-            {
-                new CirculationNote
-                {
-                    NoteType = "Check in",
-                    Note = "NÄR LÅNTAGARE ÅTERLÄMNAR: Lägg på hyllan för återlämnade fjärrlån på HB",
-                }
-            };
+        public List<CirculationNote> CirculationNotes { get; set; } = new List<CirculationNote>();
         public string[] StatisticalCodeIds { get; set; } = new string[]
             {
                 AppSettings["chillinStatisticalCodeId"]

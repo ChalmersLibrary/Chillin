@@ -390,6 +390,7 @@
     <Content Include="Views\Partials\Chalmers.ILL.Action.ReceiveBook.cshtml" />
     <Content Include="Views\ChalmersILLDiskPage.cshtml" />
     <Content Include="Views\Partials\DeliveryType\ArticleFromProvider.cshtml" />
+    <Content Include="Views\Partials\Settings\ChillinText.cshtml" />
     <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />
     <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
@@ -434,6 +435,7 @@
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Configuration\DefaultChillinConfiguration.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
+    <Compile Include="Controllers\SurfaceControllers\ChillinTextSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemPurchaseLibrarySurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemSearchSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\BookCirculationSurfaceController.cs" />
@@ -534,6 +536,8 @@
       <DependentUpon>201910030614091_ExpandedSierraModel.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\ChillinText.cs" />
+    <Compile Include="Models\PartialPage\Settings\ChillinTextDto.cs" />
     <Compile Include="Models\ItemQuery.cs" />
     <Compile Include="Models\CircualtionBasic.cs" />
     <Compile Include="Models\Circulation.cs" />
@@ -626,8 +630,10 @@
     <Compile Include="Providers\IProviderService.cs" />
     <Compile Include="Providers\LibrisOrderItemsSource.cs" />
     <Compile Include="Providers\ProviderService.cs" />
+    <Compile Include="Repositories\ChillinTextRepository.cs" />
     <Compile Include="Repositories\FolioRepository.cs" />
     <Compile Include="Models\FolioRequest.cs" />
+    <Compile Include="Repositories\IChillinTextRepository.cs" />
     <Compile Include="Repositories\IFolioRepository.cs" />
     <Compile Include="Services\BarCodeException.cs" />
     <Compile Include="Services\FolioCirculationService.cs" />
