@@ -32,32 +32,6 @@ namespace Chalmers.ILL.Services
             return _jsonService.DeserializeObject<ItemQuery>(response);
         }
 
-        public Item Post(ItemBasic item, bool readOnlyAtLibrary)
-        {
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            item.CirculationNotes.Add(new CirculationNote
-            {
-                NoteType = "Check in",
-                Note = _chillinTextRepository.ByTextField("checkInNote").CheckInNote,
-            });
-
-            if (readOnlyAtLibrary)
-            {
-                item.CirculationNotes.Add(new CirculationNote
-                {
-                    NoteType = "Check out",
-                    Note = _chillinTextRepository.ByTextField("checkOutNote").CheckOutNote,
-                });
-            }
-
-            var response = _folioRepository.Post(path, _jsonService.SerializeObject(item));
-            return _jsonService.DeserializeObject<Item>(response);
-        }
-
         public Item Put(Item item)
         {
             if (item == null)

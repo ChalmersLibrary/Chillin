@@ -70,6 +70,7 @@ namespace Chalmers.ILL
             container.RegisterType<IFolioHoldingService, FolioHoldingService>();
             container.RegisterType<IFolioCirculationService, FolioCirculationService>();
             container.RegisterType<IChillinTextRepository, ChillinTextRepository>();
+            container.RegisterType<IFolioInventoryItemService, FolioInventoryItemService>();
 
             var templateService = container.Resolve<ITemplateService>();
             var affiliationDataProvider = container.Resolve<IAffiliationDataProvider>();

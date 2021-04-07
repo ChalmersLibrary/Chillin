@@ -547,7 +547,7 @@
     <Compile Include="Models\Instance.cs" />
     <Compile Include="Models\InstanceBasic.cs" />
     <Compile Include="Models\Item.cs" />
-    <Compile Include="Models\ItemBasic.cs" />
+    <Compile Include="Models\InventoryItemBasic.cs" />
     <Compile Include="Models\BarCodeQuery.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
     <Compile Include="Models\MediaItemIdAndOrderItemId.cs" />
@@ -639,12 +639,14 @@
     <Compile Include="Services\FolioCirculationService.cs" />
     <Compile Include="Services\FolioHoldingService.cs" />
     <Compile Include="Services\FolioInstanceService.cs" />
+    <Compile Include="Services\FolioInventoryItemService.cs" />
     <Compile Include="Services\FolioItemService.cs" />
     <Compile Include="Services\FolioService.cs" />
     <Compile Include="Services\FolioUserException.cs" />
     <Compile Include="Services\IFolioCirculationService.cs" />
     <Compile Include="Services\IFolioHoldingService.cs" />
     <Compile Include="Services\IFolioInstanceService.cs" />
+    <Compile Include="Services\IFolioInventoryItemService.cs" />
     <Compile Include="Services\IFolioItemService.cs" />
     <Compile Include="Services\IFolioService.cs" />
     <Compile Include="Services\IJsonService.cs" />
