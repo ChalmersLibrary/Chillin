@@ -473,6 +473,7 @@
     <Compile Include="Controllers\SurfaceControllers\TemplatesSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\UmbracoOrderItemMigrationSurfaceController.cs" />
     <Compile Include="Database\OrderItemsDbContext.cs" />
+    <Compile Include="Exceptions\FolioUserException.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Mail\AutomaticMailSendingEngine.cs" />
@@ -537,17 +538,17 @@
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ChillinText.cs" />
+    <Compile Include="Models\ItemBasic.cs" />
     <Compile Include="Models\PartialPage\Settings\ChillinTextDto.cs" />
     <Compile Include="Models\ItemQuery.cs" />
     <Compile Include="Models\CircualtionBasic.cs" />
     <Compile Include="Models\Circulation.cs" />
-    <Compile Include="Models\FolioUser.cs" />
+    <Compile Include="Models\FolioUserNameQuery.cs" />
     <Compile Include="Models\Holding.cs" />
     <Compile Include="Models\HoldingBasic.cs" />
     <Compile Include="Models\Instance.cs" />
     <Compile Include="Models\InstanceBasic.cs" />
     <Compile Include="Models\Item.cs" />
-    <Compile Include="Models\InventoryItemBasic.cs" />
     <Compile Include="Models\BarCodeQuery.cs" />
     <Compile Include="Models\Mail\OutgoingMailModel.cs" />
     <Compile Include="Models\MediaItemIdAndOrderItemId.cs" />
@@ -581,6 +582,7 @@
     <Compile Include="Models\PartialPage\Settings\ChangePassword.cs" />
     <Compile Include="Models\PartialPage\Settings\EditTemplates.cs" />
     <Compile Include="Models\PartialPage\Settings\ModifyProviderData.cs" />
+    <Compile Include="Models\Personal.cs" />
     <Compile Include="Models\ResultResponseWithData.cs" />
     <Compile Include="Models\ResultResponseWithStringData.cs" />
     <Compile Include="Models\Template.cs" />
@@ -639,16 +641,16 @@
     <Compile Include="Services\FolioCirculationService.cs" />
     <Compile Include="Services\FolioHoldingService.cs" />
     <Compile Include="Services\FolioInstanceService.cs" />
-    <Compile Include="Services\FolioInventoryItemService.cs" />
     <Compile Include="Services\FolioItemService.cs" />
     <Compile Include="Services\FolioService.cs" />
     <Compile Include="Services\FolioUserException.cs" />
+    <Compile Include="Services\FolioUserService.cs" />
     <Compile Include="Services\IFolioCirculationService.cs" />
     <Compile Include="Services\IFolioHoldingService.cs" />
     <Compile Include="Services\IFolioInstanceService.cs" />
-    <Compile Include="Services\IFolioInventoryItemService.cs" />
     <Compile Include="Services\IFolioItemService.cs" />
     <Compile Include="Services\IFolioService.cs" />
+    <Compile Include="Services\IFolioUserService.cs" />
     <Compile Include="Services\IJsonService.cs" />
     <Compile Include="Services\JsonService.cs" />
     <Compile Include="SignalR\INotifier.cs" />
@@ -672,7 +674,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Start\" />
-    <Folder Include="Exceptions\" />
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="Startup\" />
     <Folder Include="Views\Home\" />

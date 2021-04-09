@@ -1,6 +1,7 @@
 ﻿using Chalmers.ILL.Models;
 using Chalmers.ILL.Repositories;
 using System;
+using static System.Configuration.ConfigurationManager;
 
 namespace Chalmers.ILL.Services
 {
@@ -10,16 +11,19 @@ namespace Chalmers.ILL.Services
         private readonly IChillinTextRepository _chillinTextRepository;
         private readonly IFolioRepository _folioRepository;
         private readonly IJsonService _jsonService;
+        private readonly IFolioUserService _folioUserService;
 
         public FolioItemService
         (
             IChillinTextRepository chillinTextRepository,
             IFolioRepository folioRepository, 
-            IJsonService jsonService)
+            IJsonService jsonService,
+            IFolioUserService folioUserService)
         {
             _folioRepository = folioRepository;
             _jsonService = jsonService;
             _chillinTextRepository = chillinTextRepository;
+            _folioUserService = folioUserService;
         }
 
         public ItemQuery ByQuery(string query)
@@ -30,6 +34,41 @@ namespace Chalmers.ILL.Services
             }
             var response = _folioRepository.ByQuery($"{path}?query=({query})");
             return _jsonService.DeserializeObject<ItemQuery>(response);
+        }
+
+        public Item Post(ItemBasic item, bool readOnlyAtLibrary)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            var user = _folioUserService.ByUserName(AppSettings["foliousername"]);
+            var source = new Source
+            {
+                Id = user.Id,
+                Personal = user.Personal
+            };
+
+            item.CirculationNotes.Add(new CirculationNote
+            {
+                NoteType = "Check in",
+                Note = _chillinTextRepository.ByTextField("checkInNote").CheckInNote,
+                Source = source
+            });
+
+            if (readOnlyAtLibrary)
+            {
+                item.CirculationNotes.Add(new CirculationNote
+                {
+                    NoteType = "Check out",
+                    Note = _chillinTextRepository.ByTextField("checkOutNote").CheckOutNote,
+                    Source = source
+                });
+            }       
+
+            var response = _folioRepository.Post(path, _jsonService.SerializeObject(item));
+            return _jsonService.DeserializeObject<Item>(response);
         }
 
         public Item Put(Item item)

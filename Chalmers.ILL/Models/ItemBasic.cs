@@ -4,12 +4,12 @@ using static System.Configuration.ConfigurationManager;
 
 namespace Chalmers.ILL.Models
 {
-    public class InventoryItemBasic
+    public class ItemBasic
     {
         public string Barcode { get; set; }
         public bool DiscoverySuppress { get; set; } = true;
-        public MaterialType MaterialType { get; set; } = new MaterialType();
-        public PermanentLoanType PermanentLoanType { get; set; }
+        public string MaterialTypeId { get; set; } = AppSettings["itemMaterialTypeId"];
+        public string PermanentLoanTypeId { get; set; }
         public string HoldingsRecordId { get; set; }
         public Status Status { get; set; } = new Status();
         public List<CirculationNote> CirculationNotes { get; set; } = new List<CirculationNote>();
@@ -18,7 +18,7 @@ namespace Chalmers.ILL.Models
                 AppSettings["chillinStatisticalCodeId"]
             };
 
-        public InventoryItemBasic(string barcode, string holdingsRecordId, bool readOnlyAtLibrary)
+        public ItemBasic(string barcode, string holdingsRecordId, bool readOnlyAtLibrary)
         {
             if (string.IsNullOrEmpty(barcode))
             {
@@ -30,12 +30,9 @@ namespace Chalmers.ILL.Models
             }
             Barcode = barcode;
             HoldingsRecordId = holdingsRecordId;
-            PermanentLoanType = new PermanentLoanType
-            {
-                Id = readOnlyAtLibrary ?
-                    AppSettings["itemPermanentLoanTypeIdInHouse"] :
-                    AppSettings["itemPermanentLoanTypeId"]
-            };
+            PermanentLoanTypeId = readOnlyAtLibrary ?
+                AppSettings["itemPermanentLoanTypeIdInHouse"] :
+                AppSettings["itemPermanentLoanTypeId"];
         }
     }
 
@@ -46,18 +43,17 @@ namespace Chalmers.ILL.Models
 
     public class CirculationNote
     {
+        public string Id { get; set; } = Guid.NewGuid().ToString();
         public string NoteType { get; set; }
         public string Note { get; set; }
+        public Source Source { get; set; }
+        public string Date { get; set; } = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ");
         public bool StaffOnly { get; set; } = true;
     }
 
-    public class MaterialType
+    public class Source
     {
-        public string Id { get; set; } = AppSettings["itemMaterialTypeId"];
-    }
-
-    public class PermanentLoanType
-    {
-        public string Id { get; set; }  
+        public string Id { get; set; }
+        public Personal Personal { get; set; }
     }
 }

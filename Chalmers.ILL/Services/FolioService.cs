@@ -11,22 +11,19 @@ namespace Chalmers.ILL.Services
         private readonly IFolioInstanceService _folioInstanceService;
         private readonly IFolioHoldingService _folioHoldingService;
         private readonly IFolioCirculationService _folioCirculationService;
-        private readonly IFolioInventoryItemService _folioInventoryItemService;
 
         public FolioService
         (
             IFolioItemService folioItemService,
             IFolioInstanceService folioInstanceService,
             IFolioHoldingService folioHoldingService,
-            IFolioCirculationService folioCirculationService,
-            IFolioInventoryItemService folioInventoryItemService
+            IFolioCirculationService folioCirculationService
         )
         {
             _folioItemService = folioItemService;
             _folioInstanceService = folioInstanceService;
             _folioHoldingService = folioHoldingService;
             _folioCirculationService = folioCirculationService;
-            _folioInventoryItemService = folioInventoryItemService;
         }
 
         public void SetItemToWithdrawn(string barcode)
@@ -71,7 +68,7 @@ namespace Chalmers.ILL.Services
             _folioHoldingService.Post(new HoldingBasic(instanceId));
 
         private Item CreateItem(string holdingId, string barCode, bool readOnlyAtLibrary) => 
-            _folioInventoryItemService.Post(new InventoryItemBasic(barCode, holdingId, readOnlyAtLibrary), readOnlyAtLibrary);
+            _folioItemService.Post(new ItemBasic(barCode, holdingId, readOnlyAtLibrary), readOnlyAtLibrary);
 
         private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint) => 
             _folioCirculationService.Post(new CirculationBasic(itemId, requesterId, ServicePoints()[pickupServicePoint]));
