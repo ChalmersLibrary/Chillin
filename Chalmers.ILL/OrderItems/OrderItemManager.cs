@@ -948,6 +948,11 @@ namespace Chalmers.ILL.OrderItems
             throw new NotImplementedException();
         }
 
+        public void SetTitleInformation(int nodeId, string titleInformation, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

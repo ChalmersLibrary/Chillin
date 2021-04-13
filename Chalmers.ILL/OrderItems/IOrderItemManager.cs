@@ -72,5 +72,6 @@ namespace Chalmers.ILL.OrderItems
         void SaveWithoutEventsAndWithSynchronousReindexing(int nodeId, bool doReindex = true, bool doSignal = true);
 
         string GenerateEventId(int type);
+        void SetTitleInformation(int nodeId, string titleInformation, string eventId, bool doReindex = true, bool doSignal = true);
     }
 }

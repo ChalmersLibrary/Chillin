@@ -605,6 +605,37 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
+        public void SetTitleInformation(int nodeId, string titleInformation, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
+                if (orderItem != null)
+                {
+                    if (orderItem.TitleInformation != titleInformation)
+                    {
+                        orderItem.TitleInformation = titleInformation;
+                     //   AddLogItem(nodeId, "BOKINFO", "Bok-ID ändrat till " + bookId + ".", eventId, false, false);
+                    }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set title information.");
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
         public void SetCancellationReason(int orderNodeId, int cancellationReasonId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             EnsureDatabaseContext();

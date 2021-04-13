@@ -48,6 +48,8 @@ namespace Chalmers.ILL.Models
         public string OriginalOrder { get; set; }
         public string Reference { get; set; }
 
+        public string TitleInformation { get; set; }
+
         [JsonIgnore]
         public string OriginalOrderWithoutReferenceUrl
         {

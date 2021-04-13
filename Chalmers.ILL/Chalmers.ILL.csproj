@@ -536,6 +536,10 @@
     <Compile Include="Migrations\201910030614091_ExpandedSierraModel.Designer.cs">
       <DependentUpon>201910030614091_ExpandedSierraModel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202104130744460_AddOrderItemModelTitleInformation.cs" />
+    <Compile Include="Migrations\202104130744460_AddOrderItemModelTitleInformation.Designer.cs">
+      <DependentUpon>202104130744460_AddOrderItemModelTitleInformation.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ChillinText.cs" />
     <Compile Include="Models\ItemBasic.cs" />
@@ -711,6 +715,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201910030614091_ExpandedSierraModel.resx">
       <DependentUpon>201910030614091_ExpandedSierraModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202104130744460_AddOrderItemModelTitleInformation.resx">
+      <DependentUpon>202104130744460_AddOrderItemModelTitleInformation.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
