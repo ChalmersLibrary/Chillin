@@ -22,11 +22,10 @@ namespace Chalmers.ILL.EventHandlers
             {
                 var configuration = new Migrations.Configuration();
                 var migrator = new DbMigrator(configuration);
-                migrator.Update();
-                //if (migrator.GetPendingMigrations().Count() > 0)
-                //{
-                //    migrator.Update();
-                //}
+                if (migrator.GetPendingMigrations().Count() > 0)
+                {
+                    migrator.Update();
+                }
             }
 
             Bootstrapper.Initialise();
