@@ -59,8 +59,8 @@
         </div>
     </div>
     <div class="col-md-12">
-        <button class="btn btn-success" onclick="sendToFolio(false, true)">Ta emot för vanligt lån</button>
-        <button class="btn btn-success" onclick="sendToFolio(true, true)">Ta emot för läsesalslån</button>
+        <button class="btn btn-success" onclick="sendToFolio(false, true)" @(Model.OrderItem.Status == "17:FOLIO" ? "disabled" : "") >Ta emot för vanligt lån</button>
+        <button class="btn btn-success" onclick="sendToFolio(true, true)" @(Model.OrderItem.Status == "17:FOLIO" ? "disabled" : "")>Ta emot för läsesalslån</button>
     </div>
 </div>
 
