@@ -540,6 +540,14 @@
     <Compile Include="Migrations\202104130744460_AddOrderItemModelTitleInformation.Designer.cs">
       <DependentUpon>202104130744460_AddOrderItemModelTitleInformation.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202104140631003_RemovedOrderItemModelTitleInformation.cs" />
+    <Compile Include="Migrations\202104140631003_RemovedOrderItemModelTitleInformation.Designer.cs">
+      <DependentUpon>202104140631003_RemovedOrderItemModelTitleInformation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202104140635033_AddOrderItemModelTitleInformation1.cs" />
+    <Compile Include="Migrations\202104140635033_AddOrderItemModelTitleInformation1.Designer.cs">
+      <DependentUpon>202104140635033_AddOrderItemModelTitleInformation1.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ChillinText.cs" />
     <Compile Include="Models\ItemBasic.cs" />
@@ -718,6 +726,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202104130744460_AddOrderItemModelTitleInformation.resx">
       <DependentUpon>202104130744460_AddOrderItemModelTitleInformation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202104140631003_RemovedOrderItemModelTitleInformation.resx">
+      <DependentUpon>202104140631003_RemovedOrderItemModelTitleInformation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202104140635033_AddOrderItemModelTitleInformation1.resx">
+      <DependentUpon>202104140635033_AddOrderItemModelTitleInformation1.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
