@@ -71,14 +71,13 @@ namespace Chalmers.ILL.Services
             return _jsonService.DeserializeObject<Item>(response);
         }
 
-        public Item Put(Item item)
+        public void Put(Item item)
         {
             if (item == null)
             {
                 throw new ArgumentNullException(nameof(item));
             }
-            var response = _folioRepository.Put($"{path}/{item.Id}", _jsonService.SerializeObject(item));
-            return _jsonService.DeserializeObject<Item>(response);
+            _folioRepository.Put($"{path}/{item.Id}", _jsonService.SerializeObject(item));
         }
     }
 }

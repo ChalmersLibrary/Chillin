@@ -6,6 +6,6 @@ namespace Chalmers.ILL.Services
     {
         ItemQuery ByQuery(string query);
         Item Post(ItemBasic item, bool readOnlyAtLibrary);
-        Item Put(Item item);
+        void Put(Item item);
     }
 }

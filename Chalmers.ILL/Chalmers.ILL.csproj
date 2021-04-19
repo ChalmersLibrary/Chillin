@@ -473,7 +473,9 @@
     <Compile Include="Controllers\SurfaceControllers\TemplatesSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\UmbracoOrderItemMigrationSurfaceController.cs" />
     <Compile Include="Database\OrderItemsDbContext.cs" />
+    <Compile Include="Exceptions\FolioRequestException.cs" />
     <Compile Include="Exceptions\FolioUserException.cs" />
+    <Compile Include="Exceptions\ItemNotFoundException.cs" />
     <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Mail\AutomaticMailSendingEngine.cs" />

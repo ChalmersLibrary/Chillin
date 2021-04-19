@@ -18,7 +18,12 @@
     <script type="text/javascript">
         function returnItem() {
             lockScreen();
-            $.post("/umbraco/surface/OrderItemReturnSurface/ReturnItem", { nodeId: "@Model.OrderItem.NodeId", bookId: "@Model.OrderItem.BookId" }).done(function (json) {
+            $.post("/umbraco/surface/OrderItemReturnSurface/ReturnItem",
+                {
+                    nodeId: "@Model.OrderItem.NodeId",
+                    bookId: "@Model.OrderItem.BookId",
+                    status: @Model.OrderItem.Status.Substring(0, 2)
+                }).done(function (json) {
                 if (json.Success) {
                     loadOrderItemDetails(@Model.OrderItem.NodeId);
                 }

@@ -1,4 +1,5 @@
-﻿using Chalmers.ILL.Models;
+﻿using Chalmers.ILL.Exceptions;
+using Chalmers.ILL.Models;
 using System;
 using System.Collections.Generic;
 using static System.Configuration.ConfigurationManager;
@@ -33,8 +34,11 @@ namespace Chalmers.ILL.Services
             {
                 response.Items[0].Status.Name = "Withdrawn";
                 _folioItemService.Put(response.Items[0]);
+            } 
+            else
+            {
+                throw new ItemNotFoundException("Hittade inte boken i FOLIO");
             }
-            //TODO - Slänga fel om det inte blir satt?
         }
 
         public void InitFolio(string title, string orderId, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary, string folioUserId)

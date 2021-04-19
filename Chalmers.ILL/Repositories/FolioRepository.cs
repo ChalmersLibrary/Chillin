@@ -1,4 +1,5 @@
-﻿using Chalmers.ILL.Models;
+﻿using Chalmers.ILL.Exceptions;
+using Chalmers.ILL.Models;
 using Chalmers.ILL.Patron;
 using System.Configuration;
 using System.IO;
@@ -71,17 +72,24 @@ namespace Chalmers.ILL.Repositories
             }
 
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            var outputStream = response.GetResponseStream();
-
-            var sr = new StreamReader(outputStream);
-            var resultString = sr.ReadToEnd();
-
-            if (resultString.ToLower().Contains("invalid token"))
+            
+            if ((int)response.StatusCode >= 200 && (int)response.StatusCode < 300)
             {
-                throw new InvalidTokenException();
-            }
+                var outputStream = response.GetResponseStream();
+                var sr = new StreamReader(outputStream);
+                var resultString = sr.ReadToEnd();
 
-            return resultString;
+                if (resultString.ToLower().Contains("invalid token"))
+                {
+                    throw new InvalidTokenException();
+                }
+
+                return resultString;
+            }
+            else
+            {
+                throw new FolioRequestException();
+            }
         }
 
         private void SetToken()

@@ -20,6 +20,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IUmbracoWrapper _umbraco;
 
         private readonly IFolioService _folioService;
+        private const int STATUS_FOLIO = 17;
 
         public OrderItemReturnSurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco, IFolioService folioService)
         {
@@ -45,13 +46,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpPost]
-        public ActionResult ReturnItem(int nodeId, string bookId)
+        public ActionResult ReturnItem(int nodeId, string bookId, int status)
         {
             var json = new ResultResponse();
 
             try
             {
-                _folioService.SetItemToWithdrawn(bookId);
+                if (status == STATUS_FOLIO)
+                {
+                    _folioService.SetItemToWithdrawn(bookId);
+                }
                 var eventId = _orderItemManager.GenerateEventId(BOOK_RETURNED_HOME_EVENT_TYPE);
                 _orderItemManager.SetStatus(nodeId, "10:Återsänd", eventId);
 
