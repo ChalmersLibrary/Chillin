@@ -162,29 +162,29 @@
                     </div>
 
 
-                        <!-- Delivery Library button -->
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
-                                Leveransbibliotek <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
-                                @{
-                                    foreach (var library in Model.AvailableDeliveryLibraries)
+                    <!-- Delivery Library button -->
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                            Leveransbibliotek <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
+                            @{
+                                foreach (var library in Model.AvailableDeliveryLibraries)
+                                {
+                                    if (library.Id == Model.OrderItem.DeliveryLibraryId)
                                     {
-                                        if (library.Id == Model.OrderItem.DeliveryLibraryId)
-                                        {
-                                            <li><a href="#" class="disabled-link"><span class="current">@( library.Value == "Lindholmenbiblioteket" ? "Kuggen" : library.Value ) </span> <span class="glyphicon glyphicon-ok"></span></a></li>
-                                        }
-                                        else
-                                        {
-                                            <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.OrderItem.NodeId, @library.Id); event.preventDefault();">@( library.Value == "Lindholmenbiblioteket" ? "Kuggen" : library.Value )</a></li>
-                                        }
+                                        <li><a href="#" class="disabled-link"><span class="current">@( library.Value == "Lindholmenbiblioteket" ? "Kuggen" : library.Value ) </span> <span class="glyphicon glyphicon-ok"></span></a></li>
+                                    }
+                                    else
+                                    {
+                                        <li><a href="#" onclick="setOrderItemDeliveryLibrary(@Model.OrderItem.NodeId, @library.Id); event.preventDefault();">@( library.Value == "Lindholmenbiblioteket" ? "Kuggen" : library.Value )</a></li>
                                     }
                                 }
-                            </ul>
-                        </div>
-                                    if (Model.OrderItem.Type == "Inköpsförslag")
-                                    {
+                            }
+                        </ul>
+                    </div>
+                    if (Model.OrderItem.Type == "Inköpsförslag")
+                    {
                         <!-- Purchase Library button -->
                         <div class="btn-group">
                             <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
@@ -206,9 +206,9 @@
                                 }
                             </ul>
                         </div>
-                                        }
-                                    }
-                    
+                    }
+                }
+
                 @if (Model.OrderItem.TypeId > 0)
                 {
                     <button type="button" class="btn btn-primary" onclick="loadReferenceAction(@Model.OrderItem.NodeId);">Referens</button>
@@ -233,10 +233,17 @@
                             Lånetid <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" role="menu">
-                            @*<li><a href="#" onclick="loadPatronReturnDateAction(@Model.OrderItem.NodeId); event.preventDefault();">Mot låntagare</a></li>*@
+                            @if (Model.OrderItem.StatusString == "Utlånad" || Model.OrderItem.StatusString == "Krävd")
+                            {
+                                <li><a href="#" onclick="loadPatronReturnDateAction(@Model.OrderItem.NodeId); event.preventDefault();">Mot låntagare</a></li>
+                            }
                             <li><a href="#" onclick="loadProviderReturnDateAction(@Model.OrderItem.NodeId); event.preventDefault();">Från utlånande bibliotek</a></li>
                         </ul>
                     </div>
+                    if (Model.OrderItem.StatusString == "Utlånad")
+                    {
+                        <button type="button" class="btn btn-primary" onclick="loadClaimAction(@Model.OrderItem.NodeId);">Kräv</button>
+                    }
                     <button type="button" class="btn btn-primary" onclick="loadReturnAction(@Model.OrderItem.NodeId);">Retur</button>
                 }
             </div>
