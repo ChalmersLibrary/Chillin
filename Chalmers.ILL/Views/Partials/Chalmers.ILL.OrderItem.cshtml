@@ -233,14 +233,14 @@
                             Lånetid <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu" role="menu">
-                            @if (Model.OrderItem.StatusString == "Utlånad" || Model.OrderItem.StatusString == "Krävd")
+                            @if ((Model.OrderItem.StatusString == "Utlånad" || Model.OrderItem.StatusString == "Krävd" || Model.OrderItem.StatusString == "Åtgärda") && Model.OrderItem.CreateDate <= DateTime.Parse("2021-05-16"))
                             {
                                 <li><a href="#" onclick="loadPatronReturnDateAction(@Model.OrderItem.NodeId); event.preventDefault();">Mot låntagare</a></li>
                             }
                             <li><a href="#" onclick="loadProviderReturnDateAction(@Model.OrderItem.NodeId); event.preventDefault();">Från utlånande bibliotek</a></li>
                         </ul>
                     </div>
-                    if (Model.OrderItem.StatusString == "Utlånad")
+                    if ((Model.OrderItem.StatusString == "Utlånad" || Model.OrderItem.StatusString == "Krävd") && Model.OrderItem.CreateDate <= DateTime.Parse("2021-05-16"))
                     {
                         <button type="button" class="btn btn-primary" onclick="loadClaimAction(@Model.OrderItem.NodeId);">Kräv</button>
                     }
