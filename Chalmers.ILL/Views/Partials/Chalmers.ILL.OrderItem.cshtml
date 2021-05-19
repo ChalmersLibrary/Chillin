@@ -240,7 +240,7 @@
                             <li><a href="#" onclick="loadProviderReturnDateAction(@Model.OrderItem.NodeId); event.preventDefault();">Från utlånande bibliotek</a></li>
                         </ul>
                     </div>
-                    if ((Model.OrderItem.StatusString == "Utlånad" || Model.OrderItem.StatusString == "Krävd") && Model.OrderItem.CreateDate <= DateTime.Parse("2021-05-16"))
+                    if ((Model.OrderItem.StatusString == "Utlånad" || Model.OrderItem.StatusString == "Krävd" || Model.OrderItem.StatusString == "Åtgärda") && Model.OrderItem.CreateDate <= DateTime.Parse("2021-05-16"))
                     {
                         <button type="button" class="btn btn-primary" onclick="loadClaimAction(@Model.OrderItem.NodeId);">Kräv</button>
                     }
