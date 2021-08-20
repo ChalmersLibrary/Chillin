@@ -9,6 +9,7 @@ using System.IO;
 using Newtonsoft.Json;
 using Chalmers.ILL.Templates;
 using System.Text;
+using Umbraco.Core.Logging;
 
 namespace Chalmers.ILL.Patron
 {
@@ -76,12 +77,30 @@ namespace Chalmers.ILL.Patron
         {
             SierraModel res = new SierraModel();
 
-            var json = GetDataFromFolioWithRetries("/users?limit=1&query=" + Uri.EscapeDataString("username=" + pnr + " or barcode=" + barcode));
+            var requestUserDataPath = "/users?limit=1&query=" + Uri.EscapeDataString("username=" + pnr + " or barcode=" + barcode);
 
-            if (json != null && json.users != null && json.users.Count == 1)
+            try
             {
-                var mblockJson = GetDataFromFolioWithRetries("/manualblocks?query=userId=" + json.users[0].id);
-                FillInSierraModelFromFolioData(json.users[0], mblockJson, res);
+                var json = GetDataFromFolioWithRetries(requestUserDataPath);
+
+                if (json != null && json.users != null && json.users.Count == 1)
+                {
+                    var requestManualBlocksPath = "/manualblocks?query=userId=" + json.users[0].id;
+
+                    try
+                    {
+                        var mblockJson = GetDataFromFolioWithRetries(requestManualBlocksPath);
+                        FillInSierraModelFromFolioData(json.users[0], mblockJson, res);
+                    }
+                    catch (Exception e)
+                    {
+                        LogHelper.Error<FolioPatronDataProvider>("Error while fetching patron data from Folio with (" + requestManualBlocksPath + "): ", e);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                LogHelper.Error<FolioPatronDataProvider>("Error while fetching manual block data from Folio with (" + requestUserDataPath + "): ", e);
             }
 
             return res;
