@@ -99,7 +99,7 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IMailService), mailService);
             container.RegisterInstance(typeof(IProviderService), providerService);
             container.RegisterInstance(typeof(IBulkDataManager), bulkDataManager);
-            container.RegisterInstance<IPatronDataProvider>(new FolioPatronDataProvider(templateService, affiliationDataProvider).Connect());
+            container.RegisterInstance<IPatronDataProvider>(new FolioPatronDataProvider(templateService, affiliationDataProvider));
         }
     }
 }
