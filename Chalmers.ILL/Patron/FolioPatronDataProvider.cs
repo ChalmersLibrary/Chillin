@@ -15,7 +15,7 @@ namespace Chalmers.ILL.Patron
 {
     public class FolioPatronDataProvider : IPatronDataProvider
     {
-        private string _token { get; set; }
+        private string _token = "fejktoken";
 
         private string _folioApiBaseAddress = ConfigurationManager.AppSettings["folioApiBaseAddress"].ToString();
         private string _tenant = ConfigurationManager.AppSettings["folioXOkapiTenant"].ToString();
