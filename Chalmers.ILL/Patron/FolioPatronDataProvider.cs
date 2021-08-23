@@ -215,6 +215,7 @@ namespace Chalmers.ILL.Patron
                         }
                         else
                         {
+                            LogHelper.Error<FolioPatronDataProvider>("WebException on Folio request but no \"invalid token\" in response body.", e);
                             throw e;
                         }
                     }
