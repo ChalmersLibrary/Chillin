@@ -94,13 +94,13 @@ namespace Chalmers.ILL.Patron
                     }
                     catch (Exception e)
                     {
-                        LogHelper.Error<FolioPatronDataProvider>("Error while fetching patron data from Folio with (" + requestManualBlocksPath + "): ", e);
+                        LogHelper.Error<FolioPatronDataProvider>("Error while fetching manual block data from Folio with (" + requestManualBlocksPath + "): ", e);
                     }
                 }
             }
             catch (Exception e)
             {
-                LogHelper.Error<FolioPatronDataProvider>("Error while fetching manual block data from Folio with (" + requestUserDataPath + "): ", e);
+                LogHelper.Error<FolioPatronDataProvider>("Error while fetching patron data from Folio with (" + requestUserDataPath + "): ", e);
             }
 
             return res;
