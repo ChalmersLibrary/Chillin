@@ -178,18 +178,49 @@ namespace Chalmers.ILL.Patron
             request.Headers["x-okapi-tenant"] = _tenant;
             request.Headers["x-okapi-token"] = _token;
 
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            var outputStream = response.GetResponseStream();
-
-            var sr = new StreamReader(outputStream);
-            var resultString = sr.ReadToEnd();
-
-            if (resultString.ToLower().Contains("invalid token"))
+            try
             {
-                throw new InvalidTokenException();
+                using (WebResponse response = request.GetResponse())
+                {
+                    HttpWebResponse httpResponse = (HttpWebResponse)response;
+
+                    using (Stream outputStream = httpResponse.GetResponseStream())
+                    using (var sr = new StreamReader(outputStream))
+                    {
+                        var resultString = sr.ReadToEnd();
+
+                        if (resultString.ToLower().Contains("invalid token"))
+                        {
+                            throw new InvalidTokenException();
+                        }
+
+                        res = JsonConvert.DeserializeObject<dynamic>(resultString);
+                    }
+                }
+            }
+            catch (WebException e)
+            {
+                using (WebResponse response = e.Response)
+                {
+                    HttpWebResponse httpResponse = (HttpWebResponse)response;
+
+                    using (Stream outputStream = httpResponse.GetResponseStream())
+                    using (var sr = new StreamReader(outputStream))
+                    {
+                        var resultString = sr.ReadToEnd();
+
+                        if (resultString.ToLower().Contains("invalid token"))
+                        {
+                            throw new InvalidTokenException();
+                        }
+                        else
+                        {
+                            throw e;
+                        }
+                    }
+                }
             }
 
-            res = JsonConvert.DeserializeObject<dynamic>(resultString);
             return res;
         }
 
