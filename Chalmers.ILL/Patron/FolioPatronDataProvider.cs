@@ -75,9 +75,12 @@ namespace Chalmers.ILL.Patron
 
         public SierraModel GetPatronInfoFromLibraryCardNumberOrPersonnummer(string barcode, string pnr)
         {
+
+            string testPnr = pnr.Length == 12 ? pnr.Remove(0, 2) : pnr;
+
             SierraModel res = new SierraModel();
 
-            var requestUserDataPath = "/users?limit=1&query=" + Uri.EscapeDataString("username=" + pnr + " or barcode=" + barcode);
+            var requestUserDataPath = "/users?limit=1&query=" + Uri.EscapeDataString("username=" + testPnr + " or barcode=" + barcode);
 
             try
             {
