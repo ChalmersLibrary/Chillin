@@ -56,6 +56,8 @@ namespace Chalmers.ILL.Repositories
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_folioApiBaseAddress + folioRequest.Path);
 
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
             request.Accept = folioRequest.Accept;
             request.ContentType = "application/json";
             request.Headers["x-okapi-tenant"] = _tenant;
@@ -100,6 +102,8 @@ namespace Chalmers.ILL.Repositories
             request.ContentType = "application/json";
             request.Headers["x-okapi-tenant"] = _tenant;
             request.Method = "POST";
+
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             UTF8Encoding encoding = new UTF8Encoding();
             var bodyBytes = encoding.GetBytes("{ \"username\": \"" + _username + "\", \"password\": \"" + _password + "\" }");
