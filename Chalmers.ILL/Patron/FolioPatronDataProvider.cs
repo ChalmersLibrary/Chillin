@@ -173,6 +173,7 @@ namespace Chalmers.ILL.Patron
         private dynamic GetDataFromFolio(string pathAndQuery)
         {
             dynamic res = null;
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(_folioApiBaseAddress + pathAndQuery);
 
@@ -205,6 +206,11 @@ namespace Chalmers.ILL.Patron
             {
                 using (WebResponse response = e.Response)
                 {
+                    if(response == null)
+                    {
+                        throw new InvalidTokenException();
+                    }
+
                     HttpWebResponse httpResponse = (HttpWebResponse)response;
 
                     using (Stream outputStream = httpResponse.GetResponseStream())
