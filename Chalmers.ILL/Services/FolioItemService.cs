@@ -8,6 +8,7 @@ namespace Chalmers.ILL.Services
     public class FolioItemService : IFolioItemService
     {
         private readonly string path = "/item-storage/items";
+        private readonly string withdrawPath = "/inventory/items";
         private readonly IChillinTextRepository _chillinTextRepository;
         private readonly IFolioRepository _folioRepository;
         private readonly IJsonService _jsonService;
@@ -77,7 +78,7 @@ namespace Chalmers.ILL.Services
             {
                 throw new ArgumentNullException(nameof(item));
             }
-            _folioRepository.Put($"{path}/{item.Id}", _jsonService.SerializeObject(item));
+            _folioRepository.Post($"{withdrawPath}/{item.Id}/mark-withdrawn", "{}");
         }
     }
 }

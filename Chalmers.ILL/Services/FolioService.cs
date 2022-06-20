@@ -47,7 +47,7 @@ namespace Chalmers.ILL.Services
             var resInstance = CreateInstance(title, orderId);
             var resHolding = CreateHolding(resInstance.Id);
             var resItem = CreateItem(resHolding.Id, barcode, readOnlyAtLibrary);
-            var resCiruclation = CreateCirculation(resItem.Id, folioUserId, pickUpServicePoint);
+            var resCiruclation = CreateCirculation(resItem.Id, folioUserId, pickUpServicePoint, resInstance.Id, resHolding.Id);
         }
 
         private void VerifyBarCode(string barcode)
@@ -74,8 +74,8 @@ namespace Chalmers.ILL.Services
         private Item CreateItem(string holdingId, string barCode, bool readOnlyAtLibrary) => 
             _folioItemService.Post(new ItemBasic(barCode, holdingId, readOnlyAtLibrary), readOnlyAtLibrary);
 
-        private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint) => 
-            _folioCirculationService.Post(new CirculationBasic(itemId, requesterId, ServicePoints()[pickupServicePoint]));
+        private Circulation CreateCirculation(string itemId, string requesterId, string pickupServicePoint, string instanceId, string holdingId) => 
+            _folioCirculationService.Post(new CirculationBasic(itemId, requesterId, ServicePoints()[pickupServicePoint], instanceId, holdingId));
 
         private Dictionary<string, string> ServicePoints() =>
             new Dictionary<string, string>()
