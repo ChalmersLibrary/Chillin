@@ -2,6 +2,7 @@ using Chalmers.ILL.Configuration;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.MediaItems;
 using Chalmers.ILL.Members;
+using Chalmers.ILL.Models;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Patron;
 using Chalmers.ILL.Providers;
@@ -12,6 +13,7 @@ using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
 using Microsoft.Practices.Unity;
 using Nest;
+using System;
 using System.Web.Http;
 using System.Web.Mvc;
 using Umbraco.Core;
@@ -21,6 +23,94 @@ using Unity.Mvc4;
 
 namespace Chalmers.ILL
 {
+    public class FakeFolio : IFolioItemService, IFolioRepository, IFolioService, IFolioInstanceService,
+        IFolioHoldingService, IFolioCirculationService, IFolioUserService
+    {
+        public ItemQuery ByQuery(string query)
+        {
+            return new ItemQuery
+            {
+                Items = new Item[0],
+                TotalRecords = 0
+            };
+        }
+
+        public FolioUser ByUserName(string userName)
+        {
+            return new FolioUser
+            {
+                Id = "7312031232",
+                Personal = new Personal
+                {
+                    FirstName = "John",
+                    LastName = "Doe"
+                }
+            };
+        }
+
+        public void InitFolio(string title, string orderId, string barcode, string pickUpServicePoint, bool readOnlyAtLibrary, string patronCardNumber)
+        {
+            Console.WriteLine("INIT FOLIO");
+        }
+
+        public Item Post(ItemBasic item, bool readOnlyAtLibrary)
+        {
+            Console.WriteLine("POST FOLIO ITEM");
+
+            return null;
+        }
+
+        public string Post(string path, string body)
+        {
+            Console.WriteLine("POST FOLIO PATH BODY");
+
+            return "tjosan";
+        }
+
+        public Instance Post(InstanceBasic item)
+        {
+            Console.WriteLine("POST FOLIO INSTANCE");
+
+            return null;
+        }
+
+        public Holding Post(HoldingBasic item)
+        {
+            Console.WriteLine("POST FOLIO HOLDING BASIC");
+
+            return null;
+        }
+
+        public Circulation Post(CirculationBasic item)
+        {
+            Console.WriteLine("POST FOLIO CIRCULATION");
+
+            return null;
+        }
+
+        public void Put(Item item)
+        {
+            Console.WriteLine("PUT FOLIO ITEM");
+        }
+
+        public string Put(string path, string body)
+        {
+            Console.WriteLine("PUT FOLIO PATH BODY");
+
+            return "tjosan";
+        }
+
+        public void SetItemToWithdrawn(string id)
+        {
+            Console.WriteLine("FOLIO SET ITEM TO WITHDRAWN " + id);
+        }
+
+        string IFolioRepository.ByQuery(string path)
+        {
+            return "IFolioRepository";
+        }
+    }
+
     public static class Bootstrapper
     {
         public static IUnityContainer Initialise()
@@ -62,14 +152,25 @@ namespace Chalmers.ILL
             container.RegisterType<ITemplateService, ElasticsearchTemplateService>();
             container.RegisterType<IAffiliationDataProvider, SolrLibcdksAffiliationDataProvider>();
 
+            container.RegisterType<IChillinTextRepository, ChillinTextRepository>();
             container.RegisterType<IJsonService, JsonService>();
+
+            // Uncomment to not touch FOLIO
+            /*container.RegisterType<IFolioItemService, FakeFolio>();
+            container.RegisterType<IFolioRepository, FakeFolio>();
+            container.RegisterType<IFolioService, FakeFolio>();
+            container.RegisterType<IFolioInstanceService, FakeFolio>();
+            container.RegisterType<IFolioHoldingService, FakeFolio>();
+            container.RegisterType<IFolioCirculationService, FakeFolio>();
+            container.RegisterType<IFolioUserService, FakeFolio>();*/
+
+            // Comment these to not touch FOLIO
             container.RegisterType<IFolioItemService, FolioItemService>();
             container.RegisterType<IFolioRepository, FolioRepository>();
             container.RegisterType<IFolioService, FolioService>();
             container.RegisterType<IFolioInstanceService, FolioInstanceService>();
             container.RegisterType<IFolioHoldingService, FolioHoldingService>();
             container.RegisterType<IFolioCirculationService, FolioCirculationService>();
-            container.RegisterType<IChillinTextRepository, ChillinTextRepository>();
             container.RegisterType<IFolioUserService, FolioUserService>();
 
             var templateService = container.Resolve<ITemplateService>();
