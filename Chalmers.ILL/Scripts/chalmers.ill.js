@@ -846,30 +846,34 @@ function loadLogItems(id)
 
 /* Set new property values for Provider from form */
 
-function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInformation, followUpDate, updateStatusAndFollowUpDate)
+function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInformation, followUpDate, patronAccountActive, updateStatusAndFollowUpDate)
 {
     updateStatusAndFollowUpDate = typeof updateStatusAndFollowUpDate !== "undefined" ? updateStatusAndFollowUpDate : true;
 
-    lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider", {
-        nodeId: nodeId,
-        providerName: providerName,
-        providerOrderId: providerOrderId.trim(),
-        providerInformation: providerInformation,
-        newFollowUpDate: followUpDate,
-        updateStatusAndFollowUpDate: updateStatusAndFollowUpDate
-    }).done(function (json) {
-        if (json.Success) {
-            loadOrderItemDetails(nodeId);
-        }
-        else {
-            alert(json.Message);
-        }
-        unlockScreen();
-    }).fail(function (jqxhr, textStatus, error) {
-        alert("Error: " + textStatus + " " + error);
-        unlockScreen();
-    });
+	if (typeof patronAccountActive !== "undefined" || confirm("Information från FOLIO om låntagarens konto är aktivt saknas. Vill du fortsätta med beställningen ändå?")) {
+		if (patronAccountActive || typeof patronAccountActive === "undefined" || confirm("Det ser ut som att låntagarens konto i FOLIO är inaktivt. Vill du fortsätta ändå?")) {
+			lockScreen();
+			$.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider", {
+				nodeId: nodeId,
+				providerName: providerName,
+				providerOrderId: providerOrderId.trim(),
+				providerInformation: providerInformation,
+				newFollowUpDate: followUpDate,
+				updateStatusAndFollowUpDate: updateStatusAndFollowUpDate
+			}).done(function (json) {
+				if (json.Success) {
+					loadOrderItemDetails(nodeId);
+				}
+				else {
+					alert(json.Message);
+				}
+				unlockScreen();
+			}).fail(function (jqxhr, textStatus, error) {
+				alert("Error: " + textStatus + " " + error);
+				unlockScreen();
+			});
+		}
+	}
 }
 
 /* Set new property values for Reference from form */

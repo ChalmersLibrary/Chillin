@@ -31,6 +31,7 @@ namespace Chalmers.ILL.Models
         public int record_id { get; set; }
         public string aff { get; set; }
         public List<SierraAddressModel> adress { get; set; }
+        public bool? active { get; set; }
     }
 
     public class SierraAddressModel
