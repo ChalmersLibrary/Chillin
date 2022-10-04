@@ -162,7 +162,7 @@
         if (localLoan) {
             confirm("Lägg i röd slip EJ HEMLÅN i boken");
         }
-        if (typeof patronAccountActive !== "undefined" || confirm("Information från FOLIO om låntagarens konto är aktivt saknas. Vill du fortsätta med beställningen ändå?")) {
+        if (typeof patronAccountActive !== "undefined" || confirm("Information från FOLIO om låntagarens konto är aktivt saknas. Vill du fortsätta med mottagning av bok ändå?")) {
             if (patronAccountActive || typeof patronAccountActive === "undefined" || confirm("Det ser ut som att låntagarens konto i FOLIO är inaktivt. Vill du fortsätta ändå?")) {
                 if (hasTitleToFolioBeenEdited || confirm("Du har inte ändrat Folio/EDS titeln. Är du säker på att du vill fortsätta?")) {
                     if (hasBarcodeToFolioBeenEdited || confirm("Du har inte ändrat streckkoden för boken. Är du säker på att du vill fortsätta?")) {
