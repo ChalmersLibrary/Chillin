@@ -15,6 +15,8 @@ namespace Chalmers.ILL.Templates
         string GetTemplateData(string nodeName, OrderItemModel orderItem);
         string GetTemplateData(int templateId, OrderItemModel orderItem);
         void SetTemplateData(int nodeId, string data);
+
+        void CreateTemplate(string description, bool acquisition);
         List<Template> PopulateTemplateList(List<Template> list);
         string GetPrettyLibraryNameFromLibraryAbbreviation(string libraryName);
 

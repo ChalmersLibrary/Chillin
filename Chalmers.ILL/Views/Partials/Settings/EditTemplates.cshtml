@@ -1,6 +1,17 @@
 ﻿@model Chalmers.ILL.Models.PartialPage.Settings.EditTemplates
 
 <div class="col-lg-12">
+    <h3>Skapa ny mall</h3>
+    <div class="form-group">
+        <label for="new-template-description">Beskrivning av ny mall</label>
+        <input type="text" class="form-control" id="new-template-description" name="new-template-description">
+        <label for="new-template-acquisition">Mallen berör inköp</label>
+        <input type="checkbox" id="new-template-acquisition" name="new-template-acquisition">
+    </div>
+    <button class="btn btn-success" onclick="createTemplate();">Skapa ny mall</button>
+</div>
+
+<div class="col-lg-12">
     <h3>Editera mallar</h3>
 </div>
 @{
@@ -69,5 +80,27 @@
             }
             unlockScreen();
         });
+    }
+
+    function createTemplate() {
+        let description = $("#new-template-description").val().trim()
+        let isAcquisitionChecked = document.querySelector("#new-template-acquisition").checked
+        if (description) {
+            lockScreen();
+            $.post("/umbraco/surface/TemplatesSurface/CreateTemplate", {
+                description: description,
+                acquisition: isAcquisitionChecked
+            }).done(function (json) {
+                if (!json.Success) {
+                    alert(json.Message)
+                    unlockScreen()
+                } else {
+                    setTimeout(() => {
+                        $("#template-settings-link").click()
+                        unlockScreen()
+                    }, 4000)
+                }
+            });
+        }
     }
 </script>
