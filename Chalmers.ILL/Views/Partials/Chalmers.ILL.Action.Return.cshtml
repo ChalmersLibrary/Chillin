@@ -18,14 +18,18 @@
     <script type="text/javascript">
         function returnItem() {
             lockScreen();
+            let previousStatus = @Model.OrderItem.Status.Substring(0, 2)
             $.post("/umbraco/surface/OrderItemReturnSurface/ReturnItem",
                 {
                     nodeId: "@Model.OrderItem.NodeId",
                     bookId: "@Model.OrderItem.BookId",
-                    status: @Model.OrderItem.Status.Substring(0, 2)
+                    status: previousStatus
                 }).done(function (json) {
                 if (json.Success) {
                     loadOrderItemDetails(@Model.OrderItem.NodeId);
+                    if (previousStatus === 17) {
+                        alert("Glöm inte att returnera boken i FOLIO också.")
+                    }
                 }
                 else {
                     alert(json.Message);

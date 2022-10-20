@@ -37,6 +37,7 @@
 
     function changeProviderReturnDate() {
         lockScreen();
+        let previousStatus = @Model.OrderItem.Status.Substring(0, 2)
         $.post("/umbraco/surface/OrderItemProviderReturnDateSurface/ChangeReturnDate", {
             packJson: JSON.stringify({
                 nodeId: @Model.OrderItem.NodeId,
@@ -46,6 +47,9 @@
         }).done(function (json) {
             if (json.Success) {
                 loadOrderItemDetails(@Model.OrderItem.NodeId);
+                if (previousStatus === 17) {
+                    alert("Glöm inte att ändra lånetid mot låntagaren i FOLIO också.")
+                }
             }
             else {
                 alert(json.Message);

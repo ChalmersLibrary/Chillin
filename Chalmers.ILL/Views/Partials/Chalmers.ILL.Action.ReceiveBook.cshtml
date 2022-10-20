@@ -59,8 +59,8 @@
         </div>
     </div>
     <div class="col-md-12">
-        <button class="btn btn-success" onclick="sendToFolio(false, true)" @(Model.OrderItem.Status == "17:FOLIO" ? "disabled" : "") >Ta emot för vanligt lån</button>
-        <button class="btn btn-success" onclick="sendToFolio(true, true)" @(Model.OrderItem.Status == "17:FOLIO" ? "disabled" : "")>Ta emot för läsesalslån</button>
+        <button class="btn btn-success" onclick="sendToFolio(false, true, @(Model.OrderItem.SierraInfo.active.HasValue ? Model.OrderItem.SierraInfo.active.Value.ToString().ToLowerInvariant() : "undefined"))" @(Model.OrderItem.Status == "17:FOLIO" ? "disabled" : "") >Ta emot för vanligt lån</button>
+        <button class="btn btn-success" onclick="sendToFolio(true, true, @(Model.OrderItem.SierraInfo.active.HasValue ? Model.OrderItem.SierraInfo.active.Value.ToString().ToLowerInvariant() : "undefined"))" @(Model.OrderItem.Status == "17:FOLIO" ? "disabled" : "")>Ta emot för läsesalslån</button>
     </div>
 </div>
 
@@ -158,46 +158,50 @@
         }
     }
 
-    function sendToFolio(localLoan, print) {
+    function sendToFolio(localLoan, print, patronAccountActive) {
         if (localLoan) {
             confirm("Lägg i röd slip EJ HEMLÅN i boken");
         }
-        if (hasTitleToFolioBeenEdited || confirm("Du har inte ändrat Folio/EDS titeln. Är du säker på att du vill fortsätta?")) {
-            if (hasBarcodeToFolioBeenEdited || confirm("Du har inte ändrat streckkoden för boken. Är du säker på att du vill fortsätta?")) {
-                if (hasProviderInfoBeenEdited || confirm("Du har inte ändrat leverantörsdata. Är du säker på att du vill fortsätta?")) {
-                    $('#container #printDiv').insertAfter('#container');
-                    var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
-                    $('.dueDatePlaceHolder').html(dueDate);
+        if (typeof patronAccountActive !== "undefined" || confirm("Information från FOLIO om låntagarens konto är aktivt saknas. Vill du fortsätta med mottagning av bok ändå?")) {
+            if (patronAccountActive || typeof patronAccountActive === "undefined" || confirm("Det ser ut som att låntagarens konto i FOLIO är inaktivt. Vill du fortsätta ändå?")) {
+                if (hasTitleToFolioBeenEdited || confirm("Du har inte ändrat Folio/EDS titeln. Är du säker på att du vill fortsätta?")) {
+                    if (hasBarcodeToFolioBeenEdited || confirm("Du har inte ändrat streckkoden för boken. Är du säker på att du vill fortsätta?")) {
+                        if (hasProviderInfoBeenEdited || confirm("Du har inte ändrat leverantörsdata. Är du säker på att du vill fortsätta?")) {
+                            $('#container #printDiv').insertAfter('#container');
+                            var dueDate = moment($('#dueDate').val()).format("YYYY-MM-DD");
+                            $('.dueDatePlaceHolder').html(dueDate);
 
-                    var r = true;
-                    if (print) {
-                        let titleElem = document.getElementById('titleToFolio');
-                        let printElem = document.getElementById('printTitle');
-                        printElem.innerText = titleElem.value;
-                        console.log(`Title: ${titleElem.value} Print: ${printElem.value}`);
-                        window.print();
-                        
-                        r = window.confirm("Skrevs bokslippen ut korrekt?");
-                    }
-                    if (r) {
-                        setOrderItemDeliveryReceived(
+                            var r = true;
+                            if (print) {
+                                let titleElem = document.getElementById('titleToFolio');
+                                let printElem = document.getElementById('printTitle');
+                                printElem.innerText = titleElem.value;
+                                console.log(`Title: ${titleElem.value} Print: ${printElem.value}`);
+                                window.print();
+
+                                r = window.confirm("Skrevs bokslippen ut korrekt?");
+                            }
+                            if (r) {
+                                setOrderItemDeliveryReceived(
                             @Model.OrderItem.NodeId,
-                            $('#bookId').val(),
-                            $('#dueDate').val(),
-                            $('#providerInformation').val(),
-                            $("#log-message").val(),
-                            localLoan,
-                            $("#titleToFolio").val(),
-                            "@Model.OrderItem.OrderId",
-                            "@Model.OrderItem.DeliveryLibrary",
-                            "@Model.OrderItem.SierraInfo.id"
-                        );
+                                    $('#bookId').val(),
+                                    $('#dueDate').val(),
+                                    $('#providerInformation').val(),
+                                    $("#log-message").val(),
+                                    localLoan,
+                                    $("#titleToFolio").val(),
+                                    "@Model.OrderItem.OrderId",
+                                    "@Model.OrderItem.DeliveryLibrary",
+                                    "@Model.OrderItem.SierraInfo.id"
+                                );
 
-                        $("#printDiv").remove();
-                    } else {
-                        alert("Leveransfunktionen kommer laddas om, försök därefter igen.");
-                        $("#printDiv").remove();
-                        loadReceiveBookAction(@Model.OrderItem.NodeId);
+                                $("#printDiv").remove();
+                            } else {
+                                alert("Leveransfunktionen kommer laddas om, försök därefter igen.");
+                                $("#printDiv").remove();
+                                loadReceiveBookAction(@Model.OrderItem.NodeId);
+                            }
+                        }
                     }
                 }
             }

@@ -357,6 +357,9 @@
     <div>
         <span class='label @((String.IsNullOrEmpty(Model.OrderItem.SierraInfo.mblock) || Model.OrderItem.SierraInfo.mblock=="-") ? "label-primary" : "label-danger") order-item-var-label'>Folio - M-block</span> @Model.OrderItem.SierraInfo.mblock
     </div>
+    <div>
+        <span class='label @(Model.OrderItem.SierraInfo.active.HasValue && Model.OrderItem.SierraInfo.active.Value ? "label-primary" : "label-danger") order-item-var-label'>Folio - Active</span> @Model.OrderItem.SierraInfo.active
+    </div>
 </div>
 
 <!-- Log list -->

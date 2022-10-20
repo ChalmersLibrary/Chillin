@@ -190,5 +190,10 @@ namespace Chalmers.ILL.Templates
 
             return template.ToString();
         }
+
+        public void CreateTemplate(string description, bool acquisition)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

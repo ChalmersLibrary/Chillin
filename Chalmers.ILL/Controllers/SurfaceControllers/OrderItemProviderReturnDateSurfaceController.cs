@@ -57,7 +57,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     _orderItemManager.AddLogItem(pack.nodeId, "LOG", pack.logMsg, eventId, false, false);
                 }
 
-                if (orderItem.LastDeliveryStatusId != -1)
+                var statusValue = Int32.Parse(orderItem.Status.Substring(0, 2));
+                if (statusValue != 17 && orderItem.LastDeliveryStatusId != -1)
                 {
                     _orderItemManager.SetStatus(pack.nodeId, orderItem.LastDeliveryStatusId, eventId, false, false);
                 }

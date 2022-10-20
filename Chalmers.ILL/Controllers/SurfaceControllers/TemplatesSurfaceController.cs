@@ -97,6 +97,27 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return Json(json, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpPost, ValidateInput(false)]
+        public ActionResult CreateTemplate(string description, bool acquisition)
+        {
+            var json = new ResultResponse();
+
+            try
+            {
+                _templateService.CreateTemplate(description, acquisition);
+
+                json.Success = true;
+                json.Message = "Skapade ny mall.";
+            }
+            catch (Exception e)
+            {
+                json.Success = false;
+                json.Message = "Error: " + e.Message;
+            }
+
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
         #region Private methods.
 
         private List<string> PopulateAvailableOrderItemProperties(List<string> list)

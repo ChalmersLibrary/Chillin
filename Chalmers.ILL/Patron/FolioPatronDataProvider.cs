@@ -249,6 +249,7 @@ namespace Chalmers.ILL.Patron
             result.ptype = ConvertToSierraPtype(recordData.patronGroup.ToString());
             result.expdate = recordData.expirationDate;
             result.pnum = recordData.username;
+            result.active = recordData.active;
             result.aff = _affiliationDataProvider.GetAffiliationFromPersonNumber(Convert.ToString(recordData.username));
         }
 

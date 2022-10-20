@@ -94,6 +94,39 @@ namespace Chalmers.ILL.Templates
             }
         }
 
+        public void CreateTemplate(string description, bool acquisition)
+        {
+            var id = Guid.NewGuid();
+
+            var response = _elasticClient.Search<Template>(s => s
+                .Size(0)
+                .Index(_config.ElasticSearchTemplatesIndex)
+                .AllTypes()
+                .Query(q => q.MatchAll())
+                .Aggregations(a => a.Max("max_id", am => am.Field("id"))));
+            var maxIdValueAggregate = response.Aggregations["max_id"] as ValueAggregate;
+            var highestIdString = maxIdValueAggregate.Value.Value.ToString();
+            var random = new Random();
+            var nextIdString = Int32.Parse(highestIdString) + random.Next(0, 10);
+
+
+            var newTemplate = new Template();
+            newTemplate.Id = nextIdString;
+            newTemplate.NodeName = "NodeName" + nextIdString;
+            newTemplate.CreateDate = DateTime.Now;
+            newTemplate.UpdateDate = DateTime.Now;
+            newTemplate.NodeTypeAlias = "ChalmersILLTemplate";
+            newTemplate.Description = description;
+            newTemplate.Data = "";
+            newTemplate.Automatic = false;
+            newTemplate.Acquisition = acquisition;
+
+            _elasticClient.Index(newTemplate, i => i
+                .Index(_config.ElasticSearchTemplatesIndex)
+                .Type("_doc")
+                .Id(nextIdString));
+        }
+
         public List<Template> PopulateTemplateList(List<Template> list)
         {
             list.AddRange(GetAllTemplates());

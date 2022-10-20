@@ -912,6 +912,7 @@ namespace Chalmers.ILL.OrderItems
                     orderItem.SierraInfo.mblock = newSierraInfo.mblock;
                     orderItem.SierraInfo.ptype = newSierraInfo.ptype;
                     orderItem.SierraInfo.record_id = newSierraInfo.record_id;
+                    orderItem.SierraInfo.active = newSierraInfo.active;
                     orderItem.SierraInfo.aff = aff;
                     orderItem.PatronAffiliation = aff;
                     orderItem.SierraInfoStr = JsonConvert.SerializeObject(orderItem.SierraInfo);
