@@ -156,22 +156,22 @@ namespace Chalmers.ILL
             container.RegisterType<IJsonService, JsonService>();
 
             // Uncomment to not touch FOLIO
-            /*container.RegisterType<IFolioItemService, FakeFolio>();
+            container.RegisterType<IFolioItemService, FakeFolio>();
             container.RegisterType<IFolioRepository, FakeFolio>();
             container.RegisterType<IFolioService, FakeFolio>();
             container.RegisterType<IFolioInstanceService, FakeFolio>();
             container.RegisterType<IFolioHoldingService, FakeFolio>();
             container.RegisterType<IFolioCirculationService, FakeFolio>();
-            container.RegisterType<IFolioUserService, FakeFolio>();*/
+            container.RegisterType<IFolioUserService, FakeFolio>();
 
             // Comment these to not touch FOLIO
-            container.RegisterType<IFolioItemService, FolioItemService>();
+            /*container.RegisterType<IFolioItemService, FolioItemService>();
             container.RegisterType<IFolioRepository, FolioRepository>();
             container.RegisterType<IFolioService, FolioService>();
             container.RegisterType<IFolioInstanceService, FolioInstanceService>();
             container.RegisterType<IFolioHoldingService, FolioHoldingService>();
             container.RegisterType<IFolioCirculationService, FolioCirculationService>();
-            container.RegisterType<IFolioUserService, FolioUserService>();
+            container.RegisterType<IFolioUserService, FolioUserService>();*/
 
             var templateService = container.Resolve<ITemplateService>();
             var affiliationDataProvider = container.Resolve<IAffiliationDataProvider>();
