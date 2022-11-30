@@ -555,6 +555,14 @@
     <Compile Include="Migrations\202209270520498_AddActiveToSierraModel.Designer.cs">
       <DependentUpon>202209270520498_AddActiveToSierraModel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202211221457293_AddEResourceAccess.cs" />
+    <Compile Include="Migrations\202211221457293_AddEResourceAccess.Designer.cs">
+      <DependentUpon>202211221457293_AddEResourceAccess.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202211221509378_AddCid.cs" />
+    <Compile Include="Migrations\202211221509378_AddCid.Designer.cs">
+      <DependentUpon>202211221509378_AddCid.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ChillinText.cs" />
     <Compile Include="Models\ItemBasic.cs" />
@@ -644,6 +652,9 @@
     <Compile Include="Patron\IAffiliationDataProvider.cs" />
     <Compile Include="Patron\InvalidTokenException.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />
+    <Compile Include="Patron\IPersonDataProvider.cs" />
+    <Compile Include="Patron\PdbAffiliationDataProvider.cs" />
+    <Compile Include="Patron\PdbPersonDataProvider.cs" />
     <Compile Include="Patron\SierraCache.cs" />
     <Compile Include="Patron\SierraConnectionException.cs" />
     <Compile Include="Patron\SolrLibcdksAffiliationDataProvider.cs" />
@@ -742,6 +753,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202209270520498_AddActiveToSierraModel.resx">
       <DependentUpon>202209270520498_AddActiveToSierraModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202211221457293_AddEResourceAccess.resx">
+      <DependentUpon>202211221457293_AddEResourceAccess.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202211221509378_AddCid.resx">
+      <DependentUpon>202211221509378_AddCid.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -14,6 +14,7 @@ using Chalmers.ILL.UmbracoApi;
 using Microsoft.Practices.Unity;
 using Nest;
 using System;
+using System.Net.Http;
 using System.Web.Http;
 using System.Web.Mvc;
 using Umbraco.Core;
@@ -143,6 +144,7 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
             container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
             container.RegisterInstance<IElasticClient>(elasticClient);
+            container.RegisterInstance(new HttpClient());
 
             container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
@@ -150,7 +152,7 @@ namespace Chalmers.ILL
             container.RegisterType<IMediaItemManager, UmbracoMediaItemManager>("Legacy");
             container.RegisterType<IOrderItemSearcher, ElasticSearchOrderItemSearcher>();
             container.RegisterType<ITemplateService, ElasticsearchTemplateService>();
-            container.RegisterType<IAffiliationDataProvider, SolrLibcdksAffiliationDataProvider>();
+            container.RegisterType<IAffiliationDataProvider, PdbAffiliationDataProvider>();
 
             container.RegisterType<IChillinTextRepository, ChillinTextRepository>();
             container.RegisterType<IJsonService, JsonService>();
@@ -172,6 +174,8 @@ namespace Chalmers.ILL
             container.RegisterType<IFolioHoldingService, FolioHoldingService>();
             container.RegisterType<IFolioCirculationService, FolioCirculationService>();
             container.RegisterType<IFolioUserService, FolioUserService>();
+
+            container.RegisterType<IPersonDataProvider, PdbPersonDataProvider>();
 
             var templateService = container.Resolve<ITemplateService>();
             var affiliationDataProvider = container.Resolve<IAffiliationDataProvider>();

@@ -164,7 +164,7 @@ namespace Chalmers.ILL.Patron
             result.mblock = recordData.mblock;
             result.ptype = recordData.ptype;
             result.record_id = Convert.ToInt32(recordId.Remove(recordId.Length - 1).Remove(0, 1));
-            result.aff = _affiliationDataProvider.GetAffiliationFromPersonNumber(recordData.pnum.ToString());
+            _affiliationDataProvider.GetAffiliationFromPersonNumber(recordData.pnum.ToString(), result);
         }
 
         private Models.SierraAddressModel BuildSierraAddressModel(string address)

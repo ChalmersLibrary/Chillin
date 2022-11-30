@@ -138,7 +138,7 @@ namespace Chalmers.ILL.Patron
                 foreach (var user in json.users)
                 {
                     var sierraModelForUser = new SierraModel();
-                    FillInSierraModelFromFolioData(user, null, sierraModelForUser);
+                    FillInSierraModelFromFolioData(user, null, sierraModelForUser, true);
                     res.Add(sierraModelForUser);
                 }
             }
@@ -234,7 +234,7 @@ namespace Chalmers.ILL.Patron
             return res;
         }
 
-        private void FillInSierraModelFromFolioData(dynamic recordData, dynamic mblockData, /* out */ SierraModel result)
+        private void FillInSierraModelFromFolioData(dynamic recordData, dynamic mblockData, /* out */ SierraModel result, bool skipAffiliation = false)
         {
             result.barcode = recordData.barcode;
             result.id = recordData.id;
@@ -250,7 +250,10 @@ namespace Chalmers.ILL.Patron
             result.expdate = recordData.expirationDate;
             result.pnum = recordData.username;
             result.active = recordData.active;
-            result.aff = _affiliationDataProvider.GetAffiliationFromPersonNumber(Convert.ToString(recordData.username));
+            if (!skipAffiliation)
+            {
+                _affiliationDataProvider.GetAffiliationFromPersonNumber(Convert.ToString(recordData.username), result);
+            }
         }
 
         private int ConvertToSierraPtype(string uuid)

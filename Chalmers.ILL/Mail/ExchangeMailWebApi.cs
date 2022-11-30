@@ -30,6 +30,7 @@ namespace Chalmers.ILL.Mail
         /// <returns>The Service reference</returns>
         public void ConnectToExchangeService(string username, string password)
         {
+
             ServicePointManager.ServerCertificateValidationCallback = CertificateValidationCallBack;
             System.Uri exchangeUrl = new System.Uri(ConfigurationManager.AppSettings["chalmersIllExhangeWebServiceUrl"]);
             _service = new ExchangeService(ExchangeVersion.Exchange2010_SP1);
@@ -38,8 +39,8 @@ namespace Chalmers.ILL.Mail
             _service.Credentials = new WebCredentials(username, password);
 
             // Debug flags
-            // service.TraceEnabled = true;
-            // service.TraceFlags = TraceFlags.All;
+            //_service.TraceEnabled = true;
+            //_service.TraceFlags = TraceFlags.All;
 
             // Connect to the EWS surface or die trying
             try

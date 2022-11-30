@@ -2,46 +2,76 @@
 
 <div class="action-header">Hämta beställardata</div>
 
-<form class="form" role="form" onsubmit="return false;">
-    <div class="row">
-        <div class="sub-action-header col-sm-12">
-            Sökning och inläsning från FOLIO
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="input-group col-sm-6">
-                <div id="patron-data-query-count" class="input-group-addon wide">0</div>
-                <input type="text" class="form-control" id="patron-data-query-input" name="patron-data-query-input" value="@Model.PatronEmail">
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div class="row patron-list-header">
-                        <div class="col-sm-2">Namn</div>
-                        <div class="col-sm-3">E-mail</div>
-                        <div class="col-sm-2">Bibliotekskortsnummer</div>
-                        <div class="col-sm-2">Personnummer</div>
-                        <div class="col-sm-1">P-Typ</div>
-                        <div class="col-sm-2">Sista giltighetsdag</div>
-                    </div>
+<div class="row">
+    <div class="col-sm-12">
+        <form class="form" role="form" onsubmit="return false;">
+            <div class="row">
+                <div class="sub-action-header col-sm-12">
+                    Inläsning från PDB
                 </div>
-                <div class="panel-body">
-                    <div id="patron-data-search-result-list" class="patron-list">
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="input-group col-sm-6">
+                        <input type="text" class="form-control" id="patron-data-pdb-import" name="patron-data-pdb-import" placeholder="CID, e-mail eller pnr">
                     </div>
                 </div>
             </div>
-        </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-success" onclick="fetchDataFromPdb();">Läs in beställardata från PDB</button>
+                </div>
+            </div>
+        </form>
     </div>
-    <div class="row">
-        <div class="col-md-6">
-            <button class="btn btn-success" onclick="updateWithSelectedPatronData();">Läs in vald beställardata</button>
-        </div>
+</div>
+
+<br />
+
+<div class="row">
+    <div class="col-sm-12">
+        <form class="form" role="form" onsubmit="return false;">
+            <div class="row">
+                <div class="sub-action-header col-sm-12">
+                    Sökning och inläsning från FOLIO
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="input-group col-sm-6">
+                        <div id="patron-data-query-count" class="input-group-addon wide">0</div>
+                        <input type="text" class="form-control" id="patron-data-query-input" name="patron-data-query-input" value="@Model.PatronEmail">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row patron-list-header">
+                                <div class="col-sm-2">Namn</div>
+                                <div class="col-sm-3">E-mail</div>
+                                <div class="col-sm-2">Bibliotekskortsnummer</div>
+                                <div class="col-sm-2">Personnummer</div>
+                                <div class="col-sm-1">P-Typ</div>
+                                <div class="col-sm-2">Sista giltighetsdag</div>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <div id="patron-data-search-result-list" class="patron-list">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <button class="btn btn-success" onclick="updateWithSelectedPatronData();">Läs in vald beställardata från FOLIO</button>
+                </div>
+            </div>
+        </form>
     </div>
-</form>
+</div>
 <script type="text/javascript">
     function selectPatron(item) {
         $("#patron-data-search-result-list > .row").removeClass("selected-row");
@@ -100,6 +130,25 @@
             var sierraId = selectedItem.find(".patron-data-sierraid").text();
             
             fetchDataFromSierraUsingSierraId(@Model.NodeId, sierraId, true);
+        }
+    }
+
+    function fetchDataFromPdb() {
+        let data = $("#patron-data-pdb-import").val().trim()
+
+        if (data) {
+            lockScreen();
+            $.post("/umbraco/surface/OrderItemPatronDataSurface/FetchPatronDataUsingPdbRoundtrip", {
+                orderItemNodeId: @Model.NodeId,
+                data: encodeURIComponent(data)
+            }).done(function (json) {
+                if (json.Success) {
+                    loadOrderItemDetails(@Model.NodeId);
+                } else {
+                    alert(json.Message);
+                }
+                unlockScreen();
+            });
         }
     }
 
