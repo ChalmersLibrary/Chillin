@@ -18,6 +18,7 @@ using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Templates;
+using Umbraco.Core.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -169,6 +170,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
             catch (Exception e)
             {
+                LogHelper.Error<OrderItemMailSurfaceController>("Error while sending mail for new order.", e);
                 json.Success = false;
                 json.Message = "Error: " + e.Message;
             }
