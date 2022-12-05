@@ -29,14 +29,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IOrderItemManager _orderItemManager;
         IPatronDataProvider _patronDataProviderSierraCache;
         IPatronDataProvider _patronDataProviderSierra;
+        IPersonDataProvider _personDataProvider;
         IUmbracoWrapper _umbraco;
 
-        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProviderSierraCache, 
-            IPatronDataProvider patronDataProviderSierra, IUmbracoWrapper umbraco)
+        public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProviderSierraCache,
+            IPatronDataProvider patronDataProviderSierra, IPersonDataProvider personDataProvider, IUmbracoWrapper umbraco)
         {
             _orderItemManager = orderItemManager;
             _patronDataProviderSierraCache = patronDataProviderSierraCache;
             _patronDataProviderSierra = patronDataProviderSierra;
+            _personDataProvider = personDataProvider;
             _umbraco = umbraco;
         }
 
@@ -213,6 +215,50 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 json.Success = false;
                 json.Message = "Failed to load Sierra data from library card number: " + e.Message;
+            }
+
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
+
+        /// <summary>
+        /// Retrieves data from PDB and then from FOLIO.
+        /// </summary>
+        /// <param name="orderItemNodeId">The id of the order item which the document should be bound to.</param>
+        /// <param name="data">CID, e-mail or pnr</param>
+        /// <returns>Returns a result indicating how the request went.</returns>
+        [HttpPost]
+        public ActionResult FetchPatronDataUsingPdbRoundtrip(int orderItemNodeId, string data)
+        {
+            var json = new ResultResponse();
+
+            try
+            {
+                var content = _orderItemManager.GetOrderItem(orderItemNodeId);
+                var eventId = _orderItemManager.GenerateEventId(EVENT_TYPE);
+
+                var sm = new SierraModel();
+                var smFromPdb = _personDataProvider.GetPatronInfoFromLibraryCidPersonnummerOrEmail(data, data);
+
+                if (!String.IsNullOrEmpty(smFromPdb.cid))
+                {
+                    sm = _patronDataProviderSierra.GetPatronInfoFromLibraryCardNumberOrPersonnummer(smFromPdb.pnum, smFromPdb.pnum);
+                }
+
+
+                if (!String.IsNullOrEmpty(sm.id))
+                {
+                    _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library, sm.aff);
+                    _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content.NodeId, false, false);
+                }
+                _orderItemManager.AddSierraDataToLog(orderItemNodeId, sm, eventId);
+
+                json.Success = true;
+                json.Message = "Succcessfully loaded Sierra data from \"personnummer\" or library card number.";
+            }
+            catch (Exception e)
+            {
+                json.Success = false;
+                json.Message = "Failed to load Sierra data from \"personnummer\" or library card number: " + e.Message;
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);

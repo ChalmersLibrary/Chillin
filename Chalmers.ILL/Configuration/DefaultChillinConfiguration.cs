@@ -44,5 +44,21 @@ namespace Chalmers.ILL.Configuration
                 return ConfigurationManager.AppSettings["BlobStorageConnectionString"];
             }
         }
+
+        public string LibPSearchUrl
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["LibPSearchUrl"];
+            }
+        }
+
+        public string LibPSearchApiKey
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["LibPSearchApiKey"];
+            }
+        }
     }
 }

@@ -32,6 +32,8 @@ namespace Chalmers.ILL.Models
         public string aff { get; set; }
         public List<SierraAddressModel> adress { get; set; }
         public bool? active { get; set; }
+        public bool? e_resource_access { get; set; }
+        public string cid { get; set; }
     }
 
     public class SierraAddressModel

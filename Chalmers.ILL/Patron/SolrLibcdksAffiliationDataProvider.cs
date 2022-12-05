@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Chalmers.ILL.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -11,9 +12,9 @@ namespace Chalmers.ILL.Patron
 {
     public class SolrLibcdksAffiliationDataProvider : IAffiliationDataProvider
     {
-        public string GetAffiliationFromPersonNumber(string pnum)
+        public void GetAffiliationFromPersonNumber(string pnum, /*out*/ SierraModel sm)
         {
-            var res = "N/A";
+            sm.aff = "N/A";
 
             var fixedPnum = FixPersonNumber(pnum);
 
@@ -40,17 +41,15 @@ namespace Chalmers.ILL.Patron
 
                     if (json.response.numFound == 1)
                     {
-                        res = json.response.docs[0].aff.ToString();
+                        sm.aff = json.response.docs[0].aff.ToString();
                     }
 
                 }
                 catch (Exception)
                 {
-                    res = "Misslyckad inläsning";
+                    sm.aff = "Misslyckad inläsning";
                 }
             }
-
-            return res;
         }
 
         #region Private methods

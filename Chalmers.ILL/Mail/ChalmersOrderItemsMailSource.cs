@@ -39,6 +39,7 @@ namespace Chalmers.ILL.Mail
         INotifier _notifier;
         IMediaItemManager _mediaItemManager;
         IPatronDataProvider _patronDataProvider;
+        IPersonDataProvider _personDataProvider;
         IOrderItemSearcher _orderItemSearcher;
 
         private SourcePollingResult _result;
@@ -51,13 +52,15 @@ namespace Chalmers.ILL.Mail
         }
 
         public ChalmersOrderItemsMailSource(IExchangeMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager,
-            INotifier notifier, IMediaItemManager mediaItemManager, IPatronDataProvider patronDataProvider, IOrderItemSearcher orderItemSearcher)
+            INotifier notifier, IMediaItemManager mediaItemManager, IPatronDataProvider patronDataProvider, IPersonDataProvider personDataProvider, 
+            IOrderItemSearcher orderItemSearcher)
         {
             _exchangeMailWebApi = exchangeMailWebApi;
             _orderItemManager = orderItemManager;
             _notifier = notifier;
             _mediaItemManager = mediaItemManager;
             _patronDataProvider = patronDataProvider;
+            _personDataProvider = personDataProvider;
             _orderItemSearcher = orderItemSearcher;
         }
 
@@ -159,7 +162,27 @@ namespace Chalmers.ILL.Mail
                         // New order received from someone
                         if (item.Type == MailQueueType.NEW)
                         {
-                            list[indexet].SierraPatronInfo = _patronDataProvider.GetPatronInfoFromLibraryCardNumberOrPersonnummer(item.PatronCardNo, item.PatronCardNo);
+                            var smFromFolio = _patronDataProvider.GetPatronInfoFromLibraryCardNumberOrPersonnummer(item.PatronCardNo, item.PatronCardNo);
+
+                            var smFromPdb = _personDataProvider.GetPatronInfoFromLibraryCidPersonnummerOrEmail(item.PatronCardNo, item.PatronEmail);
+
+                            if (String.IsNullOrEmpty(smFromFolio.id) && !String.IsNullOrEmpty(smFromPdb.cid))
+                            {
+                                // We found nothing in patron provider (FOLIO) but we found something in person provider (PDB)
+                                // Try against patron provider again using data from person provider
+                                smFromFolio = _patronDataProvider.GetPatronInfoFromLibraryCardNumberOrPersonnummer(item.PatronCardNo, smFromPdb.pnum);
+                            }
+
+
+
+                            if (String.IsNullOrEmpty(smFromFolio.id) && !String.IsNullOrEmpty(smFromPdb.cid))
+                            {
+                                // We got nothing from patron provider so we use data from person provider only.
+                                smFromFolio = smFromPdb;
+                            }
+
+
+                            list[indexet].SierraPatronInfo = smFromFolio;
                         }
 
                         indexet++;

@@ -131,14 +131,14 @@
       <Private>True</Private>
       <HintPath>..\packages\EWS-Api-2.0.1.0.1\lib\net35\Microsoft.Exchange.WebServices.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin">
-      <HintPath>..\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
+    <Reference Include="Microsoft.Owin, Version=4.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.4.2.2\lib\net45\Microsoft.Owin.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin.Host.SystemWeb">
-      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.2.0.2\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
+    <Reference Include="Microsoft.Owin.Host.SystemWeb, Version=4.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Host.SystemWeb.4.2.2\lib\net45\Microsoft.Owin.Host.SystemWeb.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Owin.Security">
-      <HintPath>..\packages\Microsoft.Owin.Security.2.0.2\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+    <Reference Include="Microsoft.Owin.Security, Version=4.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.4.2.2\lib\net45\Microsoft.Owin.Security.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation">
       <HintPath>..\packages\CommonServiceLocator.1.0\lib\NET35\Microsoft.Practices.ServiceLocation.dll</HintPath>
@@ -220,6 +220,7 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Net.Http.2.0.20505.0\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
     </Reference>
+    <Reference Include="System.Security" />
     <Reference Include="System.Spatial, Version=5.8.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Spatial.5.8.4\lib\net40\System.Spatial.dll</HintPath>
       <Private>True</Private>
@@ -554,6 +555,14 @@
     <Compile Include="Migrations\202209270520498_AddActiveToSierraModel.Designer.cs">
       <DependentUpon>202209270520498_AddActiveToSierraModel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202211221457293_AddEResourceAccess.cs" />
+    <Compile Include="Migrations\202211221457293_AddEResourceAccess.Designer.cs">
+      <DependentUpon>202211221457293_AddEResourceAccess.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202211221509378_AddCid.cs" />
+    <Compile Include="Migrations\202211221509378_AddCid.Designer.cs">
+      <DependentUpon>202211221509378_AddCid.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ChillinText.cs" />
     <Compile Include="Models\ItemBasic.cs" />
@@ -643,6 +652,9 @@
     <Compile Include="Patron\IAffiliationDataProvider.cs" />
     <Compile Include="Patron\InvalidTokenException.cs" />
     <Compile Include="Patron\IPatronDataProvider.cs" />
+    <Compile Include="Patron\IPersonDataProvider.cs" />
+    <Compile Include="Patron\PdbAffiliationDataProvider.cs" />
+    <Compile Include="Patron\PdbPersonDataProvider.cs" />
     <Compile Include="Patron\SierraCache.cs" />
     <Compile Include="Patron\SierraConnectionException.cs" />
     <Compile Include="Patron\SolrLibcdksAffiliationDataProvider.cs" />
@@ -741,6 +753,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202209270520498_AddActiveToSierraModel.resx">
       <DependentUpon>202209270520498_AddActiveToSierraModel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202211221457293_AddEResourceAccess.resx">
+      <DependentUpon>202211221457293_AddEResourceAccess.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202211221509378_AddCid.resx">
+      <DependentUpon>202211221509378_AddCid.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

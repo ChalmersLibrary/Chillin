@@ -13,5 +13,7 @@ namespace Chalmers.ILL.Configuration
         string ElasticSearchIndex { get; }
         string ElasticSearchTemplatesIndex { get; }
         string BaseUrl { get; }
+        string LibPSearchUrl { get; }
+        string LibPSearchApiKey { get; }
     }
 }

@@ -296,6 +296,23 @@
     <div>
         <span class="label label-primary order-item-var-label">Uppföljning</span> @Model.OrderItem.FollowUpDate.ToString("yyyy-MM-dd HH:mm", CultureInfo.CurrentCulture)
     </div>
+    <div>
+        @{
+            var notEmpty = !String.IsNullOrEmpty(Model.OrderItem.ProviderInformation);
+            var moreThanOneRow = Model.OrderItem.ProviderInformation.Contains("\n");
+            <span class="order-item-var-row">
+                <span class="label label-primary order-item-var-label">Lev. - Namn</span>
+                @Model.OrderItem.ProviderName@(notEmpty && !moreThanOneRow ? " (" + Model.OrderItem.ProviderInformation + ")" : "")
+            </span>
+            if (notEmpty && moreThanOneRow)
+            {
+                <span class="glyphicon glyphicon-exclamation-sign" data-toggle="popover" data-content="@Model.OrderItem.ProviderInformation.Replace("\n", "<br/>")"></span>
+            }
+        }
+    </div>
+    <div>
+        <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lev. - Order ID</span> @Model.OrderItem.ProviderOrderId</span>
+    </div>
     @if (Model.OrderItem.DeliveryDate.Year >= 1975 && Model.OrderItem.Type == "Bok")
     {
         <div>
@@ -321,24 +338,13 @@
         <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lt. - Valt bibl.</span> @Model.OrderItem.DeliveryLibraryPrettyName</span>
     </div>
     <div>
-        <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lt. - Tillhörighet</span> @Model.OrderItem.PatronAffiliation</span>
+        <span class="order-item-var-row"><span class='label @(Model.OrderItem.SierraInfo.aff == "Student" || Model.OrderItem.SierraInfo.aff == "Anställd" ? "label-primary" : "label-danger") order-item-var-label'>Ch. - Tillhörighet</span> @Model.OrderItem.PatronAffiliation</span>
     </div>
     <div>
-        @{
-            var notEmpty = !String.IsNullOrEmpty(Model.OrderItem.ProviderInformation);
-            var moreThanOneRow = Model.OrderItem.ProviderInformation.Contains("\n");
-        <span class="order-item-var-row">
-            <span class="label label-primary order-item-var-label">Lev. - Namn</span> 
-            @Model.OrderItem.ProviderName@(notEmpty && !moreThanOneRow ? " (" + Model.OrderItem.ProviderInformation + ")" : "")
-        </span>
-            if (notEmpty && moreThanOneRow)
-            {
-        <span class="glyphicon glyphicon-exclamation-sign" data-toggle="popover" data-content="@Model.OrderItem.ProviderInformation.Replace("\n", "<br/>")"></span>
-            }
-        }
+        <span class='label @(Model.OrderItem.SierraInfo.e_resource_access.HasValue && Model.OrderItem.SierraInfo.e_resource_access.Value ? "label-primary" : "label-danger") order-item-var-label'>Ch. - E-Resource</span> @Model.OrderItem.SierraInfo.e_resource_access
     </div>
     <div>
-        <span class="order-item-var-row"><span class="label label-primary order-item-var-label">Lev. - Order ID</span> @Model.OrderItem.ProviderOrderId</span>
+        <span class="label label-primary order-item-var-label">Ch. - CID</span> @Model.OrderItem.SierraInfo.cid
     </div>
 </div>
 <div class="col-sm-4 order-details">

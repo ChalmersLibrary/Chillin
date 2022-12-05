@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Chalmers.ILL.Patron
 {
-    public interface IAffiliationDataProvider
+    public interface IPersonDataProvider
     {
-        void GetAffiliationFromPersonNumber(string pnum, /*out*/ SierraModel sm);
+        SierraModel GetPatronInfoFromLibraryCidPersonnummerOrEmail(string cidOrPersonnummer, string email);
     }
 }
