@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using Chalmers.ILL.Configuration;
@@ -31,6 +32,22 @@ namespace Chalmers.ILL.Patron
                 Task<string> task = null;
                 dynamic userData = null;
 
+                if (cidOrPersonnummer != null)
+                {
+                    cidOrPersonnummer = cidOrPersonnummer.Trim();
+                    var pnrRx = new Regex("^[0-9]");
+                    if (pnrRx.IsMatch(cidOrPersonnummer))
+                    {
+                        // If personnummer, remove -
+                        cidOrPersonnummer = cidOrPersonnummer.Replace("-", "");
+                    }
+                }
+
+                if (email != null)
+                {
+                    email = email.Trim();
+                }
+
                 try
                 {
                     url = _config.LibPSearchUrl + "/api-search?apikey=" + _config.LibPSearchApiKey + "&pnr=" + cidOrPersonnummer;
@@ -53,7 +70,7 @@ namespace Chalmers.ILL.Patron
                     userData = JsonConvert.DeserializeObject<dynamic>(task.Result);
                 }
 
-                if (userData == null || userData.errorStr == null)
+                if (userData != null && userData.errorStr == null)
                 {
                     res = new SierraModel();
 
@@ -61,7 +78,7 @@ namespace Chalmers.ILL.Patron
                     res.last_name = userData.lname;
                     res.pnum = userData.pnr;
                     res.email = userData.email;
-                    res.cid = userData.cid;
+                    res.cid = userData.cid + " (" + userData.fname + " " + userData.lname + ")";
                     res.e_resource_access = userData.eResourceAccess;
 
                     IEnumerable<dynamic> activeCategories = userData.activeCategories;

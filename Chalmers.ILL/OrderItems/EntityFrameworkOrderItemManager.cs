@@ -332,6 +332,10 @@ namespace Chalmers.ILL.OrderItems
                                     "Barcode: " + sm.barcode + " Email: " + sm.email + " Ptyp: " + sm.ptype + "\n";
                 AddLogItem(orderItemNodeId, "SIERRA", logtext, eventId, doReindex, doSignal);
             }
+            else if (!String.IsNullOrEmpty(sm.cid))
+            {
+                AddLogItem(orderItemNodeId, "SIERRA", "Låntagaren hittades inte, men en person på Chalmers hittades.", eventId, doReindex, doSignal);
+            } 
             else
             {
                 AddLogItem(orderItemNodeId, "SIERRA", "Låntagaren hittades inte.", eventId, doReindex, doSignal);

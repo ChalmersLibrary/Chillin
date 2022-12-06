@@ -242,10 +242,21 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 if (!String.IsNullOrEmpty(smFromPdb.cid))
                 {
                     sm = _patronDataProviderSierra.GetPatronInfoFromLibraryCardNumberOrPersonnummer(smFromPdb.pnum, smFromPdb.pnum);
+
+                    if (String.IsNullOrEmpty(sm.id))
+                    {
+                        // Found in PDB but nothing in FOLIO, use data from PDB
+                        sm = smFromPdb;
+
+                        // Remove this data, so that it is clear that it did not come from FOLIO.
+                        sm.first_name = "";
+                        sm.last_name = "";
+                        sm.email = "";
+                    }
                 }
 
 
-                if (!String.IsNullOrEmpty(sm.id))
+                if (!String.IsNullOrEmpty(sm.id) || !String.IsNullOrEmpty(sm.cid))
                 {
                     _orderItemManager.SetPatronData(content.NodeId, JsonConvert.SerializeObject(sm), sm.record_id, sm.ptype, sm.home_library, sm.aff);
                     _orderItemManager.SaveWithoutEventsAndWithSynchronousReindexing(content.NodeId, false, false);
