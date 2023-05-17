@@ -85,9 +85,10 @@ namespace Chalmers.ILL.Mail
                         delayedMailOperation.NewStatus = "02:Åtgärda";
                         delayedMailOperation.ShouldBeProcessed = true;
                     }
-                } else if (status.Contains("Transport"))
+                }
+                else if (status.Contains("Transport"))
                 {
-                    if (now.Date >= deliveryDate.AddDays(4))
+                    if (now.Date >= AddBusinessDays(deliveryDate, 4))
                     {
                         delayedMailOperation.LogMessages.Add(new LogMessage("LOG", "Transport antas vara genomförd."));
                         delayedMailOperation.Mail.message = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", _orderItemManager.GetOrderItem(orderItem.NodeId));
@@ -141,6 +142,37 @@ namespace Chalmers.ILL.Mail
                 res.Add(mailOperationResult);
             }
 
+            return res;
+        }
+
+        public static DateTime AddBusinessDays(DateTime date, int days)
+        {
+            var res = date;
+            var totalBusinessDaysToAdd = days;
+            var businessDaysAddCount = 0;
+
+            if (res.DayOfWeek == DayOfWeek.Saturday)
+            {
+                res = res.AddDays(1);
+            }
+            if (res.DayOfWeek == DayOfWeek.Sunday)
+            {
+                res = res.AddDays(1);
+            }
+
+            while (businessDaysAddCount < totalBusinessDaysToAdd)
+            {
+                res = res.AddDays(1);
+                if (res.DayOfWeek == DayOfWeek.Saturday)
+                {
+                    res = res.AddDays(1);
+                }
+                if (res.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    res = res.AddDays(1);
+                }
+                businessDaysAddCount += 1;
+            }
             return res;
         }
 
