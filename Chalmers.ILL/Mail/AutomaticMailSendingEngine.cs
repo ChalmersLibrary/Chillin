@@ -86,6 +86,18 @@ namespace Chalmers.ILL.Mail
                         delayedMailOperation.ShouldBeProcessed = true;
                     }
                 }
+                else if (status.Contains("Transport"))
+                {
+                    if (now.Date >= AddBusinessDays(deliveryDate, 4))
+                    {
+                        delayedMailOperation.LogMessages.Add(new LogMessage("LOG", "Transport antas vara genomförd."));
+                        delayedMailOperation.Mail.message = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", _orderItemManager.GetOrderItem(orderItem.NodeId));
+                        delayedMailOperation.LogMessages.Add(new LogMessage("MAIL_NOTE", "Skickat automatiskt leveransmail till " + delayedMailOperation.Mail.recipientEmail));
+                        delayedMailOperation.LogMessages.Add(new LogMessage("MAIL", delayedMailOperation.Mail.message));
+                        delayedMailOperation.NewStatus = "05:Levererad";
+                        delayedMailOperation.ShouldBeProcessed = true;
+                    }
+                }
 
                 if (delayedMailOperation.ShouldBeProcessed)
                 {
@@ -133,11 +145,42 @@ namespace Chalmers.ILL.Mail
             return res;
         }
 
+        public static DateTime AddBusinessDays(DateTime date, int days)
+        {
+            var res = date;
+            var totalBusinessDaysToAdd = days;
+            var businessDaysAddCount = 0;
+
+            if (res.DayOfWeek == DayOfWeek.Saturday)
+            {
+                res = res.AddDays(1);
+            }
+            if (res.DayOfWeek == DayOfWeek.Sunday)
+            {
+                res = res.AddDays(1);
+            }
+
+            while (businessDaysAddCount < totalBusinessDaysToAdd)
+            {
+                res = res.AddDays(1);
+                if (res.DayOfWeek == DayOfWeek.Saturday)
+                {
+                    res = res.AddDays(1);
+                }
+                if (res.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    res = res.AddDays(1);
+                }
+                businessDaysAddCount += 1;
+            }
+            return res;
+        }
+
         #region Private methods.
 
         private IEnumerable<OrderItemModel> GetOrderItemsThatAreRelevantForAutomaticMailSending()
         {
-            return _orderItemSearcher.Search("status:Utlånad OR status:Krävd");
+            return _orderItemSearcher.Search("status:Utlånad OR status:Krävd OR status:Transport");
         }
 
         #endregion

@@ -351,5 +351,94 @@ namespace Chalmers.ILL.Tests.Mail
                 Assert.AreEqual("02:Åtgärda", result.NewStatus, "The new status was not as expected.");
             }
         }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_InTransitDeliveryDateMoreThanFourBusinessDaysAgo_StatusDelivered()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("13:Transport", new DateTime(1970, 1, 1), DateTime.Now.AddDays(-7), result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(3, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(1, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(1, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual("ArticleAvailableInInfodiskMailTemplate", result.MailTemplate, "The fetched template was not as expected.");
+                Assert.AreEqual("05:Levererad", result.NewStatus, "The new status was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void SendOutMailsThatAreDue_InTransitDeliveryDateLessThanFourBusinessDaysAgo_StatusDelivered()
+        {
+            using (ShimsContext.Create())
+            {
+                var result = new AutomaticMailSendTestResult();
+
+                SetupAutomaticMailSendingEngine("13:Transport", new DateTime(1970, 1, 1), DateTime.Now.AddDays(-3), result).SendOutMailsThatAreDue();
+
+                Assert.AreEqual(0, result.NumberOfLogMessages, "Number of messages logged was not as expected.");
+                Assert.AreEqual(0, result.NumberOfReindexes, "Number of reindexes was not as expected.");
+                Assert.AreEqual(0, result.NumberOfSignals, "Number of signals was not as expected.");
+                Assert.AreEqual(null, result.MailTemplate, "The fetched template was not as expected.");
+                Assert.AreEqual(null, result.NewStatus, "The new status was not as expected.");
+            }
+        }
+
+        [TestMethod]
+        public void AddBusinessDays_FromMondayAddFourDays_ThursdaySameWeek()
+        {
+            var startDate = new DateTime(2023, 5, 15); // Monday
+            var endDate = AutomaticMailSendingEngine.AddBusinessDays(startDate, 4);
+
+            Assert.AreEqual(endDate.Year, 2023);
+            Assert.AreEqual(endDate.Month, 5);
+            Assert.AreEqual(endDate.Day, 19);
+        }
+
+        [TestMethod]
+        public void AddBusinessDays_FromMondayAddSevenDays_WednesdayNextWeek()
+        {
+            var startDate = new DateTime(2023, 5, 15); // Monday
+            var endDate = AutomaticMailSendingEngine.AddBusinessDays(startDate, 7);
+
+            Assert.AreEqual(endDate.Year, 2023);
+            Assert.AreEqual(endDate.Month, 5);
+            Assert.AreEqual(endDate.Day, 24);
+        }
+
+        [TestMethod]
+        public void AddBusinessDays_FromSaturdayAddSevenDays_WednesdayNextNextWeek()
+        {
+            var startDate = new DateTime(2023, 5, 13); // Saturday
+            var endDate = AutomaticMailSendingEngine.AddBusinessDays(startDate, 7);
+
+            Assert.AreEqual(endDate.Year, 2023);
+            Assert.AreEqual(endDate.Month, 5);
+            Assert.AreEqual(endDate.Day, 24);
+        }
+
+        [TestMethod]
+        public void AddBusinessDays_FromFridayAddSevenDays_TuedayNextNextWeek()
+        {
+            var startDate = new DateTime(2023, 5, 12); // Friday
+            var endDate = AutomaticMailSendingEngine.AddBusinessDays(startDate, 7);
+
+            Assert.AreEqual(endDate.Year, 2023);
+            Assert.AreEqual(endDate.Month, 5);
+            Assert.AreEqual(endDate.Day, 23);
+        }
+
+        [TestMethod]
+        public void AddBusinessDays_FromSundayAddSevenDays_FridayNextWeek()
+        {
+            var startDate = new DateTime(2023, 5, 14); // Sunday
+            var endDate = AutomaticMailSendingEngine.AddBusinessDays(startDate, 4);
+
+            Assert.AreEqual(endDate.Year, 2023);
+            Assert.AreEqual(endDate.Month, 5);
+            Assert.AreEqual(endDate.Day, 19);
+        }
     }
 }
