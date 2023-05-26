@@ -88,7 +88,7 @@ namespace Chalmers.ILL.Mail
                 }
                 else if (status.Contains("Transport"))
                 {
-                    if (now.Date >= AddBusinessDays(deliveryDate, 4))
+                    if (now.Date >= AddBusinessDays(deliveryDate, 4).Date)
                     {
                         delayedMailOperation.LogMessages.Add(new LogMessage("LOG", "Transport antas vara genomförd."));
                         delayedMailOperation.Mail.message = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", _orderItemManager.GetOrderItem(orderItem.NodeId));
