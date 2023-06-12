@@ -146,7 +146,8 @@ namespace Chalmers.ILL
             container.RegisterInstance<IElasticClient>(elasticClient);
             container.RegisterInstance(new HttpClient());
 
-            container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
+            container.RegisterType<IExchangeMailWebApi, MicrosoftGraphMailWebApi>();
+            container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>("Legacy");
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
             container.RegisterType<IMediaItemManager, BlobStorageMediaItemManager>();
             container.RegisterType<IMediaItemManager, UmbracoMediaItemManager>("Legacy");

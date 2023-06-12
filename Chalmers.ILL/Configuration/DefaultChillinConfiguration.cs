@@ -5,6 +5,46 @@ namespace Chalmers.ILL.Configuration
 {
     public class DefaultChillinConfiguration : IConfiguration
     {
+        public string MicrosoftGraphApiUserId
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["MicrosoftGraphApiUserId"];
+            }
+        }
+
+        public string MicrosoftGraphApiEndpoint
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["MicrosoftGraphApiEndpoint"];
+            }
+        }
+
+        public string MicrosoftGraphAuthority
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["MicrosoftGraphAuthority"];
+            }
+        }
+
+        public string MicrosoftGraphClientId
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["MicrosoftGraphClientId"];
+            }
+        }
+
+        public string MicrosoftGraphClientSecret
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["MicrosoftGraphClientSecret"];
+            }
+        }
+
         public string BaseUrl
         {
             get
