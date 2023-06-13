@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Dynamic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -350,6 +351,8 @@ namespace Chalmers.ILL.Mail
                 requestMessage.Headers.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenResult.AccessToken);
 
+                System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
                 var sendTask = _httpClient.SendAsync(requestMessage);
                 sendTask.Wait();
                 var response = sendTask.Result;
@@ -385,6 +388,9 @@ namespace Chalmers.ILL.Mail
                         Encoding.UTF8,
                         "application/json");
                 }
+
+                System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
                 var sendTask = _httpClient.SendAsync(requestMessage);
                 sendTask.Wait();
                 var response = sendTask.Result;
@@ -425,7 +431,8 @@ namespace Chalmers.ILL.Mail
                     }
                 }
 
-                
+                System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
                 var sendTask = _httpClient.SendAsync(requestMessage);
                 sendTask.Wait();
                 var response = sendTask.Result;
@@ -455,6 +462,8 @@ namespace Chalmers.ILL.Mail
                     new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 requestMessage.Headers.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenResult.AccessToken);
+
+                System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
                 var sendTask = _httpClient.SendAsync(requestMessage);
                 sendTask.Wait();
@@ -488,6 +497,9 @@ namespace Chalmers.ILL.Mail
                 requestMessage.Content = new StringContent(data,
                     Encoding.UTF8,
                     "application/json");
+
+                System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
                 var sendTask = _httpClient.SendAsync(requestMessage);
                 sendTask.Wait();
                 var response = sendTask.Result;
