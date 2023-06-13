@@ -342,6 +342,8 @@ namespace Chalmers.ILL.Mail
         {
             dynamic res = null;
 
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
             var tokenTask = _app.AcquireTokenForClient(scopes).ExecuteAsync();
             tokenTask.Wait();
             var tokenResult = tokenTask.Result;
@@ -352,8 +354,6 @@ namespace Chalmers.ILL.Mail
                     new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 requestMessage.Headers.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenResult.AccessToken);
-
-                System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
                 var sendTask = _httpClient.SendAsync(requestMessage);
                 sendTask.Wait();
@@ -374,6 +374,8 @@ namespace Chalmers.ILL.Mail
         {
             dynamic res = null;
 
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
             var tokenTask = _app.AcquireTokenForClient(scopes).ExecuteAsync();
             tokenTask.Wait();
             var tokenResult = tokenTask.Result;
@@ -390,8 +392,6 @@ namespace Chalmers.ILL.Mail
                         Encoding.UTF8,
                         "application/json");
                 }
-
-                System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
                 var sendTask = _httpClient.SendAsync(requestMessage);
                 sendTask.Wait();
@@ -411,6 +411,8 @@ namespace Chalmers.ILL.Mail
         private dynamic PutToUpload(string url, byte[] data, IDictionary<string, string> headers = null)
         {
             dynamic res = null;
+
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Put, url))
             {
@@ -433,8 +435,6 @@ namespace Chalmers.ILL.Mail
                     }
                 }
 
-                System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-
                 var sendTask = _httpClient.SendAsync(requestMessage);
                 sendTask.Wait();
                 var response = sendTask.Result;
@@ -454,6 +454,8 @@ namespace Chalmers.ILL.Mail
         {
             dynamic res = null;
 
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
             var tokenTask = _app.AcquireTokenForClient(scopes).ExecuteAsync();
             tokenTask.Wait();
             var tokenResult = tokenTask.Result;
@@ -464,8 +466,6 @@ namespace Chalmers.ILL.Mail
                     new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
                 requestMessage.Headers.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenResult.AccessToken);
-
-                System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
                 var sendTask = _httpClient.SendAsync(requestMessage);
                 sendTask.Wait();
@@ -486,6 +486,8 @@ namespace Chalmers.ILL.Mail
         {
             dynamic res = null;
 
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
             var tokenTask = _app.AcquireTokenForClient(scopes).ExecuteAsync();
             tokenTask.Wait();
             var tokenResult = tokenTask.Result;
@@ -499,8 +501,6 @@ namespace Chalmers.ILL.Mail
                 requestMessage.Content = new StringContent(data,
                     Encoding.UTF8,
                     "application/json");
-
-                System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
                 var sendTask = _httpClient.SendAsync(requestMessage);
                 sendTask.Wait();
