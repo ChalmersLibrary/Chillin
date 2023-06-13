@@ -43,6 +43,8 @@ namespace Chalmers.ILL.Mail
         /// <returns>The Service reference</returns>
         public void ConnectToExchangeService(string username, string password)
         {
+            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
             _app = ConfidentialClientApplicationBuilder.Create(_config.MicrosoftGraphClientId)
                 .WithClientSecret(_config.MicrosoftGraphClientSecret)
                 .WithAuthority(new Uri(_config.MicrosoftGraphAuthority))
