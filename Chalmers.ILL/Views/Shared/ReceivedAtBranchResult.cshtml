@@ -1,0 +1,66 @@
+﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.Page.ReceivedAtBranchResultModel>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Ta emot artikel på filial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        .main-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #344e41;
+        }
+
+        .inner-container {
+            padding: 4rem;
+            background-color: #588157;
+            outline: solid 1rem #a3b18a;
+        }
+
+        .message {
+            font-size: 1.4rem;
+            color: #dad7cd;
+            text-align: center;
+            font-family: 'Raleway', sans-serif;
+        }
+
+        .icon {
+            font-size: 8rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <main class="main-container">
+        <section class="inner-container">
+            @if (Model.IsSuccess)
+            {
+                <section class="icon">🥳</section>
+            }
+            else
+            {
+                <section class="icon">😴</section>
+            }
+            <section class="message">@Model.Message</section>
+        </section>
+    </main>
+</body>
+</html>

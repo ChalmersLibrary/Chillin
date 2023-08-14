@@ -202,6 +202,11 @@
     <Reference Include="Owin">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="QRCoder, Version=1.4.3.0, Culture=neutral, PublicKeyToken=c4ed5b9ae8358a28, processorArchitecture=MSIL">
+      <HintPath>..\packages\QRCoder.1.4.3\lib\net40\QRCoder.dll</HintPath>
+    </Reference>
     <Reference Include="SQLCE4Umbraco">
       <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\SQLCE4Umbraco.dll</HintPath>
     </Reference>
@@ -318,6 +323,7 @@
     <Reference Include="UrlRewritingNet.UrlRewriter">
       <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\UrlRewritingNet.UrlRewriter.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\amd64\Microsoft.VC90.CRT\msvcr90.dll" />
@@ -400,6 +406,7 @@
     <Content Include="Views\ChalmersILLDiskPage.cshtml" />
     <Content Include="Views\Partials\DeliveryType\ArticleFromProvider.cshtml" />
     <Content Include="Views\Partials\Settings\ChillinText.cshtml" />
+    <Content Include="Views\Shared\ReceivedAtBranchResult.cshtml" />
     <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />
     <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
@@ -446,6 +453,7 @@
     <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Controllers\SurfaceControllers\ChillinTextSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemPurchaseLibrarySurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemReceivedAtBranchSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemSearchSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\BookCirculationSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\MediaItemSurfaceController.cs" />
@@ -575,6 +583,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ChillinText.cs" />
     <Compile Include="Models\ItemBasic.cs" />
+    <Compile Include="Models\Page\ReceivedAtBranchResultModel.cs" />
     <Compile Include="Models\PartialPage\Settings\ChillinTextDto.cs" />
     <Compile Include="Models\ItemQuery.cs" />
     <Compile Include="Models\CircualtionBasic.cs" />

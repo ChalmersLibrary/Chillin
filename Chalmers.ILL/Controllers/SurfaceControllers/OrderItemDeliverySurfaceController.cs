@@ -9,6 +9,11 @@ using Newtonsoft.Json;
 using System;
 using System.Web.Mvc;
 using Umbraco.Web.Mvc;
+using QRCoder;
+using System.Drawing;
+using System.IO;
+using System.Drawing.Imaging;
+using Chalmers.ILL.Configuration;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -23,14 +28,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IUmbracoWrapper _umbraco;
         ITemplateService _templateService;
         IMailService _mailService;
+        IConfiguration _config;
 
         public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco, 
-            ITemplateService templateService, IMailService mailService)
+            ITemplateService templateService, IMailService mailService, IConfiguration config)
         {
             _orderItemManager = orderItemManager;
             _umbraco = umbraco;
             _templateService = templateService;
             _mailService = mailService;
+            _config = config;
         }
 
         /// <summary>
@@ -105,6 +112,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _umbraco.PopulateModelWithAvailableValues(pageModel);
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
             pageModel.ArticleDeliveryLibrary = _templateService.GetPrettyLibraryNameFromLibraryAbbreviation(pageModel.OrderItem.SierraInfo.home_library);
+
+            // Generate QR code which should be printed on the slip and scanned to register that the article has been received at branch
+            QRCodeGenerator qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(_config.BaseUrl + "/umbraco/surface/OrderItemReceivedAtBranchSurface/RenderResponse?nodeId=" + pageModel.OrderItem.NodeId, QRCodeGenerator.ECCLevel.Q);
+            QRCode qrCode = new QRCode(qrCodeData);
+            Bitmap qrCodeImage = qrCode.GetGraphic(4);
+            using (MemoryStream stream = new MemoryStream())
+            {
+                qrCodeImage.Save(stream, ImageFormat.Png);
+                stream.Close();
+                var base64 = Convert.ToBase64String(stream.ToArray()); 
+                pageModel.RegisterReceivedQrCode = "data:image/gif;base64," + base64;
+            }
+
             return PartialView("DeliveryType/ArticleInTransit", pageModel);
         }
 
