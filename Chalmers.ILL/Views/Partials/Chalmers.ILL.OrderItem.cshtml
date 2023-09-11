@@ -372,6 +372,8 @@
 <div class="col-sm-12">
     <span class="label label-default">Händelser</span>
 </div>
+<section class="col-sm-12 helpful-dynamic-information__container">
+</section>
 <div id="log-@Model.OrderItem.NodeId" class="col-sm-12 log-list">
     @{
         string lastEventId = "";
@@ -411,6 +413,7 @@
                             evenRow = !evenRow;
             }
 
+
             <div class="row log-item-content @logItem.Type @(logItem.Type == "MAIL" && !firstMail ? "collapsed" : "")">
                 <div class="col-sm-2">
                     @logItem.Type
@@ -434,11 +437,16 @@
     <script type="text/javascript">
     $.each($("#log-@Model.OrderItem.NodeId .log-message:contains('http')"), function () {
             $(this).html(addSaveDocumentButton(@Model.OrderItem.NodeId, replaceURLWithHTMLLinks($(this).text())));
-        });
+    });
     </script>
 </div>
 
 <script type="text/javascript">
+    var chillinVars = {
+        eventIdToEventName: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.EventIdToEventNameMapping)),
+        orderItemData: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.OrderItem))
+    }
+
     $(function () {
         $("[data-toggle='popover']").popover({
             trigger: "hover",
