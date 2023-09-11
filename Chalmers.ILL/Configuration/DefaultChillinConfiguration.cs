@@ -5,6 +5,13 @@ namespace Chalmers.ILL.Configuration
 {
     public class DefaultChillinConfiguration : IConfiguration
     {
+        public bool UseMicrosoftGraphMailService
+        {
+            get
+            {
+                return ConfigurationManager.AppSettings["UseMicrosoftGraphMailService"] != null && ConfigurationManager.AppSettings["UseMicrosoftGraphMailService"].ToLower() == "true";
+            }
+        }
         public string MicrosoftGraphApiUserId
         {
             get
