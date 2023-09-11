@@ -36,7 +36,8 @@ namespace Chalmers.ILL.Models.PartialPage
             {25, "Bok mottagen i lånedisk" },
             {26, "Artikel skickad till filial" },
             {27, "Leverantörsdata uppdaterad" },
-            {28, "Snabbändring av inköpsbibliotek" }
+            {28, "Snabbändring av inköpsbibliotek" },
+            {29, "Artikel ankommen till filial" }
         };
 
         public ChalmersILLOrderItemModel(OrderItemModel orderItemModel) : base(orderItemModel) { }

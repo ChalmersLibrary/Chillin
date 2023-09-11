@@ -8,6 +8,12 @@ namespace Chalmers.ILL.Configuration
 {
     public interface IConfiguration
     {
+        bool UseMicrosoftGraphMailService { get; }
+        string MicrosoftGraphApiUserId { get; }
+        string MicrosoftGraphApiEndpoint { get; }
+        string MicrosoftGraphAuthority { get; }
+        string MicrosoftGraphClientId { get; }
+        string MicrosoftGraphClientSecret { get; }
         string StorageConnectionString { get; }
         string ElasticSearchUrl { get; }
         string ElasticSearchIndex { get; }

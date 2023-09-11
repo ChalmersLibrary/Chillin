@@ -214,7 +214,7 @@ namespace Chalmers.ILL.Mail
                             // Archive the mail message to correct folder
                             if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
                             {
-                                FolderId archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item.Id);
+                                var archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item);
                                 list[index].ArchiveFolderId = archiveFolderId;
                             }
 
@@ -277,7 +277,7 @@ namespace Chalmers.ILL.Mail
                             {
                                 if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
                                 {
-                                    FolderId archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item.Id);
+                                    var archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item);
                                     list[index].ArchiveFolderId = archiveFolderId;
                                 }
                             }
@@ -379,7 +379,7 @@ namespace Chalmers.ILL.Mail
                             {
                                 if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
                                 {
-                                    FolderId archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item.Id);
+                                    var archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item);
                                     list[index].ArchiveFolderId = archiveFolderId;
                                 }
                             }
@@ -415,7 +415,7 @@ namespace Chalmers.ILL.Mail
                                     var address = addressWithPotentialWs.Trim();
                                     try
                                     {
-                                        _exchangeMailWebApi.ForwardMailMessage(item.Id, address, item.ParseErrorMessage, false);
+                                        _exchangeMailWebApi.ForwardMailMessage(item, address, item.ParseErrorMessage, false);
                                     }
                                     catch (Exception innerInnerExc)
                                     {
@@ -429,7 +429,7 @@ namespace Chalmers.ILL.Mail
                             }
 
                             // Forward failed mail to manual handling.
-                            _exchangeMailWebApi.ForwardMailMessage(item.Id, ConfigurationManager.AppSettings["chalmersILLForwardingAddress"]);
+                            _exchangeMailWebApi.ForwardMailMessage(item, ConfigurationManager.AppSettings["chalmersILLForwardingAddress"]);
                             list[index].StatusResult = "This message has been forwarded to " + ConfigurationManager.AppSettings["chalmersILLForwardingAddress"];
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
@@ -446,7 +446,7 @@ namespace Chalmers.ILL.Mail
                     {
                         try
                         {
-                            _exchangeMailWebApi.ForwardMailMessage(item.Id, ConfigurationManager.AppSettings["chalmersILLForwardingAddress"]);
+                            _exchangeMailWebApi.ForwardMailMessage(item, ConfigurationManager.AppSettings["chalmersILLForwardingAddress"]);
                             list[index].StatusResult = "This message has been forwarded to " + ConfigurationManager.AppSettings["chalmersILLForwardingAddress"];
                         }
                         catch (Exception e)

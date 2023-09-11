@@ -18,7 +18,7 @@ namespace Chalmers.ILL.Models.Mail
     public class MailQueueModel
     {
         public ItemId Id { get; set; }
-        public FolderId ArchiveFolderId { get; set; }
+        public string ArchiveFolderId { get; set; }
         public MailQueueType Type { get; set; }
 
         public string MsgRef { get; set; }

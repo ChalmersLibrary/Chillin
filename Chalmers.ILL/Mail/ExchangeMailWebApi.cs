@@ -187,8 +187,10 @@ namespace Chalmers.ILL.Mail
         /// </summary>
         /// <param name="service">Exchange Web Service reference</param>
         /// <param name="Id">Mail Message Item Id</param>
-        public FolderId ArchiveMailMessage(ItemId Id)
+        public string ArchiveMailMessage(MailQueueModel mqm)
         {
+            var Id = mqm.Id;
+
             // Bind the message to get properties
             EmailMessage message = EmailMessage.Bind(_service, Id, new PropertySet(BasePropertySet.FirstClassProperties));
 
@@ -224,7 +226,7 @@ namespace Chalmers.ILL.Mail
             message.Move(monthFolderId);
 
             // Return the FolderId which we moved to
-            return monthFolderId;
+            return monthFolderId.ToString();
         }
 
         /// <summary>
@@ -233,8 +235,10 @@ namespace Chalmers.ILL.Mail
         /// <param name="service">Exchange Web Service Object</param>
         /// <param name="Id">Mail Message ItemId</param>
         /// <param name="recipientAddress">Receiving address</param>
-        public void ForwardMailMessage(ItemId Id, string recipientAddress, string extraText = "", bool delete = true)
+        public void ForwardMailMessage(MailQueueModel mqm, string recipientAddress, string extraText = "", bool delete = true)
         {
+            ItemId Id = mqm.Id;
+
             // Bind the message to get properties
             EmailMessage message = EmailMessage.Bind(_service, Id, new PropertySet(BasePropertySet.FirstClassProperties));
 
