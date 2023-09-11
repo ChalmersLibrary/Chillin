@@ -152,7 +152,7 @@ namespace Chalmers.ILL
             }
             else
             {
-                container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>("Legacy");
+                container.RegisterType<IExchangeMailWebApi, ExchangeMailWebApi>();
             }
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
             container.RegisterType<IMediaItemManager, BlobStorageMediaItemManager>();
