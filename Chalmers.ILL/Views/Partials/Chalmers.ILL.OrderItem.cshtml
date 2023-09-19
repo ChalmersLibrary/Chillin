@@ -704,7 +704,7 @@
                 msgEl.style.position = "relative";
                 msgEl.style.color = "white";
 
-                let msgParts = msg.split(/(https?[^ ]+)/)
+                let msgParts = msg.split(/(https?[^ \n]+)/)
                 for (const msgPart of msgParts) {
                     if (msgPart.indexOf("http") === 0) {
                         let linkEl = document.createElement("a")
