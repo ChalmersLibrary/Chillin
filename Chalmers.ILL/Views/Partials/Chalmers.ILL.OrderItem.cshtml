@@ -640,21 +640,19 @@
             return acc;
         }, new Map());
 
-        let currentDateStr = new Date().toISOString().split("T")[0];
+        let detailedLogElements = document.querySelectorAll(".log-item-container");
+        let mergedLogItemsArr = [...mergedLogItems];
+        for (let i = 0; i < mergedLogItemsArr.length; i++) {
+            mergedLogItemsArr[i][1].detailedLogElement = detailedLogElements[i];
+        }
 
-        let dateEl = document.createElement("section");
-        Object.assign(dateEl.style, dateElementStyle);
-        dateEl.innerText = prettyDateMap[currentDateStr];
-        el.appendChild(dateEl);
+        let currentDateStr
 
         for (const [eventId, logItem] of mergedLogItems) {
-            let dateStr = prettyDateMap[logItem.dateStr] ?
-                prettyDateMap[logItem.dateStr] : logItem.dateStr;
-
             if (logItem.dateStr !== currentDateStr) {
                 let dateEl = document.createElement("section");
                 Object.assign(dateEl.style, dateElementStyle);
-                dateEl.innerText = dateStr;
+                dateEl.innerText = logItem.dateStr;
                 el.appendChild(dateEl);
                 currentDateStr = logItem.dateStr;
             }
@@ -669,6 +667,11 @@
             logItemEl.style["background-color"] = "#fefefe";
             logItemEl.style.position = "relative";
             logItemEl.style["font-size"] = "2rem";
+            logItemEl.style.cursor = "pointer";
+            logItemEl.addEventListener("click", event => window.scrollTo({
+                top: logItem.detailedLogElement.getBoundingClientRect().top + window.pageYOffset - document.querySelector(".navbar").offsetHeight,
+                behavior: "smooth"
+            }))
             logItemEl.title = logItem.timeStr;
 
             let userContainer = document.createElement("section");
@@ -699,10 +702,10 @@
             for (const msg of logItem.messages) {
                 let msgEl = document.createElement("section");
                 msgEl.style.padding = "0.8rem";
-                msgEl.style["background-color"] = "#deb40b";
+                msgEl.style["background-color"] = "#f0db7d";
                 msgEl.style["border-radius"] = "1rem";
                 msgEl.style.position = "relative";
-                msgEl.style.color = "white";
+                msgEl.style.color = "#303030";
 
                 let msgParts = msg.split(/(https?[^ \n]+)/)
                 for (const msgPart of msgParts) {
@@ -724,7 +727,7 @@
                 spike.style.width = "0";
                 spike.style.height = "0";
                 spike.style.border = "15px solid transparent";
-                spike.style["border-right-color"] = "#deb40b";
+                spike.style["border-right-color"] = "#f0db7d";
                 spike.style["border-left"] = "0";
                 spike.style["border-top"] = "0";
                 spike.style["margin-top"] = "-7.5px";
@@ -737,10 +740,5 @@
 
             el.appendChild(logItemEl);
         }
-
-        dateEl = document.createElement("section");
-        Object.assign(dateEl.style, dateElementStyle);
-        dateEl.innerText = "TIDENS BÖRJAN";
-        el.appendChild(dateEl);
     })
 </script>
