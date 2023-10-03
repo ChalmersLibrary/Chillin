@@ -505,60 +505,6 @@
     }
 
     document.querySelector(".new-log__add-btn").addEventListener("click", async () => {
-        let createImageElement = async name => {
-            let imgUrlOrEmoji = {
-                "System": "🖥️",
-                "Lars A": "🐷",
-                "Lari Kovanen": "🎅",
-                "Ylva Lindgren": "https://www.chalmers.se/_next/image/?url=https%3A%2F%2Fcms.www.chalmers.se%2FMedia%2F0a2p50wr%2Fylva.jpg%3Fwidth%3D600%26height%3D600%26rnd%3D133240822880700000%26quality%3D60%26format%3Dwebp&w=1920&q=75",
-                "Lars-Håkan Herbertsson": "https://www.chalmers.se/_next/image/?url=https%3A%2F%2Fcms.www.chalmers.se%2FMedia%2Fmmejbyeh%2Flarher.jpg%3Fwidth%3D600%26height%3D600%26rnd%3D133240822861030000%26quality%3D60%26format%3Dwebp&w=1920&q=75",
-                "Johanna Nilsson": "https://www.chalmers.se/_next/image/?url=https%3A%2F%2Fcms.www.chalmers.se%2FMedia%2F4iab434t%2Fnjohanna.jpg%3Fwidth%3D600%26height%3D600%26rnd%3D133240822856600000%26quality%3D60%26format%3Dwebp&w=1920&q=75",
-                "Martina Karlsson": "https://www.chalmers.se/_next/image/?url=https%3A%2F%2Fcms.www.chalmers.se%2FMedia%2Ftdsn1a2p%2Fmartinak.jpg%3Fwidth%3D600%26height%3D600%26rnd%3D133240822867800000%26quality%3D60%26format%3Dwebp&w=1920&q=75",
-                "Ellen Åberg": "https://www.chalmers.se/_next/image/?url=https%3A%2F%2Fcms.www.chalmers.se%2FMedia%2Fan2dzomb%2Faellen.jpg%3Fwidth%3D600%26height%3D600%26rnd%3D133240823118200000%26quality%3D60%26format%3Dwebp&w=1920&q=75",
-                "Maryam Vardeh": "https://www.chalmers.se/_next/image/?url=https%3A%2F%2Fcms.www.chalmers.se%2FMedia%2Fyfzb34vw%2Fvardeh.jpg%3Fwidth%3D600%26height%3D600%26rnd%3D133240823219900000%26quality%3D60%26format%3Dwebp&w=1920&q=75",
-                "Marie Widigson": "https://www.chalmers.se/_next/image/?url=https%3A%2F%2Fcms.www.chalmers.se%2FMedia%2F5y0hnk1r%2Fperning.jpg%3Fwidth%3D600%26height%3D600%26rnd%3D133240822990670000%26quality%3D60%26format%3Dwebp&w=1920&q=75"
-            }[name];
-
-            if (!imgUrlOrEmoji) {
-                imgUrlOrEmoji = "👤"
-            }
-
-            let el = document.createElement("section");
-            el.style.width = "2.5rem";
-            el.style.height = "2.5rem";
-            el.style["border-radius"] = "100%";
-            el.style.border = "solid 1px black";
-            el.style.display = "flex";
-            el.style["justify-content"] = "center";
-            el.style["align-items"] = "center";
-            el.style["background-color"] = "#d0d0d0";
-            el.style.overflow = "hidden";
-            el.title = name;
-
-            if (imgUrlOrEmoji.charAt(0) !== "h") {
-                /* Calculate unique color for person */
-                const msgUint8 = new TextEncoder().encode(name);
-                const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const hashHex = hashArray
-                    .map(x => x.toString(16).padStart(2, "0"))
-                    .join("");
-                el.style["background-color"] = "#" + hashHex.slice(0, 6);
-
-                let emojiEl = document.createElement("span");
-                emojiEl.style["font-size"] = "1.2rem";
-                emojiEl.style["user-select"] = "none";
-                emojiEl.innerText = imgUrlOrEmoji;
-                el.appendChild(emojiEl);
-            } else {
-                let imgEl = document.createElement("img");
-                imgEl.style.width = "100%";
-                imgEl.src = imgUrlOrEmoji;
-                el.appendChild(imgEl);
-            }
-            return el;
-        };
-
         let dateElementStyle = {
             "background-color": "#404040",
             "color": "#d0d0d0",
@@ -678,21 +624,20 @@
             });
             logItemEl.title = logItem.timeStr;
 
-            let userContainer = document.createElement("section");
-            userContainer.style["margin-right"] = "1rem";
-            userContainer.style.display = "flex";
-            userContainer.style["justify-content"] = "center";
-            userContainer.style["align-items"] = "center";
-            logItemEl.appendChild(userContainer);
-
-            userContainer.appendChild(await createImageElement(logItem.user));
-
             let msgAndTextContainer = document.createElement("section");
             msgAndTextContainer.style.display = "flex";
             msgAndTextContainer.style["flex-direction"] = "column";
             msgAndTextContainer.style["justify-content"] = "center";
             msgAndTextContainer.style["align-items"] = "left";
             logItemEl.appendChild(msgAndTextContainer);
+
+            let userNameEl = document.createElement("section")
+            userNameEl.innerText = logItem.user
+            userNameEl.style["font-size"] = "1.4rem"
+            userNameEl.style.color = "black"
+            userNameEl.style["margin-left"] = "0.5rem"
+            userNameEl.style["font-weight"] = "bold"
+            msgAndTextContainer.appendChild(userNameEl)
 
             let textContainer = document.createElement("section");
             textContainer.style["text-align"] = "left";
@@ -705,13 +650,24 @@
             msgContainer.style["flex-direction"] = "column";
             for (const msg of logItem.messages) {
                 let msgEl = document.createElement("section");
-                msgEl.style.padding = "0.8rem";
-                msgEl.style["background-color"] = "#f0db7d";
-                msgEl.style["border-radius"] = "1rem";
-                msgEl.style.position = "relative";
                 msgEl.style.color = "#303030";
+                msgEl.style.border = "solid 1px black"
+                msgEl.style["background-color"] = "#fffede"
+                msgEl.style.position = "relative"
+                msgEl.style.padding = "6rem"
+                msgEl.style.margin = "0.5rem"
 
-                let msgParts = msg.split(/(https?[^ \n]+)/)
+                let preCitEl = document.createElement("span")
+                preCitEl.style["font-size"] = "12rem"
+                preCitEl.style["line-height"] = "10rem"
+                preCitEl.style.position = "absolute"
+                preCitEl.style.left = "1rem"
+                preCitEl.style.top = "1rem"
+                preCitEl.style["font-family"] = "sans-serif"
+                preCitEl.innerText = "“"
+                msgEl.appendChild(preCitEl)
+
+                let msgParts = msg.split(/(https?[^ \n]+|\n)/)
                 for (const msgPart of msgParts) {
                     if (msgPart.indexOf("http") === 0) {
                         let linkEl = document.createElement("a")
@@ -719,24 +675,23 @@
                         linkEl.innerText = msgPart
                         linkEl.target = "_blank"
                         msgEl.appendChild(linkEl)
+                    } else if (msgPart.indexOf("\n") === 0) {
+                        let brEl = document.createElement("br")
+                        msgEl.appendChild(brEl)
                     } else {
                         msgEl.appendChild(document.createTextNode(msgPart))
                     }
                 }
 
-                let spike = document.createElement("span");
-                spike.style.position = "absolute";
-                spike.style.left = "0";
-                spike.style.top = "50%";
-                spike.style.width = "0";
-                spike.style.height = "0";
-                spike.style.border = "15px solid transparent";
-                spike.style["border-right-color"] = "#f0db7d";
-                spike.style["border-left"] = "0";
-                spike.style["border-top"] = "0";
-                spike.style["margin-top"] = "-7.5px";
-                spike.style["margin-left"] = "-15px";
-                msgEl.appendChild(spike);
+                let postCitEl = document.createElement("span")
+                postCitEl.style["font-size"] = "12rem"
+                postCitEl.style["line-height"] = "0"
+                postCitEl.style.position = "absolute"
+                postCitEl.style.right = "1rem"
+                postCitEl.style.bottom = "0"
+                postCitEl.style["font-family"] = "sans-serif"
+                postCitEl.innerText = "”"
+                msgEl.appendChild(postCitEl)
 
                 msgContainer.appendChild(msgEl);
             }
