@@ -675,6 +675,7 @@
                         linkEl.innerText = msgPart
                         linkEl.target = "_blank"
                         msgEl.appendChild(linkEl)
+                        linkEl.addEventListener("click", e => e.stopPropagation())
                     } else if (msgPart.indexOf("\n") === 0) {
                         let brEl = document.createElement("br")
                         msgEl.appendChild(brEl)
