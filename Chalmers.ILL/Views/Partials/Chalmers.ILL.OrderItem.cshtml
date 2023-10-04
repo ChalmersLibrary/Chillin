@@ -373,10 +373,6 @@
     <span class="label label-default">Händelser</span>
 </div>
 <section class="col-sm-12 helpful-dynamic-information__container">
-    <section style="text-align:right;">
-        <button type="button" style="padding:0.5rem;" class="new-log__add-btn">VISA NY LOGG SOM ÄR UNDER KONSTRUKTION</button>
-        <section>Använd gärna knappen med <span class="glyphicon glyphicon-bullhorn"></span> för att säga vad du tycker.</section>
-    </section>
 </section>
 <div id="log-@Model.OrderItem.NodeId" class="col-sm-12 log-list">
     @{
@@ -504,7 +500,7 @@
         return ret;
     }
 
-    document.querySelector(".new-log__add-btn").addEventListener("click", async () => {
+    (async () => {
         let dateElementStyle = {
             "background-color": "#404040",
             "color": "#d0d0d0",
@@ -558,13 +554,6 @@
         el.style.padding = "2rem";
         el.style["box-sizing"] = "border-box";
         el.innerHTML = "";
-
-        let title = document.createElement("h3");
-        title.style["text-align"] = "center";
-        title.style.color = "#808080";
-        title.style["max-width"] = "unset";
-        title.innerText = "DEN LILLE LOGGEN";
-        el.appendChild(title);
 
         let logItems = chillinVars.orderItemData.LogItemsList;
         let mergedLogItems = logItems.reduce((acc, logItem) => {
@@ -654,18 +643,9 @@
                 msgEl.style.border = "solid 1px black"
                 msgEl.style["background-color"] = "#fffede"
                 msgEl.style.position = "relative"
-                msgEl.style.padding = "6rem"
+                msgEl.style.padding = "0.5rem"
                 msgEl.style.margin = "0.5rem"
-
-                let preCitEl = document.createElement("span")
-                preCitEl.style["font-size"] = "12rem"
-                preCitEl.style["line-height"] = "10rem"
-                preCitEl.style.position = "absolute"
-                preCitEl.style.left = "1rem"
-                preCitEl.style.top = "1rem"
-                preCitEl.style["font-family"] = "sans-serif"
-                preCitEl.innerText = "“"
-                msgEl.appendChild(preCitEl)
+                msgEl.style["line-height"] = "2rem"
 
                 let msgParts = msg.split(/(https?[^ \n]+|\n)/)
                 for (const msgPart of msgParts) {
@@ -684,21 +664,11 @@
                     }
                 }
 
-                let postCitEl = document.createElement("span")
-                postCitEl.style["font-size"] = "12rem"
-                postCitEl.style["line-height"] = "0"
-                postCitEl.style.position = "absolute"
-                postCitEl.style.right = "1rem"
-                postCitEl.style.bottom = "0"
-                postCitEl.style["font-family"] = "sans-serif"
-                postCitEl.innerText = "”"
-                msgEl.appendChild(postCitEl)
-
                 msgContainer.appendChild(msgEl);
             }
             msgAndTextContainer.appendChild(msgContainer);
 
             el.appendChild(logItemEl);
         }
-    })
+    })();
 </script>
