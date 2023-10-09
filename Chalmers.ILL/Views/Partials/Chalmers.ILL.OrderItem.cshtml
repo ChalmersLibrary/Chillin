@@ -622,7 +622,7 @@
 
             let userNameEl = document.createElement("section")
             userNameEl.innerText = logItem.user
-            userNameEl.style["font-size"] = "1.4rem"
+            userNameEl.style["font-size"] = "1.2rem"
             userNameEl.style.color = "black"
             userNameEl.style["margin-left"] = "0.5rem"
             userNameEl.style["font-weight"] = "bold"
@@ -630,6 +630,7 @@
 
             let textContainer = document.createElement("section");
             textContainer.style["text-align"] = "left";
+            textContainer.style["font-size"] = "1.4rem"
             textContainer.style["margin-left"] = "0.5rem";
             textContainer.innerText = logItem.text;
             msgAndTextContainer.appendChild(textContainer);
@@ -645,7 +646,7 @@
                 msgEl.style.position = "relative"
                 msgEl.style.padding = "0.5rem"
                 msgEl.style.margin = "0.5rem"
-                msgEl.style["line-height"] = "2rem"
+                msgEl.style["font-size"] = "1.4rem"
 
                 let msgParts = msg.split(/(https?[^ \n]+|\n)/)
                 for (const msgPart of msgParts) {
