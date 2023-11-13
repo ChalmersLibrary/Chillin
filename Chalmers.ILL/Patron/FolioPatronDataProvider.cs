@@ -67,7 +67,8 @@ namespace Chalmers.ILL.Patron
             if (json != null && json.users != null && json.users.Count == 1)
             {
                 var mblockJson = GetDataFromFolioWithRetries("/manualblocks?query=userId=" + json.users[0].id);
-                FillInSierraModelFromFolioData(json.users[0], mblockJson, res);
+                var ablockJson = GetDataFromFolioWithRetries("/automated-patron-blocks/" + json.users[0].id);
+                FillInSierraModelFromFolioData(json.users[0], mblockJson, ablockJson, res);
             }
 
             return res;
@@ -93,7 +94,8 @@ namespace Chalmers.ILL.Patron
                     try
                     {
                         var mblockJson = GetDataFromFolioWithRetries(requestManualBlocksPath);
-                        FillInSierraModelFromFolioData(json.users[0], mblockJson, res);
+                        var ablockJson = GetDataFromFolioWithRetries("/automated-patron-blocks/" + json.users[0].id);
+                        FillInSierraModelFromFolioData(json.users[0], mblockJson, ablockJson, res);
                     }
                     catch (Exception e)
                     {
@@ -118,7 +120,8 @@ namespace Chalmers.ILL.Patron
             if (json != null && json.users != null && json.users.Count == 1)
             {
                 var mblockJson = GetDataFromFolioWithRetries("/manualblocks?query=userId=" + json.users[0].id);
-                FillInSierraModelFromFolioData(json.users[0], mblockJson, res);
+                var ablockJson = GetDataFromFolioWithRetries("/automated-patron-blocks/" + json.users[0].id);
+                FillInSierraModelFromFolioData(json.users[0], mblockJson, ablockJson, res);
             }
 
             return res;
@@ -138,7 +141,7 @@ namespace Chalmers.ILL.Patron
                 foreach (var user in json.users)
                 {
                     var sierraModelForUser = new SierraModel();
-                    FillInSierraModelFromFolioData(user, null, sierraModelForUser, true);
+                    FillInSierraModelFromFolioData(user, null, null, sierraModelForUser, true);
                     res.Add(sierraModelForUser);
                 }
             }
@@ -234,7 +237,7 @@ namespace Chalmers.ILL.Patron
             return res;
         }
 
-        private void FillInSierraModelFromFolioData(dynamic recordData, dynamic mblockData, /* out */ SierraModel result, bool skipAffiliation = false)
+        private void FillInSierraModelFromFolioData(dynamic recordData, dynamic mblockData, dynamic ablockData, /* out */ SierraModel result, bool skipAffiliation = false)
         {
             result.barcode = recordData.barcode;
             result.id = recordData.id;
@@ -245,7 +248,7 @@ namespace Chalmers.ILL.Patron
                 result.last_name = recordData.personal.lastName;
             }
 
-            result.mblock = mblockData != null ? CalculateMblock(mblockData, recordData.id.ToString()) : "";
+            result.mblock = mblockData != null || ablockData != null ? CalculateMblock(mblockData, ablockData, recordData.id.ToString()) : "";
             result.ptype = ConvertToSierraPtype(recordData.patronGroup.ToString());
             result.expdate = recordData.expirationDate;
             result.pnum = recordData.username;
@@ -271,36 +274,56 @@ namespace Chalmers.ILL.Patron
             return res;
         }
 
-        private string CalculateMblock(dynamic manualblocksResult, string userId)
+        private string CalculateMblock(dynamic manualblocksResult, dynamic autoblocksResult, string userId)
         {
             var borrowing = false;
             var renewals = false;
             var requests = false;
-            for (var i=0; i<manualblocksResult.manualblocks.Count; i++)
+            var borrowingAuto = false;
+            var renewalsAuto = false;
+            var requestsAuto = false;
+
+            if (manualblocksResult != null)
             {
-                var blockItem = manualblocksResult.manualblocks[i];
-                if (blockItem.userId == userId)
+                for (var i = 0; i < manualblocksResult.manualblocks.Count; i++)
                 {
-                    borrowing |= Convert.ToBoolean(blockItem.borrowing);
-                    renewals |= Convert.ToBoolean(blockItem.renewals);
-                    requests |= Convert.ToBoolean(blockItem.requests);
+                    var blockItem = manualblocksResult.manualblocks[i];
+                    if (blockItem.userId == userId)
+                    {
+                        borrowing |= Convert.ToBoolean(blockItem.borrowing);
+                        renewals |= Convert.ToBoolean(blockItem.renewals);
+                        requests |= Convert.ToBoolean(blockItem.requests);
+                    }
                 }
             }
 
-            var blockStrings = new List<string>();
-            if (borrowing)
+            if (autoblocksResult != null)
             {
-                blockStrings.Add("borrowing");
+                for (var i = 0; i < autoblocksResult.automatedPatronBlocks.Count; i++)
+                {
+                    var blockItem = autoblocksResult.automatedPatronBlocks[i];
+                    borrowingAuto |= Convert.ToBoolean(blockItem.blockBorrowing);
+                    renewalsAuto |= Convert.ToBoolean(blockItem.blockRenewals);
+                    requestsAuto |= Convert.ToBoolean(blockItem.blockRequests);
+                }
             }
-            if (renewals)
+
+            // We only care about requests block, be they automatic or manual
+            var blockString = "";
+            if (requests && requestsAuto)
             {
-                blockStrings.Add("renewals");
+                blockString = "requests (both)";
             }
-            if (requests)
+            else if (requests)
             {
-                blockStrings.Add("requests");
+                blockString = "requests (manual)";
             }
-            return String.Join(", ", blockStrings);
+            else if (requestsAuto)
+            {
+                blockString = "requests (auto)";
+            }
+
+            return blockString;
         }
 
         #endregion
