@@ -58,9 +58,24 @@ namespace Chalmers.ILL.Mail
         public string ArchiveMailMessage(MailQueueModel mqm)
         {
             // Find out Year and Month to archive on
+            string year = DateTime.UtcNow.Year.ToString();
+            string month = DateTime.UtcNow.Month.ToString();
             var parts = mqm.DateTimeReceived.Split('-');
-            string year = parts[0];
-            string month = parts[1];
+            if (parts.Length >= 2)
+            {
+                year = parts[0];
+                month = parts[1];
+            }
+            else
+            {
+                // Probably american format
+                parts = mqm.DateTimeReceived.Split('/');
+                if (parts.Length >= 3)
+                {
+                    year = parts[2];
+                    month = parts[0];
+                }
+            }
 
             // Check if Year folder exists below Inbox
             var rootMailFoldersResponse = GetFromMicrosoftGraph(_config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/inbox/childFolders");
