@@ -73,7 +73,7 @@ namespace Chalmers.ILL.Mail
                 if (parts.Length >= 3)
                 {
                     year = parts[2];
-                    month = parts[0];
+                    month = parts[0].PadLeft(2, '0');
                 }
             }
 
