@@ -59,7 +59,7 @@ namespace Chalmers.ILL.Mail
         {
             // Find out Year and Month to archive on
             string year = DateTime.UtcNow.Year.ToString();
-            string month = DateTime.UtcNow.Month.ToString();
+            string month = DateTime.UtcNow.Month.ToString().PadLeft(2, '0');
             var parts = mqm.DateTimeReceived.Split('-');
             if (parts.Length >= 2)
             {
@@ -78,21 +78,43 @@ namespace Chalmers.ILL.Mail
             }
 
             // Check if Year folder exists below Inbox
-            var rootMailFoldersResponse = GetFromMicrosoftGraph(_config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/inbox/childFolders");
-            var rootMailFolders = rootMailFoldersResponse.value as IEnumerable<dynamic>;
-            var yearFolder = rootMailFolders.FirstOrDefault(x => x.displayName.ToString().Trim() == year);
+            var isFirstYearRequest = true;
+            dynamic rootMailFoldersResponse = null;
+            dynamic yearFolder = null;
+            while (yearFolder == null && (isFirstYearRequest || rootMailFoldersResponse["@odata.nextLink"] != null))
+            {
+                var url = isFirstYearRequest ?
+                    _config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/inbox/childFolders" :
+                    rootMailFoldersResponse["@odata.nextLink"].ToString();
+                rootMailFoldersResponse = GetFromMicrosoftGraph(url);
+                var rootMailFolders = rootMailFoldersResponse.value as IEnumerable<dynamic>;
+                yearFolder = rootMailFolders.FirstOrDefault(x => x.displayName.ToString().Trim() == year);
+
+                isFirstYearRequest = false;
+            }
 
             // Create folder for Year if it wasn't found
             if (yearFolder == null)
             {
-                yearFolder = PostToMicrosoftGraph(_config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/inbox/childFolders", 
+                yearFolder = PostToMicrosoftGraph(_config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/inbox/childFolders",
                     "{ \"displayName\":\"" + year + "\" }");
             }
 
             // Check if Month folder exists below Year folder
-            var childMailFoldersResponse = GetFromMicrosoftGraph(_config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/" + yearFolder.id + "/childFolders");
-            var childMailFolders = childMailFoldersResponse.value as IEnumerable<dynamic>;
-            var monthFolder = childMailFolders.FirstOrDefault(x => x.displayName.ToString().Trim() == month);
+            var isFirstMonthRequest = true;
+            dynamic childMailFoldersResponse = null;
+            dynamic monthFolder = null;
+            while (monthFolder == null && (isFirstMonthRequest || childMailFoldersResponse["@odata.nextLink"] != null))
+            {
+                var url = isFirstMonthRequest ?
+                    _config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/" + yearFolder.id + "/childFolders" :
+                    childMailFoldersResponse["@odata.nextLink"].ToString();
+                childMailFoldersResponse = GetFromMicrosoftGraph(url);
+                var childMailFolders = childMailFoldersResponse.value as IEnumerable<dynamic>;
+                monthFolder = childMailFolders.FirstOrDefault(x => x.displayName.ToString().Trim() == month);
+
+                isFirstMonthRequest = false;
+            }
 
             // Create folder for Month if it wasn't found
             if (monthFolder == null)
