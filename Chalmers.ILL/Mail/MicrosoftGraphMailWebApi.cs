@@ -58,9 +58,24 @@ namespace Chalmers.ILL.Mail
         public string ArchiveMailMessage(MailQueueModel mqm)
         {
             // Find out Year and Month to archive on
+            string year = DateTime.UtcNow.Year.ToString();
+            string month = DateTime.UtcNow.Month.ToString();
             var parts = mqm.DateTimeReceived.Split('-');
-            string year = parts[0];
-            string month = parts[1];
+            if (parts.Length >= 2)
+            {
+                year = parts[0];
+                month = parts[1];
+            }
+            else
+            {
+                // Probably american format
+                parts = mqm.DateTimeReceived.Split('/');
+                if (parts.Length >= 3)
+                {
+                    year = parts[2];
+                    month = parts[0];
+                }
+            }
 
             // Check if Year folder exists below Inbox
             var rootMailFoldersResponse = GetFromMicrosoftGraph(_config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/inbox/childFolders");
@@ -165,12 +180,7 @@ namespace Chalmers.ILL.Mail
                     m.Sender = mailData.from.emailAddress.name.ToString();
                     m.Debug = mailData.body.content.ToString();
                     m.Subject = mailData.subject.ToString();
-                    _umbraco.LogInfo<MicrosoftGraphMailWebApi>("DEBUG DATE TIME RECEIVED! " + mailData.receivedDateTime.ToString());
                     m.DateTimeReceived = mailData.receivedDateTime.ToString().Replace("T", " ").Remove(16).Trim();
-                    if (String.IsNullOrEmpty(m.DateTimeReceived))
-                    {
-                        m.DateTimeReceived = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture).Replace("T", " ").Remove(16).Trim();
-                    }
                     m.Attachments = attachmentList;
 
                     // Message body as text only
