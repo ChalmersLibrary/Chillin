@@ -63,8 +63,8 @@ namespace Chalmers.ILL.Mail
             var parts = mqm.DateTimeReceived.Split('-');
             if (parts.Length >= 2)
             {
-                year = parts[0];
-                month = parts[1];
+                year = parts[0].Trim();
+                month = parts[1].Trim();
             }
             else
             {
@@ -72,15 +72,15 @@ namespace Chalmers.ILL.Mail
                 parts = mqm.DateTimeReceived.Split(' ')[0].Split('/');
                 if (parts.Length >= 3)
                 {
-                    year = parts[2];
-                    month = parts[0].PadLeft(2, '0');
+                    year = parts[2].Trim();
+                    month = parts[0].Trim().PadLeft(2, '0');
                 }
             }
 
             // Check if Year folder exists below Inbox
             var rootMailFoldersResponse = GetFromMicrosoftGraph(_config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/inbox/childFolders");
             var rootMailFolders = rootMailFoldersResponse.value as IEnumerable<dynamic>;
-            var yearFolder = rootMailFolders.FirstOrDefault(x => x.displayName == year);
+            var yearFolder = rootMailFolders.FirstOrDefault(x => x.displayName.ToString().Trim() == year);
 
             // Create folder for Year if it wasn't found
             if (yearFolder == null)
@@ -92,7 +92,7 @@ namespace Chalmers.ILL.Mail
             // Check if Month folder exists below Year folder
             var childMailFoldersResponse = GetFromMicrosoftGraph(_config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/" + yearFolder.id + "/childFolders");
             var childMailFolders = childMailFoldersResponse.value as IEnumerable<dynamic>;
-            var monthFolder = childMailFolders.FirstOrDefault(x => x.displayName == month);
+            var monthFolder = childMailFolders.FirstOrDefault(x => x.displayName.ToString().Trim() == month);
 
             // Create folder for Month if it wasn't found
             if (monthFolder == null)
