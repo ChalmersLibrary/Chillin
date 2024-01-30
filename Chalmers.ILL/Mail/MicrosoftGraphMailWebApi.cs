@@ -69,7 +69,7 @@ namespace Chalmers.ILL.Mail
             else
             {
                 // Probably american format
-                parts = mqm.DateTimeReceived.Split('/');
+                parts = mqm.DateTimeReceived.Split(' ')[0].Split('/');
                 if (parts.Length >= 3)
                 {
                     year = parts[2];
