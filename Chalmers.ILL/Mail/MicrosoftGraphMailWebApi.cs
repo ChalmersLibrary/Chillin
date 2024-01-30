@@ -165,12 +165,7 @@ namespace Chalmers.ILL.Mail
                     m.Sender = mailData.from.emailAddress.name.ToString();
                     m.Debug = mailData.body.content.ToString();
                     m.Subject = mailData.subject.ToString();
-                    _umbraco.LogInfo<MicrosoftGraphMailWebApi>("DEBUG DATE TIME RECEIVED! " + mailData.receivedDateTime.ToString());
                     m.DateTimeReceived = mailData.receivedDateTime.ToString().Replace("T", " ").Remove(16).Trim();
-                    if (String.IsNullOrEmpty(m.DateTimeReceived))
-                    {
-                        m.DateTimeReceived = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture).Replace("T", " ").Remove(16).Trim();
-                    }
                     m.Attachments = attachmentList;
 
                     // Message body as text only
