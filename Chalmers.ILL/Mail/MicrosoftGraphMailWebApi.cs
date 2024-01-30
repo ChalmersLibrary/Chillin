@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Dynamic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Chalmers.ILL.Configuration;
 using Chalmers.ILL.Models.Mail;
+using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Utilities;
 using HtmlAgilityPack;
 using Microsoft.Exchange.WebServices.Data;
@@ -30,11 +32,13 @@ namespace Chalmers.ILL.Mail
         private IConfidentialClientApplication _app;
         private HttpClient _httpClient;
         private IConfiguration _config;
+        private IUmbracoWrapper _umbraco;
 
-        public MicrosoftGraphMailWebApi(HttpClient httpClient, IConfiguration config)
+        public MicrosoftGraphMailWebApi(HttpClient httpClient, IConfiguration config, IUmbracoWrapper umbraco)
         {
             _httpClient = httpClient;
             _config = config;
+            _umbraco = umbraco;
         }
 
         /// <summary>
@@ -161,7 +165,12 @@ namespace Chalmers.ILL.Mail
                     m.Sender = mailData.from.emailAddress.name.ToString();
                     m.Debug = mailData.body.content.ToString();
                     m.Subject = mailData.subject.ToString();
-                    m.DateTimeReceived = mailData.receivedDateTime.ToString().Replace("T", " ").Remove(16);
+                    _umbraco.LogInfo<MicrosoftGraphMailWebApi>("DEBUG DATE TIME RECEIVED! " + m.DateTimeReceived);
+                    m.DateTimeReceived = mailData.receivedDateTime.ToString().Replace("T", " ").Remove(16).Trim();
+                    if (String.IsNullOrEmpty(m.DateTimeReceived))
+                    {
+                        m.DateTimeReceived = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture).Replace("T", " ").Remove(16).Trim();
+                    }
                     m.Attachments = attachmentList;
 
                     // Message body as text only
