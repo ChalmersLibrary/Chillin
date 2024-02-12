@@ -254,11 +254,16 @@ namespace Chalmers.ILL.Mail
             messageBody.content = body.Replace("\n", "<br />");
             message.body = messageBody;
 
-            dynamic toRecipient = new ExpandoObject();
-            dynamic toEmailAddress = new ExpandoObject();
-            toEmailAddress.address = recipientAddress;
-            toRecipient.emailAddress = toEmailAddress;
-            message.toRecipients = new List<dynamic>() { toRecipient };
+            message.toRecipients = new List<dynamic>();
+
+            foreach (var singleRecipientAddress in recipientAddress.Split(',').Select(x => x.Trim()).Where(x => !String.IsNullOrEmpty(x)))
+            {
+                dynamic toRecipient = new ExpandoObject();
+                dynamic toEmailAddress = new ExpandoObject();
+                toEmailAddress.address = singleRecipientAddress;
+                toRecipient.emailAddress = toEmailAddress;
+                message.toRecipients.Add(toRecipient);
+            }
 
             dynamic replyToRecipient = new ExpandoObject();
             dynamic replyToEmailAddress = new ExpandoObject();
