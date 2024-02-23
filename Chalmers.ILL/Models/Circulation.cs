@@ -14,7 +14,7 @@ namespace Chalmers.ILL.Models
         [JsonProperty("item")]
         public CirculationItem Item { get; set; }
         public Requester Requester { get; set; }
-        public string FulfilmentPreference { get; set; }
+        public string FulfillmentPreference { get; set; }
         public string PickupServicePointId { get; set; }
         public Metadata Metadata { get; set; }
         public int Position { get; set; }

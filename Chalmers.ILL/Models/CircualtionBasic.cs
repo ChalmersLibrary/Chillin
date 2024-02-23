@@ -9,7 +9,7 @@ namespace Chalmers.ILL.Models
         public string RequestType { get; set; } = "Page";
         public string RequestLevel { get; set; } = "Item";
         public string RequestDate { get; set; } = DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ");
-        public string FulfilmentPreference { get; set; } = "Hold Shelf";
+        public string FulfillmentPreference { get; set; } = "Hold Shelf";
         public string PickupServicePointId { get; set; }
         public string InstanceId { get; set; }
         public string HoldingsRecordId { get; set; }
