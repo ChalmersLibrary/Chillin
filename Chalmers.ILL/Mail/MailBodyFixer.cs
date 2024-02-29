@@ -10,7 +10,8 @@ namespace Chalmers.ILL.Mail
             var res = "";
             if (!String.IsNullOrEmpty(htmlText))
             {
-                res = Regex.Replace(htmlText, @"<a[^>]*href=""([^""]*)""[^>]*>([^<]*)</a>", "$2 ( $1 )");
+                res = Regex.Replace(htmlText, @"<a[^>]*href=""([^""]*)""[^>]*>\1</a>", "$1");
+                res = Regex.Replace(res, @"<a[^>]*href=""([^""]*)""[^>]*>([^<]*)</a>", "$2 ( $1 )");
             }
             return res;
         }
