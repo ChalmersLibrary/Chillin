@@ -21,6 +21,34 @@ namespace Chalmers.ILL.Tests.Mail
             Assert.AreEqual(LoadMailTestData("reprints-desk-mail-links-removed.txt"), res);
         }
 
+        [TestMethod]
+        public void RemoveHtmlAroundLinks_TextEqualsHref_KeepOnlyOne()
+        {
+            var res = MailBodyFixer.RemoveHtmlAroundLinks(@"<a href=""https://lib.chalmers.se"">https://lib.chalmers.se</a>");
+            Assert.AreEqual("https://lib.chalmers.se", res);
+        }
+
+        [TestMethod]
+        public void RemoveHtmlAroundLinks_NoLinks_AreIdentical()
+        {
+            var res = MailBodyFixer.RemoveHtmlAroundLinks("Tjosan hejsan!");
+            Assert.AreEqual(res, "Tjosan hejsan!");
+        }
+
+        [TestMethod]
+        public void RemoveHtmlAroundLinks_EmptyString_AreIdentical()
+        {
+            var res = MailBodyFixer.RemoveHtmlAroundLinks("");
+            Assert.AreEqual(res, "");
+        }
+
+        [TestMethod]
+        public void RemoveHtmlAroundLinks_Null_EmptyString()
+        {
+            var res = MailBodyFixer.RemoveHtmlAroundLinks(null);
+            Assert.AreEqual(res, "");
+        }
+
         #region Private methods
 
         private string LoadMailTestData(string filename)
