@@ -91,7 +91,7 @@ namespace Chalmers.ILL.Providers
                             if (!OrderWithSeedIdAlreadyExists(seed.Id))
                             {
                                 seed.PatronEmail = req.user.email.Value;
-                                seed.PatronName = req.user.full_name.Value;
+                                seed.PatronName = "";  // req.user.full_name.Value; Borttaget pga. minskad mängd personuppgifter.
                                 seed.PatronCardNumber = req.user.library_card.Value;
                                 seed.DeliveryLibrarySigel = sigel;
                                 seed.Message = "Författare: " + ReplaceWithNotAvailableIfEmptyString(req.author.Value) + "\n" +
