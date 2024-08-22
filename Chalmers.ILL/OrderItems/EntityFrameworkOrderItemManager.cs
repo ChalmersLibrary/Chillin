@@ -1380,7 +1380,7 @@ namespace Chalmers.ILL.OrderItems
         private void UpdateLastDeliveryStatusWhenProper(OrderItemModel orderItem, int newStatusId)
         {
             var statusStr = umbraco.library.GetPreValueAsString(newStatusId).Split(':').Last();
-            if (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport") || statusStr.Contains("Infodisk"))
+            if (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport") || statusStr.Contains("Infodisk") || statusStr.Contains("FOLIO"))
             {
                 orderItem.LastDeliveryStatusId = newStatusId;
             }
