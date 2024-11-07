@@ -1,0 +1,33 @@
+﻿@model Chalmers.ILL.Models.OrderItemModel
+
+<div class="action-header">Anonymisera order</div>
+
+<p>Denna order är delvis anonymiserad och låst för förändringar.</p>
+<p>Manuell borttagning av personuppgifter ur följande data behöver göras.</p>
+<form class="form" role="form" onsubmit="return false;">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="reference">Referens</label>
+                <textarea id="reference" style="width:100%;" rows="20" data-id="reference" onkeydown="inputAnonymization(event);">@Model.Reference</textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+    <label>Fritextsloggar</label>
+    @foreach (var logItem in Model.LogItemsList.Where(x => x.Type == "LOG"))
+    {
+        <textarea style="width:100%" rows="3" onkeydown="inputAnonymization(event);" data-id="log:@logItem.Id">@logItem.Message</textarea>
+    }
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-success" onclick="anonymize(@Model.NodeId, event);">Anonymisera</button>
+    <script>
+        $(function () {
+            $("#reference").focus().scrollTop(0)[0].setSelectionRange(0, 0);
+        });
+    </script>
+</form>

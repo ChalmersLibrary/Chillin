@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.props" Condition="Exists('..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -24,7 +25,8 @@
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>
     <SccProvider>SAK</SccProvider>
-    <NuGetPackageImportStamp>77c77be9</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
     <UseGlobalApplicationHostFile />
     <TargetFrameworkProfile />
     <Use64BitIISExpress />
@@ -73,12 +75,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="Examine">
       <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Examine.dll</HintPath>
@@ -407,6 +407,7 @@
     <Content Include="Views\Partials\DeliveryType\ArticleFromProvider.cshtml" />
     <Content Include="Views\Partials\Settings\ChillinText.cshtml" />
     <Content Include="Views\Shared\ReceivedAtBranchResult.cshtml" />
+    <Content Include="Views\Partials\Chalmers.ILL.Action.Anonymize.cshtml" />
     <None Include="Views\Web.config" />
     <Content Include="Views\ChalmersILL.cshtml" />
     <Content Include="Views\ChalmersILLOrderListPage.cshtml" />
@@ -452,6 +453,7 @@
     <Compile Include="Configuration\DefaultChillinConfiguration.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Controllers\SurfaceControllers\ChillinTextSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemAnonymizationSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemPurchaseLibrarySurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemReceivedAtBranchSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemSearchSurfaceController.cs" />
@@ -580,6 +582,14 @@
     <Compile Include="Migrations\202211221509378_AddCid.Designer.cs">
       <DependentUpon>202211221509378_AddCid.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202410170822183_AnonymizationField.cs" />
+    <Compile Include="Migrations\202410170822183_AnonymizationField.Designer.cs">
+      <DependentUpon>202410170822183_AnonymizationField.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202410240950285_AddIsAnonymizedAutomatically.cs" />
+    <Compile Include="Migrations\202410240950285_AddIsAnonymizedAutomatically.Designer.cs">
+      <DependentUpon>202410240950285_AddIsAnonymizedAutomatically.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ChillinText.cs" />
     <Compile Include="Models\ItemBasic.cs" />
@@ -630,6 +640,7 @@
     <Compile Include="Models\Personal.cs" />
     <Compile Include="Models\ResultResponseWithData.cs" />
     <Compile Include="Models\ResultResponseWithStringData.cs" />
+    <Compile Include="Models\SearchResult.cs" />
     <Compile Include="Models\Template.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLEditTemplatesModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLOrderItemModel.cs" />
@@ -778,6 +789,12 @@
     <EmbeddedResource Include="Migrations\202211221509378_AddCid.resx">
       <DependentUpon>202211221509378_AddCid.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202410170822183_AnonymizationField.resx">
+      <DependentUpon>202410170822183_AnonymizationField.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202410240950285_AddIsAnonymizedAutomatically.resx">
+      <DependentUpon>202410240950285_AddIsAnonymizedAutomatically.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -836,9 +853,7 @@
   </ProjectExtensions>
   <PropertyGroup>
     <PreBuildEvent>xcopy $(ProjectDir)\..\packages\UmbracoCms.6.1.6\UmbracoFiles $(ProjectDir) /y /d /e /exclude:$(ProjectDir)\xcopy-exclude-list.txt
-xcopy $(ProjectDir)\..\packages\UmbracoCms.6.1.6\Content $(ProjectDir) /y /d /e /exclude:$(ProjectDir)\xcopy-exclude-list.txt
-cd $(ProjectDir)
-bower install</PreBuildEvent>
+xcopy $(ProjectDir)\..\packages\UmbracoCms.6.1.6\Content $(ProjectDir) /y /d /e /exclude:$(ProjectDir)\xcopy-exclude-list.txt</PreBuildEvent>
   </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -846,12 +861,15 @@ bower install</PreBuildEvent>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.props'))" />
     <Error Condition="!Exists('..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.targets'))" />
   </Target>
   <Import Project="..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets" Condition="Exists('..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets')" />
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

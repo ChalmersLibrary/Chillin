@@ -52,7 +52,7 @@
 
         var i = Convert.ToInt32(status == "" ? "0" : status.Split(':').First());
 
-        var sortingWeights = new Int32[]{1, 2, 4, 6, 7, 10, 11, 12, 17, 13, 3, 14, 9, 5, 8, 0, 15, 16};
+        var sortingWeights = new Int32[] { 1, 2, 4, 6, 7, 10, 11, 12, 17, 13, 3, 14, 9, 5, 8, 0, 15, 16 };
 
         return sortingWeights[i];
     }
@@ -88,8 +88,12 @@
     }
 }
 
-@if (Model.PendingOrderItems.Count() > 0)
+@if (Model.PendingOrderItems.Items.Count() > 0)
 {
+    var start = Request.QueryString["start"] != null ? Int32.Parse(Request.QueryString["start"]) : 0;
+    var areMoreItems = start + 50 < Model.PendingOrderItems.Count;
+    var queryString = Request.QueryString["query"] != null ? "&query=" + Request.QueryString["query"] : "";
+
     <div class="text-center">
         <div id="library-filter-buttons" class="btn-group" data-pending-filter-change="0">
             <button id="library00-button" type="button" value="" class="btn btn-default active" style="border-radius:0;">Alla <span id="allaBibliotek" class="badge">0</span></button>
@@ -100,7 +104,7 @@
     </div>
 
     <div>
-        <h2 id="order-list-title">Beställningar - Alla bibliotek</h2>  
+        <h2 id="order-list-title">Beställningar - Alla bibliotek</h2>
         <div id="filter-buttons" class="btn-group" data-pending-filter-change="0">
             <button id="status00-button" type="button" value="" class="btn btn-default active" style="border-radius:0;">Alla <span id="status00-counter" class="badge">0</span></button>
             <button id="status01-button" type="button" value=".chillin-status-01" class="btn btn-default btn-success hidden">Ny <span id="status01-counter" class="badge">0</span></button>
@@ -129,6 +133,11 @@
         <h3>Beställningar som matchar <strong>@Request.QueryString["query"]</strong></h3>
     }
 
+    if (Model.PendingOrderItems.Count > 50)
+    {
+        <h3>Visar ordrar @(start) till @(start + 49 < Model.PendingOrderItems.Count ? start + 49 : Model.PendingOrderItems.Count) av totalt @(Model.PendingOrderItems.Count) ordrar.</h3>
+    }
+
     <div class="order-list container-fluid">
 
         <div class="row header">
@@ -139,17 +148,40 @@
             <div class="col-sm-1"><a id="sort-on-status-link" href="#">Status <span id="sort-icon" class="glyphicon glyphicon-chevron-down"></span></a></div>
         </div>
 
+        @if (start > 0)
+        {
+            <section style="height: 8rem; display: flex; justify-content: center; align-items: center;"><a href="/bestaellningar/?start=@(start - 50)@(queryString)">Gå till föregående sida med ordrar.</a></section>
+        }
+
         @{
             int loggedInMember = Model.CurrentMemberId;
-            foreach (var item in Model.PendingOrderItems.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.FollowUpDate))
-            {          
+            foreach (var item in Model.PendingOrderItems.Items.OrderBy(GetSortOrderFromOrderItemSearchResult).ThenBy(y => y.FollowUpDate))
+            {
                 @RenderOrderList(loggedInMember, item.NodeId, item.FollowUpDate, item.PatronName, item.DeliveryLibrary, item.Status,
                     item.Type, item.Reference, item.EditedBy, item.PurchaseLibrary);
             }
-            
+
             // Add debug message
             debugMessage += "query.ToString()=" + Request.QueryString["query"];
         }
+
+        @if (areMoreItems)
+        {
+            <section style="height: 8rem; display: flex; justify-content: center; align-items: center;"><a href="/bestaellningar/?start=@(start + 50)@(queryString)">Gå till nästa sida med ordrar.</a></section>
+        }
+
+        @if (Model.ManualAnonymizationItems.Items.Count() > 0)
+        {
+            <section style="height: 8rem; display: flex; justify-content: center; align-items: center; background-color: khaki;">Nedanför hittas @(Model.ManualAnonymizationItems.Items.Count()) av totalt @(Model.ManualAnonymizationItems.Count) ordrar som behöver manuell anonymisering.</section>
+        
+
+            foreach (var item in Model.ManualAnonymizationItems.Items)
+            {
+                @RenderOrderList(loggedInMember, item.NodeId, item.FollowUpDate, item.PatronName, item.DeliveryLibrary, item.Status,
+                    item.Type, item.Reference, item.EditedBy, item.PurchaseLibrary);
+            }
+        }
+
         <div class="silly-filler"></div>
     </div><!-- /order-list -->
 }
@@ -172,13 +204,13 @@ else
     @prevalue.Split(':').Last()
 }
 
-@helper RenderOrderList(int memberId, object Id, DateTime date, object patronName, object library, object status, object type, 
+@helper RenderOrderList(int memberId, object Id, DateTime date, object patronName, object library, object status, object type,
     object reference, object editorID, object purchaseLibrary)
 {
     string css_class = "";
     string data_attribute = "";
     int loggedInMember = memberId;
-    
+
     // Check if item is marked as being edited; if so, check so it is not edited by the member currently logged in
     if ((editorID.ToString().AsInt() != 0) && (editorID.ToString().AsInt() != loggedInMember))
     {
@@ -194,7 +226,7 @@ else
     {
         data_attribute = "data-locked-by-memberid=\"" + editorID.ToString() + "\"";
     }
-    
+
     <div id="@Id" class="@css_class" data-editorid="@editorID.ToString().AsInt()" @data_attribute>
         <div class="col-sm-7" data-column="reference">@Html.Raw(reference.ToString().Replace("\n", "<br />"))</div>
         <div class="col-sm-2" data-column="patronName">@patronName</div>

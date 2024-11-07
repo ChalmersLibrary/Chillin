@@ -7,6 +7,7 @@ namespace Chalmers.ILL.Models.Page
 {
     public class ChalmersILLOrderListPageModel : ChalmersILLModel
     {
-        public IEnumerable<OrderItemModel> PendingOrderItems { get; set; }
+        public SearchResult PendingOrderItems { get; set; }
+        public SearchResult ManualAnonymizationItems { get; set; }
     }
 }

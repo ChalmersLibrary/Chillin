@@ -29,6 +29,11 @@ namespace Chalmers.ILL.OrderItems
             // Handled automatically by Umbraco.
         }
 
+        Models.SearchResult IOrderItemSearcher.Search(string query, int start, int size)
+        {
+            throw new NotImplementedException();
+        }
+
         IEnumerable<OrderItemModel> IOrderItemSearcher.Search(string query)
         {
             var res = new List<OrderItemModel>();
@@ -61,6 +66,11 @@ namespace Chalmers.ILL.OrderItems
             }
 
             return res;
+        }
+
+        public IEnumerable<OrderItemModel> Search(string query, int size, string[] fields)
+        {
+            throw new NotImplementedException();
         }
     }
 }

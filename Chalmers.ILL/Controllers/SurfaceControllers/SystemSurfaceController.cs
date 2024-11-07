@@ -14,12 +14,14 @@ using Chalmers.ILL.UmbracoApi;
 using Microsoft.Practices.Unity;
 using Chalmers.ILL.Models;
 using System.Configuration;
+using Nest;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class SystemSurfaceController : SurfaceController
     {
         public static int TIME_BASED_UPDATE_OF_ORDER_EVENT_TYPE { get { return 19; } }
+        public static int ANONYMIZATION_OF_ORDER_EVENT_TYPE { get { return 30; } }
 
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
@@ -62,6 +64,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     ConvertOrdersWithExpiredFollowUpDateAndCertainStatusToNewStatus();
 
                     SignalExpiredFollowUpDates();
+
+                    AnonymizeOldOrderItems();
 
                     foreach (var source in _sourceFactory.Sources())
                     {
@@ -198,6 +202,30 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _orderItemManager.AddLogItem(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", eventId, false, false);
                 _orderItemManager.SetStatus(id, _dataTypes.GetAvailableStatuses().First(x => x.Value.Contains("Åtgärda")).Id, eventId);
                 _notifier.UpdateOrderItemUpdate(id, memberId.ToString(), "", true, true);
+            }
+        }
+
+        private void AnonymizeOldOrderItems()
+        {
+            // -1 means that we haven't checked edited by properly and should disregard it
+            var memberId = -1;
+
+            var query = "updateDate:[* TO 2023-10-17] AND status:(\"05:Levererad\" OR \"06:Annullerad\" OR \"07:Överförd\" OR \"08:Inköpt\" OR \"10:Återsänd\" OR \"15:Förlorad?\" OR \"16:Förlorad\") AND (isAnonymizedAutomatically:false OR (!_exists_:isAnonymizedAutomatically)) AND (isAnonymized:false OR (!_exists_:isAnonymized))";
+            var orderItems = _orderItemsSearcher.Search(query, 10, new string[] { "nodeId" });
+            foreach (var orderItem in orderItems)
+            {
+                try
+                {
+                    var id = orderItem.NodeId;
+                    var eventId = _orderItemManager.GenerateEventId(ANONYMIZATION_OF_ORDER_EVENT_TYPE);
+                    _orderItemManager.AddLogItem(id, "ANONYMISERING", "Automatisk anonymisering av order.", eventId, false, false);
+                    _orderItemManager.AnonymizeOrder(id, eventId);
+                    _notifier.UpdateOrderItemUpdate(id, memberId.ToString(), "", true);
+                } catch (Exception ex)
+                {
+                    // On test some order items exist in common search but only in some databases.
+                    // NOOP
+                }
             }
         }
 

@@ -894,6 +894,45 @@ function setOrderItemReference(nodeId, reference) {
     });
 }
 
+/* Anonymize order */
+function anonymize(nodeId, event) {
+    lockScreen()
+
+    let match
+    let data = {
+        nodeId: nodeId,
+        reference: undefined,
+        logsSerialized: undefined
+    }
+    var logs = []
+    for (let textAreaEl of event.target.parentElement.querySelectorAll("textarea")) {
+        if (textAreaEl.dataset.id === "reference") {
+            data.reference = textAreaEl.value
+        } else if (match = textAreaEl.dataset.id.match(/^log:(.*)$/)) {
+            logs.push({
+                Id: match[1],
+                Message: textAreaEl.value
+            })
+        } else {
+            throw new Error("Unknown id type.")
+        }
+    }
+    data.logsSerialized = JSON.stringify(logs)
+
+    $.post("/umbraco/surface/OrderItemAnonymizationSurface/Anonymize", data).done(function (json) {
+        if (json.Success) {
+            loadOrderItemDetails(nodeId);
+        }
+        else {
+            alert(json.Message);
+        }
+        unlockScreen();
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
+}
+
 /* Set new property values for Delivery from form */
 function setOrderItemDelivery(nodeId, logEntry, delivery) {
     lockScreen();
@@ -1067,6 +1106,19 @@ function loadProviderAction(id) {
 function loadReferenceAction(id) {
     $("#loading-partial-view").show();
     $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemReferenceSurface/RenderReferenceAction?nodeId=' + id,
+        function (responseText, textStatus, req) {
+            if (req.status == 200) {
+                $('#action-' + id + ' #reference').focus();
+            }
+            $("#loading-partial-view").hide();
+        }
+    );
+}
+
+/* Load Partial View for the Anonymize Action */
+function loadAnonymizeAction(id) {
+    $("#loading-partial-view").show();
+    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemAnonymizationSurface/RenderAnonymizeAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             if (req.status == 200) {
                 $('#action-' + id + ' #reference').focus();

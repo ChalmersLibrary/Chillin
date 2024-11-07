@@ -17,6 +17,9 @@ using Umbraco.Core.Logging;
 using Chalmers.ILL.SignalR;
 using System.Threading;
 using static Chalmers.ILL.Models.OrderItemModel;
+using Nest;
+using Umbraco.Core;
+using System.IdentityModel.Tokens;
 
 namespace Chalmers.ILL.OrderItems
 {
@@ -1219,6 +1222,51 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
+        /**
+         * Manual anonymization.
+         */
+        public void SilentAnonymization(int nodeId, string reference, IList<LogItem> logs, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
+                if (orderItem != null)
+                {
+                    if (reference != null)
+                    {
+                        orderItem.Reference = reference;
+                    }
+                    foreach (var log in orderItem.LogItemsList)
+                    {
+                        var editLogItem = logs.FirstOrDefault(x => x.Id == log.Id);
+                        if (editLogItem != null)
+                        {
+                            log.Message = editLogItem.Message;
+                        }
+                    }
+                    orderItem.IsAnonymized = true;
+
+                    FillOutStuff(orderItem);
+
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to do silent anonymization");
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
         public void SetStatus(int orderNodeId, string statusPrevalue, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var statusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], statusPrevalue);
@@ -1336,6 +1384,89 @@ namespace Chalmers.ILL.OrderItems
                 else
                 {
                     throw new OrderItemNotFoundException("Failed to find order item when trying to set read only at library.");
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
+        /**
+         * Automatic anonymization.
+         */
+        public void AnonymizeOrder(int nodeId, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            var mailNoteMessageAlts = new string[] {
+                "Skickat mail till",
+                "E-post mot låntagare ändrad till",
+                "Skickat automatiskt leveransmail till",
+                "Skickat automatiskt \"courtesy notice\" till",
+                "Skickat automatiskt påminnelsemail nummer ett till",
+                "Skickat automatiskt påminnelsemail nummer två till",
+                "Skickat automatiskt påminnelsemail nummer tre till",
+                "Skickat automatiskt leveransmail till",
+                "Svar från",
+                "Svar fr��n",
+                "Leverans från",
+                "PatronEmail ändrad till"
+            };
+
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
+                if (orderItem != null)
+                {
+                    orderItem.OriginalOrder = "ANONYMIZED";
+                    orderItem.PatronName = "ANONYMIZED";
+                    orderItem.PatronCardNo = "ANONYMIZED";
+                    orderItem.PatronEmail = "ANONYMIZED";
+
+                    if (orderItem.LogItemsList != null)
+                    {
+                        // Modify some log items
+                        foreach (var logItem in orderItem.LogItemsList)
+                        {
+                            // MAIL_NOTE, SIERRA and MAIL are the only one anonymized automatically.
+                            if (logItem.Type == "MAIL_NOTE")
+                            {
+                                logItem.Message = Regex.Replace(logItem.Message, "^(" + String.Join("|", mailNoteMessageAlts) + ").*$", "$1 ANONYMIZED");
+                            }
+                            if (logItem.Type == "SIERRA")
+                            {
+                                logItem.Message = "ANONYMIZED";
+                            }
+                            if (logItem.Type == "MAIL")
+                            {
+                                logItem.Message = "ANONYMIZED";
+                            }
+                        }
+                    }
+
+                    if (orderItem.SierraInfo != null)
+                    {
+                        orderItem.SierraInfo.id = "ANONYMIZED";
+                        orderItem.SierraInfo.barcode = "ANONYMIZED";
+                        orderItem.SierraInfo.pnum = "ANONYMIZED";
+                        orderItem.SierraInfo.email = "ANONYMIZED";
+                        orderItem.SierraInfo.first_name = "ANONYMIZED";
+                        orderItem.SierraInfo.last_name = "ANONYMIZED";
+                        orderItem.SierraInfo.adress = new List<SierraAddressModel>();
+                        orderItem.SierraInfo.cid = "ANONYMIZED";
+                        orderItem.SierraInfoStr = JsonConvert.SerializeObject(orderItem.SierraInfo);
+                    }
+
+                    orderItem.IsAnonymizedAutomatically = true;
+
+                    FillOutStuff(orderItem);
+
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
             }
             catch (Exception)

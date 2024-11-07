@@ -59,7 +59,7 @@ namespace Chalmers.ILL.OrderItems
 
         public OrderItemModel GetOrderItem(int nodeId)
         {
-            SearchResult contentNode = null;
+            Examine.SearchResult contentNode = null;
 
             // Query ChalmersILLOrderItemsSearcher in Examine for the node.
             try
@@ -559,6 +559,11 @@ namespace Chalmers.ILL.OrderItems
             SaveWithoutEventsAndWithSynchronousReindexing(content, doReindex, doSignal);
         }
 
+        public void SilentAnonymization(int nodeId, string reference, IList<LogItem> logs, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetReadOnlyAtLibrary(int nodeId, bool readOnlyAtLibrary, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);
@@ -949,6 +954,11 @@ namespace Chalmers.ILL.OrderItems
         }
 
         public void SetTitleInformation(int nodeId, string titleInformation, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AnonymizeOrder(int nodeId, string eventId, bool doReindex = true, bool doSignal = true)
         {
             throw new NotImplementedException();
         }

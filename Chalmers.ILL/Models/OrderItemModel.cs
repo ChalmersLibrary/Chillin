@@ -137,5 +137,7 @@ namespace Chalmers.ILL.Models
         public SierraModel SierraInfo { get; set; }
 
         public string SeedId { get; set; }
+        public bool IsAnonymizedAutomatically { get; set; }      // Indicates if the order has been anonymized automatically
+        public bool IsAnonymized { get; set; }                   // Indicates if the order has been fully anonymized, both automatically and manually.
     }
 }

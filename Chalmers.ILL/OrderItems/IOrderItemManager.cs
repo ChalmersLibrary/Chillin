@@ -48,6 +48,7 @@ namespace Chalmers.ILL.OrderItems
         void SetProviderOrderId(int nodeId, string providerOrderId, string eventId, bool doReindex = true, bool doSignal = true);
         void SetProviderInformation(int nodeId, string providerInformation, string eventId, bool doReindex = true, bool doSignal = true);
         void SetReference(int nodeId, string reference, string eventId, bool doReindex = true, bool doSignal = true);
+        void SilentAnonymization(int nodeId, string reference, IList<LogItem> logs, string eventId, bool doReindex = true, bool doSignal = true);
         void SetReadOnlyAtLibrary(int nodeId, bool readOnlyAtLibrary, string eventId, bool doReindex = true, bool doSignal = true);
         void SetEditedByData(int orderNodeId, string memberId, string memberName, bool doReindex = true, bool doSignal = true);
 
@@ -73,5 +74,7 @@ namespace Chalmers.ILL.OrderItems
 
         string GenerateEventId(int type);
         void SetTitleInformation(int nodeId, string titleInformation, string eventId, bool doReindex = true, bool doSignal = true);
+
+        void AnonymizeOrder(int nodeId, string eventId, bool doReindex = true, bool doSignal = true);
     }
 }

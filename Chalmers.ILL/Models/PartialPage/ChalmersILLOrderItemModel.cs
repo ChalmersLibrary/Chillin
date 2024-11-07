@@ -37,7 +37,9 @@ namespace Chalmers.ILL.Models.PartialPage
             {26, "Artikel skickad till filial" },
             {27, "Leverantörsdata uppdaterad" },
             {28, "Snabbändring av inköpsbibliotek" },
-            {29, "Artikel ankommen till filial" }
+            {29, "Artikel ankommen till filial" },
+            {30, "Automatisk anonymisering av order" },
+            {31, "Manuell anonymisering av order" }
         };
 
         public ChalmersILLOrderItemModel(OrderItemModel orderItemModel) : base(orderItemModel) { }

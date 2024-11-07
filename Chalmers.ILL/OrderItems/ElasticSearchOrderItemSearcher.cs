@@ -48,7 +48,26 @@ namespace Chalmers.ILL.OrderItems
 
         public IEnumerable<OrderItemModel> Search(string query)
         {
-            return SimpleSearch(query);
+            return SimpleSearch(query, 0, 10000).Items;
+        }
+
+        public SearchResult Search(string query, int start, int size)
+        {
+            return SimpleSearch(query, start, size);
+        }
+
+        public IEnumerable<OrderItemModel> Search(string query, int size, string[] fields)
+        {
+            return _elasticClient.Search<OrderItemModel>(s => s
+                .From(0)
+                .Size(size)
+                .Source(sr => sr.Includes(fi => fi.Fields(fields)))
+                .Type("orderitemmodel")
+                .Query(q => q
+                    .Bool(b =>
+                        b.Must(m =>
+                            m.QueryString(qs => qs
+                                .Query(query)))))).Hits.Select(x => x.Source);
         }
 
         public IEnumerable<string> AggregatedProviders()
@@ -82,17 +101,23 @@ namespace Chalmers.ILL.OrderItems
 
         #region Private methods
 
-        private IEnumerable<OrderItemModel> SimpleSearch(string query)
+        private SearchResult SimpleSearch(string query, int start, int size)
         {
-            return _elasticClient.Search<OrderItemModel>(s => s
-                .From(0)
-                .Size(10000)
+            var esResponse = _elasticClient.Search<OrderItemModel>(s => s
+                .From(start)
+                .Size(size)
                 .Type("orderitemmodel")
                 .Query(q => q
                     .Bool(b =>
                         b.Must(m =>
                             m.QueryString(qs => qs
-                                .Query(query)))))).Hits.Select(x => x.Source);
+                                .Query(query))))));
+
+            return new SearchResult
+            {
+                Count = esResponse.Total,
+                Items = esResponse.Hits.Select(h => h.Source)
+            };
         }
 
         #endregion
