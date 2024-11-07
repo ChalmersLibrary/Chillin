@@ -181,7 +181,7 @@ else
 @if (Model.ManualAnonymizationItems.Items.Count() > 0)
 {
     <section style="height:12rem;"></section>
-    <section style="height: 8rem; display: flex; justify-content: center; align-items: center; background-color: khaki;">Nedanför hittas @(Model.ManualAnonymizationItems.Items.Count()) av totalt @(Model.ManualAnonymizationItems.Count) ordrar som behöver manuell anonymisering.</section>
+    <section style="height: 8rem; display: flex; justify-content: center; align-items: center; background-color: khaki;">Nedanför visas @(Model.ManualAnonymizationItems.Items.Count()) av totalt @(Model.ManualAnonymizationItems.Count) ordrar som behöver manuell anonymisering.</section>
 
     <section class="anonymization-list">
         @foreach (var item in Model.ManualAnonymizationItems.Items)
