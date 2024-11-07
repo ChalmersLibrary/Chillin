@@ -210,7 +210,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // -1 means that we haven't checked edited by properly and should disregard it
             var memberId = -1;
 
-            var query = "updateDate:[* TO 2023-10-17] AND status:(\"05:Levererad\" OR \"06:Annullerad\" OR \"07:Överförd\" OR \"08:Inköpt\" OR \"10:Återsänd\" OR \"15:Förlorad?\" OR \"16:Förlorad\") AND (isAnonymizedAutomatically:false OR (!_exists_:isAnonymizedAutomatically)) AND (isAnonymized:false OR (!_exists_:isAnonymized))";
+            var anonymizationOrderItemDateBreakpoint = DateTime.Now.AddYears(-1);
+            var anonymizationOrderItemDateBreakpointText = anonymizationOrderItemDateBreakpoint.ToString("yyyy-MM-dd");
+
+            var query = "updateDate:[* TO " + anonymizationOrderItemDateBreakpointText + "] AND status:(\"05:Levererad\" OR \"06:Annullerad\" OR \"07:Överförd\" OR \"08:Inköpt\" OR \"10:Återsänd\" OR \"15:Förlorad?\" OR \"16:Förlorad\") AND (isAnonymizedAutomatically:false OR (!_exists_:isAnonymizedAutomatically)) AND (isAnonymized:false OR (!_exists_:isAnonymized))";
             var orderItems = _orderItemsSearcher.Search(query, 10, new string[] { "nodeId" });
             foreach (var orderItem in orderItems)
             {
