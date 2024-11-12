@@ -318,6 +318,11 @@ namespace Chalmers.ILL.Mail
             message.Send();
         }
 
+        public void DeleteOldMessagesFromFolder(string folder, DateTime oldLimit)
+        {
+            throw new NotImplementedException();
+        }
+
 
         /// <summary>
         /// Find Exchange FolderId based on DisplayName of folder, starting from root
@@ -444,6 +449,5 @@ namespace Chalmers.ILL.Mail
                 Marshal.ZeroFreeGlobalAllocUnicode(unmanagedString);
             }
         }
-
     }
 }

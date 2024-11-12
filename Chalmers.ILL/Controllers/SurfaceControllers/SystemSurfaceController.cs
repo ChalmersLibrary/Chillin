@@ -133,6 +133,22 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 res.Message = "Failed to send out mail: " + e.Message;
             }
 
+            try
+            {
+                if (IsRequestAuthorized())
+                {
+                    _automaticMailSendingEngine.RemoveOldSentMails();
+                }
+                else
+                {
+                    _umbraco.LogWarn<SystemSurfaceController>("Request was not authorized when trying to clean old sent mails.");
+                }
+            }
+            catch (Exception e)
+            {
+                _umbraco.LogError<SystemSurfaceController>("Encountered error when cleaning old sent mails.", e);
+            }
+
             return Json(res, JsonRequestBehavior.AllowGet);
         }
 
@@ -207,9 +223,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
         private void AnonymizeOldOrderItems()
         {
-            // -1 means that we haven't checked edited by properly and should disregard it
-            var memberId = -1;
-
             var anonymizationOrderItemDateBreakpoint = DateTime.Now.AddYears(-1);
             var anonymizationOrderItemDateBreakpointText = anonymizationOrderItemDateBreakpoint.ToString("yyyy-MM-dd");
 
@@ -223,8 +236,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     var eventId = _orderItemManager.GenerateEventId(ANONYMIZATION_OF_ORDER_EVENT_TYPE);
                     _orderItemManager.AddLogItem(id, "ANONYMISERING", "Automatisk anonymisering av order.", eventId, false, false);
                     _orderItemManager.AnonymizeOrder(id, eventId);
-                    _notifier.UpdateOrderItemUpdate(id, memberId.ToString(), "", true);
-                } catch (Exception ex)
+                } catch (Exception)
                 {
                     // On test some order items exist in common search but only in some databases.
                     // NOOP

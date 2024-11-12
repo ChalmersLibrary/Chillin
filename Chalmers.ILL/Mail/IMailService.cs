@@ -11,5 +11,6 @@ namespace Chalmers.ILL.Mail
     public interface IMailService
     {
         void SendMail(OutgoingMailModel mailModel);
+        void DeleteOldMessagesFromFolder(string folder, DateTime oldLimit);
     }
 }

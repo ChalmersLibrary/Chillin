@@ -9,5 +9,6 @@ namespace Chalmers.ILL.Mail
     public interface IAutomaticMailSendingEngine
     {
         IEnumerable<MailOperationResult> SendOutMailsThatAreDue();
+        void RemoveOldSentMails();
     }
 }

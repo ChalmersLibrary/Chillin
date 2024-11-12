@@ -145,6 +145,11 @@ namespace Chalmers.ILL.Mail
             return res;
         }
 
+        public void RemoveOldSentMails()
+        {
+            _mailService.DeleteOldMessagesFromFolder("sentitems", DateTime.Now.AddYears(-1));
+        }
+
         public static DateTime AddBusinessDays(DateTime date, int days)
         {
             var res = date;

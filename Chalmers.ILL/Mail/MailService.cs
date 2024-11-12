@@ -51,5 +51,11 @@ namespace Chalmers.ILL.Mail
             _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
             _exchangeMailWebApi.SendMailMessage(mailModel.OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], mailModel.recipientName, mailModel.recipientEmail, attachments);
         }
+
+        public void DeleteOldMessagesFromFolder(string folder, DateTime oldLimit)
+        {
+            _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
+            _exchangeMailWebApi.DeleteOldMessagesFromFolder(folder, oldLimit);
+        }
     }
 }
