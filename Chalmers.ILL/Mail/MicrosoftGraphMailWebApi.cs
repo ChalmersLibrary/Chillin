@@ -245,7 +245,7 @@ namespace Chalmers.ILL.Mail
         public void DeleteOldMessagesFromFolder(string folder, DateTime oldLimit)
         {
             // Fetch mail ids from given folder where the messages are older than old limit
-            var getUrl = _config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/" + folder + "/messages?$orderby=sentDateTime%20asc&$select=sentDateTime,id&$filter=sentDateTime%20lt%20" + oldLimit.ToString("yyyy-MM-dd");
+            var getUrl = _config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/" + folder + "/messages?$orderby=sentDateTime%20asc&$select=sentDateTime,id&$filter=sentDateTime%20lt%20" + oldLimit.ToString("yyyy-MM-dd") + "&$top=100";
             var mailInboxData = GetFromMicrosoftGraph(getUrl);
 
             // Iterate through the list of mail ids and delete each one of them
