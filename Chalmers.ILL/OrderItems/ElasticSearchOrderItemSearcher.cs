@@ -61,6 +61,7 @@ namespace Chalmers.ILL.OrderItems
             return _elasticClient.Search<OrderItemModel>(s => s
                 .From(0)
                 .Size(size)
+                .Sort(q => q.Descending(f => f.CreateDate))
                 .Source(sr => sr.Includes(fi => fi.Fields(fields)))
                 .Type("orderitemmodel")
                 .Query(q => q
