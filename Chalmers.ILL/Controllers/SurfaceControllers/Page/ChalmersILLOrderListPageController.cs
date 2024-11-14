@@ -55,7 +55,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
                 var implementationDate = new DateTime(2024, 11, 13);
                 var differenceBetweenNowAndImplementationDate = DateTime.Now - implementationDate;
                 var daysToSubtract = differenceBetweenNowAndImplementationDate.Days * 5; // We go back five days for each day forward.
-                var manualAnonymizationDateLimit = implementationDate.AddDays(-daysToSubtract);
+                var implementationDateMinusOneYear = new DateTime(2023, 11, 13);
+                var manualAnonymizationDateLimit = implementationDateMinusOneYear.AddDays(-daysToSubtract);
                 var manualAnonymizationQueryString = "createDate:[" + manualAnonymizationDateLimit.ToString("yyyy-MM-dd") + " TO *] AND isAnonymized:false AND isAnonymizedAutomatically:true";
                 customModel.ManualAnonymizationItems = _orderItemSearcher.Search(manualAnonymizationQueryString, 0, 5);
             }
