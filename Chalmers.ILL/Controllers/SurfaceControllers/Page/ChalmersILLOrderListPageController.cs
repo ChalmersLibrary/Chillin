@@ -51,7 +51,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
                 customModel.PendingOrderItems = _orderItemSearcher.Search(@"status:01\:Ny OR status:02\:Åtgärda OR status:09\:Mottagen OR 
                      (status:03\:Beställd AND followUpDate:[1975-01-01T00:00:00.000Z TO " + DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"]) OR
                      (status:14\:Infodisk AND dueDate:[1975-01-01T00:00:00.000Z TO " + DateTime.Now.AddDays(5).Date.ToString("yyyy-MM-ddT") + @"23:59:59.999Z])", start, 50);
-                customModel.ManualAnonymizationItems = _orderItemSearcher.Search("isAnonymized:false AND isAnonymizedAutomatically:true", 0, 5);
+
+                var implementationDate = new DateTime(2024, 11, 13);
+                var differenceBetweenNowAndImplementationDate = DateTime.Now - implementationDate;
+                var daysToSubtract = differenceBetweenNowAndImplementationDate.Days * 5; // We go back five days for each day forward.
+                var manualAnonymizationDateLimit = implementationDate.AddDays(-daysToSubtract);
+                var manualAnonymizationQueryString = "createDate:[" + manualAnonymizationDateLimit.ToString("yyyy-MM-dd") + " TO *] AND isAnonymized:false AND isAnonymizedAutomatically:true";
+                customModel.ManualAnonymizationItems = _orderItemSearcher.Search(manualAnonymizationQueryString, 0, 5);
             }
 
             return CurrentTemplate(customModel);
