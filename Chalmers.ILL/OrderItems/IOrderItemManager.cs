@@ -76,5 +76,7 @@ namespace Chalmers.ILL.OrderItems
         void SetTitleInformation(int nodeId, string titleInformation, string eventId, bool doReindex = true, bool doSignal = true);
 
         void AnonymizeOrder(int nodeId, string eventId, bool doReindex = true, bool doSignal = true);
+
+        void MakeDuplicate(int orderNodeId, string eventId, bool doReindex = true, bool doSignal = true);
     }
 }

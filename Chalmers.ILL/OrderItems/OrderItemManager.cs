@@ -963,6 +963,11 @@ namespace Chalmers.ILL.OrderItems
             throw new NotImplementedException();
         }
 
+        public void MakeDuplicate(int orderNodeId, string eventId, bool doReindex = true, bool doSignal = true)
+        { 
+            throw new NotImplementedException(); 
+        }
+
         #endregion
     }
 }

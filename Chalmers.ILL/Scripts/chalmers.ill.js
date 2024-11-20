@@ -691,6 +691,22 @@ function setOrderItemType(node, type) {
     });
 }
 
+function makeDuplicate(node) {
+    lockScreen();
+    $.post("/umbraco/surface/OrderItemDuplicateSurface/MakeDuplicate?orderNodeId=" + node, function (json) {
+        if (json.Success) {
+            loadOrderItemDetails(node);
+        }
+        else {
+            alert(json.Message);
+        }
+        unlockScreen();
+    }).fail(function (jqxhr, textStatus, error) {
+        alert("Error: " + textStatus + " " + error);
+        unlockScreen();
+    });
+}
+
 function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
     lockScreen();
     $.getJSON("/umbraco/surface/OrderItemDeliveryLibrarySurface/SetOrderItemDeliveryLibrary?orderNodeId=" + node + "&deliveryLibraryId=" + deliveryLibrary, function (json) {

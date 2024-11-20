@@ -464,6 +464,7 @@
     <Compile Include="Controllers\SurfaceControllers\OrderItemProviderReturnDateSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemReceiveBookSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemReturnSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemDuplicateSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLDiskPageController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLLogoutPageController.cs" />

@@ -47,6 +47,7 @@
 
     @if (!Model.OrderItem.IsAnonymized && !Model.OrderItem.IsAnonymizedAutomatically)
     {
+        <button type="button" class="btn btn-success" onclick="makeDuplicate(@Model.OrderItem.NodeId); event.preventDefault();">Skapa kopia</button>
         <!-- Type button -->
         <div class="btn-group">
             <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">

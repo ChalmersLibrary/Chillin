@@ -20,6 +20,7 @@ using static Chalmers.ILL.Models.OrderItemModel;
 using Nest;
 using Umbraco.Core;
 using System.IdentityModel.Tokens;
+using Microsoft.Exchange.WebServices.Data;
 
 namespace Chalmers.ILL.OrderItems
 {
@@ -1323,6 +1324,59 @@ namespace Chalmers.ILL.OrderItems
                         FillOutStuff(orderItem);
                         AddLogItem(orderNodeId, "TYP", "Typ ändrad till " + umbraco.library.GetPreValueAsString(typeId), eventId, false, false);
                     }
+                    MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set type.");
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
+        public void MakeDuplicate(int orderNodeId, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems
+                    .AsNoTracking()
+                    .Include(x => x.SierraInfo)
+                    .Include(x => x.SierraInfo.adress)
+                    .Include(x => x.LogItemsList)
+                    .Include(x => x.AttachmentList)
+                    .FirstOrDefault(x => x.NodeId == orderNodeId);
+
+                var sourceOrderId = orderItem.OrderId;
+
+                if (orderItem != null)
+                {
+                    // Temporary OrderId with MD5 Hash
+                    orderItem.OrderId = "cthb-" + Helpers.CalculateMD5Hash(DateTime.Now.Ticks.ToString());
+
+                    orderItem.Reference = orderItem.Reference + "\n\nKopia av " + sourceOrderId + ".";
+
+                    FillOutStuff(orderItem);
+
+                    _threadIdToDbContextMap[Thread.CurrentThread.ManagedThreadId].OrderItems.Add(orderItem);
+
+                    // Save the OrderItem to get an Id
+                    SaveToDatabase(null, false);
+
+                    // Shorten the OrderId and include the NodeId
+                    orderItem.OrderId = orderItem.OrderId.Substring(0, 13) + "-" + orderItem.NodeId.ToString();
+
+                    AddLogItem(orderNodeId, "DUPLICERING", "Kopia " + orderItem.OrderId + " skapad med denna order som källa.", eventId, false, false);
+                    AddLogItem(orderItem.NodeId, "DUPLICERING", "Skapade denna order som en kopia av " + sourceOrderId + ".", eventId, false, false);
+
                     MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
                 else
