@@ -47,7 +47,6 @@
 
     @if (!Model.OrderItem.IsAnonymized && !Model.OrderItem.IsAnonymizedAutomatically)
     {
-        <button type="button" class="btn btn-success" onclick="makeDuplicate(@Model.OrderItem.NodeId); event.preventDefault();">Skapa kopia</button>
         <!-- Type button -->
         <div class="btn-group">
             <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
@@ -256,6 +255,15 @@
             }
             <button type="button" class="btn btn-primary" onclick="loadReturnAction(@Model.OrderItem.NodeId);">Retur</button>
         }
+        <!-- Misc actions -->
+        <div class="btn-group">
+            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                Misc <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" id="orderitem-misclist" role="menu">
+                <li><a href="#" class="disabled-link" onclick="makeDuplicate(@Model.OrderItem.NodeId); event.preventDefault();">Skapa kopia</a></li>
+            </ul>
+        </div>
     }
 </div>
 
