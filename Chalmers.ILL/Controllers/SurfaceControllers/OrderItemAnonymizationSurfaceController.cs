@@ -59,5 +59,31 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             return Json(json, JsonRequestBehavior.AllowGet);
         }
+
+        [HttpPost]
+        public ActionResult SetIsAnonymizedOnMultiple(int[] nodeIds, bool isAnonymized)
+        {
+            var json = new ResultResponse();
+
+            try
+            {
+                foreach (var nodeId in nodeIds)
+                {
+                    var eventId = _orderItemManager.GenerateEventId(MANUAL_ANONYMIZATION_EVENT_TYPE);
+                    _orderItemManager.SetIsAnonymized(nodeId, isAnonymized, eventId);
+                }
+
+                // Construct JSON response for client (ie jQuery/getJSON)
+                json.Success = true;
+                json.Message = "Anonymized multiple.";
+            }
+            catch (Exception e)
+            {
+                json.Success = false;
+                json.Message = "Error: " + e.Message;
+            }
+
+            return Json(json, JsonRequestBehavior.AllowGet);
+        }
     }
 }

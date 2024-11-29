@@ -968,6 +968,11 @@ namespace Chalmers.ILL.OrderItems
             throw new NotImplementedException(); 
         }
 
+        public void SetIsAnonymized(int nodeId, bool isAnonymized, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
     }
 }

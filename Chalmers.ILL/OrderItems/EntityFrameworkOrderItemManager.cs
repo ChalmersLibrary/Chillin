@@ -1268,6 +1268,40 @@ namespace Chalmers.ILL.OrderItems
             }
         }
 
+        /**
+         * Set anonymized flag
+         */
+        public void SetIsAnonymized(int nodeId, bool isAnonymized, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
+                if (orderItem != null)
+                {
+                    if (orderItem.IsAnonymized != isAnonymized)
+                    {
+                        orderItem.IsAnonymized = isAnonymized;
+                        AddLogItem(orderItem.NodeId, "ANONYMISERING", "Anonymiseringsstatus ändrad till " + (orderItem.IsAnonymized ? "anonymiserad" : "ej anonymiserad") + ".", eventId, false, false);
+                        MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                    }
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to set anonymized flag to " + isAnonymized);
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
         public void SetStatus(int orderNodeId, string statusPrevalue, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var statusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], statusPrevalue);
