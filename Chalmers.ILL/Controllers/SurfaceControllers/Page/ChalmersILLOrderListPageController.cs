@@ -4,6 +4,7 @@ using Chalmers.ILL.Models.Page;
 using Chalmers.ILL.OrderItems;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using System.Windows.Documents;
@@ -51,8 +52,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
                 customModel.PendingOrderItems = _orderItemSearcher.Search(@"status:01\:Ny OR status:02\:Åtgärda OR status:09\:Mottagen OR 
                      (status:03\:Beställd AND followUpDate:[1975-01-01T00:00:00.000Z TO " + DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"]) OR
                      (status:14\:Infodisk AND dueDate:[1975-01-01T00:00:00.000Z TO " + DateTime.Now.AddDays(5).Date.ToString("yyyy-MM-ddT") + @"23:59:59.999Z])", start, 50);
-
-                var implementationDate = new DateTime(2024, 11, 23);
+                
+                var implementationDateStringParts = ConfigurationManager.AppSettings["ManualAnonymizationImplementationDate"].Split('-');
+                var implementationDate = new DateTime(int.Parse(implementationDateStringParts[0]), int.Parse(implementationDateStringParts[1]), int.Parse(implementationDateStringParts[2]));
                 var differenceBetweenNowAndImplementationDate = DateTime.Now - implementationDate;
                 var daysToSubtract = differenceBetweenNowAndImplementationDate.Days * 5; // We go back five days for each day forward.
                 var implementationDateMinusOneYear = implementationDate.AddYears(-1);
