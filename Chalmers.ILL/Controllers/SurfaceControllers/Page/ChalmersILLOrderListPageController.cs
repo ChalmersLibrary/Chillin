@@ -52,10 +52,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
                      (status:03\:Beställd AND followUpDate:[1975-01-01T00:00:00.000Z TO " + DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") + @"]) OR
                      (status:14\:Infodisk AND dueDate:[1975-01-01T00:00:00.000Z TO " + DateTime.Now.AddDays(5).Date.ToString("yyyy-MM-ddT") + @"23:59:59.999Z])", start, 50);
 
-                var implementationDate = new DateTime(2024, 11, 13);
+                var implementationDate = new DateTime(2024, 11, 23);
                 var differenceBetweenNowAndImplementationDate = DateTime.Now - implementationDate;
                 var daysToSubtract = differenceBetweenNowAndImplementationDate.Days * 5; // We go back five days for each day forward.
-                var implementationDateMinusOneYear = new DateTime(2023, 11, 13);
+                var implementationDateMinusOneYear = implementationDate.AddYears(-1);
                 var manualAnonymizationDateLimit = implementationDateMinusOneYear.AddDays(-daysToSubtract);
                 var manualAnonymizationQueryString = "createDate:[" + manualAnonymizationDateLimit.ToString("yyyy-MM-dd") + " TO *] AND isAnonymized:false AND isAnonymizedAutomatically:true";
                 customModel.ManualAnonymizationItems = _orderItemSearcher.Search(manualAnonymizationQueryString, 0, 5);
