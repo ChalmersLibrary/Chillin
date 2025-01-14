@@ -452,6 +452,8 @@
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Configuration\DefaultChillinConfiguration.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
+    <Compile Include="Connections\FolioConnection.cs" />
+    <Compile Include="Connections\IFolioConnection.cs" />
     <Compile Include="Controllers\SurfaceControllers\ChillinTextSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemAnonymizationSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemPurchaseLibrarySurfaceController.cs" />

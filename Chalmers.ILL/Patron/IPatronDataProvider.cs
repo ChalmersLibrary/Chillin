@@ -9,9 +9,6 @@ namespace Chalmers.ILL.Patron
 {
     public interface IPatronDataProvider
     {
-        IPatronDataProvider Connect();
-        IPatronDataProvider Disconnect();
-
         IList<SierraModel> GetPatrons(string query);
         SierraModel GetPatronInfoFromLibraryCardNumber(string barcode);
         SierraModel GetPatronInfoFromLibraryCardNumberOrPersonnummer(string barcode, string pnr);

@@ -10,52 +10,21 @@ using Newtonsoft.Json;
 using Chalmers.ILL.Templates;
 using System.Text;
 using Umbraco.Core.Logging;
+using Chalmers.ILL.Connections;
 
 namespace Chalmers.ILL.Patron
 {
     public class FolioPatronDataProvider : IPatronDataProvider
     {
-        private string _token = "fejktoken";
-
-        private string _folioApiBaseAddress = ConfigurationManager.AppSettings["folioApiBaseAddress"].ToString();
-        private string _tenant = ConfigurationManager.AppSettings["folioXOkapiTenant"].ToString();
-        private string _username = ConfigurationManager.AppSettings["folioUsername"].ToString();
-        private string _password = ConfigurationManager.AppSettings["folioPassword"].ToString();
-
         private ITemplateService _templateService;
         private IAffiliationDataProvider _affiliationDataProvider;
+        private IFolioConnection _folioConnection;
 
-        public FolioPatronDataProvider(ITemplateService templateService, IAffiliationDataProvider affiliationDataProvider)
+        public FolioPatronDataProvider(ITemplateService templateService, IAffiliationDataProvider affiliationDataProvider, IFolioConnection folioConnection)
         {
             _templateService = templateService;
             _affiliationDataProvider = affiliationDataProvider;
-        }
-
-        public IPatronDataProvider Connect()
-        {
-            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(_folioApiBaseAddress + "/authn/login");
-
-            request.Accept = "application/json";
-            request.ContentType = "application/json";
-            request.Headers["x-okapi-tenant"] = _tenant;
-            request.Method = "POST";
-
-            UTF8Encoding encoding = new UTF8Encoding();
-            var bodyBytes = encoding.GetBytes("{ \"username\": \"" + _username + "\", \"password\": \"" + _password + "\" }");
-            request.ContentLength = bodyBytes.Length;
-            var requestStream = request.GetRequestStream();
-            requestStream.Write(bodyBytes, 0, bodyBytes.Length);
-
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            _token = response.Headers.Get("x-okapi-token");
-
-            return this;
-        }
-
-        public IPatronDataProvider Disconnect()
-        {
-            // Not needed
-            return this;
+            _folioConnection = folioConnection;
         }
 
         public SierraModel GetPatronInfoFromLibraryCardNumber(string barcode)
@@ -165,8 +134,37 @@ namespace Chalmers.ILL.Patron
                 }
                 catch (InvalidTokenException)
                 {
-                    Connect();
+                    _folioConnection.ClearToken(); // Force set token on retry
                     retry = retryCount > 0;
+
+                    if (!retry)
+                    {
+                        // We throw for good measure if it is not retry time
+                        throw;
+                    }
+                }
+                catch (WebException e)
+                {
+                    var httpWebResponse = e.Response as HttpWebResponse;
+                    if (httpWebResponse != null && httpWebResponse.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        _folioConnection.ClearToken(); // Force set token on retry
+                        retry = retryCount > 0;
+                    }
+                    else if (e.Status == WebExceptionStatus.SecureChannelFailure)
+                    {
+                        retry = retryCount > 0;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+
+                    if (!retry)
+                    {
+                        // We throw for good measure if it is not retry time
+                        throw;
+                    }
                 }
                 retryCount -= 1;
             }
@@ -178,12 +176,17 @@ namespace Chalmers.ILL.Patron
             dynamic res = null;
             System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
-            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(_folioApiBaseAddress + pathAndQuery);
+            if (_folioConnection.NeedNewToken())
+            {
+                _folioConnection.SetToken();
+            }
+
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(_folioConnection.GetFolioApiBaseAddress() + pathAndQuery);
 
             request.Accept = "application/json";
             request.ContentType = "application/json";
-            request.Headers["x-okapi-tenant"] = _tenant;
-            request.Headers["x-okapi-token"] = _token;
+            request.Headers["x-okapi-tenant"] = _folioConnection.GetTenant();
+            request.Headers["x-okapi-token"] = _folioConnection.GetToken();
 
             try
             {

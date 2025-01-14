@@ -1,4 +1,5 @@
 using Chalmers.ILL.Configuration;
+using Chalmers.ILL.Connections;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.MediaItems;
 using Chalmers.ILL.Members;
@@ -165,7 +166,8 @@ namespace Chalmers.ILL
             container.RegisterType<IJsonService, JsonService>();
 
             // Uncomment to not touch FOLIO
-            /*container.RegisterType<IFolioItemService, FakeFolio>();
+            /*container.RegisterInstance<IFolioConnection>(new FakeFolioConnection()); // Singleton to reuse tokens between calls
+            container.RegisterType<IFolioItemService, FakeFolio>();
             container.RegisterType<IFolioRepository, FakeFolio>();
             container.RegisterType<IFolioService, FakeFolio>();
             container.RegisterType<IFolioInstanceService, FakeFolio>();
@@ -174,6 +176,7 @@ namespace Chalmers.ILL
             container.RegisterType<IFolioUserService, FakeFolio>();*/
 
             // Comment these to not touch FOLIO
+            container.RegisterInstance<IFolioConnection>(new FolioConnection()); // Singleton to reuse tokens between calls
             container.RegisterType<IFolioItemService, FolioItemService>();
             container.RegisterType<IFolioRepository, FolioRepository>();
             container.RegisterType<IFolioService, FolioService>();
@@ -213,7 +216,7 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IMailService), mailService);
             container.RegisterInstance(typeof(IProviderService), providerService);
             container.RegisterInstance(typeof(IBulkDataManager), bulkDataManager);
-            container.RegisterInstance<IPatronDataProvider>(new FolioPatronDataProvider(templateService, affiliationDataProvider));
+            container.RegisterInstance<IPatronDataProvider>(new FolioPatronDataProvider(templateService, affiliationDataProvider, container.Resolve<IFolioConnection>()));
         }
     }
 }
