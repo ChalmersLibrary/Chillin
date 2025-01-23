@@ -34,7 +34,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return PartialView("Chalmers.ILL.Action.Anonymize", orderItem);
         }
 
-        [HttpPost]
+        [HttpPost, ValidateInput(false)]
         public ActionResult Anonymize(int nodeId, string reference, string logsSerialized)
         {
             var json = new ResultResponse();
