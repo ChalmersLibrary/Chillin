@@ -8,6 +8,7 @@ namespace Chalmers.ILL.Models
         public string CallNumber { get; set; } = "Interlibrary-in-loan";
         public bool DiscoverySuppress { get; set; } = true;
         public string InstanceId { get; set; }
+        public string SourceId { get; set; } = AppSettings["folioSourceId"];
         public string PermanentLocationId { get; set; } = AppSettings["holdingPermanentLocationId"];
         public string[] StatisticalCodeIds { get; set; } = new string[]
             {
