@@ -37,7 +37,7 @@ namespace Chalmers.ILL.OrderItems
         {
             var res = new List<ISource>();
             res.Add(new ChalmersOrderItemsMailSource(_exchangeMailWebApi, _orderItemManager, _notifier, _mediaItemManager, _patronDataProvider, _personDataProvider, _orderItemSearcher));
-            res.Add(new LibrisOrderItemsSource(_umbraco, _orderItemManager, _patronDataProvider, _orderItemSearcher));
+            // res.Add(new LibrisOrderItemsSource(_umbraco, _orderItemManager, _patronDataProvider, _orderItemSearcher)); Removed due to service being discontinued 2025-09-08
             return res;
         }
     }
