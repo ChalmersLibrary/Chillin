@@ -106,6 +106,18 @@ div.illedit:hover{
     padding: 8px;
 }
 
+.anonymization-spacer {
+    height: 12rem;
+}
+
+.anonymization-header {
+    height: 8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: khaki;
+}
+
 .anonymization-list {
     margin: 20px 20px 20px 16px;
 }
