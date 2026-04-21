@@ -60,7 +60,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
                 var implementationDateMinusOneYear = implementationDate.AddYears(-1);
                 var manualAnonymizationDateLimit = implementationDateMinusOneYear.AddDays(-daysToSubtract);
                 var manualAnonymizationQueryString = "createDate:[" + manualAnonymizationDateLimit.ToString("yyyy-MM-dd") + " TO *] AND isAnonymized:false AND isAnonymizedAutomatically:true";
-                customModel.ManualAnonymizationItems = _orderItemSearcher.Search(manualAnonymizationQueryString, 0, 5);
+                // customModel.ManualAnonymizationItems = _orderItemSearcher.Search(manualAnonymizationQueryString, 0, 5);
+                customModel.ManualAnonymizationItems = new SearchResult
+                {
+                    Items = new List<OrderItemModel>(),
+                    Count = 0
+                };
             }
 
             return CurrentTemplate(customModel);
