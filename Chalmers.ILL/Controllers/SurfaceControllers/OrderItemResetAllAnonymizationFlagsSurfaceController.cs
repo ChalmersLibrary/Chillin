@@ -25,7 +25,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpPost, ValidateInput(false)]
-        public ActionResult ResetAllAnonymizationFlags(int nodeId)
+        public ActionResult Reset(int nodeId)
         {
             var json = new ResultResponse();
 
@@ -37,7 +37,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;
-                json.Message = "Anonymized.";
+                json.Message = "Reset.";
             }
             catch (Exception e)
             {
