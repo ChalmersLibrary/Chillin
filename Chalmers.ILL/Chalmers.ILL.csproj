@@ -455,6 +455,7 @@
     <Compile Include="Connections\FolioConnection.cs" />
     <Compile Include="Connections\IFolioConnection.cs" />
     <Compile Include="Controllers\SurfaceControllers\ChillinTextSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\OrderItemResetAllAnonymizationFlagsSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemAnonymizationSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemPurchaseLibrarySurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemReceivedAtBranchSurfaceController.cs" />
