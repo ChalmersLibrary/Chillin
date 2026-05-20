@@ -80,5 +80,7 @@ namespace Chalmers.ILL.OrderItems
         void MakeDuplicate(int orderNodeId, string eventId, bool doReindex = true, bool doSignal = true);
 
         void SetIsAnonymized(int nodeId, bool isAnonymized, string eventId, bool doReindex = true, bool doSignal = true);
+
+        void ResetAllAnonymizationFlags(int nodeId, string eventId, bool doReindex = true, bool doSignal = true);
     }
 }

@@ -1269,6 +1269,42 @@ namespace Chalmers.ILL.OrderItems
         }
 
         /**
+         * Set all anonymization flags to false
+         */
+        public void ResetAllAnonymizationFlags(int nodeId, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            EnsureDatabaseContext();
+            try
+            {
+                var orderItem = GetOrderItemFromEntityFramework(nodeId);
+                if (orderItem != null)
+                {
+                    if (orderItem.IsAnonymized || orderItem.IsAnonymizedAutomatically)
+                    {
+                        orderItem.IsAnonymized = false;
+                        orderItem.IsAnonymizedAutomatically = false;
+                        AddLogItem(orderItem.NodeId, "ANONYMISERING", "Anonymiseringsstatus ändrad till ej anonymiserad.", eventId, false, false);
+                        AddLogItem(orderItem.NodeId, "ANONYMISERING", "Automatisk anonymiseringsstatus ändrad till ej anonymiserad.", eventId, false, false);
+                        MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
+                    }
+                }
+                else
+                {
+                    throw new OrderItemNotFoundException("Failed to find order item when trying to reset all anonymization flags.");
+                }
+            }
+            catch (Exception)
+            {
+                DisposeDatabaseContext(true);
+                throw;
+            }
+            finally
+            {
+                DisposeDatabaseContext(doReindex);
+            }
+        }
+
+        /**
          * Set anonymized flag
          */
         public void SetIsAnonymized(int nodeId, bool isAnonymized, string eventId, bool doReindex = true, bool doSignal = true)

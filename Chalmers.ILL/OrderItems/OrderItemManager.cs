@@ -564,6 +564,11 @@ namespace Chalmers.ILL.OrderItems
             throw new NotImplementedException();
         }
 
+        public void ResetAllAnonymizationFlags(int nodeId, string eventId, bool doReindex = true, bool doSignal = true)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetReadOnlyAtLibrary(int nodeId, bool readOnlyAtLibrary, string eventId, bool doReindex = true, bool doSignal = true)
         {
             var content = _contentService.GetById(nodeId);

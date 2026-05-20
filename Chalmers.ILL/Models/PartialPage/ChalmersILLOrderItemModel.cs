@@ -40,7 +40,8 @@ namespace Chalmers.ILL.Models.PartialPage
             {29, "Artikel ankommen till filial" },
             {30, "Automatisk anonymisering av order" },
             {31, "Manuell anonymisering av order" },
-            {32, "Duplicering av order." }
+            {32, "Duplicering av order." },
+            {33, "Återställning av anonymiseringsflaggor." }
         };
 
         public ChalmersILLOrderItemModel(OrderItemModel orderItemModel) : base(orderItemModel) { }
