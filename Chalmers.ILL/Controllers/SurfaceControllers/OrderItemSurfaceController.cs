@@ -250,6 +250,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Return JSON to client.
                 json.Success = false;
                 json.Message = "Error reading locked OrderItems: " + e.Message;
+                LogHelper.Error<OrderItemSurfaceController>("Error reading locked OrderItems", e);
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);
