@@ -232,3 +232,6 @@ Migration/*.txt
 /Chalmers.ILL/.vscode
 /.vscode
 desktop.ini
+
+# Claude Code local settings (machine-specific permissions)
+.claude/settings.local.json
