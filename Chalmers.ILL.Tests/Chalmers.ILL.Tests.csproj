@@ -115,6 +115,7 @@
   <ItemGroup>
     <Compile Include="Mail\AutomaticMailSendingEngineTest.cs" />
     <Compile Include="Mail\MailBodyFixerTest.cs" />
+    <Compile Include="Members\MemberInfoManagerTest.cs" />
     <Compile Include="OrderItems\BulkDataManagerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statistics\StatisticsTest.cs" />
