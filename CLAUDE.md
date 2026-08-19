@@ -23,3 +23,8 @@ inte brutits. Använd följande kommandon:
 ```
 
 Alla tester ska vara gröna innan arbetet rapporteras klart.
+
+## TODO-lista
+
+När en punkt i [TODO-remove-umbraco.md](TODO-remove-umbraco.md) är genomförd, kryssa i den (`[ ]` → `[x]`) direkt.
+Committa aldrig kod eller ändringar utan att användaren explicit ber om det.
