@@ -5,7 +5,7 @@ men följande beroenden kvarstår.
 
 ## Autentisering & Membership
 
-- [ ] Ersätt Umbraco-membership med standard ASP.NET-autentisering  
+- [x] Ersätt Umbraco-membership med standard ASP.NET-autentisering  
   `MemberInfoManager.cs` och `LoginSurfaceController.cs` använder `umbraco.cms.businesslogic.member.Member`
   för inloggning, sessionshantering och rollkontroll.
 

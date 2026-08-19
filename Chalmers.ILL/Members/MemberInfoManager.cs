@@ -1,10 +1,6 @@
-﻿using Chalmers.ILL.Models.Page;
+using Chalmers.ILL.Models.Page;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web;
-using umbraco.cms.businesslogic.member;
-using Umbraco.Core.Logging;
 
 namespace Chalmers.ILL.Members
 {
@@ -17,68 +13,32 @@ namespace Chalmers.ILL.Members
 
         public int GetCurrentMemberId(HttpRequestBase request, HttpResponseBase response)
         {
-            string memberIdObject = null;
-            int memberId = 0;
+            var memberIdStr = request?.Cookies[cookieKey]?[memberIdKey];
+            if (memberIdStr != null)
+                return Convert.ToInt32(Uri.UnescapeDataString(memberIdStr));
 
-            if (request != null && request.Cookies[MemberInfoManager.cookieKey] != null)
-            {
-                memberIdObject = request.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberIdKey];
-            }
-
-            if (memberIdObject != null)
-            {
-                memberId = Convert.ToInt32(Uri.UnescapeDataString(memberIdObject.ToString()));
-            }
-            else
-            {
-                memberId = GetCurrentMember(response).Id;
-            }
-
-            return memberId;
+            PopulateCookieFromCurrentUser(response);
+            return 0;
         }
 
         public string GetCurrentMemberText(HttpRequestBase request, HttpResponseBase response)
         {
-            string memberTextObject = null;
-            string memberText = "";
+            var memberTextStr = request?.Cookies[cookieKey]?[memberTextKey];
+            if (memberTextStr != null)
+                return Uri.UnescapeDataString(memberTextStr);
 
-            if (request != null && request.Cookies[MemberInfoManager.cookieKey] != null)
-            {
-                memberTextObject = request.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberTextKey];
-            }
-
-            if (memberTextObject != null)
-            {
-                memberText = Uri.UnescapeDataString(memberTextObject.ToString());
-            }
-            else
-            {
-                memberText = GetCurrentMember(response).Text;
-            }
-
-            return memberText;
+            PopulateCookieFromCurrentUser(response);
+            return HttpContext.Current?.User?.Identity?.Name ?? "";
         }
 
         public string GetCurrentMemberLoginName(HttpRequestBase request, HttpResponseBase response)
         {
-            string memberLoginNameObject = null;
-            string memberLoginName = "";
+            var memberLoginNameStr = request?.Cookies[cookieKey]?[memberLoginNameKey];
+            if (memberLoginNameStr != null)
+                return Uri.UnescapeDataString(memberLoginNameStr);
 
-            if (request != null && request.Cookies[MemberInfoManager.cookieKey] != null)
-            {
-                memberLoginNameObject = request.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberLoginNameKey];
-            }
-
-            if (memberLoginNameObject != null)
-            {
-                memberLoginName = Uri.UnescapeDataString(memberLoginNameObject.ToString());
-            }
-            else
-            {
-                memberLoginName = GetCurrentMember(response).LoginName;
-            }
-
-            return memberLoginName;
+            PopulateCookieFromCurrentUser(response);
+            return HttpContext.Current?.User?.Identity?.Name ?? "";
         }
 
         public void PopulateModelWithMemberData(HttpRequestBase request, HttpResponseBase response, ChalmersILLModel model)
@@ -88,30 +48,25 @@ namespace Chalmers.ILL.Members
             model.CurrentMemberLoginName = GetCurrentMemberLoginName(request, response);
         }
 
-        public void AddMemberToCache(HttpResponseBase response, Member member)
+        public void AddMemberToCache(HttpResponseBase response, int memberId, string memberText, string memberLoginName)
         {
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberIdKey] = Uri.EscapeUriString(Convert.ToString(member.Id));
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberTextKey] = Uri.EscapeUriString(member.Text);
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberLoginNameKey] = Uri.EscapeUriString(member.LoginName);
-            response.Cookies[MemberInfoManager.cookieKey].Expires = DateTime.Now.AddDays(1);
+            response.Cookies[cookieKey][memberIdKey] = Uri.EscapeUriString(Convert.ToString(memberId));
+            response.Cookies[cookieKey][memberTextKey] = Uri.EscapeUriString(memberText);
+            response.Cookies[cookieKey][memberLoginNameKey] = Uri.EscapeUriString(memberLoginName);
+            response.Cookies[cookieKey].Expires = DateTime.Now.AddDays(1);
         }
 
         public void ClearMemberCache(HttpResponseBase response)
         {
-            response.Cookies[MemberInfoManager.cookieKey].Expires = DateTime.Now.AddDays(-1);
+            response.Cookies[cookieKey].Expires = DateTime.Now.AddDays(-1);
         }
 
-        #region Private methods
-
-        private Member GetCurrentMember(HttpResponseBase response)
+        private void PopulateCookieFromCurrentUser(HttpResponseBase response)
         {
-            var member = Member.GetCurrentMember();
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberIdKey] = Uri.EscapeUriString(Convert.ToString(member.Id));
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberTextKey] = Uri.EscapeUriString(member.Text);
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberLoginNameKey] = Uri.EscapeUriString(member.LoginName);
-            return member;
+            var username = HttpContext.Current?.User?.Identity?.Name ?? "";
+            response.Cookies[cookieKey][memberIdKey] = Uri.EscapeUriString("0");
+            response.Cookies[cookieKey][memberTextKey] = Uri.EscapeUriString(username);
+            response.Cookies[cookieKey][memberLoginNameKey] = Uri.EscapeUriString(username);
         }
     }
 }
-
-        #endregion

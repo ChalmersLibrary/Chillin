@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using umbraco.cms.businesslogic.member;
+using System.Web.Security;
 using Umbraco.Web.Mvc;
 using Umbraco.Web;
 using Chalmers.ILL.Members;
@@ -25,16 +25,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             if (ModelState.IsValid)
             {
-                var m = Member.GetMemberFromLoginNameAndPassword(model.Login, model.Password);
-                if (m != null)
+                if (Membership.ValidateUser(model.Login, model.Password))
                 {
-                    Member.AddMemberToCache(m);
-                    _memberInfoManager.AddMemberToCache(Response, m);
+                    FormsAuthentication.SetAuthCookie(model.Login, false);
+                    _memberInfoManager.AddMemberToCache(Response, 0, model.Login, model.Login);
                     string redirectUrl;
-                    if(System.Web.Security.Roles.IsUserInRole(model.Login, "Desk"))
+                    if (Roles.IsUserInRole(model.Login, "Desk"))
                     {
                         redirectUrl = "/disk/?login=ok";
-                    } else
+                    }
+                    else
                     {
                         redirectUrl = Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url + "?login=ok";
                     }
