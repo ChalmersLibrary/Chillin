@@ -4,14 +4,12 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
-using Umbraco.Web.Mvc;
-using Umbraco.Web;
 using Chalmers.ILL.Members;
 using System.Configuration;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class LoginSurfaceController : SurfaceController
+    public class LoginSurfaceController : Controller
     {
         IMemberInfoManager _memberInfoManager;
 
@@ -36,20 +34,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     }
                     else
                     {
-                        redirectUrl = Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url + "?login=ok";
+                        redirectUrl = ConfigurationManager.AppSettings["orderListPageUrl"] + "?login=ok";
                     }
                     Response.Redirect(redirectUrl);
                 }
                 else
                 {
-                    Response.Redirect(CurrentPage.Url + "?error=invalid-member");
+                    Response.Redirect(Request.Url.AbsolutePath + "?error=invalid-member");
                 }
             }
             else
             {
-                Response.Redirect(CurrentPage.Url + "?error=invalid-model");
+                Response.Redirect(Request.Url.AbsolutePath + "?error=invalid-model");
             }
-            return RedirectToCurrentUmbracoPage();
+            return Redirect(Request.Url.AbsolutePath);
         }
     }
 }

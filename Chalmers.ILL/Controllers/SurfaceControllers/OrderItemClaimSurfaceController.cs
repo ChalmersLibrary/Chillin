@@ -12,12 +12,11 @@ using System.Configuration;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemClaimSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemClaimSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 13; } }
 

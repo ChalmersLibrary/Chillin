@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 using umbraco.cms.businesslogic.member;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
@@ -17,8 +16,8 @@ using Chalmers.ILL.Providers;
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
 
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemProviderSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemProviderSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 7; } }
         public static int PROVIDER_DATA_UPDATED_EVENT_TYPE { get { return 27; } }

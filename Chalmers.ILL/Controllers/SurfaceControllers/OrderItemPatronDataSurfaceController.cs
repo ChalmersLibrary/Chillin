@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 using Newtonsoft.Json;
 using Chalmers.ILL.Patron;
 using System.Configuration;
@@ -21,8 +20,8 @@ using Microsoft.Practices.Unity;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemPatronDataSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemPatronDataSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 5; } }
 

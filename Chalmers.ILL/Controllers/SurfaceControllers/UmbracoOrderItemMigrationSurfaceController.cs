@@ -6,11 +6,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class UmbracoOrderItemMigrationSurfaceController : SurfaceController
+    public class UmbracoOrderItemMigrationSurfaceController : Controller
     {
         private IOrderItemManager _legacyOrderItemManager;
         private IMediaItemManager _legacyMediaItemManager;

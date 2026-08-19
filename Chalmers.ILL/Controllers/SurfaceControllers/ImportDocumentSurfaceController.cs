@@ -1,5 +1,4 @@
 ﻿using System;
-using Umbraco.Web.Mvc;
 using System.Web.Mvc;
 using Chalmers.ILL.Models;
 using System.IO;
@@ -10,8 +9,8 @@ using Chalmers.ILL.MediaItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class ImportDocumentSurfaceController : SurfaceController
+    [Authorize]
+    public class ImportDocumentSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 16; } }
 

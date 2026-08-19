@@ -9,12 +9,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemProviderReturnDateSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemProviderReturnDateSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 12; } }
 

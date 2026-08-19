@@ -8,12 +8,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class MediaItemSurfaceController : SurfaceController
+    [Authorize]
+    public class MediaItemSurfaceController : Controller
     {
         private IMediaItemManager _mediaItemManager;
 

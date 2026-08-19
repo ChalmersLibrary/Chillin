@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Umbraco.Web.Mvc;
 using umbraco.cms.businesslogic.member;
 using umbraco.cms.businesslogic.datatype;
 using System.Web.Mvc;
@@ -15,8 +14,8 @@ using System.Web.Security;
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
 
-    [MemberAuthorize(AllowType = "Standard")]
-    public class GetMemberSurfaceController : SurfaceController
+    [Authorize]
+    public class GetMemberSurfaceController : Controller
     {
         [HttpGet]
         public string GetMemberNameById(int memberId)

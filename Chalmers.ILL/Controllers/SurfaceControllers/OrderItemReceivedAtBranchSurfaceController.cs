@@ -5,11 +5,10 @@ using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
 using System;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class OrderItemReceivedAtBranchSurfaceController : SurfaceController
+    public class OrderItemReceivedAtBranchSurfaceController : Controller
     {
         IOrderItemManager _orderItemManager;
         IUmbracoWrapper _umbraco;

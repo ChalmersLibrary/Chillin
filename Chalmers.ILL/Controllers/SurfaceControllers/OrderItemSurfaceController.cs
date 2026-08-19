@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
@@ -24,8 +23,8 @@ using Umbraco.Core.Services;
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
 
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemSurfaceController : Controller
     {
         IMemberInfoManager _memberInfoManager;
         IOrderItemManager _orderItemManager;

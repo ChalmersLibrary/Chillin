@@ -7,13 +7,12 @@ using System.Linq;
 using System.Net;
 using System.Web.Mvc;
 using Umbraco.Core.Services;
-using Umbraco.Web.Mvc;
 using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class TemplatesSurfaceController : SurfaceController
+    [Authorize]
+    public class TemplatesSurfaceController : Controller
     {
         ITemplateService _templateService;
         IOrderItemManager _orderItemManager;

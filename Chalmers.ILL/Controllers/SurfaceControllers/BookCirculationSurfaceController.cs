@@ -2,11 +2,10 @@
 using Chalmers.ILL.OrderItems;
 using System;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class BookCirculationSurfaceController : SurfaceController
+    public class BookCirculationSurfaceController : Controller
     {
         public static int BOOK_RETURNED_FROM_BORROWER_EVENT_TYPE { get { return 23; } }
         public static int BOOK_LOANED_EVENT_TYPE { get { return 24; } }

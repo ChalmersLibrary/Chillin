@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 using umbraco.cms.businesslogic.member;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
@@ -22,8 +21,8 @@ using Umbraco.Core.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemMailSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemMailSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 6; } }
 

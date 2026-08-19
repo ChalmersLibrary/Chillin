@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 using umbraco;
 using Chalmers.ILL.OrderItems;
 using Umbraco.Core.Logging;
@@ -18,7 +17,7 @@ using Nest;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class SystemSurfaceController : SurfaceController
+    public class SystemSurfaceController : Controller
     {
         public static int TIME_BASED_UPDATE_OF_ORDER_EVENT_TYPE { get { return 19; } }
         public static int ANONYMIZATION_OF_ORDER_EVENT_TYPE { get { return 30; } }

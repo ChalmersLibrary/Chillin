@@ -4,14 +4,12 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using umbraco.cms.businesslogic.member;
-using Umbraco.Web.Mvc;
-using Umbraco.Web;
 using System.Security.Cryptography;
 using Chalmers.ILL.Members;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class PasswordSurfaceController : SurfaceController
+    public class PasswordSurfaceController : Controller
     {
         IMemberInfoManager _memberInfoManager;
 
@@ -39,23 +37,19 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     m.ChangePassword(HashPassword(model.NewPassword));
                     m.Save();
-                    Response.Redirect(CurrentPage.Url + "?success=true");
+                    Response.Redirect(Request.Url.AbsolutePath + "?success=true");
                 }
-
-                // Login+CurrentPassword doesn't match up to a Member
                 else
                 {
-                    Response.Redirect(CurrentPage.Url + "?error=invalid-member");
+                    Response.Redirect(Request.Url.AbsolutePath + "?error=invalid-member");
                 }
             }
-
-            // Something is missing in the Model, CurrentPassword or NewPassword
             else
             {
-                Response.Redirect(CurrentPage.Url + "?error=invalid-model");
+                Response.Redirect(Request.Url.AbsolutePath + "?error=invalid-model");
             }
 
-            return RedirectToCurrentUmbracoPage();
+            return Redirect(Request.Url.AbsolutePath);
         }
 
         // Compute Hash for provided NewPassword as it is stored hashed

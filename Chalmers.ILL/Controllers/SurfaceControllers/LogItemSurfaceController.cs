@@ -6,7 +6,6 @@ using System.Web.Mvc;
 using umbraco.cms.businesslogic.datatype;
 using umbraco.cms.businesslogic.member;
 using System.ComponentModel.DataAnnotations;
-using Umbraco.Web.Mvc;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Models.PartialPage;
 using System.Globalization;
@@ -16,8 +15,8 @@ using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class LogItemSurfaceController : SurfaceController
+    [Authorize]
+    public class LogItemSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 8; } }
 

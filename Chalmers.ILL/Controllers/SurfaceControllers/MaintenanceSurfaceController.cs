@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 using Newtonsoft.Json;
 using Umbraco.Core.Logging;
 using Examine;
@@ -14,7 +13,7 @@ using Chalmers.ILL.MediaItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class MaintenanceSurfaceController : SurfaceController
+    public class MaintenanceSurfaceController : Controller
     {
         IOrderItemManager _orderItemManager;
         IMediaItemManager _mediaItemManager;

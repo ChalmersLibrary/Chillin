@@ -8,12 +8,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemResetAllAnonymizationFlagsSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemResetAllAnonymizationFlagsSurfaceController : Controller
     {
         public static int RESET_ALL_ANONYMIZATION_FLAGS_EVENT_TYPE { get { return 33; } }
 

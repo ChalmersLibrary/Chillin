@@ -6,11 +6,10 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using Umbraco.Core.Logging;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class OrderItemSearchSurfaceController : SurfaceController
+    public class OrderItemSearchSurfaceController : Controller
     {
         private IOrderItemSearcher _orderItemSearcher;
         private IOrderItemManager _orderItemManager;

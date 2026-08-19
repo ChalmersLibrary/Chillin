@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using umbraco.cms.businesslogic.member;
@@ -17,8 +16,8 @@ using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class StatisticsSurfaceController : SurfaceController
+    [Authorize]
+    public class StatisticsSurfaceController : Controller
     {
         private IOrderItemSearcher _orderItemSearcher;
 

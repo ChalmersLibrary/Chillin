@@ -5,14 +5,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 using Chalmers.ILL.Extensions;
 using System.Globalization;
 using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class PublicDataSurfaceController : SurfaceController
+    public class PublicDataSurfaceController : Controller
     {
         IBulkDataManager _bulkDataManager;
 

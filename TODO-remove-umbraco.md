@@ -11,7 +11,7 @@ men följande beroenden kvarstår.
 
 ## Controllers
 
-- [ ] Byt ut `SurfaceController` som basklass i alla ~40 controllers till standard MVC `Controller`  
+- [x] Byt ut `SurfaceController` som basklass i alla ~40 controllers till standard MVC `Controller`  
   Alla controllers under `Controllers/SurfaceControllers/` ärver `Umbraco.Web.Mvc.SurfaceController`.
 
 - [ ] Byt ut `RenderMvcController` i sidkontrollanterna under `Controllers/SurfaceControllers/Page/`  

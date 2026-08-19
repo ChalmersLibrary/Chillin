@@ -8,7 +8,6 @@ using Chalmers.ILL.UmbracoApi;
 using Newtonsoft.Json;
 using System;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 using QRCoder;
 using System.Drawing;
 using System.IO;
@@ -18,8 +17,8 @@ using Chalmers.ILL.Configuration;
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
 
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemDeliverySurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemDeliverySurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 9; } }
         public static int ARTICLE_SENT_TO_BRANCH_EVENT_TYPE { get { return 26; } }

@@ -7,12 +7,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemReturnSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemReturnSurfaceController : Controller
     {
         public static int BOOK_RETURNED_HOME_EVENT_TYPE { get { return 14; } }
 

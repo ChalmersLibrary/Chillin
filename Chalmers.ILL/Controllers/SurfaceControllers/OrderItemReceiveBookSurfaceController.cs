@@ -10,12 +10,11 @@ using Chalmers.ILL.UmbracoApi;
 using Newtonsoft.Json;
 using System;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemReceiveBookSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemReceiveBookSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 10; } }
         public static int BOOK_RECEIVED_AT_BRANCH_EVENT_TYPE { get { return 25; } }

@@ -6,3 +6,20 @@ Testtäckningen i [Chalmers.ILL.Tests](Chalmers.ILL.Tests) är bristfällig. Inn
 görs klar: lägg till eller verifiera ett characterization-test som täcker nuvarande beteende för den
 berörda ytan (kontroller/flöde), om det saknas. Testet ska verifiera beteende (t.ex. via HTTP-anrop/output)
 snarare än interna Umbraco-typer, så att det överlever omskrivningen.
+
+## Testrutiner
+
+Kör alltid testerna **innan** och **efter** kodändringar för att säkerställa att befintligt beteende
+inte brutits. Använd följande kommandon:
+
+```powershell
+# Bygg testprojektet
+& "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" `
+  "Chalmers.ILL.Tests\Chalmers.ILL.Tests.csproj" /p:Configuration=Debug /v:minimal
+
+# Kör testerna
+& "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe" `
+  "Chalmers.ILL.Tests\bin\Debug\Chalmers.ILL.Tests.dll"
+```
+
+Alla tester ska vara gröna innan arbetet rapporteras klart.

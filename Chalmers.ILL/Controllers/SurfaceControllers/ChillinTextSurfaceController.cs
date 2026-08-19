@@ -3,11 +3,10 @@ using Chalmers.ILL.Repositories;
 using Chalmers.ILL.Services;
 using System;
 using System.Web.Mvc;
-using Umbraco.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class ChillinTextSurfaceController : SurfaceController
+    public class ChillinTextSurfaceController : Controller
     {
         private readonly IChillinTextRepository _chillinTextRepository;
         private readonly IJsonService _jsonService;
