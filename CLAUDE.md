@@ -10,16 +10,11 @@ snarare än interna Umbraco-typer, så att det överlever omskrivningen.
 ## Testrutiner
 
 Kör alltid testerna **innan** och **efter** kodändringar för att säkerställa att befintligt beteende
-inte brutits. Använd följande kommandon:
+inte brutits. Kör bygge och tester i **ett enda PowerShell-anrop** (dessa exakta kommandon är
+förhandsgodkända i `.claude/settings.local.json`):
 
 ```powershell
-# Bygg testprojektet
-& "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" `
-  "Chalmers.ILL.Tests\Chalmers.ILL.Tests.csproj" /p:Configuration=Debug /v:minimal
-
-# Kör testerna
-& "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe" `
-  "Chalmers.ILL.Tests\bin\Debug\Chalmers.ILL.Tests.dll"
+& "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MSBuild.exe" "Chalmers.ILL.Tests\Chalmers.ILL.Tests.csproj" /p:Configuration=Debug /v:minimal; if ($?) { & "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe" "Chalmers.ILL.Tests\bin\Debug\Chalmers.ILL.Tests.dll" }
 ```
 
 Alla tester ska vara gröna innan arbetet rapporteras klart.
