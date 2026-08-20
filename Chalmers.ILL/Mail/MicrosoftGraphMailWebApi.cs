@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using System.Web;
 using Chalmers.ILL.Configuration;
 using Chalmers.ILL.Models.Mail;
-using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Utilities;
 using HtmlAgilityPack;
 using Microsoft.Exchange.WebServices.Data;
@@ -32,13 +31,11 @@ namespace Chalmers.ILL.Mail
         private IConfidentialClientApplication _app;
         private HttpClient _httpClient;
         private IConfiguration _config;
-        private IUmbracoWrapper _umbraco;
 
-        public MicrosoftGraphMailWebApi(HttpClient httpClient, IConfiguration config, IUmbracoWrapper umbraco)
+        public MicrosoftGraphMailWebApi(HttpClient httpClient, IConfiguration config)
         {
             _httpClient = httpClient;
             _config = config;
-            _umbraco = umbraco;
         }
 
         /// <summary>

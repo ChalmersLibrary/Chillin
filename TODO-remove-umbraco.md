@@ -27,7 +27,7 @@ men följande beroenden kvarstår.
 
 ## IUmbracoWrapper
 
-- [ ] Ta bort `IUmbracoWrapper` / `UmbracoWrapper`  
+- [x] Ta bort `IUmbracoWrapper` / `UmbracoWrapper`  
   Wrappern hanterar Umbracos data types, dropdown-prevalue-listor, relationer och content-XPath-queries.
   Ersätt prevalue-listor med konfiguration/databas och ta bort relationslogiken.
 

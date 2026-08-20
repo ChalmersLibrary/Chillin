@@ -1,5 +1,4 @@
 ﻿using Chalmers.ILL.Templates;
-using Chalmers.ILL.UmbracoApi;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,13 +14,11 @@ namespace Chalmers.ILL.Patron
 {
     public class SierraCache : IPatronDataProvider
     {
-        IUmbracoWrapper _umbraco;
         ITemplateService _templateService;
         IAffiliationDataProvider _affiliationDataProvider;
 
-        public SierraCache(IUmbracoWrapper umbraco, ITemplateService templateService, IAffiliationDataProvider affiliationDataProvider)
+        public SierraCache(ITemplateService templateService, IAffiliationDataProvider affiliationDataProvider)
         {
-            _umbraco = umbraco;
             _templateService = templateService;
             _affiliationDataProvider = affiliationDataProvider;
         }

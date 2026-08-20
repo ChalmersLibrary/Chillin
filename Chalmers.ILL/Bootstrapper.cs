@@ -190,10 +190,6 @@ namespace Chalmers.ILL
             var templateService = container.Resolve<ITemplateService>();
             var affiliationDataProvider = container.Resolve<IAffiliationDataProvider>();
 
-            // Hook up some stuff that are needed now
-            var umbraco = new UmbracoWrapper();
-            container.RegisterInstance(typeof(IUmbracoWrapper), umbraco);
-
             var orderConfig = new ChillinOrderConfiguration();
             container.RegisterInstance(typeof(IChillinOrderConfiguration), orderConfig);
 
@@ -201,12 +197,12 @@ namespace Chalmers.ILL
             var mailService = new MailService(container.Resolve<IMediaItemManager>(), container.Resolve<IExchangeMailWebApi>());
             var notifier = new Notifier();
             var orderItemManager = new EntityFrameworkOrderItemManager(orderConfig, container.Resolve<IOrderItemSearcher>());
-            var legacyOrderItemManager = new OrderItemManager(umbraco);
+            var legacyOrderItemManager = new OrderItemManager();
             var providerService = new ProviderService(container.Resolve<IOrderItemSearcher>());
             var bulkDataManager = new BulkDataManager(container.Resolve<IOrderItemSearcher>());
 
             // Connect instances that depend on eachother.
-            notifier.SetOrderItemManager(orderItemManager, umbraco);
+            notifier.SetOrderItemManager(orderItemManager);
             orderItemManager.SetNotifier(notifier);
 
             // Hook up more stuff

@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Linq;
-using System.Collections;
 using Microsoft.AspNet.SignalR;
-using Umbraco.Core.Models;
-using Chalmers.ILL.Utilities;
-using Chalmers.ILL.Controllers.SurfaceControllers;
-using umbraco.cms.businesslogic.datatype;
 using System.Configuration;
 using Chalmers.ILL.OrderItems;
-using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.SignalR
@@ -16,72 +9,10 @@ namespace Chalmers.ILL.SignalR
     public class Notifier : INotifier
     {
         IOrderItemManager _orderItemManager;
-        IUmbracoWrapper _umbraco;
 
-        public void SetOrderItemManager(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco)
+        public void SetOrderItemManager(IOrderItemManager orderItemManager)
         {
             _orderItemManager = orderItemManager;
-            _umbraco = umbraco;
-        }
-
-        /*
-         * This notifier is a simple helper, to send notifications to a SignalR hub
-         * It takes a document as a parameter and then passes that data on to signalR
-         * Which then sends it to all connected browsers.
-         * Finally, in the browser, a javascript method is executed based on the data from the server
-         */
-        public void ReportNewOrderItemUpdate(IContent d)
-        {
-            // get the NotificationHub
-            var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
-
-            // Parse out the integer of status and type
-            int OrderStatusId = 0;
-            int OrderTypeId = 0;
-            DateTime followUpDate = DateTime.MaxValue;
-
-            if (d.GetValue("status") != null)
-            {
-                Int32.TryParse(d.GetValue("status").ToString(), out OrderStatusId);
-            }
-
-            if (d.GetValue("type") != null)
-            {
-                Int32.TryParse(d.GetValue("type").ToString(), out OrderTypeId);
-            }
-
-            if (d.GetValue("followUpDate") != null)
-            {
-                followUpDate = Convert.ToDateTime(d.GetValue("followUpDate").ToString());
-            }
-
-            // Extract the real chillin order status id from the umbraco id.
-            int chillinOrderStatusId = 0;
-            var ds = new Umbraco.Core.Services.DataTypeService();
-            PreValue iter;
-            foreach (DictionaryEntry pv in _umbraco.GetPreValues(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"]))
-            {
-                iter = ((PreValue)pv.Value);
-                if (iter.Id == OrderStatusId)
-                {
-                    chillinOrderStatusId = Convert.ToInt32(iter.Value.Split(':').First());
-                    break;
-                }
-            }
-
-            // create a notication object to send to the clients
-            var n = new OrderItemNotification
-                        {
-                            NodeId = d.Id,
-                            EditedBy = _orderItemManager.GetOrderItem(d.Id).EditedBy,
-                            EditedByMemberName = _orderItemManager.GetOrderItem(d.Id).EditedByMemberName,
-                            SignificantUpdate = true,
-                            IsPending = chillinOrderStatusId == 1 || chillinOrderStatusId == 2 || chillinOrderStatusId == 9 || (chillinOrderStatusId > 2 && chillinOrderStatusId < 5 && DateTime.Now > followUpDate),
-                            UpdateFromMail = false
-                        };
-
-            // this calls the javascript method updateStream(message) in all connected browsers
-            context.Clients.All.updateStream(n);
         }
 
         public void ReportNewOrderItemUpdate(OrderItemModel orderItem)

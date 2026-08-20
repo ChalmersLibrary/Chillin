@@ -1,9 +1,9 @@
 ﻿using Chalmers.ILL.Models;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Patron;
-using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Utilities;
 using Examine;
+using Umbraco.Core.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -19,7 +19,6 @@ namespace Chalmers.ILL.Providers
         public static int CREATE_ORDER_FROM_LIBRIS_DATA_EVENT_TYPE { get { return 17; } }
         public static int UPDATE_ORDER_FROM_LIBRIS_DATA_EVENT_TYPE { get { return 18; } }
 
-        IUmbracoWrapper _umbraco;
         IOrderItemManager _orderItemManager;
         IPatronDataProvider _patronDataProvider;
         IOrderItemSearcher _orderItemSearcher;
@@ -34,10 +33,9 @@ namespace Chalmers.ILL.Providers
             }
         }
 
-        public LibrisOrderItemsSource(IUmbracoWrapper umbraco, IOrderItemManager orderItemManager, IPatronDataProvider patronDataProvider,
+        public LibrisOrderItemsSource(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProvider,
             IOrderItemSearcher orderItemSearcher)
         {
-            _umbraco = umbraco;
             _orderItemManager = orderItemManager;
             _patronDataProvider = patronDataProvider;
             _orderItemSearcher = orderItemSearcher;
@@ -109,7 +107,7 @@ namespace Chalmers.ILL.Providers
                             var msg = "Error when trying to add seed for a new user request. ";
                             _result.Errors++;
                             _result.Messages.Add(msg + e.Message);
-                            _umbraco.LogError<LibrisOrderItemsSource>(msg, e);
+                            LogHelper.Error<LibrisOrderItemsSource>(msg, e);
                         }
                     }
                 }
@@ -153,7 +151,7 @@ namespace Chalmers.ILL.Providers
                     catch (Exception e)
                     {
                         var msg = "Error creating new OrderItem node. ";
-                        _umbraco.LogError<LibrisOrderItemsSource>(msg, e);
+                        LogHelper.Error<LibrisOrderItemsSource>(msg, e);
                         _result.Errors++;
                         _result.Messages.Add(msg + e.Message);
                     }
