@@ -16,15 +16,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public static int BOOK_RETURNED_HOME_EVENT_TYPE { get { return 14; } }
 
         IOrderItemManager _orderItemManager;
-        IUmbracoWrapper _umbraco;
+        IChillinOrderConfiguration _orderConfig;
 
         private readonly IFolioService _folioService;
         private const int STATUS_FOLIO = 17;
 
-        public OrderItemReturnSurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco, IFolioService folioService)
+        public OrderItemReturnSurfaceController(IOrderItemManager orderItemManager, IChillinOrderConfiguration orderConfig, IFolioService folioService)
         {
             _orderItemManager = orderItemManager;
-            _umbraco = umbraco;
+            _orderConfig = orderConfig;
             _folioService = folioService;
         }
 
@@ -38,7 +38,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var pageModel = new ChalmersILLActionReturnModel(_orderItemManager.GetOrderItem(nodeId));
 
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Return", pageModel);

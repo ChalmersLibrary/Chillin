@@ -24,16 +24,16 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public static int ARTICLE_SENT_TO_BRANCH_EVENT_TYPE { get { return 26; } }
 
         IOrderItemManager _orderItemManager;
-        IUmbracoWrapper _umbraco;
+        IChillinOrderConfiguration _orderConfig;
         ITemplateService _templateService;
         IMailService _mailService;
         IConfiguration _config;
 
-        public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco, 
+        public OrderItemDeliverySurfaceController(IOrderItemManager orderItemManager, IChillinOrderConfiguration orderConfig,
             ITemplateService templateService, IMailService mailService, IConfiguration config)
         {
             _orderItemManager = orderItemManager;
-            _umbraco = umbraco;
+            _orderConfig = orderConfig;
             _templateService = templateService;
             _mailService = mailService;
             _config = config;
@@ -48,7 +48,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderDeliveryAction(int nodeId)
         {
             var pageModel = new ChalmersILLActionDeliveryModel(_orderItemManager.GetOrderItem(nodeId));
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
             return PartialView("Chalmers.ILL.Action.Delivery", pageModel);
         }
 
@@ -61,7 +61,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderArticleByEmailDeliveryType(int nodeId)
         {
             var pageModel = new Models.PartialPage.DeliveryType.ArticleByEmail(_orderItemManager.GetOrderItem(nodeId));
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
             pageModel.ArticleDeliveryByMailTemplate = _templateService.GetTemplateData("ArticleDeliveryByMailTemplate");
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
             return PartialView("DeliveryType/ArticleByEmail", pageModel);
@@ -76,7 +76,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderArticleByMailOrInternalMailDeliveryType(int nodeId)
         {
             var pageModel = new Models.PartialPage.DeliveryType.ArticleByMailOrInternalMail(_orderItemManager.GetOrderItem(nodeId));
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
             pageModel.ArticleDeliveryByPostTemplate = _templateService.GetTemplateData("ArticleDeliveryByPostTemplate");
             pageModel.ArticleDeliveryByInternpostTemplate = _templateService.GetTemplateData("ArticleDeliveryByInternpostTemplate");
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
@@ -92,7 +92,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderArticleInInfodiskDeliveryType(int nodeId)
         {
             var pageModel = new Models.PartialPage.DeliveryType.ArticleInInfodisk(_orderItemManager.GetOrderItem(nodeId));
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
             pageModel.ArticleDeliveryLibrary = _templateService.GetPrettyLibraryNameFromLibraryAbbreviation(pageModel.OrderItem.SierraInfo.home_library);
             pageModel.ArticleAvailableInInfodiskMailTemplate = _templateService.GetTemplateData("ArticleAvailableInInfodiskMailTemplate", pageModel.OrderItem);
@@ -108,7 +108,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderArticleInTransitDeliveryType(int nodeId)
         {
             var pageModel = new Models.PartialPage.DeliveryType.ArticleInTransit(_orderItemManager.GetOrderItem(nodeId));
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
             pageModel.DrmWarning = pageModel.OrderItem.DrmWarning == "1" ? true : false;
             pageModel.ArticleDeliveryLibrary = _templateService.GetPrettyLibraryNameFromLibraryAbbreviation(pageModel.OrderItem.SierraInfo.home_library);
 
@@ -132,7 +132,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderArticleFromProviderDeliveryType(int nodeId)
         {
             var pageModel = new Models.PartialPage.DeliveryType.ArticleFromProvider(_orderItemManager.GetOrderItem(nodeId));
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
             return PartialView("DeliveryType/ArticleFromProvider", pageModel);
         }
 
@@ -145,7 +145,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderBookInstantLoanDeliveryType(int nodeId)
         {
             var pageModel = new Models.PartialPage.DeliveryType.BookInstantLoan(_orderItemManager.GetOrderItem(nodeId));
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
             pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate", pageModel.OrderItem);
             return PartialView("DeliveryType/BookInstantLoan", pageModel);
         }
@@ -159,7 +159,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderBookReadAtLibraryDeliveryType(int nodeId)
         {
             var pageModel = new Models.PartialPage.DeliveryType.BookReadAtLibrary(_orderItemManager.GetOrderItem(nodeId));
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
             pageModel.BookAvailableForReadingAtLibraryMailTemplate = _templateService.GetTemplateData("BookAvailableForReadingAtLibraryMailTemplate", pageModel.OrderItem);
             return PartialView("DeliveryType/BookReadAtLibrary", pageModel);
         }

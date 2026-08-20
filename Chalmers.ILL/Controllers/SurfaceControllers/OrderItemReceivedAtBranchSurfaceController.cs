@@ -11,17 +11,17 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     public class OrderItemReceivedAtBranchSurfaceController : Controller
     {
         IOrderItemManager _orderItemManager;
-        IUmbracoWrapper _umbraco;
+        IChillinOrderConfiguration _orderConfig;
         ITemplateService _templateService;
         IMailService _mailService;
 
         public static int ARTICLE_RECEIVED_AT_BRANCH_EVENT_TYPE { get { return 29; } }
 
-        public OrderItemReceivedAtBranchSurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco,
+        public OrderItemReceivedAtBranchSurfaceController(IOrderItemManager orderItemManager, IChillinOrderConfiguration orderConfig,
             ITemplateService templateService, IMailService mailService)
         {
             _orderItemManager = orderItemManager;
-            _umbraco = umbraco;
+            _orderConfig = orderConfig;
             _templateService = templateService;
             _mailService = mailService;
         }
@@ -35,7 +35,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderResponse(int nodeId)
         {
             var pageModel = new Models.Page.ReceivedAtBranchResultModel(_orderItemManager.GetOrderItem(nodeId));
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
 
             if (pageModel.OrderItem != null)
             {

@@ -194,10 +194,13 @@ namespace Chalmers.ILL
             var umbraco = new UmbracoWrapper();
             container.RegisterInstance(typeof(IUmbracoWrapper), umbraco);
 
+            var orderConfig = new ChillinOrderConfiguration();
+            container.RegisterInstance(typeof(IChillinOrderConfiguration), orderConfig);
+
             // Create all our singleton type instances.
             var mailService = new MailService(container.Resolve<IMediaItemManager>(), container.Resolve<IExchangeMailWebApi>());
             var notifier = new Notifier();
-            var orderItemManager = new EntityFrameworkOrderItemManager(umbraco, container.Resolve<IOrderItemSearcher>());
+            var orderItemManager = new EntityFrameworkOrderItemManager(orderConfig, container.Resolve<IOrderItemSearcher>());
             var legacyOrderItemManager = new OrderItemManager(umbraco);
             var providerService = new ProviderService(container.Resolve<IOrderItemSearcher>());
             var bulkDataManager = new BulkDataManager(container.Resolve<IOrderItemSearcher>());

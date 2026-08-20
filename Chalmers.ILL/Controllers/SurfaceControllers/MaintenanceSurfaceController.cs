@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Newtonsoft.Json;
-using Umbraco.Core.Logging;
 using Examine;
 using UmbracoExamine;
 using System.Configuration;
@@ -15,6 +14,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class MaintenanceSurfaceController : Controller
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MaintenanceSurfaceController));
+
         IOrderItemManager _orderItemManager;
         IMediaItemManager _mediaItemManager;
 
@@ -60,7 +61,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
             catch (Exception e)
             {
-                LogHelper.Error<SystemSurfaceController>("Failed to remove old media items.", e);
+                _log.Error("Failed to remove old media items.", e);
                 res.Success = false;
                 res.Message += "Failed to remove old media items. ";
             }
@@ -85,7 +86,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
             catch (Exception e)
             {
-                LogHelper.Error<SystemSurfaceController>("Failed to optimize indexes.", e);
+                _log.Error("Failed to optimize indexes.", e);
                 res.Success = false;
                 res.Message += "Failed to optimize indexes. ";
             }

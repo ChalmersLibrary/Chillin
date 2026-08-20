@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using umbraco;
 using Chalmers.ILL.OrderItems;
-using Umbraco.Core.Logging;
-using Examine;
 using Chalmers.ILL.SignalR;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.UmbracoApi;
@@ -22,27 +19,27 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public static int TIME_BASED_UPDATE_OF_ORDER_EVENT_TYPE { get { return 19; } }
         public static int ANONYMIZATION_OF_ORDER_EVENT_TYPE { get { return 30; } }
 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(SystemSurfaceController));
+
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
         IExchangeMailWebApi _exchangeMailWebApi;
-        IUmbracoWrapper _dataTypes;
+        IChillinOrderConfiguration _orderConfig;
         ISourceFactory _sourceFactory;
         IOrderItemSearcher _orderItemsSearcher;
         IAutomaticMailSendingEngine _automaticMailSendingEngine;
-        IUmbracoWrapper _umbraco;
 
-        public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, IExchangeMailWebApi exchangeMailWebApi, 
-            IUmbracoWrapper dataTypes, ISourceFactory sourceFactory, IOrderItemSearcher orderItemsSearcher,
-            IAutomaticMailSendingEngine automaticMailSendingEngine, IUmbracoWrapper umbraco)
+        public SystemSurfaceController(IOrderItemManager orderItemManager, INotifier notifier, IExchangeMailWebApi exchangeMailWebApi,
+            IChillinOrderConfiguration orderConfig, ISourceFactory sourceFactory, IOrderItemSearcher orderItemsSearcher,
+            IAutomaticMailSendingEngine automaticMailSendingEngine)
         {
             _orderItemManager = orderItemManager;
             _notifier = notifier;
             _exchangeMailWebApi = exchangeMailWebApi;
-            _dataTypes = dataTypes;
+            _orderConfig = orderConfig;
             _sourceFactory = sourceFactory;
             _orderItemsSearcher = orderItemsSearcher;
             _automaticMailSendingEngine = automaticMailSendingEngine;
-            _umbraco = umbraco;
         }
 
         /// <summary>
@@ -74,14 +71,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                         }
                         catch (Exception e)
                         {
-                            LogHelper.Error<SystemSurfaceController>("Error while polling source.", e);
+                            _log.Error("Error while polling source.", e);
                         }
                     }
                 }
             }
             catch (Exception e)
             {
-                LogHelper.Error<SystemSurfaceController>("Error while running regular update.", e);
+                _log.Error("Error while running regular update.", e);
             }
 
             return Json(res, JsonRequestBehavior.DenyGet);
@@ -140,12 +137,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
                 else
                 {
-                    _umbraco.LogWarn<SystemSurfaceController>("Request was not authorized when trying to clean old sent mails.");
+                    _log.Warn("Request was not authorized when trying to clean old sent mails.");
                 }
             }
             catch (Exception e)
             {
-                _umbraco.LogError<SystemSurfaceController>("Encountered error when cleaning old sent mails.", e);
+                _log.Error("Encountered error when cleaning old sent mails.", e);
             }
 
             return Json(res, JsonRequestBehavior.AllowGet);
@@ -173,7 +170,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             if (!res)
             {
-                _umbraco.LogWarn<SystemSurfaceController>("Denied access to system APIs for IP: " + clientIpAddr);
+                _log.Warn("Denied access to system APIs for IP: " + clientIpAddr);
             }
 
             return res;
@@ -197,7 +194,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
             catch (Exception e)
             {
-                LogHelper.Error<SystemSurfaceController>("Failed to signal expired follow up dates.", e);
+                _log.Error("Failed to signal expired follow up dates.", e);
             }
         }
 
@@ -215,7 +212,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 var eventId = _orderItemManager.GenerateEventId(TIME_BASED_UPDATE_OF_ORDER_EVENT_TYPE);
                 _orderItemManager.AddLogItem(id, "LOG", "Automatisk statusändring på grund av att uppföljningsdatum löpt ut.", eventId, false, false);
-                _orderItemManager.SetStatus(id, _dataTypes.GetAvailableStatuses().First(x => x.Value.Contains("Åtgärda")).Id, eventId);
+                var atordraSt = _orderConfig.GetAvailableStatuses().FirstOrDefault(x => x.Value.Contains("Åtgärda"));
+                if (atordraSt != null)
+                    _orderItemManager.SetStatus(id, atordraSt.Id, eventId);
                 _notifier.UpdateOrderItemUpdate(id, memberId.ToString(), "", true, true);
             }
         }

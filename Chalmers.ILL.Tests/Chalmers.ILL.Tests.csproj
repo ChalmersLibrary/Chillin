@@ -111,11 +111,15 @@
     <Reference Include="umbraco">
       <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\umbraco.dll</HintPath>
     </Reference>
+    <Reference Include="Umbraco.Core">
+      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Umbraco.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Mail\AutomaticMailSendingEngineTest.cs" />
     <Compile Include="Mail\MailBodyFixerTest.cs" />
     <Compile Include="Controllers\ChillinTextSurfaceControllerTest.cs" />
+    <Compile Include="Controllers\OrderItemSurfaceControllerTest.cs" />
     <Compile Include="Controllers\PageControllersTest.cs" />
     <Compile Include="Controllers\RoutingTest.cs" />
     <Compile Include="Members\MemberInfoManagerTest.cs" />

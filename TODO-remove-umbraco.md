@@ -31,7 +31,7 @@ men följande beroenden kvarstår.
   Wrappern hanterar Umbracos data types, dropdown-prevalue-listor, relationer och content-XPath-queries.
   Ersätt prevalue-listor med konfiguration/databas och ta bort relationslogiken.
 
-- [ ] Ersätt `UmbracoDropdownListNtextDataType`-modellen och `PopulateModelWithAvailableValues`  
+- [x] Ersätt `UmbracoDropdownListNtextDataType`-modellen och `PopulateModelWithAvailableValues`  
   Typer, statuser och leveransbibliotek hämtas idag ur Umbracos data type prevalue-tabeller.
 
 ## Legacy-klasser (kan troligen tas bort nu)

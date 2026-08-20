@@ -9,16 +9,12 @@ using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
 using Chalmers.ILL.OrderItems;
 using umbraco.cms.businesslogic.member;
-using umbraco.cms.businesslogic.relation;
-using Umbraco.Core.Logging;
 using Chalmers.ILL.Members;
 using Newtonsoft.Json;
 using System.Configuration;
-using umbraco.cms.businesslogic.datatype;
 using Chalmers.ILL.SignalR;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Models.PartialPage;
-using Umbraco.Core.Services;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -26,18 +22,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     [Authorize]
     public class OrderItemSurfaceController : Controller
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(OrderItemSurfaceController));
+
         IMemberInfoManager _memberInfoManager;
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
-        IUmbracoWrapper _umbraco;
+        IChillinOrderConfiguration _orderConfig;
 
-        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager, IOrderItemManager orderItemManager, 
-            INotifier notifier, IUmbracoWrapper umbraco)
+        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager, IOrderItemManager orderItemManager,
+            INotifier notifier, IChillinOrderConfiguration orderConfig)
         {
             _memberInfoManager = memberInfoManager;
             _orderItemManager = orderItemManager;
             _notifier = notifier;
-            _umbraco = umbraco;
+            _orderConfig = orderConfig;
         }
 
         public const string lockRelationType = "memberLocked";
@@ -60,7 +58,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // Check if the current user has the lock for the item.
             pageModel.OrderItem.EditedByCurrentMember = pageModel.OrderItem.EditedBy != "" && pageModel.OrderItem.EditedBy == memberId.ToString();
 
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
 
             // Return Partial View to the client
             return PartialView("Chalmers.ILL.OrderItem", pageModel);
@@ -249,7 +247,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Return JSON to client.
                 json.Success = false;
                 json.Message = "Error reading locked OrderItems: " + e.Message;
-                LogHelper.Error<OrderItemSurfaceController>("Error reading locked OrderItems", e);
+                _log.Error("Error reading locked OrderItems", e);
             }
 
             return Json(json, JsonRequestBehavior.AllowGet);

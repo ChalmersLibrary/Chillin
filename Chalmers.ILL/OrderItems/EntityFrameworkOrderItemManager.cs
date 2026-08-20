@@ -5,20 +5,16 @@ using System.Data.Entity;
 using System.Web;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Models.Mail;
-using Umbraco.Core.Models;
 using Chalmers.ILL.Database;
 using Newtonsoft.Json;
-using umbraco.cms.businesslogic.member;
 using Chalmers.ILL.Utilities;
 using System.Text.RegularExpressions;
 using Chalmers.ILL.UmbracoApi;
-using System.Configuration;
-using Umbraco.Core.Logging;
 using Chalmers.ILL.SignalR;
+using System.Web;
 using System.Threading;
 using static Chalmers.ILL.Models.OrderItemModel;
 using Nest;
-using Umbraco.Core;
 using System.IdentityModel.Tokens;
 using Microsoft.Exchange.WebServices.Data;
 
@@ -26,16 +22,18 @@ namespace Chalmers.ILL.OrderItems
 {
     public class EntityFrameworkOrderItemManager : IOrderItemManager
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(EntityFrameworkOrderItemManager));
+
         private INotifier _notifier;
-        private IUmbracoWrapper _umbraco;
+        private IChillinOrderConfiguration _orderConfig;
         private Random _rand;
         private IOrderItemSearcher _orderItemSearcher;
 
         private Dictionary<int, OrderItemsDbContext> _threadIdToDbContextMap = new Dictionary<int, OrderItemsDbContext>();
 
-        public EntityFrameworkOrderItemManager(IUmbracoWrapper umbraco, IOrderItemSearcher orderItemSearcher)
+        public EntityFrameworkOrderItemManager(IChillinOrderConfiguration orderConfig, IOrderItemSearcher orderItemSearcher)
         {
-            _umbraco = umbraco;
+            _orderConfig = orderConfig;
             _orderItemSearcher = orderItemSearcher;
             _rand = new Random();
         }
@@ -95,12 +93,12 @@ namespace Chalmers.ILL.OrderItems
 
                     if (orderItems.Count() == 0)
                     {
-                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Couldn't find any node with the ID " + nodeId + ".");
+                        _log.Warn("GetOrderItem: Couldn't find any node with the ID " + nodeId + ".");
                     }
                     else if (orderItems.Count() > 1)
                     {
                         // should never happen
-                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Found more than one node with the ID " + nodeId + ".");
+                        _log.Warn("GetOrderItem: Found more than one node with the ID " + nodeId + ".");
                     }
                     else
                     {
@@ -111,7 +109,7 @@ namespace Chalmers.ILL.OrderItems
                 }
                 catch (Exception e)
                 {
-                    LogHelper.Error<OrderItemManager>("Failed to query node.", e);
+                    _log.Error("Failed to query node.", e);
                 }
 
                 return res;
@@ -151,12 +149,12 @@ namespace Chalmers.ILL.OrderItems
 
                     if (orderItems.Count() == 0)
                     {
-                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Couldn't find any node with the order ID " + orderId + ".");
+                        _log.Warn("GetOrderItem: Couldn't find any node with the order ID " + orderId + ".");
                     }
                     else if (orderItems.Count() > 1)
                     {
                         // should never happen
-                        LogHelper.Warn<OrderItemManager>("GetOrderItem: Found more than one node with the order ID " + orderId + ".");
+                        _log.Warn("GetOrderItem: Found more than one node with the order ID " + orderId + ".");
                     }
                     else
                     {
@@ -167,7 +165,7 @@ namespace Chalmers.ILL.OrderItems
                 }
                 catch (Exception e)
                 {
-                    LogHelper.Error<OrderItemManager>("Failed to query node.", e);
+                    _log.Error("Failed to query node.", e);
                 }
 
                 return res;
@@ -391,7 +389,8 @@ namespace Chalmers.ILL.OrderItems
                 newOrderItem.PatronAffiliation = model.SierraPatronInfo.aff;
                 newOrderItem.FollowUpDate = DateTime.Now;
                 newOrderItem.EditedBy = "";
-                newOrderItem.StatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny");
+                newOrderItem.StatusId = _orderConfig.GetIdByValue("OrderStatus", "01:Ny");
+                newOrderItem.Status = "01:Ny";
                 newOrderItem.SierraInfo = model.SierraPatronInfo;
                 newOrderItem.LogItemsList = new List<LogItem>();
                 newOrderItem.AttachmentList = new List<OrderAttachment>();
@@ -401,16 +400,19 @@ namespace Chalmers.ILL.OrderItems
                 newOrderItem.BookId = "";
                 newOrderItem.ProviderInformation = "";
 
-                switch (model.DeliveryLibrary) 
+                switch (model.DeliveryLibrary)
                 {
                     case "Z":
-                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
+                        newOrderItem.DeliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", "Huvudbiblioteket");
+                        newOrderItem.DeliveryLibrary = "Huvudbiblioteket";
                         break;
                     case "Za":
-                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
+                        newOrderItem.DeliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", "Arkitekturbiblioteket");
+                        newOrderItem.DeliveryLibrary = "Arkitekturbiblioteket";
                         break;
                     case "Zl":
-                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
+                        newOrderItem.DeliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", "Lindholmenbiblioteket");
+                        newOrderItem.DeliveryLibrary = "Lindholmenbiblioteket";
                         break;
                     default:
                         break;
@@ -419,7 +421,8 @@ namespace Chalmers.ILL.OrderItems
                 // Set Type directly if "IsPurchaseRequest" is true
                 if (model.IsPurchaseRequest)
                 {
-                    newOrderItem.TypeId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Inköpsförslag");
+                    newOrderItem.TypeId = _orderConfig.GetIdByValue("OrderType", "Inköpsförslag");
+                    newOrderItem.Type = "Inköpsförslag";
                 }
 
                 FillOutStuff(newOrderItem);
@@ -468,7 +471,8 @@ namespace Chalmers.ILL.OrderItems
                 newOrderItem.PatronCardNo = model.PatronCardNumber;
                 newOrderItem.FollowUpDate = DateTime.Now;
                 newOrderItem.EditedBy = "";
-                newOrderItem.StatusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], "01:Ny");
+                newOrderItem.StatusId = _orderConfig.GetIdByValue("OrderStatus", "01:Ny");
+                newOrderItem.Status = "01:Ny";
                 newOrderItem.SierraInfo = model.SierraPatronInfo;
                 newOrderItem.LogItemsList = new List<LogItem>();
                 newOrderItem.AttachmentList = new List<OrderAttachment>();
@@ -481,29 +485,35 @@ namespace Chalmers.ILL.OrderItems
 
                 if (model.DeliveryLibrarySigel == "Z")
                 {
-                    newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
+                    newOrderItem.DeliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", "Huvudbiblioteket");
+                    newOrderItem.DeliveryLibrary = "Huvudbiblioteket";
                 }
                 else if (model.DeliveryLibrarySigel == "ZL")
                 {
-                    newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
+                    newOrderItem.DeliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", "Lindholmenbiblioteket");
+                    newOrderItem.DeliveryLibrary = "Lindholmenbiblioteket";
                 }
                 else if (model.DeliveryLibrarySigel == "ZA")
                 {
-                    newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
+                    newOrderItem.DeliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", "Arkitekturbiblioteket");
+                    newOrderItem.DeliveryLibrary = "Arkitekturbiblioteket";
                 }
                 else if (!String.IsNullOrEmpty(model.SierraPatronInfo.home_library))
                 {
                     if (model.SierraPatronInfo.home_library.ToLower() == "abib")
                     {
-                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Arkitekturbiblioteket");
+                        newOrderItem.DeliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", "Arkitekturbiblioteket");
+                        newOrderItem.DeliveryLibrary = "Arkitekturbiblioteket";
                     }
                     else if (model.SierraPatronInfo.home_library.ToLower() == "lbib")
                     {
-                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Lindholmenbiblioteket");
+                        newOrderItem.DeliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", "Lindholmenbiblioteket");
+                        newOrderItem.DeliveryLibrary = "Lindholmenbiblioteket";
                     }
                     else
                     {
-                        newOrderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
+                        newOrderItem.DeliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", "Huvudbiblioteket");
+                        newOrderItem.DeliveryLibrary = "Huvudbiblioteket";
                     }
                 }
 
@@ -656,7 +666,7 @@ namespace Chalmers.ILL.OrderItems
                     {
                         orderItem.CancellationReasonId = cancellationReasonId;
                         FillOutStuff(orderItem);
-                        AddLogItem(orderNodeId, "ANNULLERINGSORSAK", "Annulleringsorsak ändrad till " + umbraco.library.GetPreValueAsString(cancellationReasonId), eventId, false, false);
+                        AddLogItem(orderNodeId, "ANNULLERINGSORSAK", "Annulleringsorsak ändrad till " + _orderConfig.GetValueById(cancellationReasonId), eventId, false, false);
                     }
                     MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
@@ -678,7 +688,7 @@ namespace Chalmers.ILL.OrderItems
 
         public void SetDeliveryLibrary(int orderNodeId, string deliveryLibraryPrevalue, string eventId, bool doReindex = true, bool doSignal = true)
         {
-            var deliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], deliveryLibraryPrevalue);
+            var deliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", deliveryLibraryPrevalue);
             SetDeliveryLibrary(orderNodeId, deliveryLibraryId, eventId, doReindex, doSignal);
         }
 
@@ -694,7 +704,11 @@ namespace Chalmers.ILL.OrderItems
                     if (currentDeliveryLibrary != deliveryLibraryId)
                     {
                         orderItem.DeliveryLibraryId = deliveryLibraryId;
-                        AddLogItem(orderNodeId, "BIBLIOTEK", "Leveransbibliotek ändrat från " + (currentDeliveryLibrary != -1 ? (umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last()=="Lindholmenbiblioteket"?"Kuggen": umbraco.library.GetPreValueAsString(currentDeliveryLibrary).Split(':').Last()) : "Odefinierad") + " till " + (umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last() == "Lindholmenbiblioteket" ? "Kuggen" : umbraco.library.GetPreValueAsString(deliveryLibraryId).Split(':').Last()), eventId, false, false);
+                        var fromLib = currentDeliveryLibrary != -1 ? _orderConfig.GetValueById(currentDeliveryLibrary).Split(':').Last() : "Odefinierad";
+                        if (fromLib == "Lindholmenbiblioteket") fromLib = "Kuggen";
+                        var toLib = _orderConfig.GetValueById(deliveryLibraryId).Split(':').Last();
+                        if (toLib == "Lindholmenbiblioteket") toLib = "Kuggen";
+                        AddLogItem(orderNodeId, "BIBLIOTEK", "Leveransbibliotek ändrat från " + fromLib + " till " + toLib, eventId, false, false);
                     }
                     MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
@@ -1172,7 +1186,7 @@ namespace Chalmers.ILL.OrderItems
                     {
                         orderItem.PurchasedMaterialId = purchasedMaterialId;
                         FillOutStuff(orderItem);
-                        AddLogItem(orderNodeId, "MATERIALINKÖP", "Inköpt material ändrat till " + umbraco.library.GetPreValueAsString(purchasedMaterialId), eventId, false, false);
+                        AddLogItem(orderNodeId, "MATERIALINKÖP", "Inköpt material ändrat till " + _orderConfig.GetValueById(purchasedMaterialId), eventId, false, false);
                     }
                     MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
@@ -1340,7 +1354,7 @@ namespace Chalmers.ILL.OrderItems
 
         public void SetStatus(int orderNodeId, string statusPrevalue, string eventId, bool doReindex = true, bool doSignal = true)
         {
-            var statusId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"], statusPrevalue);
+            var statusId = _orderConfig.GetIdByValue("OrderStatus", statusPrevalue);
             SetStatus(orderNodeId, statusId, eventId, doReindex, doSignal);
         }
 
@@ -1359,7 +1373,7 @@ namespace Chalmers.ILL.OrderItems
                         orderItem.StatusId = statusId;
                         OnStatusChanged(orderItem, statusId);
                         FillOutStuff(orderItem);
-                        AddLogItem(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? umbraco.library.GetPreValueAsString(currentStatus).Split(':').Last() : "Odefinierad") + " till " + umbraco.library.GetPreValueAsString(statusId).Split(':').Last(), eventId, false, false);
+                        AddLogItem(orderNodeId, "STATUS", "Status ändrad från " + (currentStatus != -1 ? _orderConfig.GetValueById(currentStatus).Split(':').Last() : "Odefinierad") + " till " + _orderConfig.GetValueById(statusId).Split(':').Last(), eventId, false, false);
                     }
                     MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
@@ -1392,7 +1406,7 @@ namespace Chalmers.ILL.OrderItems
                         orderItem.TypeId = typeId;
                         OnTypeChanged(orderItem, typeId);
                         FillOutStuff(orderItem);
-                        AddLogItem(orderNodeId, "TYP", "Typ ändrad till " + umbraco.library.GetPreValueAsString(typeId), eventId, false, false);
+                        AddLogItem(orderNodeId, "TYP", "Typ ändrad till " + _orderConfig.GetValueById(typeId), eventId, false, false);
                     }
                     MaybeSaveToDatabase(doReindex, doSignal ? orderItem : null);
                 }
@@ -1634,7 +1648,7 @@ namespace Chalmers.ILL.OrderItems
 
         private void UpdateLastDeliveryStatusWhenProper(OrderItemModel orderItem, int newStatusId)
         {
-            var statusStr = umbraco.library.GetPreValueAsString(newStatusId).Split(':').Last();
+            var statusStr = _orderConfig.GetValueById(newStatusId).Split(':').Last();
             if (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport") || statusStr.Contains("Infodisk") || statusStr.Contains("FOLIO"))
             {
                 orderItem.LastDeliveryStatusId = newStatusId;
@@ -1645,7 +1659,7 @@ namespace Chalmers.ILL.OrderItems
         {
             var deliveryDateStr = orderItem.DeliveryDate == null ? "" : orderItem.DeliveryDate.ToString();
             var deliveryDate = deliveryDateStr == "" ? new DateTime(1970, 1, 1) : Convert.ToDateTime(deliveryDateStr);
-            var statusStr = umbraco.library.GetPreValueAsString(newStatusId).Split(':').Last();
+            var statusStr = _orderConfig.GetValueById(newStatusId).Split(':').Last();
             if (deliveryDate.Year == 1970 && (statusStr.Contains("Levererad") || statusStr.Contains("Utlånad") || statusStr.Contains("Transport") ||
                     statusStr.Contains("Infodisk")))
             {
@@ -1655,9 +1669,10 @@ namespace Chalmers.ILL.OrderItems
 
         private void SetDeliveryLibraryIfNewTypeIsArtikel(OrderItemModel orderItem, int newTypeId)
         {
-            if (newTypeId == _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderTypeDataTypeDefinitionName"], "Artikel"))
+            if (newTypeId == _orderConfig.GetIdByValue("OrderType", "Artikel"))
             {
-                orderItem.DeliveryLibraryId = _umbraco.DataTypePrevalueId(ConfigurationManager.AppSettings["umbracoOrderDeliveryLibraryDataTypeDefinitionName"], "Huvudbiblioteket");
+                orderItem.DeliveryLibraryId = _orderConfig.GetIdByValue("DeliveryLibrary", "Huvudbiblioteket");
+                orderItem.DeliveryLibrary = "Huvudbiblioteket";
             }
         }
 
@@ -1741,12 +1756,10 @@ namespace Chalmers.ILL.OrderItems
 
         private string GetCurrentUserOrSystem()
         {
-            var res = "System";
-            if (Member.IsLoggedOn())
-            {
-                res = Member.GetCurrentMember().Text;
-            }
-            return res;
+            var identity = HttpContext.Current?.User?.Identity;
+            if (identity != null && identity.IsAuthenticated)
+                return identity.Name;
+            return "System";
         }
 
         private string UrlDecodeAndEscapeAllLinks(string str)
@@ -1770,34 +1783,60 @@ namespace Chalmers.ILL.OrderItems
 
             orderItem.FollowUpDateIsDue = orderItem.FollowUpDate <= DateTime.Now ? true : false;
 
-            // Status (id, whole prevalue "xx:yyyy" and just string "yyyy")
-            orderItem.StatusString = orderItem.StatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.StatusId).Split(':').Last() : "";
-            orderItem.Status = orderItem.StatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.StatusId) : "";
+            // Status — look up string from config; if not found, preserve existing Status from DB
+            if (orderItem.StatusId != -1)
+            {
+                var v = _orderConfig.GetValueById(orderItem.StatusId);
+                if (!string.IsNullOrEmpty(v)) orderItem.Status = v;
+            }
+            orderItem.StatusString = (orderItem.Status ?? "").Split(':').Last();
 
-            // Previous status (id, whole prevalue "xx:yyyy" and just string "yyyy")
-            orderItem.PreviousStatusString = orderItem.PreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.PreviousStatusId).Split(':').Last() : "";
-            orderItem.PreviousStatus = orderItem.PreviousStatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.PreviousStatusId) : "";
+            // Previous status
+            if (orderItem.PreviousStatusId != -1)
+            {
+                var v = _orderConfig.GetValueById(orderItem.PreviousStatusId);
+                if (!string.IsNullOrEmpty(v)) orderItem.PreviousStatus = v;
+            }
+            orderItem.PreviousStatusString = (orderItem.PreviousStatus ?? "").Split(':').Last();
 
-            // Last delivery status (id, whole prevalue "xx:yyyy" and just string "yyyy")
-            orderItem.LastDeliveryStatusString = orderItem.LastDeliveryStatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.LastDeliveryStatusId).Split(':').Last() : "";
-            orderItem.LastDeliveryStatus = orderItem.LastDeliveryStatusId != -1 ? umbraco.library.GetPreValueAsString(orderItem.LastDeliveryStatusId) : "";
+            // Last delivery status
+            if (orderItem.LastDeliveryStatusId != -1)
+            {
+                var v = _orderConfig.GetValueById(orderItem.LastDeliveryStatusId);
+                if (!string.IsNullOrEmpty(v)) orderItem.LastDeliveryStatus = v;
+            }
+            orderItem.LastDeliveryStatusString = (orderItem.LastDeliveryStatus ?? "").Split(':').Last();
 
-            // Type (id and prevalue)
-            orderItem.Type = orderItem.TypeId != -1 ? umbraco.library.GetPreValueAsString(orderItem.TypeId) : "";
+            // Type — look up from config; preserve if not found
+            if (orderItem.TypeId != -1)
+            {
+                var v = _orderConfig.GetValueById(orderItem.TypeId);
+                if (!string.IsNullOrEmpty(v)) orderItem.Type = v;
+            }
 
-            // Delivery Library (id and prevalue)
-            orderItem.DeliveryLibrary = orderItem.DeliveryLibraryId != -1 ? umbraco.library.GetPreValueAsString(orderItem.DeliveryLibraryId) : "";
+            // Delivery Library — look up from config; preserve if not found
+            if (orderItem.DeliveryLibraryId != -1)
+            {
+                var v = _orderConfig.GetValueById(orderItem.DeliveryLibraryId);
+                if (!string.IsNullOrEmpty(v)) orderItem.DeliveryLibrary = v;
+            }
 
-            // Cancellation reason (id and prevalue)
-            orderItem.CancellationReason = orderItem.CancellationReasonId != -1 ? umbraco.library.GetPreValueAsString(orderItem.CancellationReasonId) : "";
+            // Cancellation reason
+            if (orderItem.CancellationReasonId != -1)
+            {
+                var v = _orderConfig.GetValueById(orderItem.CancellationReasonId);
+                if (!string.IsNullOrEmpty(v)) orderItem.CancellationReason = v;
+            }
 
-            // Purchased material (id and prevalue)
-            orderItem.PurchasedMaterial = orderItem.PurchasedMaterialId != -1 ? umbraco.library.GetPreValueAsString(orderItem.PurchasedMaterialId) : "";
+            // Purchased material
+            if (orderItem.PurchasedMaterialId != -1)
+            {
+                var v = _orderConfig.GetValueById(orderItem.PurchasedMaterialId);
+                if (!string.IsNullOrEmpty(v)) orderItem.PurchasedMaterial = v;
+            }
 
             orderItem.EditedByCurrentMember = false;
 
-            // Include the Content Version Count in Umbraco db
-            // FIXME: Always set to zero to avoid ContentService calls. Never used. Should be removed from model?
             orderItem.ContentVersionsCount = 0;
 
             orderItem.DeliveryLibrarySameAsHomeLibrary = IsDeliveryLibrarySameAsHomeLibrary(orderItem);

@@ -19,7 +19,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public static int EVENT_TYPE { get { return 10; } }
         public static int BOOK_RECEIVED_AT_BRANCH_EVENT_TYPE { get { return 25; } }
 
-        private  IUmbracoWrapper _umbraco;
+        private IChillinOrderConfiguration _orderConfig;
         private  IOrderItemManager _orderItemManager;
         private  ITemplateService _templateService;
         private  IMailService _mailService;
@@ -27,9 +27,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         private readonly IChillinTextRepository _chillinTextRepository;
 
         public OrderItemReceiveBookSurfaceController(
-            IUmbracoWrapper umbraco, 
-            IOrderItemManager orderItemManager, 
-            ITemplateService templateService, 
+            IChillinOrderConfiguration orderConfig,
+            IOrderItemManager orderItemManager,
+            ITemplateService templateService,
             IMailService mailService,
             IFolioService folioService,
             IChillinTextRepository chillinTextRepository)
@@ -37,7 +37,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _orderItemManager = orderItemManager;
             _templateService = templateService;
             _mailService = mailService;
-            _umbraco = umbraco;
+            _orderConfig = orderConfig;
             _folioService = folioService;
             _chillinTextRepository = chillinTextRepository;
         }
@@ -47,7 +47,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var standardTextTitle = _chillinTextRepository.ByTextField("standardTitleText");
             var pageModel = new ChalmersILLActionReceiveBookModel(_orderItemManager.GetOrderItem(nodeId), standardTextTitle.StandardTitleText);
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
             pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate");
             return PartialView("Chalmers.ILL.Action.ReceiveBook", pageModel);
         }

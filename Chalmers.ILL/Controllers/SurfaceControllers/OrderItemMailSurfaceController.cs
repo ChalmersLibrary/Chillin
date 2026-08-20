@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using umbraco.cms.businesslogic.member;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
@@ -17,7 +16,6 @@ using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Templates;
-using Umbraco.Core.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
@@ -26,18 +24,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         public static int EVENT_TYPE { get { return 6; } }
 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(OrderItemMailSurfaceController));
+
         IOrderItemManager _orderItemManager;
         IExchangeMailWebApi _exchangeMailWebApi;
-        IUmbracoWrapper _dataTypes;
+        IChillinOrderConfiguration _orderConfig;
         IMailService _mailService;
         ITemplateService _templateService;
 
-        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IExchangeMailWebApi exchangeMailWebApi, 
-            IUmbracoWrapper dataTypes, IMailService mailService, ITemplateService templateService)
+        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IExchangeMailWebApi exchangeMailWebApi,
+            IChillinOrderConfiguration orderConfig, IMailService mailService, ITemplateService templateService)
         {
             _orderItemManager = orderItemManager;
             _exchangeMailWebApi = exchangeMailWebApi;
-            _dataTypes = dataTypes;
+            _orderConfig = orderConfig;
             _mailService = mailService;
             _templateService = templateService;
         }
@@ -52,7 +52,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var model = new ChalmersILLActionMailModel(_orderItemManager.GetOrderItem(nodeId));
 
-            _dataTypes.PopulateModelWithAvailableValues(model);
+            _orderConfig.PopulateModelWithAvailableValues(model);
             model.SignatureTemplate = _templateService.GetTemplateData("SignatureTemplate", model.OrderItem);
             model.Templates = _templateService.GetManualTemplates();
 
@@ -169,7 +169,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
             catch (Exception e)
             {
-                LogHelper.Error<OrderItemMailSurfaceController>("Error while sending mail for new order.", e);
+                _log.Error("Error while sending mail for new order.", e);
                 json.Success = false;
                 json.Message = "Error: " + e.Message;
             }

@@ -378,6 +378,9 @@
     <Content Include="images\help.png" />
     <Content Include="images\help.svg" />
     <Content Include="bower.json" />
+    <Content Include="Config\chillinPrevalues.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="images\lock-plain.svg" />
     <Content Include="images\lock.png" />
     <Content Include="MacroScripts\dummy.txt" />
@@ -597,6 +600,7 @@
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ChillinText.cs" />
+    <Compile Include="Models\DropdownOption.cs" />
     <Compile Include="Models\ItemBasic.cs" />
     <Compile Include="Models\Page\ReceivedAtBranchResultModel.cs" />
     <Compile Include="Models\PartialPage\Settings\ChillinTextDto.cs" />
@@ -731,6 +735,8 @@
     <Compile Include="Templates\TemplateServiceException.cs" />
     <Compile Include="UmbracoApi\UmbracoWrapper.cs" />
     <Compile Include="UmbracoApi\IUmbracoWrapper.cs" />
+    <Compile Include="UmbracoApi\IChillinOrderConfiguration.cs" />
+    <Compile Include="UmbracoApi\ChillinOrderConfiguration.cs" />
     <Compile Include="Utilities\Helpers.cs" />
     <Compile Include="OrderItems\OrderItemManager.cs" />
     <Compile Include="Patron\Sierra.cs" />

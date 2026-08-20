@@ -21,12 +21,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public static int EVENT_TYPE { get { return 8; } }
 
         IOrderItemManager _orderItemManager;
-        IUmbracoWrapper _dataTypes;
+        IChillinOrderConfiguration _orderConfig;
 
-        public LogItemSurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper dataTypes)
+        public LogItemSurfaceController(IOrderItemManager orderItemManager, IChillinOrderConfiguration orderConfig)
         {
             _orderItemManager = orderItemManager;
-            _dataTypes = dataTypes;
+            _orderConfig = orderConfig;
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             var pageModel = new ChalmersILLActionLogEntryModel(_orderItemManager.GetOrderItem(nodeId));
 
-            _dataTypes.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.LogEntry", pageModel);

@@ -29,16 +29,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IPatronDataProvider _patronDataProviderSierraCache;
         IPatronDataProvider _patronDataProviderSierra;
         IPersonDataProvider _personDataProvider;
-        IUmbracoWrapper _umbraco;
 
         public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProviderSierraCache,
-            IPatronDataProvider patronDataProviderSierra, IPersonDataProvider personDataProvider, IUmbracoWrapper umbraco)
+            IPatronDataProvider patronDataProviderSierra, IPersonDataProvider personDataProvider)
         {
             _orderItemManager = orderItemManager;
             _patronDataProviderSierraCache = patronDataProviderSierraCache;
             _patronDataProviderSierra = patronDataProviderSierra;
             _personDataProvider = personDataProvider;
-            _umbraco = umbraco;
         }
 
         [HttpGet]

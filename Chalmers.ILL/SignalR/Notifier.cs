@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections;
 using Microsoft.AspNet.SignalR;
 using Umbraco.Core.Models;
-using umbraco.cms.businesslogic.member;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Controllers.SurfaceControllers;
 using umbraco.cms.businesslogic.datatype;
@@ -90,18 +89,12 @@ namespace Chalmers.ILL.SignalR
             // get the NotificationHub
             var context = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
 
-            // Extract the real chillin order status id from the umbraco id.
+            // Extract the chillin order status code from the Status string "NN:Description"
             int chillinOrderStatusId = 0;
-            var ds = new Umbraco.Core.Services.DataTypeService();
-            PreValue iter;
-            foreach (DictionaryEntry pv in _umbraco.GetPreValues(ConfigurationManager.AppSettings["umbracoOrderStatusDataTypeDefinitionName"]))
+            if (!string.IsNullOrEmpty(orderItem.Status))
             {
-                iter = ((PreValue)pv.Value);
-                if (iter.Id == orderItem.StatusId)
-                {
-                    chillinOrderStatusId = Convert.ToInt32(iter.Value.Split(':').First());
-                    break;
-                }
+                var prefix = orderItem.Status.Split(':')[0];
+                int.TryParse(prefix, out chillinOrderStatusId);
             }
 
             // create a notication object to send to the clients
