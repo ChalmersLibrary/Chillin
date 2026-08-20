@@ -736,7 +736,7 @@
     <Compile Include="Members\MemberInfoManager.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Start\" />
+    <Compile Include="App_Start\RouteConfig.cs" />
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="Startup\" />
     <Folder Include="Views\Home\" />

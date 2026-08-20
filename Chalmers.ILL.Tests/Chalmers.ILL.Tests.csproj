@@ -117,6 +117,7 @@
     <Compile Include="Mail\MailBodyFixerTest.cs" />
     <Compile Include="Controllers\ChillinTextSurfaceControllerTest.cs" />
     <Compile Include="Controllers\PageControllersTest.cs" />
+    <Compile Include="Controllers\RoutingTest.cs" />
     <Compile Include="Members\MemberInfoManagerTest.cs" />
     <Compile Include="OrderItems\BulkDataManagerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

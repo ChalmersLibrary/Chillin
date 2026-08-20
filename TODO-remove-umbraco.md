@@ -19,7 +19,7 @@ men följande beroenden kvarstår.
 
 ## Routing & Vyer
 
-- [ ] Ersätt Umbraco content-baserad routing med standard MVC-routing  
+- [x] Ersätt Umbraco content-baserad routing med standard MVC-routing  
   Nuvarande URL-routing drivs av Umbracos innehållsträd; ersätt med konventionell `RouteConfig` och egna routes.
 
 - [ ] Migrera vyerna från Umbraco Razor-mallar till standard MVC-vyer  
