@@ -684,7 +684,6 @@
     <Compile Include="OrderItems\SaveException.cs" />
     <Compile Include="OrderItems\SourcePollingException.cs" />
     <Compile Include="OrderItems\SourcePollingResult.cs" />
-    <Compile Include="OrderItems\UmbracoOrderItemSearcher.cs" />
     <Compile Include="Patron\FolioPatronDataProvider.cs" />
     <Compile Include="Patron\IAffiliationDataProvider.cs" />
     <Compile Include="Patron\InvalidTokenException.cs" />

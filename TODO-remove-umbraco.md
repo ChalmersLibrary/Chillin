@@ -40,7 +40,7 @@ men följande beroenden kvarstår.
   `OrderItemManager.cs` använder `IContentService` och Examine för att lagra orderobjekt som Umbraco content-noder.
   Ta bort klassen och `"Legacy"`-registreringen i `Bootstrapper.cs`.
 
-- [ ] Ta bort `UmbracoOrderItemSearcher`  
+- [x] Ta bort `UmbracoOrderItemSearcher`  
   Använder `ExamineManager` mot Umbracos sökindex. Klassen är redan utbytt mot `ElasticSearchOrderItemSearcher`
   men `"Legacy"`-registreringen finns kvar.
 
