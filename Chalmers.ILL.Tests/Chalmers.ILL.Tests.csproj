@@ -118,6 +118,7 @@
   <ItemGroup>
     <Compile Include="Mail\AutomaticMailSendingEngineTest.cs" />
     <Compile Include="Mail\MailBodyFixerTest.cs" />
+    <Compile Include="Controllers\MediaItemControllersTest.cs" />
     <Compile Include="Controllers\ChillinTextSurfaceControllerTest.cs" />
     <Compile Include="Controllers\OrderItemSurfaceControllerTest.cs" />
     <Compile Include="Controllers\PageControllersTest.cs" />

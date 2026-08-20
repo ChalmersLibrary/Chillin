@@ -44,7 +44,7 @@ men följande beroenden kvarstår.
   Använder `ExamineManager` mot Umbracos sökindex. Klassen är redan utbytt mot `ElasticSearchOrderItemSearcher`
   men `"Legacy"`-registreringen finns kvar.
 
-- [ ] Ta bort `UmbracoMediaItemManager`  
+- [x] Ta bort `UmbracoMediaItemManager`  
   Använder `IMediaService` för att lagra bilagor som Umbraco media-objekt. Klassen är redan utbytt mot
   `BlobStorageMediaItemManager` men `"Legacy"`-registreringen finns kvar.
 

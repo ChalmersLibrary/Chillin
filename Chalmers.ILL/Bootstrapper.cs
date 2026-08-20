@@ -157,7 +157,6 @@ namespace Chalmers.ILL
             }
             container.RegisterType<ISourceFactory, ChalmersSourceFactory>();
             container.RegisterType<IMediaItemManager, BlobStorageMediaItemManager>();
-            container.RegisterType<IMediaItemManager, UmbracoMediaItemManager>("Legacy");
             container.RegisterType<IOrderItemSearcher, ElasticSearchOrderItemSearcher>();
             container.RegisterType<ITemplateService, ElasticsearchTemplateService>();
             container.RegisterType<IAffiliationDataProvider, PdbAffiliationDataProvider>();

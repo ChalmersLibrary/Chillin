@@ -519,7 +519,6 @@
     <Compile Include="MediaItems\BlobStorageMediaItemManager.cs" />
     <Compile Include="MediaItems\IMediaItemManager.cs" />
     <Compile Include="MediaItems\MediaItemNotFoundException.cs" />
-    <Compile Include="MediaItems\UmbracoMediaItemManager.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
     <Compile Include="Migrations\201606291112079_InitialDatabaseModel.cs" />
     <Compile Include="Migrations\201606291112079_InitialDatabaseModel.Designer.cs">
