@@ -65,7 +65,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
                 };
             }
 
-            return View(customModel);
+            return View("~/Views/ChalmersILLOrderListPage.cshtml", customModel);
         }
 
         private bool IsOrderId(string text)

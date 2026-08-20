@@ -470,6 +470,7 @@
     <Compile Include="Controllers\SurfaceControllers\OrderItemDuplicateSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLDiskPageController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLLoginPageController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLLogoutPageController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLOrderListPageController.cs" />
     <Compile Include="Controllers\SurfaceControllers\Page\ChalmersILLSettingsPageController.cs" />

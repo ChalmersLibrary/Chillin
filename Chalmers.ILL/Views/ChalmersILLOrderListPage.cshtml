@@ -1,10 +1,7 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.Page.ChalmersILLOrderListPageModel>
-@using umbraco.cms.businesslogic.member;
+@inherits System.Web.Mvc.WebViewPage<Chalmers.ILL.Models.Page.ChalmersILLOrderListPageModel>
 @using System.Web.Security;
-@using Examine;
 @using Chalmers.ILL.Controllers.SurfaceControllers;
 @using Chalmers.ILL.Extensions;
-@using Umbraco.Core.Logging;
 @using System.Globalization;
 @using Chalmers.ILL.Models;
 
@@ -150,7 +147,7 @@
 
     @if (start > 0)
     {
-        <section style="height: 8rem; display: flex; justify-content: center; align-items: center;"><a href="/bestaellningar/?start=@(start - 50)@(queryString)">Gå till föregående sida med ordrar.</a></section>
+        <section style="height: 8rem; display: flex; justify-content: center; align-items: center;"><a href="/ChalmersILLOrderListPage?start=@(start - 50)@(queryString)">Gå till föregående sida med ordrar.</a></section>
     }
 
     @{
@@ -167,7 +164,7 @@
 
     @if (areMoreItems)
     {
-        <section style="height: 8rem; display: flex; justify-content: center; align-items: center;"><a href="/bestaellningar/?start=@(start + 50)@(queryString)">Gå till nästa sida med ordrar.</a></section>
+        <section style="height: 8rem; display: flex; justify-content: center; align-items: center;"><a href="/ChalmersILLOrderListPage?start=@(start + 50)@(queryString)">Gå till nästa sida med ordrar.</a></section>
     }
 
     <div class="silly-filler"></div>

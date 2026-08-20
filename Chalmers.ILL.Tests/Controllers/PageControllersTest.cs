@@ -157,6 +157,17 @@ namespace Chalmers.ILL.Tests.Controllers
             Assert.IsFalse(searcher.LastSearchQuery.StartsWith("\""));
         }
 
+        [TestMethod]
+        public void ChalmersILLLoginPageController_Index_ReturnsView()
+        {
+            var controller = new ChalmersILLLoginPageController();
+            SetHttpContext(controller);
+
+            var result = controller.Index() as ViewResult;
+
+            Assert.IsNotNull(result);
+        }
+
         private static void SetHttpContext(Controller controller, string queryString = "")
         {
             var request = new HttpRequest("", "http://localhost/", queryString);

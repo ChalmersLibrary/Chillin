@@ -1,7 +1,4 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.Page.ChalmersILLModel>
-@using Examine
-@using Examine.SearchCriteria
-@using UmbracoExamine
+@inherits System.Web.Mvc.WebViewPage<Chalmers.ILL.Models.Page.ChalmersILLModel>
 @using System.Configuration;
 @{
     Layout = null;
@@ -39,7 +36,7 @@
                     display:none; // Hide buttons for non admin account, cosmetic fix only
                 }
 
-                a[href="/bestaellningar/instaellningar/"] {
+                a[href="/ChalmersILLSettingsPage"] {
                     display:none !important; // Hide settings for non admin account, cosmetic fix only
                 }
             </style>
@@ -50,7 +47,7 @@
             @{
                 if (Convert.ToBoolean(ConfigurationManager.AppSettings["showManulMailFetchingTools"]))
                 {
-                    <img style="position:fixed; left:10px; bottom:10px;" src="~/images/chilli-plain.svg" onclick="lockScreen(); $.post('/umbraco/surface/SystemSurface/Update', {}, unlockScreen);" onerror="    onerror=null; this.src='~/images/chilli.png'" alt="Chilli">
+                    <img style="position:fixed; left:10px; bottom:10px;" src="~/images/chilli-plain.svg" onclick="lockScreen(); $.post('/SystemSurface/Update', {}, unlockScreen);" onerror="    onerror=null; this.src='~/images/chilli.png'" alt="Chilli">
                 }
             }
 
@@ -66,7 +63,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a id="main-brand-title" style="padding-top: 5px; padding-bottom: 0px;" class="navbar-brand" href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoRootContentDocumentType"]).First().Url">
+                    <a id="main-brand-title" style="padding-top: 5px; padding-bottom: 0px;" class="navbar-brand" href="/">
                         <img id="busylock" src="~/images/lock-plain.svg" onerror="onerror=null; this.src='~/images/lock.png'" alt="Busy Lock">
                         <img src="~/images/chilli-plain.svg" onerror="onerror=null; this.src='~/images/chilli.png'" alt="Chilli">
                     </a>
@@ -75,12 +72,12 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul class="nav navbar-nav">
-                        <li id="orders-button" class="@(Model.Content.Url == Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url ? "active" : null)"><a href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url">Beställningar <span id="pending-order-counter" class="badge" data-pending-order-items="[]">0</span></a></li>
+                        <li id="orders-button" class="@(Request.Path.StartsWith("/ChalmersILLOrderListPage", StringComparison.OrdinalIgnoreCase) ? "active" : null)"><a href="/ChalmersILLOrderListPage">Beställningar <span id="pending-order-counter" class="badge" data-pending-order-items="[]">0</span></a></li>
                         <li style="margin-left: 10px; margin-top: 8px;"><button id='send-feedback-button' class="btn btn-default" type="button" data-toggle="popover" data-content="<form name='feedback-form' onsubmit='sendFeedback(); event.preventDefault();'><h3>Lämna feedback</h3><textarea id='feedback-text' style='resize: none;' rows='5'></textarea><button style='width: 100%;' type='submit' class='btn btn-default'>Skicka</button></form>"><span class="glyphicon glyphicon-bullhorn"></span></button></li>
                     </ul>
 
                     <!-- Search form -->
-                    <form class="navbar-form navbar-left" role="search" action="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoOrderListPageContentDocumentType"]).First().Url">
+                    <form class="navbar-form navbar-left" role="search" action="/ChalmersILLOrderListPage">
                         <div class="form-group">
                             <input type="text" class="form-control" name="query" id="query" value="@Request.Params["query"]" placeholder="Namn, referens mm" oninput="correctSearchString()">
                         </div>
@@ -97,22 +94,22 @@
                     </form>
 
                     <!-- Logged in Member info and links -->
-                    @if (library.IsLoggedOn())
+                    @if (Request.IsAuthenticated)
                     {
                         <div id="memberIdContainer" data-memberid="@Model.CurrentMemberId"></div>
                         <ul class="nav navbar-nav navbar-right">
                             <li>
-                                <a class="image-link" href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoRootContentDocumentType"]).First().Url">
+                                <a class="image-link" href="/">
                                     <img id="help-icon" src="~/images/help.svg" onerror="onerror=null; this.src='~/images/help.png'" alt="Busy Lock">
                                 </a>
                             </li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">@Model.CurrentMemberText <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
-                                    <li><a href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoRootContentDocumentType"]).First().Url">Hjälp</a></li>
-                                    <li><a href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoSettingsPageContentDocumentType"]).First().Url">Inställningar</a></li>
+                                    <li><a href="/">Hjälp</a></li>
+                                    <li><a href="/ChalmersILLSettingsPage">Inställningar</a></li>
                                     <li><a href="@ConfigurationManager.AppSettings["statisticsUrl"]">Statistik</a></li>
-                                    <li><a href="@Umbraco.TypedContentAtXPath("//" + ConfigurationManager.AppSettings["umbracoLogoutPageContentDocumentType"]).First().Url">Logga ut</a></li>
+                                    <li><a href="/ChalmersILLLogoutPage">Logga ut</a></li>
                                 </ul>
                             </li>
                         </ul>
@@ -174,7 +171,7 @@
         var message = $("#feedback-text").val() + "\n\n" + "/" + "@Model.CurrentMemberText";
         if (message.trim() !== "") {
             lockScreen();
-            $.post("/umbraco/surface/OrderItemMailSurface/SendSimpleMail", {
+            $.post("/OrderItemMailSurface/SendSimpleMail", {
                 OrderId: "... Nej, FEEDBACK",
                 recipientName: "Buggfixarna",
                 recipientEmail: "@ConfigurationManager.AppSettings["bugFixersMailingList"]",

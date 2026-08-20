@@ -1,4 +1,4 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
+﻿@inherits System.Web.Mvc.WebViewPage<Chalmers.ILL.Models.Page.ChalmersILLStatisticsPageModel>
 @{
     Layout = "ChalmersILL.cshtml";
 }
@@ -151,7 +151,7 @@
         lockScreen();
         $.ajax({
             type: "GET",
-            url: "/umbraco/surface/StatisticsSurface/GetAvailableValues",
+            url: "/StatisticsSurface/GetAvailableValues",
             data: { Keys: ["pType", "Status", "ProviderName", "Type", "DeliveryLibrary", "HomeLibrary", "CancellationReason", "PurchasedMaterial"] },
             traditional: true,
             success: function (res) {
@@ -486,7 +486,7 @@
             first = false;
         });
 
-        $.post("/umbraco/surface/StatisticsSurface/GetData", { json: JSON.stringify(data) }).done(function (res) {
+        $.post("/StatisticsSurface/GetData", { json: JSON.stringify(data) }).done(function (res) {
             if (res.Success) {
                 var headerRow = $("<tr>");
                 for (h = 0; h < headers.length; h++) {

@@ -1,4 +1,4 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.Page.ChalmersILLSettingsPageModel>
+@inherits System.Web.Mvc.WebViewPage<Chalmers.ILL.Models.Page.ChalmersILLSettingsPageModel>
 @{
     Layout = "ChalmersILL.cshtml";
 }
@@ -29,22 +29,22 @@
 <script type="text/javascript">
     function showPasswordSettings(btn) {
         clearActiveSettingAndSetNewActiveButton(btn);
-        renderSettingsPartialView("/umbraco/surface/PasswordSurface/RenderChangePasswordAction");
+        renderSettingsPartialView("/PasswordSurface/RenderChangePasswordAction");
     }
 
     function showTemplateSettings(btn) {
         clearActiveSettingAndSetNewActiveButton(btn);
-        renderSettingsPartialView("/umbraco/surface/TemplatesSurface/RenderEditTemplatesAction");
+        renderSettingsPartialView("/TemplatesSurface/RenderEditTemplatesAction");
     }
 
     function showProviderSettings(btn) {
         clearActiveSettingAndSetNewActiveButton(btn);
-        renderSettingsPartialView("/umbraco/surface/ProviderDataSurface/RenderModifyProviderDataAction");
+        renderSettingsPartialView("/ProviderDataSurface/RenderModifyProviderDataAction");
     }
 
     function showChillinTextSettings(btn) {
         clearActiveSettingAndSetNewActiveButton(btn);
-        renderSettingsPartialView("/umbraco/surface/ChillinTextSurface/RenderChillinTextsAction")
+        renderSettingsPartialView("/ChillinTextSurface/RenderChillinTextsAction")
     }
 
     function clearActiveSettingAndSetNewActiveButton(clickedButton) {

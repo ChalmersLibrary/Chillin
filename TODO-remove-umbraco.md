@@ -22,7 +22,7 @@ men följande beroenden kvarstår.
 - [x] Ersätt Umbraco content-baserad routing med standard MVC-routing  
   Nuvarande URL-routing drivs av Umbracos innehållsträd; ersätt med konventionell `RouteConfig` och egna routes.
 
-- [ ] Migrera vyerna från Umbraco Razor-mallar till standard MVC-vyer  
+- [x] Migrera vyerna från Umbraco Razor-mallar till standard MVC-vyer  
   `Views/*.cshtml` och `Views/Partials/*.cshtml` använder Umbraco-specifika modeller (`RenderModel`) och `@Umbraco`-helper.
 
 ## IUmbracoWrapper

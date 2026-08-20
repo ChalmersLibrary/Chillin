@@ -26,7 +26,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
                 _memberInfoManager.ClearMemberCache(Response);
             }
 
-            return View(customModel);
+            return View("~/Views/ChalmersILLLogoutPage.cshtml", customModel);
         }
     }
 }

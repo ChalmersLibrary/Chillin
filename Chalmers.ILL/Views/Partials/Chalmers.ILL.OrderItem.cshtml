@@ -1,4 +1,4 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.PartialPage.ChalmersILLOrderItemModel>
+﻿@inherits System.Web.Mvc.WebViewPage<Chalmers.ILL.Models.PartialPage.ChalmersILLOrderItemModel>
 @using System.Globalization;
 @using Chalmers.ILL.Extensions;
 @using Chalmers.ILL.Models;
@@ -272,7 +272,7 @@
                                     {
                     <!-- Lock OrderItem to current Member -->
                     <script type="text/javascript">
-                        $.getJSON("/umbraco/surface/OrderItemSurface/LockOrderItem?nodeId=@Model.OrderItem.NodeId", function (json) {
+                        $.getJSON("/OrderItemSurface/LockOrderItem?nodeId=@Model.OrderItem.NodeId", function (json) {
                             if (json.Success) {
                                 $("#@Model.OrderItem.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
                                 $("#action-buttons-@Model.OrderItem.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));

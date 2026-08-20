@@ -28,7 +28,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
                     "\"" + Request.Params["query"].Trim() + "\"");
             }
 
-            return View(customModel);
+            return View("~/Views/ChalmersILLDiskPage.cshtml", customModel);
         }
     }
 }

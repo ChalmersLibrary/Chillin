@@ -10,7 +10,7 @@
 {
     <div class="alert alert-danger"><strong>Värden saknas.</strong> Du måste fylla i fälten.</div>
 }
-@using (Html.BeginUmbracoForm<Chalmers.ILL.Controllers.SurfaceControllers.LoginSurfaceController>("HandleLogin", null, new { @role = "form" }))
+@using (Html.BeginForm("HandleLogin", "LoginSurface", FormMethod.Post, new { @role = "form" }))
 {
     @Html.ValidationSummary(true)
     <div class="form-group">
