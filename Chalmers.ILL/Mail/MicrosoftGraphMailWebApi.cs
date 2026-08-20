@@ -17,13 +17,13 @@ using Microsoft.Exchange.WebServices.Data;
 using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Umbraco.Core.Logging;
-
 namespace Chalmers.ILL.Mail
 {
     public class MicrosoftGraphMailWebApi : IExchangeMailWebApi
     {
-        // With client credentials flows the scopes is ALWAYS of the shape "resource/.default", as the 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MicrosoftGraphMailWebApi));
+
+        // With client credentials flows the scopes is ALWAYS of the shape "resource/.default", as the
         // application permissions need to be set statically (in the portal or by PowerShell), and then granted by
         // a tenant administrator
         private string[] scopes = new string[] { "https://graph.microsoft.com/.default" };
@@ -233,7 +233,7 @@ namespace Chalmers.ILL.Mail
             }
             catch (Exception e)
             {
-                LogHelper.Error<MicrosoftGraphMailWebApi>("Failed fetching mail from Microsoft Graph.", e);
+                _log.Error("Failed fetching mail from Microsoft Graph.", e);
             }
 
             return res;

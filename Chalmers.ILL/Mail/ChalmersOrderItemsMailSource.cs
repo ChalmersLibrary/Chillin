@@ -6,7 +6,6 @@ using System.Configuration;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using Umbraco.Core.Logging;
 using Newtonsoft.Json;
 using Examine;
 using System.IO;
@@ -30,6 +29,8 @@ namespace Chalmers.ILL.Mail
 {
     public class ChalmersOrderItemsMailSource : ISource
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ChalmersOrderItemsMailSource));
+
         public static int CREATE_ORDER_FROM_MAIL_DATA_EVENT_TYPE { get { return 20; } }
         public static int UPDATE_ORDER_FROM_MAIL_DATA_PATRON_EVENT_TYPE { get { return 21; } }
         public static int UPDATE_ORDER_FROM_MAIL_DATA_NOT_PATRON_EVENT_TYPE { get { return 22; } }
@@ -141,7 +142,7 @@ namespace Chalmers.ILL.Mail
                         {
                             item.Type = MailQueueType.ERROR;
                             item.ParseErrorMessage = "Chillin failed to process E-mail. Reason: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Failed to process one E-mail, tagging it with ERROR.", e);
+                            _log.Error("Failed to process one E-mail, tagging it with ERROR.", e);
                             _result.Errors++;
                             _result.Messages.Add(item.ParseErrorMessage);
                         }
@@ -228,7 +229,7 @@ namespace Chalmers.ILL.Mail
                         {
                             list[index].OrderItemNodeId = -1;
                             list[index].StatusResult = "Error creating new OrderItem node: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Error creating new OrderItem node", e);
+                            _log.Error("Error creating new OrderItem node", e);
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }
@@ -296,7 +297,7 @@ namespace Chalmers.ILL.Mail
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error following up reply on OrderItem: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Error following up reply on OrderItem", e);
+                            _log.Error("Error following up reply on OrderItem", e);
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }
@@ -398,7 +399,7 @@ namespace Chalmers.ILL.Mail
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error following up delivery on OrderItem: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Error following up delivery on OrderItem", e);
+                            _log.Error("Error following up delivery on OrderItem", e);
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }
@@ -419,13 +420,13 @@ namespace Chalmers.ILL.Mail
                                     }
                                     catch (Exception innerInnerExc)
                                     {
-                                        LogHelper.Error<SystemSurfaceController>("Failed to forward message to " + address + ".", innerInnerExc);
+                                        _log.Error("Failed to forward message to " + address + ".", innerInnerExc);
                                     }
                                 }
                             }
                             catch (Exception innerExc)
                             {
-                                LogHelper.Error<SystemSurfaceController>("Failed to forward message to bug fixers.", innerExc);
+                                _log.Error("Failed to forward message to bug fixers.", innerExc);
                             }
 
                             // Forward failed mail to manual handling.
@@ -437,7 +438,7 @@ namespace Chalmers.ILL.Mail
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error forwarding mail: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Error forwarding mail", e);
+                            _log.Error("Error forwarding mail", e);
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }
@@ -452,7 +453,7 @@ namespace Chalmers.ILL.Mail
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error forwarding mail: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Error forwarding mail", e);
+                            _log.Error("Error forwarding mail", e);
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }

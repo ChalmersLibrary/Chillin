@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using System;
 using System.Data.Entity;
-using Umbraco.Core.Logging;
 using System.Linq;
 using Chalmers.ILL.OrderItems;
 using System.Collections.Generic;
@@ -13,6 +12,7 @@ namespace Chalmers.ILL.Database
     public class OrderItemsDbContext : DbContext
     {
         private static readonly string _connectionStringName = "chillinOrderItemsDb";
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(OrderItemsDbContext));
 
         private IOrderItemSearcher _orderItemSearcher;
 
@@ -82,12 +82,12 @@ namespace Chalmers.ILL.Database
             }
             catch (DbEntityValidationException e)
             {
-                LogHelper.Error<OrderItemsDbContext>("An entity validation exception occured during saving.", e);
+                _log.Error("An entity validation exception occured during saving.", e);
                 throw e;
             }
             catch (Exception e)
             {
-                LogHelper.Error<OrderItemsDbContext>("An error occured during a save to database.", e);
+                _log.Error("An error occured during a save to database.", e);
                 throw e;
             }
 

@@ -53,7 +53,7 @@ men följande beroenden kvarstår.
 
 ## Loggning
 
-- [ ] Ersätt Umbraco `LogHelper` med standard loggning  
+- [x] Ersätt Umbraco `LogHelper` med standard loggning  
   `IUmbracoWrapper.LogError/LogWarn/LogInfo/LogDebug` och direkta anrop till `Umbraco.Core.Logging.LogHelper`
   används genomgående; byt till log4net direkt eller `ILogger`.
 

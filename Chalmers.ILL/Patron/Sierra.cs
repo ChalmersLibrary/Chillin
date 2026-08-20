@@ -8,12 +8,11 @@ using Chalmers.ILL.Models;
 using System.Configuration;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Templates;
-using Umbraco.Core.Logging;
-
 namespace Chalmers.ILL.Patron
 {
     public class Sierra : IPatronDataProvider, IDisposable
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(Sierra));
         private ITemplateService _templateService;
         private NpgsqlConnection _connection;
 
@@ -31,7 +30,7 @@ namespace Chalmers.ILL.Patron
             }
             catch (Exception e)
             {
-                LogHelper.Error<Sierra>("Failed to open connection with Sierra.", e);
+                _log.Error("Failed to open connection with Sierra.", e);
             }
 
             return this; // For call chaining
@@ -45,7 +44,7 @@ namespace Chalmers.ILL.Patron
             }
             catch (Exception e)
             {
-                LogHelper.Error<Sierra>("Failed to close connection with Sierra.", e);
+                _log.Error("Failed to close connection with Sierra.", e);
             }
 
             return this; // For call chaining
@@ -70,7 +69,7 @@ namespace Chalmers.ILL.Patron
                 }
                 catch (Exception e)
                 {
-                    LogHelper.Error<Sierra>("Failed to get patron info from library card number " + barcode + " from Sierra.", e);
+                    _log.Error("Failed to get patron info from library card number " + barcode + " from Sierra.", e);
 
                     // If we fail the first time we reconnect and try to fetch the information one more time.
                     if (runCount < 2)
@@ -121,7 +120,7 @@ namespace Chalmers.ILL.Patron
                 }
                 catch (Exception e)
                 {
-                    LogHelper.Error<Sierra>("Failed to get patron info from library card number or personnummer " + barcode + " from Sierra.", e);
+                    _log.Error("Failed to get patron info from library card number or personnummer " + barcode + " from Sierra.", e);
 
                     // If we fail the first time we reconnect and try to fetch the information one more time.
                     if (runCount < 2)
@@ -154,7 +153,7 @@ namespace Chalmers.ILL.Patron
                 }
                 catch (Exception e)
                 {
-                    LogHelper.Error<Sierra>("Failed to get patron info using sierra identifier " + sierraId + " from Sierra.", e);
+                    _log.Error("Failed to get patron info using sierra identifier " + sierraId + " from Sierra.", e);
 
                     // If we fail the first time we reconnect and try to fetch the information one more time.
                     if (runCount < 2)
