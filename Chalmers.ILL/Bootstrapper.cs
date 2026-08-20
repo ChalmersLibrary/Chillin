@@ -197,7 +197,6 @@ namespace Chalmers.ILL
             var mailService = new MailService(container.Resolve<IMediaItemManager>(), container.Resolve<IExchangeMailWebApi>());
             var notifier = new Notifier();
             var orderItemManager = new EntityFrameworkOrderItemManager(orderConfig, container.Resolve<IOrderItemSearcher>());
-            var legacyOrderItemManager = new OrderItemManager();
             var providerService = new ProviderService(container.Resolve<IOrderItemSearcher>());
             var bulkDataManager = new BulkDataManager(container.Resolve<IOrderItemSearcher>());
 
@@ -210,7 +209,6 @@ namespace Chalmers.ILL
             container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
             container.RegisterInstance(typeof(INotifier), notifier);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
-            container.RegisterInstance<IOrderItemManager>("Legacy", legacyOrderItemManager);
             container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(container.Resolve<IOrderItemSearcher>(), templateService, orderItemManager, mailService));
             container.RegisterInstance(typeof(IMailService), mailService);
             container.RegisterInstance(typeof(IProviderService), providerService);

@@ -498,7 +498,6 @@
     <Compile Include="Controllers\SurfaceControllers\StatisticsSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\ImportDocumentSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\TemplatesSurfaceController.cs" />
-    <Compile Include="Controllers\SurfaceControllers\UmbracoOrderItemMigrationSurfaceController.cs" />
     <Compile Include="Database\OrderItemsDbContext.cs" />
     <Compile Include="Exceptions\FolioRequestException.cs" />
     <Compile Include="Exceptions\FolioUserException.cs" />
@@ -736,7 +735,6 @@
     <Compile Include="UmbracoApi\IChillinOrderConfiguration.cs" />
     <Compile Include="UmbracoApi\ChillinOrderConfiguration.cs" />
     <Compile Include="Utilities\Helpers.cs" />
-    <Compile Include="OrderItems\OrderItemManager.cs" />
     <Compile Include="Patron\Sierra.cs" />
     <Compile Include="Members\MemberInfoManager.cs" />
   </ItemGroup>

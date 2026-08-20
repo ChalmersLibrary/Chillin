@@ -36,7 +36,7 @@ men följande beroenden kvarstår.
 
 ## Legacy-klasser (kan troligen tas bort nu)
 
-- [ ] Ta bort legacy `OrderItemManager` (Umbraco-baserad)  
+- [x] Ta bort legacy `OrderItemManager` (Umbraco-baserad)  
   `OrderItemManager.cs` använder `IContentService` och Examine för att lagra orderobjekt som Umbraco content-noder.
   Ta bort klassen och `"Legacy"`-registreringen i `Bootstrapper.cs`.
 
@@ -48,7 +48,7 @@ men följande beroenden kvarstår.
   Använder `IMediaService` för att lagra bilagor som Umbraco media-objekt. Klassen är redan utbytt mot
   `BlobStorageMediaItemManager` men `"Legacy"`-registreringen finns kvar.
 
-- [ ] Ta bort `UmbracoOrderItemMigrationSurfaceController`  
+- [x] Ta bort `UmbracoOrderItemMigrationSurfaceController`  
   Migreringskontrollern är bara relevant medan det fortfarande finns data kvar i Umbraco.
 
 ## Loggning
