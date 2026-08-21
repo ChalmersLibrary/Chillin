@@ -1,5 +1,6 @@
 using Chalmers.ILL.Configuration;
 using Chalmers.ILL.Connections;
+using Chalmers.ILL.DependencyResolution;
 using Chalmers.ILL.Mail;
 using Chalmers.ILL.MediaItems;
 using Chalmers.ILL.Members;
@@ -18,10 +19,6 @@ using System;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Mvc;
-using Umbraco.Core;
-using Umbraco.Core.Services;
-using Umbraco.Web;
-using Unity.Mvc4;
 
 namespace Chalmers.ILL
 {
@@ -118,8 +115,8 @@ namespace Chalmers.ILL
         public static IUnityContainer Initialise()
         {
             var container = BuildUnityContainer();
-            GlobalConfiguration.Configuration.DependencyResolver = new Unity.WebApi.UnityDependencyResolver(container);
-            DependencyResolver.SetResolver(new UnityDependencyResolver(container));
+            GlobalConfiguration.Configuration.DependencyResolver = new UnityWebApiDependencyResolver(container);
+            DependencyResolver.SetResolver(new UnityMvcDependencyResolver(container));
 
             return container;
         }
@@ -142,8 +139,6 @@ namespace Chalmers.ILL
             elasticClientSettings.DefaultIndex(config.ElasticSearchIndex);
             var elasticClient = new ElasticClient(elasticClientSettings);
 
-            container.RegisterInstance(typeof(IContentService), ApplicationContext.Current.Services.ContentService);
-            container.RegisterInstance(typeof(IMediaService), ApplicationContext.Current.Services.MediaService);
             container.RegisterInstance<IElasticClient>(elasticClient);
             container.RegisterInstance(new HttpClient());
 
@@ -204,7 +199,6 @@ namespace Chalmers.ILL
             orderItemManager.SetNotifier(notifier);
 
             // Hook up more stuff
-            container.RegisterInstance(typeof(UmbracoContext), UmbracoContext.Current);
             container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
             container.RegisterInstance(typeof(INotifier), notifier);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);

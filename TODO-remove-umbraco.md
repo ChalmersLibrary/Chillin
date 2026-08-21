@@ -59,7 +59,7 @@ men följande beroenden kvarstår.
 
 ## Bootstrapper & Application startup
 
-- [ ] Uppdatera `Bootstrapper.cs`  
+- [x] Uppdatera `Bootstrapper.cs`  
   Ta bort `ApplicationContext.Current.Services`, `UmbracoContext.Current` och Unity.Mvc4/Unity.WebApi;
   ersätt med standard DI-uppstart.
 

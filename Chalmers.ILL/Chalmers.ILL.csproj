@@ -314,12 +314,6 @@
     <Reference Include="UmbracoExamine">
       <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\UmbracoExamine.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Mvc4">
-      <HintPath>..\packages\Unity.Mvc4.1.4.0.0\lib\net45\Unity.Mvc4.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.WebApi">
-      <HintPath>..\packages\Unity.WebAPI.5.1\lib\net45\Unity.WebApi.dll</HintPath>
-    </Reference>
     <Reference Include="UrlRewritingNet.UrlRewriter">
       <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\UrlRewritingNet.UrlRewriter.dll</HintPath>
     </Reference>
@@ -454,6 +448,8 @@
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Configuration\DefaultChillinConfiguration.cs" />
+    <Compile Include="DependencyResolution\UnityMvcDependencyResolver.cs" />
+    <Compile Include="DependencyResolution\UnityWebApiDependencyResolver.cs" />
     <Compile Include="Configuration\IConfiguration.cs" />
     <Compile Include="Connections\FolioConnection.cs" />
     <Compile Include="Connections\IFolioConnection.cs" />
