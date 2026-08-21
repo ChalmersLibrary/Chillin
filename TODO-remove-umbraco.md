@@ -63,7 +63,7 @@ men följande beroenden kvarstår.
   Ta bort `ApplicationContext.Current.Services`, `UmbracoContext.Current` och Unity.Mvc4/Unity.WebApi;
   ersätt med standard DI-uppstart.
 
-- [ ] Ta bort Umbraco-koppling i `Global.asax` och pre-build-steget i `Chalmers.ILL.csproj`  
+- [x] Ta bort Umbraco-koppling i `Global.asax` och pre-build-steget i `Chalmers.ILL.csproj`  
   Pre-build xcopy:ar UmbracoFiles/Content från packages-mappen in i projektet.
 
 ## Projekt att ta bort
