@@ -79,10 +79,11 @@ men följande beroenden kvarstår.
   `ClientDependency.config` och `UrlRewriting.config` är borttagna (samt motsvarande `<Content Include>`
   i `Chalmers.ILL.csproj` och `urlrewritingnet`-sektionen/modulregistreringen i `Web.config`).
 
-- [ ] Ta bort `ExamineSettings.config` / `ExamineIndex.config`  
-  Kan inte tas bort ännu: `MaintenanceSurfaceController.cs` och `StatisticsSurfaceController.cs`
-  anropar fortfarande `ExamineManager.Instance` direkt, och båda filerna läses via `configSource`
-  i `Web.config`. Förutsätter att den Examine-baserade koden i dessa controllers tas bort/ersätts först.
+- [x] Ta bort `ExamineSettings.config` / `ExamineIndex.config`  
+  `MaintenanceSurfaceController.optimizeIndexes` (optimerade bara det oanvända Umbraco-contentindexet)
+  togs bort. `StatisticsSurfaceController.GetAvailableValues` söker nu i `IOrderItemSearcher`
+  (ElasticSearch) istället för `ExamineManager.Instance`. Config-filerna och deras `configSource`-
+  referenser i `Web.config`/`Chalmers.ILL.csproj` är borttagna.
 
 ## NuGet-paket
 

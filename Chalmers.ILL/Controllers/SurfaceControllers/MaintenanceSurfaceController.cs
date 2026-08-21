@@ -1,12 +1,6 @@
 ﻿using Chalmers.ILL.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web.Mvc;
-using Newtonsoft.Json;
-using Examine;
-using UmbracoExamine;
-using System.Configuration;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.MediaItems;
 
@@ -38,8 +32,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             removeOldMediaItems(json);
 
-            optimizeIndexes(json);
-
             if (json.Success)
             {
                 json.Message = "All maintenance jobs ran successfully.";
@@ -64,31 +56,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 _log.Error("Failed to remove old media items.", e);
                 res.Success = false;
                 res.Message += "Failed to remove old media items. ";
-            }
-        }
-
-        private void optimizeIndexes(ResultResponse res)
-        {
-            try
-            {
-                foreach (var orderItemsIndexer in ExamineManager.Instance.IndexProviderCollection)
-                {
-                    UmbracoContentIndexer umbracoOrderItemsIndexer = null;
-
-                    if (orderItemsIndexer is UmbracoContentIndexer)
-                    {
-                        umbracoOrderItemsIndexer = (UmbracoContentIndexer)orderItemsIndexer;
-                        umbracoOrderItemsIndexer.OptimizeIndex();
-                    }
-
-                    res.Success &= true;
-                }
-            }
-            catch (Exception e)
-            {
-                _log.Error("Failed to optimize indexes.", e);
-                res.Success = false;
-                res.Message += "Failed to optimize indexes. ";
             }
         }
     }

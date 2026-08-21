@@ -128,9 +128,11 @@
     <Compile Include="Mail\MailBodyFixerTest.cs" />
     <Compile Include="Controllers\MediaItemControllersTest.cs" />
     <Compile Include="Controllers\ChillinTextSurfaceControllerTest.cs" />
+    <Compile Include="Controllers\MaintenanceSurfaceControllerTest.cs" />
     <Compile Include="Controllers\OrderItemSurfaceControllerTest.cs" />
     <Compile Include="Controllers\PageControllersTest.cs" />
     <Compile Include="Controllers\RoutingTest.cs" />
+    <Compile Include="Controllers\StatisticsSurfaceControllerTest.cs" />
     <Compile Include="Members\MemberInfoManagerTest.cs" />
     <Compile Include="OrderItems\BulkDataManagerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

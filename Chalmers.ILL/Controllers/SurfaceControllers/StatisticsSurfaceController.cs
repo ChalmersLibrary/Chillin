@@ -7,8 +7,6 @@ using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using umbraco.cms.businesslogic.member;
 using System.Configuration;
-using Examine;
-using UmbracoExamine;
 using Newtonsoft.Json;
 using System.Globalization;
 using Chalmers.ILL.Statistics;
@@ -59,7 +57,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         /// <summary>
-        /// Get available values from the ChalmersILLOrderItemsSearcher for a list of keys.
+        /// Get available values from the order item searcher for a list of keys.
         /// </summary>
         /// <param name="req">The KeyValueRequest specifying what keys we want to fetch values for.</param>
         /// <returns>JsonResult containing the list of keys and the fetched available values for each key.</returns>
@@ -71,15 +69,18 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-                var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-                var allOrders = searcher.Search(searchCriteria.RawQuery("nodeTypeAlias:ChalmersILLOrderItem"));
+                var allOrders = _orderItemSearcher.Search("*");
 
                 foreach (var k in req.Keys) {
                     var keyValues = new KeyValues();
                     keyValues.Key = k;
                     SetPrettyName(keyValues);
-                    keyValues.AvailableValues = allOrders.Where(x => x.Fields.ContainsKey(k)).Select(x => x.Fields[k]).Distinct().OrderBy(x => x).ToList();
+                    keyValues.AvailableValues = allOrders
+                        .Select(x => GetFieldValue(x, k))
+                        .Where(v => !string.IsNullOrEmpty(v))
+                        .Distinct()
+                        .OrderBy(x => x)
+                        .ToList();
                     res.KeyValues.Add(keyValues);
                 }
 
@@ -96,6 +97,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         #region Private
+
+        private static string GetFieldValue(OrderItemModel item, string key)
+        {
+            if (key == "pType")
+            {
+                return item.SierraInfo?.ptype.ToString();
+            }
+            else if (key == "HomeLibrary")
+            {
+                return item.SierraInfo?.home_library;
+            }
+
+            return item.GetType().GetProperty(key)?.GetValue(item) as string;
+        }
 
         private void SetPrettyName(KeyValues kv)
         {

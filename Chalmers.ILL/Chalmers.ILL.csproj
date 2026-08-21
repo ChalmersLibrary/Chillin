@@ -340,12 +340,6 @@
     <Content Include="Config\404handlers.config" />
     <Content Include="Config\BaseRestExtensions.config" />
     <Content Include="Config\EmbeddedMedia.config" />
-    <Content Include="Config\ExamineIndex.config">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Config\ExamineSettings.config">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="Config\feedProxy.config" />
     <Content Include="Config\FileSystemProviders.config" />
     <Content Include="Config\log4net.config">
@@ -716,7 +710,6 @@
     <Compile Include="Mail\ExchangeMailWebApi.cs" />
     <Compile Include="Templates\ElasticsearchTemplateService.cs" />
     <Compile Include="Templates\ITemplateService.cs" />
-    <Compile Include="Templates\TemplateService.cs" />
     <Compile Include="Templates\TemplateServiceException.cs" />
     <Compile Include="UmbracoApi\IChillinOrderConfiguration.cs" />
     <Compile Include="UmbracoApi\ChillinOrderConfiguration.cs" />
