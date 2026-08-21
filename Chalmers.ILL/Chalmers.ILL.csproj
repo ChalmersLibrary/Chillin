@@ -339,8 +339,6 @@
     <Content Include="bin\x86\sqlcese40.dll" />
     <Content Include="Config\404handlers.config" />
     <Content Include="Config\BaseRestExtensions.config" />
-    <Content Include="Config\ClientDependency.config" />
-    <Content Include="Config\Dashboard.config" />
     <Content Include="Config\EmbeddedMedia.config" />
     <Content Include="Config\ExamineIndex.config">
       <SubType>Designer</SubType>
@@ -358,10 +356,6 @@
     <Content Include="Config\scripting.config" />
     <Content Include="Config\Skinning.config" />
     <Content Include="Config\tinyMceConfig.config" />
-    <Content Include="Config\umbracoSettings.config">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Config\UrlRewriting.config" />
     <Content Include="Config\xsltExtensions.config" />
     <Content Include="Css\chalmers.ill.print.css" />
     <Content Include="Css\dummy.txt" />
@@ -430,8 +424,6 @@
     <Content Include="Views\ChalmersILLStatisticsPage.cshtml" />
     <Content Include="Xslt\dummy.txt" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.PatronData.cshtml" />
-    <Content Include="Config\trees.config" />
-    <Content Include="Config\applications.config" />
     <Content Include="bin\x86\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
     <Content Include="bin\amd64\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
   </ItemGroup>

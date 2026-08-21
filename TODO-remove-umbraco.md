@@ -74,9 +74,15 @@ men följande beroenden kvarstår.
 
 ## Konfiguration
 
-- [ ] Ta bort Umbraco-konfigurationsfiler  
-  `Config/umbracoSettings.config`, `ExamineIndex.config`, `ExamineSettings.config`, `Dashboard.config`,
-  `trees.config`, `applications.config`, `ClientDependency.config`, `UrlRewriting.config` m.fl.
+- [x] Ta bort Umbraco-konfigurationsfiler utan levande kodberoenden  
+  `umbracoSettings.config`, `Dashboard.config`, `trees.config`, `applications.config`,
+  `ClientDependency.config` och `UrlRewriting.config` är borttagna (samt motsvarande `<Content Include>`
+  i `Chalmers.ILL.csproj` och `urlrewritingnet`-sektionen/modulregistreringen i `Web.config`).
+
+- [ ] Ta bort `ExamineSettings.config` / `ExamineIndex.config`  
+  Kan inte tas bort ännu: `MaintenanceSurfaceController.cs` och `StatisticsSurfaceController.cs`
+  anropar fortfarande `ExamineManager.Instance` direkt, och båda filerna läses via `configSource`
+  i `Web.config`. Förutsätter att den Examine-baserade koden i dessa controllers tas bort/ersätts först.
 
 ## NuGet-paket
 
