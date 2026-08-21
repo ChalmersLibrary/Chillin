@@ -68,7 +68,7 @@ men följande beroenden kvarstår.
 
 ## Projekt att ta bort
 
-- [ ] Ta bort hela projektet `Chalmers.ILL.PackageActions`  
+- [x] Ta bort hela projektet `Chalmers.ILL.PackageActions`  
   `ChillinInitialConfiguration.cs` implementerar `IPackageAction` och sätter upp Umbraco content-träd,
   member groups, media-mappar och relationstyper.
 
