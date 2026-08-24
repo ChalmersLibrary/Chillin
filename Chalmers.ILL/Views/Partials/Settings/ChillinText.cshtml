@@ -23,7 +23,7 @@
 <script type="text/javascript">
     function save() {
         lockScreen();
-        $.post("/umbraco/surface/ChillinTextSurface/Save", {
+        $.post("/ChillinTextSurface/Save", {
             id: "@Model.Id",
             chillinText: JSON.stringify({
                 checkInNote: $("#checkInNote").val(),

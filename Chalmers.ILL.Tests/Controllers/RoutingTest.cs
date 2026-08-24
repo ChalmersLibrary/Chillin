@@ -48,6 +48,19 @@ namespace Chalmers.ILL.Tests.Controllers
         }
 
         [TestMethod]
+        public void LegacyUmbracoSurfaceAliasRoute_MapsToSameControllerAndAction()
+        {
+            var routes = new RouteCollection();
+            RouteConfig.RegisterRoutes(routes);
+
+            var routeData = GetRouteData(routes, "http://localhost/umbraco/surface/OrderItemReceivedAtBranchSurface/RenderResponse");
+
+            Assert.IsNotNull(routeData);
+            Assert.AreEqual("OrderItemReceivedAtBranchSurface", routeData.Values["controller"]);
+            Assert.AreEqual("RenderResponse", routeData.Values["action"]);
+        }
+
+        [TestMethod]
         public void DefaultRoute_AxdResource_UsesStopRoutingHandler()
         {
             var routes = new RouteCollection();

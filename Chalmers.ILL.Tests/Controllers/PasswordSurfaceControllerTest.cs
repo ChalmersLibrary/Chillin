@@ -33,7 +33,7 @@ namespace Chalmers.ILL.Tests.Controllers
 
             controller.ChangePassword(new Models.PartialPage.Settings.ChangePassword { CurrentPassword = "" });
 
-            StringAssert.Contains(fakeResponse.RedirectLocation, "error=invalid-model");
+            Assert.AreEqual("/ChalmersILLSettingsPage?error=invalid-model", fakeResponse.RedirectLocation);
         }
 
         private static FakeHttpResponse SetHttpContext(Controller controller)

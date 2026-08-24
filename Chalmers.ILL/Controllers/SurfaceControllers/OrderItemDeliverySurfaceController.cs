@@ -114,7 +114,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             // Generate QR code which should be printed on the slip and scanned to register that the article has been received at branch
             QRCodeGenerator qrGenerator = new QRCodeGenerator();
-            QRCodeData qrCodeData = qrGenerator.CreateQrCode(_config.BaseUrl + "/umbraco/surface/OrderItemReceivedAtBranchSurface/RenderResponse?nodeId=" + pageModel.OrderItem.NodeId, QRCodeGenerator.ECCLevel.Q);
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(_config.BaseUrl + "/OrderItemReceivedAtBranchSurface/RenderResponse?nodeId=" + pageModel.OrderItem.NodeId, QRCodeGenerator.ECCLevel.Q);
             QRCode qrCode = new QRCode(qrCodeData);
             Bitmap qrCodeImage = qrCode.GetGraphic(4);
             using (MemoryStream stream = new MemoryStream())

@@ -34,7 +34,7 @@
 
     function claim() {
         lockScreen();
-        $.post("/umbraco/surface/OrderItemClaimSurface/ClaimItem", {
+        $.post("/OrderItemClaimSurface/ClaimItem", {
             packJson: JSON.stringify({
                 nodeId: @Model.OrderItem.NodeId,
                 dueDate: $("#dueDate").val(),

@@ -83,17 +83,82 @@ men följande beroenden kvarstår.
 - [x] Migrera vyerna från Umbraco Razor-mallar till standard MVC-vyer  
   `Views/*.cshtml` och `Views/Partials/*.cshtml` använder Umbraco-specifika modeller (`RenderModel`) och `@Umbraco`-helper.
 
-- [ ] Ta bort kvarvarande Umbraco-beroenden i två vyer  
-  Upptäckt under SuperAdmin-arbetet (se "Autentisering & Membership" ovan): `Views/Partials/Settings/ChangePassword.cshtml`
-  och `Views/Partials/Chalmers.ILL.ChangePassword.cshtml` anropar fortfarande `Html.BeginUmbracoForm<T>()` —
-  en riktig Umbraco-helper som kräver `Umbraco.Web`. Byt ut mot ett vanligt `Html.BeginForm(...)`
-  (se `Views/Partials/Settings/MemberAdmin.cshtml` för hur nyare vyer i appen bygger formulär/AJAX-anrop
-  utan Umbraco-helpers). Dessutom anropar `Views/Partials/Settings/EditTemplates.cshtml`s inbäddade JS
-  den gamla Umbraco-URL-routen `/umbraco/surface/TemplatesSurface/...` istället för den nya
-  `/TemplatesSurface/...`-formen som resten av appen migrerats till — byt dessa anrop till den nya formen.
-  Detta innebär att `UmbracoModule` i `Web.config` sannolikt fortfarande krävs för att den gamla routen
-  ska fungera; kontrollera att inget annat beror på den innan `UmbracoModule` tas bort. Måste städas
-  innan `UmbracoCms`-paketen kan tas bort (se "NuGet-paket" nedan).
+- [x] Ta bort kvarvarande Umbraco-beroenden i två vyer  
+  `Views/Partials/Settings/ChangePassword.cshtml` anropade `Html.BeginUmbracoForm<PasswordSurfaceController>(...)`
+  — en riktig Umbraco-helper (kräver `Umbraco.Web`), och med en generisk type-constraint
+  (`where TController : SurfaceController`) som `PasswordSurfaceController` inte längre uppfyller
+  sedan SurfaceController-bytet tidigare i listan. Eftersom Razor-vyer bara kompileras vid första
+  anropet (inget `MvcBuildViews` i csprojen) hade detta sannolikt gått obemärkt förbi som ett
+  runtime-fel — sidan "Byt lösenord" i Inställningar var med stor sannolikhet trasig. Ersatt med
+  vanligt `Html.BeginForm("ChangePassword", "PasswordSurface", FormMethod.Post, ...)`.
+  `PasswordSurfaceController.ChangePassword` byggde dessutom sina redirects på
+  `Request.Url.AbsolutePath` (ett Umbraco-trick för att posta till en "snygg" URL och landa
+  tillbaka på samma sida) — pekade på `/bestaellningar/instaellningar`, en URL som inte matchar
+  dagens `RouteConfig` alls. Redirects pekar nu istället uttryckligen på `/ChalmersILLSettingsPage`.
+  `Views/Partials/Chalmers.ILL.ChangePassword.cshtml` (och dess modell `PasswordModel.cs`) var
+  dödkod utan anropare — borttagna helt, liknande `GetMemberSurfaceController` tidigare.
+  `Views/Partials/Settings/EditTemplates.cshtml`s inbäddade JS bytte från den gamla
+  `/umbraco/surface/TemplatesSurface/...`-routen till `/TemplatesSurface/...`, som resten av
+  Inställningar-sidan redan använder. De fyra `Umbraco.*`-namnrymderna i `Views/Web.config`s
+  globala Razor-`<namespaces>` togs bort — inget `.cshtml`-fil använder dem längre.
+
+  **OBS — mycket större kvarstående fynd, ej åtgärdat:** samma gamla `/umbraco/surface/...`-rutt
+  används fortfarande av **12 andra vyer**, bland dem centrala orderhanteringsflöden
+  (`Chalmers.ILL.Action.Return.cshtml`, `...PatronData.cshtml`, `...Delivery.cshtml`,
+  `...Claim.cshtml`, `...Mail.cshtml`, `...Provider.cshtml`, `...ProviderReturnDate.cshtml`,
+  `...PatronReturnDate.cshtml`, `DeliveryType/ArticleByEmail.cshtml`,
+  `DeliveryType/ArticleByMailOrInternalMail.cshtml`, `Settings/ChillinText.cshtml`,
+  `Settings/ModifyProviderData.cshtml`). Att dessa fortfarande fungerar (appen är i drift) tyder
+  på att `UmbracoModule` i `Web.config` fortfarande aktivt routar `/umbraco/surface/*`-anrop till
+  rätt controller/action, trots att `SurfaceController`-basklassen är borttagen — dvs. en dold,
+  fungerande beroendekedja till Umbraco som blockerar att `UmbracoModule` tas bort. Det här är ett
+  betydligt större och riskablare jobb än vyerna ovan (rör kärnfunktionalitet, inte bara
+  Inställningar) och bör vara en egen TODO-punkt/avstämning innan `UmbracoCms`-paketen tas bort
+  (se "NuGet-paket" nedan).
+
+- [x] Migrera de återstående 12 vyerna bort från `/umbraco/surface/`-routen  
+  Bytte `/umbraco/surface/{Controller}Surface/{Action}` till `/{Controller}Surface/{Action}` i
+  samtliga 12 (14 anropsställen): `Chalmers.ILL.Action.Return/PatronData/Delivery/Claim/Mail/
+  Provider/ProviderReturnDate/PatronReturnDate.cshtml`, `DeliveryType/ArticleByEmail.cshtml`,
+  `DeliveryType/ArticleByMailOrInternalMail.cshtml`, `Settings/ChillinText.cshtml`,
+  `Settings/ModifyProviderData.cshtml`. Byggt och testat grönt (dessa ändringar rör bara
+  inbäddad JS, ingen `.cs`-kod, så testsviten är opåverkad) — men **ej verifierat i webbläsare**,
+  se stora fyndet nedan som gör detta mer osäkert än väntat.
+
+  **OBS — mycket större kvarstående fynd, ej åtgärdat, INTE samma sak som ovan:**
+  `Scripts/chalmers.ill.js` — appens huvudsakliga JS-fil — har **~44 anrop** till samma gamla
+  `/umbraco/surface/...`-rutt, och täcker i praktiken hela orderhanteringsgränssnittet: låsa/låsa
+  upp order, importera dokument, sätta status/typ/leveransbibliotek, leverans, reklamation, mail,
+  patrondata, provider, ta emot bok, loggposter m.m. Dessutom bakar
+  `OrderItemDeliverySurfaceController.cs` (rad 117) in samma gamla URL i en **QR-kod som skrivs ut
+  på en fysisk följesedel** (`OrderItemReceivedAtBranchSurface/RenderResponse`) — skannas senare
+  när boken anländer till en filial. Till skillnad från `ChangePassword`-buggen och de 12 vyerna
+  ovan är det här kärnfunktionalitet i daglig drift, så det är osannolikt att den är trasig —
+  vilket gör det troligt att `UmbracoModule` (fortfarande registrerad i `Web.config`) aktivt
+  routar `/umbraco/surface/*` oavsett `SurfaceController`-arv. Detta är en väsentligt större och
+  känsligare ändring än vyerna ovan: 44 anropsställen i en fil som allt bygger på, plus redan
+  utskrivna fysiska följesedlar vars QR-koder pekar på den gamla URL:en och som inte kan bytas ut
+  i efterhand. Kräver en medveten avstämning (och sannolikt manuell verifiering i webbläsare,
+  inte bara textersättning) innan den rörs — se separat punkt nedan.
+
+- [x] Migrera `chalmers.ill.js` och QR-kodsgenereringen bort från `/umbraco/surface/`-routen  
+  Bytte alla ~44 `/umbraco/surface/{Controller}Surface/{Action}`-anrop i `Scripts/chalmers.ill.js`
+  till `/{Controller}Surface/{Action}`, samma form som resten av appen. QR-kodsgenereringen i
+  `OrderItemDeliverySurfaceController.cs` (rad 117) genererar nu också den nya URL:en för
+  **nya** följesedlar. För att redan utskrivna följesedlar (fysiska, kan inte bytas ut) ska
+  fortsätta fungera lades en explicit alias-route till i `RouteConfig.cs`:
+  `umbraco/surface/{controller}/{action}/{id}` → samma controller/action som den vanliga
+  `{controller}/{action}/{id}`-routen. Eftersom kontroller- och actionnamnen inte ändrats av
+  Umbraco-borttagningen (bara basklassen) räcker en generisk alias-route för alla ~44+14
+  anropsställen som fanns, snarare än att särbehandla QR-koden. Alias-routen är avsedd att vara
+  kvar permanent (eller tills man är säker på att inga fysiska följesedlar med den gamla URL:en
+  längre är i cirkulation) — det är den, inte `UmbracoModule`, som nu håller gamla QR-koder vid
+  liv. Karaktäriseringstest tillagt i `RoutingTest.cs`.
+
+  **OBS — ej verifierat i webbläsare:** detta rör kärnfunktionalitet i appen (orderhantering)
+  och kunde inte köras/klickas igenom i denna miljö (kräver IIS Express, LocalDB, Elasticsearch
+  m.m.). Byggt och testat grönt, men bör stämmas av manuellt i en riktig miljö innan man litar på
+  att `UmbracoModule` verkligen kan tas bort.
 
 ## IUmbracoWrapper
 

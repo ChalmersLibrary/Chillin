@@ -114,7 +114,7 @@
         var activeDeliveryType = $("#active-delivery-type").data("delivery-type").trim();
         var apiMethod = activeDeliveryType === "post" ? "DeliverByPost" : "DeliverByInternpost";
         lockScreen();
-        $.post("/umbraco/surface/OrderItemDeliverySurface/" + apiMethod, {
+        $.post("/OrderItemDeliverySurface/" + apiMethod, {
             packJson: JSON.stringify({
                 nodeId: @Model.OrderItem.NodeId,
                 logEntry: $('#log-message').val(),

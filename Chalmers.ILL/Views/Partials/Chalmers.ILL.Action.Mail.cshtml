@@ -231,7 +231,7 @@
             } else {
                 var templateData = "";
 
-                $.getJSON("/umbraco/surface/TemplatesSurface/GetPopulatedTemplateData", { templateId:templateId, orderItemNodeId:@Model.OrderItem.NodeId })
+                $.getJSON("/TemplatesSurface/GetPopulatedTemplateData", { templateId:templateId, orderItemNodeId:@Model.OrderItem.NodeId })
                     .done(function (json) {
                         if (json.Success) {
                             $("#message").val(json.Data + $("#historyStorage").html())

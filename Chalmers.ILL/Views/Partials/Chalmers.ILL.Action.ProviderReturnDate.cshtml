@@ -38,7 +38,7 @@
     function changeProviderReturnDate() {
         lockScreen();
         let previousStatus = @Model.OrderItem.Status.Substring(0, 2)
-        $.post("/umbraco/surface/OrderItemProviderReturnDateSurface/ChangeReturnDate", {
+        $.post("/OrderItemProviderReturnDateSurface/ChangeReturnDate", {
             packJson: JSON.stringify({
                 nodeId: @Model.OrderItem.NodeId,
                 logMsg: $("#log-message").val(),

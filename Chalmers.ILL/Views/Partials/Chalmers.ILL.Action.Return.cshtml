@@ -19,7 +19,7 @@
         function returnItem() {
             lockScreen();
             let previousStatus = @Model.OrderItem.Status.Substring(0, 2)
-            $.post("/umbraco/surface/OrderItemReturnSurface/ReturnItem",
+            $.post("/OrderItemReturnSurface/ReturnItem",
                 {
                     nodeId: "@Model.OrderItem.NodeId",
                     bookId: "@Model.OrderItem.BookId",

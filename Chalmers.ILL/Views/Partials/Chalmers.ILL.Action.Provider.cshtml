@@ -73,7 +73,7 @@
 
         function updateFollowUpDate(providerName) {
             $("#set-order-item-provider-button").attr("disabled", "disabled");
-            $.get("/umbraco/surface/ProviderDataSurface/GetDeliveryTimeInHoursForProvider", {
+            $.get("/ProviderDataSurface/GetDeliveryTimeInHoursForProvider", {
                 providerName: providerName
             }).done(function (suggestedDeliveryTimeInHours) {
                 $("#set-order-item-provider-button").removeAttr("disabled");

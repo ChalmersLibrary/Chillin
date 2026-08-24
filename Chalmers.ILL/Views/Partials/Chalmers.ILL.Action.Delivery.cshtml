@@ -111,7 +111,7 @@
 
     function renderDeliveryTypePartial(renderApiMethod, type) {
         $("#loading-delivery-type-partial-view").show();
-        $("#delivery-type-view").html("").show().load("/umbraco/surface/OrderItemDeliverySurface/" + renderApiMethod + "?nodeId=" + @Model.OrderItem.NodeId + "&deliveryType=" + type,
+        $("#delivery-type-view").html("").show().load("/OrderItemDeliverySurface/" + renderApiMethod + "?nodeId=" + @Model.OrderItem.NodeId + "&deliveryType=" + type,
             function (responseText, textStatus, req) {
                 $("#loading-delivery-type-partial-view").hide();
             }

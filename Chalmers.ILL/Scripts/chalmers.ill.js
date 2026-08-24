@@ -135,7 +135,7 @@ $(function () {
         // First unlock all visible locked items
         $(".illedit[data-locked-by-memberid]").each(function () {
             var node = $(this);
-            $.getJSON("/umbraco/surface/OrderItemSurface/UnlockOrderItem?nodeId=" + node.attr("id"), function (json) {
+            $.getJSON("/OrderItemSurface/UnlockOrderItem?nodeId=" + node.attr("id"), function (json) {
                 if (json.Success) {
                     node.removeAttr("data-locked-by-memberid");
                 }
@@ -147,7 +147,7 @@ $(function () {
 
             // Discover all remaining locks for Current Member
         var lockedNodes = new Array();
-        $.getJSON("/umbraco/surface/OrderItemSurface/GetLocksForCurrentMember", function (json) {
+        $.getJSON("/OrderItemSurface/GetLocksForCurrentMember", function (json) {
             if (json.Success) {
                 $.each(json.List, function (index, lock) {
                     lockedNodes.push(lock);
@@ -159,7 +159,7 @@ $(function () {
         }).done(function () {
             if (lockedNodes && lockedNodes.length) {
                 $.each(lockedNodes, function (index, lock) {
-                    $.getJSON("/umbraco/surface/OrderItemSurface/UnlockOrderItem?nodeId=" + lock.NodeId, function (json) {
+                    $.getJSON("/OrderItemSurface/UnlockOrderItem?nodeId=" + lock.NodeId, function (json) {
                         if (!json.Success) {
                             alert(json.Message);
                     }
@@ -196,7 +196,7 @@ $(function () {
             // Unlock the OrderItems where we have lock
             $(".illedit[data-locked-by-memberid]").each(function () {
                 var node = $(this);
-                $.getJSON("/umbraco/surface/OrderItemSurface/UnlockOrderItem?nodeId=" + node.attr("id"), function (json) {
+                $.getJSON("/OrderItemSurface/UnlockOrderItem?nodeId=" + node.attr("id"), function (json) {
                     if (json.Success) {
                         node.removeAttr("data-locked-by-memberid");
                     }
@@ -271,7 +271,7 @@ function closeOrderItem(elem)
     // Unlock the OrderItems where we have lock
     if ($(elem).attr("data-locked-by-memberid")) {
         var node = $(elem);
-        $.getJSON("/umbraco/surface/OrderItemSurface/UnlockOrderItem?nodeId=" + node.attr("id"), function (json) {
+        $.getJSON("/OrderItemSurface/UnlockOrderItem?nodeId=" + node.attr("id"), function (json) {
             if (json.Success) {
                 node.removeAttr("data-locked-by-memberid");
             }
@@ -317,7 +317,7 @@ function addSaveDocumentButton(id, text) {
 
 function saveDocument(nodeId, url) {
     lockScreen();
-    $.post("/umbraco/surface/ImportDocumentSurface/ImportFromUrl", { orderItemNodeId: nodeId, url: url }).done(function (json) {
+    $.post("/ImportDocumentSurface/ImportFromUrl", { orderItemNodeId: nodeId, url: url }).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(nodeId);
         }
@@ -333,7 +333,7 @@ function saveDocument(nodeId, url) {
 
 function uploadDocument(nodeId, name, data) {
     lockScreen();
-    $.post("/umbraco/surface/ImportDocumentSurface/ImportFromData", { orderItemNodeId: nodeId, filename: name, data: data }).done(function (json) {
+    $.post("/ImportDocumentSurface/ImportFromData", { orderItemNodeId: nodeId, filename: name, data: data }).done(function (json) {
         if (json.Success) {
             var msgArr = json.Message.split(";", 2);
             if ($(".drm-warning").length > 0) {
@@ -366,7 +366,7 @@ function uploadDocument(nodeId, name, data) {
 
 function takeOverLockedOrderItem(id)
 {
-    $.getJSON("/umbraco/surface/OrderItemSurface/TakeOverLockedOrderItem?nodeId=" + id, function (json) {
+    $.getJSON("/OrderItemSurface/TakeOverLockedOrderItem?nodeId=" + id, function (json) {
         alert(json.Message);
         if (json.Success) {
             loadOrderItemDetails(id);
@@ -379,7 +379,7 @@ function takeOverLockedOrderItem(id)
 
 function loadOrderItemDetails(id, cb)
 {
-    $('#edit-' + id + '.ajax-partial-view-content').load("/umbraco/surface/OrderItemSurface/RenderOrderItem?nodeId=" + id,
+    $('#edit-' + id + '.ajax-partial-view-content').load("/OrderItemSurface/RenderOrderItem?nodeId=" + id,
         function (responseText, textStatus, req) {
             // req.status:403, req.statusText:Forbidden
             if (req.status != 200) {
@@ -550,7 +550,7 @@ function setCounterOrHide(elem, count) {
 // Load OrderItem Summary (first row in list)
 function loadOrderItemSummary(id)
 {
-    $.getJSON("/umbraco/surface/OrderItemSurface/GetOrderItem?nodeId=" + id, function (json) {
+    $.getJSON("/OrderItemSurface/GetOrderItem?nodeId=" + id, function (json) {
         if (json.NodeId && $("#" + json.NodeId).length > 0) {
             // Move this somewhere else...
             var purchaseLibraries = ['HB', 'ACE'];
@@ -627,7 +627,7 @@ function loadOrderItemSummary(id)
 
 function setOrderItemStatus(node, status) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemStatusSurface/SetOrderItemStatus?orderNodeId=" + node + "&statusId=" + status, function (json) {
+    $.getJSON("/OrderItemStatusSurface/SetOrderItemStatus?orderNodeId=" + node + "&statusId=" + status, function (json) {
         if (json.Success) {
             loadOrderItemDetails(node);
         }
@@ -643,7 +643,7 @@ function setOrderItemStatus(node, status) {
 
 function setOrderItemStatusAndCancellationReason(node, status, reason) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemStatusSurface/SetOrderItemStatus?orderNodeId=" + node + "&statusId=" + status + "&cancellationReasonId=" + reason, function (json) {
+    $.getJSON("/OrderItemStatusSurface/SetOrderItemStatus?orderNodeId=" + node + "&statusId=" + status + "&cancellationReasonId=" + reason, function (json) {
         if (json.Success) {
             loadOrderItemDetails(node);
         }
@@ -659,7 +659,7 @@ function setOrderItemStatusAndCancellationReason(node, status, reason) {
 
 function setOrderItemStatusAndPurchasedMaterial(node, status, material) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemStatusSurface/SetOrderItemStatus?orderNodeId=" + node + "&statusId=" + status + "&purchasedMaterialId=" + material, function (json) {
+    $.getJSON("/OrderItemStatusSurface/SetOrderItemStatus?orderNodeId=" + node + "&statusId=" + status + "&purchasedMaterialId=" + material, function (json) {
         if (json.Success) {
             loadOrderItemDetails(node);
         }
@@ -677,7 +677,7 @@ function setOrderItemStatusAndPurchasedMaterial(node, status, material) {
 
 function setOrderItemType(node, type) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemTypeSurface/SetOrderItemType?orderNodeId=" + node + "&typeId=" + type, function (json) {
+    $.getJSON("/OrderItemTypeSurface/SetOrderItemType?orderNodeId=" + node + "&typeId=" + type, function (json) {
         if (json.Success) {
             loadOrderItemDetails(node);
         }
@@ -693,7 +693,7 @@ function setOrderItemType(node, type) {
 
 function makeDuplicate(node) {
     lockScreen();
-    $.post("/umbraco/surface/OrderItemDuplicateSurface/MakeDuplicate?orderNodeId=" + node, function (json) {
+    $.post("/OrderItemDuplicateSurface/MakeDuplicate?orderNodeId=" + node, function (json) {
         if (json.Success) {
             loadOrderItemDetails(node);
         }
@@ -709,7 +709,7 @@ function makeDuplicate(node) {
 
 function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemDeliveryLibrarySurface/SetOrderItemDeliveryLibrary?orderNodeId=" + node + "&deliveryLibraryId=" + deliveryLibrary, function (json) {
+    $.getJSON("/OrderItemDeliveryLibrarySurface/SetOrderItemDeliveryLibrary?orderNodeId=" + node + "&deliveryLibraryId=" + deliveryLibrary, function (json) {
         if (json.Success) {
             loadOrderItemDetails(node);
         }
@@ -725,7 +725,7 @@ function setOrderItemDeliveryLibrary(node, deliveryLibrary) {
 
 function setOrderItemPurchaseLibrary(node, purchaseLibrary) {
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemPurchaseLibrarySurface/SetOrderItemPurchaseLibrary?orderNodeId=" + node + "&purchaseLibrary=" + purchaseLibrary, function (json) {
+    $.getJSON("/OrderItemPurchaseLibrarySurface/SetOrderItemPurchaseLibrary?orderNodeId=" + node + "&purchaseLibrary=" + purchaseLibrary, function (json) {
         if (json.Success) {
             loadOrderItemDetails(node);
         }
@@ -741,7 +741,7 @@ function setOrderItemPurchaseLibrary(node, purchaseLibrary) {
 
 function setOrderItemArticleAvailableForPickup(node, maildata, logMsg) {
     lockScreen();
-    $.post("/umbraco/surface/OrderItemDeliverySurface/SetArticleAvailableForPickup", {
+    $.post("/OrderItemDeliverySurface/SetArticleAvailableForPickup", {
         packJson: JSON.stringify({
             nodeId: node,
             logMsg: logMsg,
@@ -763,7 +763,7 @@ function setOrderItemArticleAvailableForPickup(node, maildata, logMsg) {
 
 function TEMPsetOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, maildata, logMsg, readOnlyAtLibrary) {
     lockScreen();
-    $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceived", {
+    $.post("/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceived", {
         packJson: JSON.stringify({
             orderNodeId: node,
             bookId: bookId,
@@ -789,7 +789,7 @@ function TEMPsetOrderItemDeliveryReceived(node, bookId, dueDate, providerInforma
 
 function lendBook(id) {
   lockScreen();
-  $.post("/umbraco/surface/BookCirculationSurface/Loaned", {
+  $.post("/BookCirculationSurface/Loaned", {
     nodeId: id,
   }, function (json) {
     if (json.Success) {
@@ -806,7 +806,7 @@ function lendBook(id) {
 
 function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation, logMsg, readOnlyAtLibrary, title, orderId, pickUpServicePoint, folioUserId) {
   lockScreen();
-  $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceived", {
+  $.post("/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceived", {
     packJson: JSON.stringify({
       orderNodeId: node,
       bookId: bookId,
@@ -835,7 +835,7 @@ function setOrderItemDeliveryReceived(node, bookId, dueDate, providerInformation
 
 function setOrderItemDeliveryReceivedAtBranch(nodeId) {
     lockScreen();
-    $.post("/umbraco/surface/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceivedAtBranch", {
+    $.post("/OrderItemReceiveBookSurface/SetOrderItemDeliveryReceivedAtBranch", {
         nodeId: nodeId
     }, function (json) {
         if (json.Success) {
@@ -853,7 +853,7 @@ function setOrderItemDeliveryReceivedAtBranch(nodeId) {
 
 function loadLogItems(id)
 {
-    $.getJSON("/umbraco/surface/LogItemSurface/GetLogItems?nodeid="+id, function (data) {
+    $.getJSON("/LogItemSurface/GetLogItems?nodeid="+id, function (data) {
         $.each(data, function (item) {
             $('#log-' + id).append("<div class=\"row log-item\"><div class=\"col-sm-3\"><span class=\"log-createdate\">" + data[item].CreateDate + "</span> <span class=\"log-membername\">" + data[item].MemberName + "</span></div><div class=\"col-sm-1\"><span class=\"log-type\">" + data[item].Type + "</div><div class=\"col-sm-6\"><span class=\"log-message\">" + replaceURLWithHTMLLinks(data[item].Message) + "</span></div></div>");
         });
@@ -869,7 +869,7 @@ function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInf
 	if (typeof patronAccountActive !== "undefined" || confirm("Information från FOLIO om låntagarens konto är aktivt saknas. Vill du fortsätta med beställningen ändå?")) {
 		if (patronAccountActive || typeof patronAccountActive === "undefined" || confirm("Det ser ut som att låntagarens konto i FOLIO är inaktivt. Vill du fortsätta ändå?")) {
 			lockScreen();
-			$.getJSON("/umbraco/surface/OrderItemProviderSurface/SetProvider", {
+			$.getJSON("/OrderItemProviderSurface/SetProvider", {
 				nodeId: nodeId,
 				providerName: providerName,
 				providerOrderId: providerOrderId.trim(),
@@ -896,7 +896,7 @@ function setOrderItemProvider(nodeId, providerName, providerOrderId, providerInf
 
 function setOrderItemReference(nodeId, reference) {
     lockScreen();
-    $.post("/umbraco/surface/OrderItemReferenceSurface/SetReference", { nodeId: nodeId, reference: reference }).done(function (json) {
+    $.post("/OrderItemReferenceSurface/SetReference", { nodeId: nodeId, reference: reference }).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(nodeId);
         }
@@ -935,7 +935,7 @@ function anonymize(nodeId, event) {
     }
     data.logsSerialized = JSON.stringify(logs)
 
-    $.post("/umbraco/surface/OrderItemAnonymizationSurface/Anonymize", data).done(function (json) {
+    $.post("/OrderItemAnonymizationSurface/Anonymize", data).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(nodeId);
         }
@@ -952,7 +952,7 @@ function anonymize(nodeId, event) {
 /* Set new property values for Delivery from form */
 function setOrderItemDelivery(nodeId, logEntry, delivery) {
     lockScreen();
-    $.post("/umbraco/surface/OrderItemDeliverySurface/SetDelivery", {
+    $.post("/OrderItemDeliverySurface/SetDelivery", {
         nodeId: nodeId,
         logEntry: logEntry,
         delivery: delivery
@@ -973,7 +973,7 @@ function setOrderItemDelivery(nodeId, logEntry, delivery) {
 /* Set new property values for Delivery from form */
 function setOrderItemTransport(nodeId, logEntry, delivery) {
     lockScreen();
-    $.post("/umbraco/surface/OrderItemDeliverySurface/SetTransport", {
+    $.post("/OrderItemDeliverySurface/SetTransport", {
         nodeId: nodeId,
         logEntry: logEntry,
         delivery: delivery
@@ -994,7 +994,7 @@ function setOrderItemTransport(nodeId, logEntry, delivery) {
 function sendMailForNewOrder(body, name, mail, libCardNr, delLibrary) {
     lockScreen();
     if (body && name && mail && libCardNr && delLibrary) {
-        $.post("/umbraco/surface/OrderItemMailSurface/SendMailForNewOrder", { message: body, name: name, mail: mail, libraryCardNumber: libCardNr, deliveryLibrary: delLibrary }).done(function (json) {
+        $.post("/OrderItemMailSurface/SendMailForNewOrder", { message: body, name: name, mail: mail, libraryCardNumber: libCardNr, deliveryLibrary: delLibrary }).done(function (json) {
             if (json.Success) {
                 alert("Successfully sent new order!");
             }
@@ -1032,7 +1032,7 @@ function sendMailForNewOrder(body, name, mail, libCardNr, delLibrary) {
 function sendMailToPatron(mailData) {
     lockScreen();
     if (message && recipientEmail) {
-        $.post("/umbraco/surface/OrderItemMailSurface/SendMail", mailData).done(function (json) {
+        $.post("/OrderItemMailSurface/SendMail", mailData).done(function (json) {
             if (json.Success) {
                 loadOrderItemDetails(mailData.nodeId);
             }
@@ -1060,7 +1060,7 @@ function sendMailToPatron(mailData) {
 function writeLogItem(nodeId, message, type, followUpDate, statusId, cancellationReasonId, purchasedMaterialId) {
     lockScreen();
     if (message) {
-        $.post("/umbraco/surface/LogItemSurface/WriteLogItem", { nodeId: nodeId, Message: message, Type: type, newFollowUpDate: followUpDate, 
+        $.post("/LogItemSurface/WriteLogItem", { nodeId: nodeId, Message: message, Type: type, newFollowUpDate: followUpDate, 
             statusId: statusId, cancellationReasonId: cancellationReasonId, purchasedMaterialId: purchasedMaterialId }).done(function (json) {
             if (json.Success) {
                 loadOrderItemDetails(nodeId);
@@ -1082,7 +1082,7 @@ function writeLogItem(nodeId, message, type, followUpDate, statusId, cancellatio
 function fetchDataFromSierraUsingLibraryCardNumber(orderItemNodeId, lcn, cache) {
     cache = typeof cache !== "undefined" ? cache : true;
     lockScreen();
-    $.post("/umbraco/surface/OrderItemPatronDataSurface/FetchPatronDataUsingLcn", { orderItemNodeId: orderItemNodeId, lcn: lcn, cache: cache }).done(function (json) {
+    $.post("/OrderItemPatronDataSurface/FetchPatronDataUsingLcn", { orderItemNodeId: orderItemNodeId, lcn: lcn, cache: cache }).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(orderItemNodeId);
         } else {
@@ -1095,7 +1095,7 @@ function fetchDataFromSierraUsingLibraryCardNumber(orderItemNodeId, lcn, cache) 
 function fetchDataFromSierraUsingSierraId(orderItemNodeId, sierraId, cache) {
     cache = typeof cache !== "undefined" ? cache : true;
     lockScreen();
-    $.getJSON("/umbraco/surface/OrderItemPatronDataSurface/FetchPatronDataUsingSierraId", { orderItemNodeId: orderItemNodeId, sierraId: sierraId, cache: cache }).done(function (json) {
+    $.getJSON("/OrderItemPatronDataSurface/FetchPatronDataUsingSierraId", { orderItemNodeId: orderItemNodeId, sierraId: sierraId, cache: cache }).done(function (json) {
         if (json.Success) {
             loadOrderItemDetails(orderItemNodeId);
         } else {
@@ -1108,7 +1108,7 @@ function fetchDataFromSierraUsingSierraId(orderItemNodeId, sierraId, cache) {
 /* Load Partial View with form for setting Provider details */
 function loadProviderAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemProviderSurface/RenderProviderAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemProviderSurface/RenderProviderAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             if (req.status == 200) {
                 $('#action-' + id + ' #providerName').focus();
@@ -1121,7 +1121,7 @@ function loadProviderAction(id) {
 /* Load Partial View for the Reference Action */
 function loadReferenceAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemReferenceSurface/RenderReferenceAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemReferenceSurface/RenderReferenceAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             if (req.status == 200) {
                 $('#action-' + id + ' #reference').focus();
@@ -1134,7 +1134,7 @@ function loadReferenceAction(id) {
 /* Load Partial View for the Anonymize Action */
 function loadAnonymizeAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemAnonymizationSurface/RenderAnonymizeAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemAnonymizationSurface/RenderAnonymizeAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             if (req.status == 200) {
                 $('#action-' + id + ' #reference').focus();
@@ -1147,7 +1147,7 @@ function loadAnonymizeAction(id) {
 /* Load Partial View for the Mail to Patron Action */
 function loadMailAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemMailSurface/RenderMailAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemMailSurface/RenderMailAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             if (req.status == 200) {
                 $('#action-' + id + ' #message').focus();
@@ -1160,7 +1160,7 @@ function loadMailAction(id) {
 /* Load Partial View for the Logging Action */
 function loadLogEntryAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/LogItemSurface/RenderLogEntryAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/LogItemSurface/RenderLogEntryAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             if (req.status == 200) {
                 $('#action-' + id + ' #message').focus();
@@ -1173,7 +1173,7 @@ function loadLogEntryAction(id) {
 /* Load Partial View for the Delivery Action */
 function loadDeliveryAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemDeliverySurface/RenderDeliveryAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemDeliverySurface/RenderDeliveryAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             if (req.status == 200) {
                 $('#action-' + id + ' #radio').focus();
@@ -1185,7 +1185,7 @@ function loadDeliveryAction(id) {
 
 function loadReceiveBookAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemReceiveBookSurface/RenderReceiveBookAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemReceiveBookSurface/RenderReceiveBookAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             if (req.status == 200) {
                 $('#action-' + id + ' #radio').focus();
@@ -1197,7 +1197,7 @@ function loadReceiveBookAction(id) {
 
 function loadClaimAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemClaimSurface/RenderClaimAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemClaimSurface/RenderClaimAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             $("#loading-partial-view").hide();
         }
@@ -1206,7 +1206,7 @@ function loadClaimAction(id) {
 
 function loadProviderReturnDateAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemProviderReturnDateSurface/RenderProviderReturnDateAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemProviderReturnDateSurface/RenderProviderReturnDateAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             $("#loading-partial-view").hide();
         }
@@ -1215,7 +1215,7 @@ function loadProviderReturnDateAction(id) {
 
 function loadPatronReturnDateAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemPatronReturnDateSurface/RenderPatronReturnDateAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemPatronReturnDateSurface/RenderPatronReturnDateAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             $("#loading-partial-view").hide();
         }
@@ -1224,7 +1224,7 @@ function loadPatronReturnDateAction(id) {
 
 function loadReturnAction(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemReturnSurface/RenderReturnAction?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemReturnSurface/RenderReturnAction?nodeId=' + id,
         function (responseText, textStatus, req) {
             $("#loading-partial-view").hide();
         }
@@ -1233,7 +1233,7 @@ function loadReturnAction(id) {
 
 function loadPatronDataView(id) {
     $("#loading-partial-view").show();
-    $('#action-' + id).html("").show().load('/umbraco/surface/OrderItemPatronDataSurface/RenderPatronDataView?nodeId=' + id,
+    $('#action-' + id).html("").show().load('/OrderItemPatronDataSurface/RenderPatronDataView?nodeId=' + id,
         function (responseText, textStatus, req) {
             if (req.status == 200) {
                 // NOP

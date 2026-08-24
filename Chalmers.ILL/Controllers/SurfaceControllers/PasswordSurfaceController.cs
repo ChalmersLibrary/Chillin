@@ -10,6 +10,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
     public class PasswordSurfaceController : Controller
     {
+        // The form posts here directly (not to the settings page itself), so redirects must name
+        // the settings page explicitly instead of reusing Request.Url.AbsolutePath.
+        const string SettingsPageUrl = "/ChalmersILLSettingsPage";
+
         IMemberInfoManager _memberInfoManager;
 
         public PasswordSurfaceController(IMemberInfoManager memberInfoManager)
@@ -37,24 +41,24 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     {
                         var user = Membership.GetUser(loginName);
                         user.ChangePassword(model.CurrentPassword, model.NewPassword);
-                        Response.Redirect(Request.Url.AbsolutePath + "?success=true");
+                        Response.Redirect(SettingsPageUrl + "?success=true");
                     }
                     catch (Exception)
                     {
-                        Response.Redirect(Request.Url.AbsolutePath + "?error=invalid-member");
+                        Response.Redirect(SettingsPageUrl + "?error=invalid-member");
                     }
                 }
                 else
                 {
-                    Response.Redirect(Request.Url.AbsolutePath + "?error=invalid-member");
+                    Response.Redirect(SettingsPageUrl + "?error=invalid-member");
                 }
             }
             else
             {
-                Response.Redirect(Request.Url.AbsolutePath + "?error=invalid-model");
+                Response.Redirect(SettingsPageUrl + "?error=invalid-model");
             }
 
-            return Redirect(Request.Url.AbsolutePath);
+            return Redirect(SettingsPageUrl);
         }
     }
 }

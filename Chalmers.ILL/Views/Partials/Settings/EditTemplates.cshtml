@@ -57,7 +57,7 @@
         $("#template-list > a").removeClass("active");
         $(listItem).addClass("active");
 
-        $.getJSON("/umbraco/surface/TemplatesSurface/GetTemplateData", { nodeId: id }).done(function (json) {
+        $.getJSON("/TemplatesSurface/GetTemplateData", { nodeId: id }).done(function (json) {
             if (json.Success) {
                 $("#template-data").data("template-id", id).val(json.Data);
             } else {
@@ -74,7 +74,7 @@
 
     function saveTemplate() {
         lockScreen();
-        $.post("/umbraco/surface/TemplatesSurface/SetTemplateData", { nodeId: $("#template-data").data("template-id"), data: $("#template-data").val() }).done(function (json) {
+        $.post("/TemplatesSurface/SetTemplateData", { nodeId: $("#template-data").data("template-id"), data: $("#template-data").val() }).done(function (json) {
             if (!json.Success) {
                 alert(json.Message);
             }
@@ -87,7 +87,7 @@
         let isAcquisitionChecked = document.querySelector("#new-template-acquisition").checked
         if (description) {
             lockScreen();
-            $.post("/umbraco/surface/TemplatesSurface/CreateTemplate", {
+            $.post("/TemplatesSurface/CreateTemplate", {
                 description: description,
                 acquisition: isAcquisitionChecked
             }).done(function (json) {

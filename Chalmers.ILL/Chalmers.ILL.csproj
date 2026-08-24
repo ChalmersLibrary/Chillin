@@ -384,7 +384,6 @@
     <Content Include="Views\Partials\Chalmers.ILL.Action.Provider.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.Reference.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.Mail.cshtml" />
-    <Content Include="Views\Partials\Chalmers.ILL.ChangePassword.cshtml" />
     <Content Include="Views\ChalmersILLSettingsPage.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.LogEntry.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.Delivery.cshtml" />
@@ -620,7 +619,6 @@
     <Compile Include="Models\Lock.cs" />
     <Compile Include="Models\Mail\MailQueueModel.cs" />
     <Compile Include="Models\Mail\OutgoingMailPackageModel.cs" />
-    <Compile Include="Models\PasswordModel.cs" />
     <Compile Include="Controllers\SurfaceControllers\PasswordSurfaceController.cs" />
     <Compile Include="EventHandlers\OwinStartup.cs" />
     <Compile Include="Global.asax.cs">

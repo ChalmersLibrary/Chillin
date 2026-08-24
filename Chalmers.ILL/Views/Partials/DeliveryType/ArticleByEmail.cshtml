@@ -91,7 +91,7 @@
         });
 
         lockScreen();
-        $.post("/umbraco/surface/OrderItemDeliverySurface/DeliverByMail", {
+        $.post("/OrderItemDeliverySurface/DeliverByMail", {
             packJson: JSON.stringify({
                 nodeId: @Model.OrderItem.NodeId,
                 logEntry: $('#log-message').val(),
