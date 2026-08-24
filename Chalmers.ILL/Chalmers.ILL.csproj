@@ -358,6 +358,7 @@
     <Content Include="Views\Partials\DeliveryType\BookReadAtLibrary.cshtml" />
     <Content Include="Views\Partials\Settings\ChangePassword.cshtml" />
     <Content Include="Views\Partials\Settings\EditTemplates.cshtml" />
+    <Content Include="Views\Partials\Settings\MemberAdmin.cshtml" />
     <Content Include="Views\Partials\Settings\ModifyProviderData.cshtml" />
     <Content Include="Views\Partials\Chalmers.ILL.Action.ReceiveBook.cshtml" />
     <Content Include="Views\ChalmersILLDiskPage.cshtml" />
@@ -436,6 +437,7 @@
     <Compile Include="Controllers\SurfaceControllers\LoginSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\LogItemSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\MaintenanceSurfaceController.cs" />
+    <Compile Include="Controllers\SurfaceControllers\MemberAdminSurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemDeliveryLibrarySurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemDeliverySurfaceController.cs" />
     <Compile Include="Controllers\SurfaceControllers\OrderItemMailSurfaceController.cs" />
@@ -474,8 +476,10 @@
     <Compile Include="MediaItems\MediaItemNotFoundException.cs" />
     <Compile Include="Members\FileMembershipProvider.cs" />
     <Compile Include="Members\FileRoleProvider.cs" />
+    <Compile Include="Members\IMemberAdminService.cs" />
     <Compile Include="Members\IMemberInfoManager.cs" />
     <Compile Include="Members\MemberAccount.cs" />
+    <Compile Include="Members\MemberAdminService.cs" />
     <Compile Include="Members\MemberFileStore.cs" />
     <Compile Include="Migrations\201606291112079_InitialDatabaseModel.cs" />
     <Compile Include="Migrations\201606291112079_InitialDatabaseModel.Designer.cs">
@@ -600,6 +604,7 @@
     <Compile Include="Models\PartialPage\DeliveryType\BookReadAtLibrary.cs" />
     <Compile Include="Models\PartialPage\Settings\ChangePassword.cs" />
     <Compile Include="Models\PartialPage\Settings\EditTemplates.cs" />
+    <Compile Include="Models\PartialPage\Settings\MemberAdmin.cs" />
     <Compile Include="Models\PartialPage\Settings\ModifyProviderData.cs" />
     <Compile Include="Models\Personal.cs" />
     <Compile Include="Models\ResultResponseWithData.cs" />

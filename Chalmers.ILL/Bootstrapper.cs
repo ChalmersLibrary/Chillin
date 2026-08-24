@@ -200,6 +200,7 @@ namespace Chalmers.ILL
 
             // Hook up more stuff
             container.RegisterInstance(typeof(IMemberInfoManager), new MemberInfoManager());
+            container.RegisterInstance(typeof(IMemberAdminService), new MemberAdminService());
             container.RegisterInstance(typeof(INotifier), notifier);
             container.RegisterInstance(typeof(IOrderItemManager), orderItemManager);
             container.RegisterInstance(typeof(IAutomaticMailSendingEngine), new AutomaticMailSendingEngine(container.Resolve<IOrderItemSearcher>(), templateService, orderItemManager, mailService));

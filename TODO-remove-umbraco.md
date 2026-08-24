@@ -48,15 +48,24 @@ men följande beroenden kvarstår.
   [System.Web.Helpers.Crypto]::HashPassword("nya-losenordet-har")
   ```
 
-- [ ] Bygg en SuperAdmin-sida för kontohantering  
-  Filbaserad medlemslagring (`FileMembershipProvider`/`FileRoleProvider`/`MemberFileStore`, se
-  punkten ovan) har idag ingen UI — konton skapas och lösenord byts genom att redigera
-  `Chalmers.ILL/Config/members.json` för hand plus ett separat PowerShell-anrop för att hasha
-  lösenordet. Bygg en admin-sida (skapa konto, sätta/byta lösenord, tilldela roller) som gör
-  detta via `MemberFileStore.Load()`/`Save()` istället, motsvarande den access till Umbracos
-  gamla backoffice/admingränssnitt som superanvändare hade. Gate:a sidan bakom en ny roll
-  `SuperAdmin` (skild från `Administrator`, som redan används för annat i appen) så att bara
-  de som tidigare hade Umbraco-adminåtkomst kan hantera konton.
+- [x] Bygg en SuperAdmin-sida för kontohantering  
+  Ny flik "Konton" i Inställningar-sidan (`MemberAdminSurfaceController` +
+  `Views/Partials/Settings/MemberAdmin.cshtml`), synlig bara om
+  `Roles.IsUserInRole(CurrentMemberLoginName, "SuperAdmin")` (samma mönster som
+  `ChalmersILL.cshtml` redan använder för `Administrator`). Kan skapa konto, byta lösenord,
+  sätta roller (kommaseparerad textruta) och ta bort konto — allt via en ny
+  `IMemberAdminService`/`MemberAdminService` som läser/skriver samma
+  `Chalmers.ILL/Config/members.json` som `FileMembershipProvider`/`FileRoleProvider` (se punkten
+  ovan), så ändringar via sidan gäller direkt utan omstart. Registrerad i `Bootstrapper.cs`.
+  `SuperAdmin` kräver ingen kodändring i providrarna — rollnamn är redan fritextsträngar i
+  `members.json`, sätts bara på det första kontot manuellt (eller via sidan när minst ett konto
+  redan har `SuperAdmin`).
+
+  **Sidoupptäckt, inte åtgärdad:** två vyer (`ChangePassword.cshtml` x2) använder fortfarande en
+  riktig Umbraco-helper (`Html.BeginUmbracoForm<T>()`), och en tredje (`EditTemplates.cshtml`)
+  anropar den gamla `/umbraco/surface/...`-routen i sin inbäddade JS. Se egen TODO-punkt under
+  "Routing & Vyer". Den nya koden här (MemberAdmin) använder genomgående vanliga HTML-formulär
+  och den nya URL-formen.
 
 ## Controllers
 
@@ -73,6 +82,18 @@ men följande beroenden kvarstår.
 
 - [x] Migrera vyerna från Umbraco Razor-mallar till standard MVC-vyer  
   `Views/*.cshtml` och `Views/Partials/*.cshtml` använder Umbraco-specifika modeller (`RenderModel`) och `@Umbraco`-helper.
+
+- [ ] Ta bort kvarvarande Umbraco-beroenden i två vyer  
+  Upptäckt under SuperAdmin-arbetet (se "Autentisering & Membership" ovan): `Views/Partials/Settings/ChangePassword.cshtml`
+  och `Views/Partials/Chalmers.ILL.ChangePassword.cshtml` anropar fortfarande `Html.BeginUmbracoForm<T>()` —
+  en riktig Umbraco-helper som kräver `Umbraco.Web`. Byt ut mot ett vanligt `Html.BeginForm(...)`
+  (se `Views/Partials/Settings/MemberAdmin.cshtml` för hur nyare vyer i appen bygger formulär/AJAX-anrop
+  utan Umbraco-helpers). Dessutom anropar `Views/Partials/Settings/EditTemplates.cshtml`s inbäddade JS
+  den gamla Umbraco-URL-routen `/umbraco/surface/TemplatesSurface/...` istället för den nya
+  `/TemplatesSurface/...`-formen som resten av appen migrerats till — byt dessa anrop till den nya formen.
+  Detta innebär att `UmbracoModule` i `Web.config` sannolikt fortfarande krävs för att den gamla routen
+  ska fungera; kontrollera att inget annat beror på den innan `UmbracoModule` tas bort. Måste städas
+  innan `UmbracoCms`-paketen kan tas bort (se "NuGet-paket" nedan).
 
 ## IUmbracoWrapper
 

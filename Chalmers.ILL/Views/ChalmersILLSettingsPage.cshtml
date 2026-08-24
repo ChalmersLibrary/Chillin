@@ -12,6 +12,10 @@
             <li role="presentation"><a id="template-settings-link" href="#" onclick="showTemplateSettings(this); event.preventDefault();">Mallar</a></li>
             <li role="presentation"><a id="provider-settings-link" href="#" onclick="showProviderSettings(this); event.preventDefault();">Leverantörsdata</a></li>
             <li role="presentation"><a href="#" onclick="showChillinTextSettings(this); event.preventDefault();">Text</a></li>
+            @if (System.Web.Security.Roles.IsUserInRole(Model.CurrentMemberLoginName, "SuperAdmin"))
+            {
+                <li role="presentation"><a id="member-settings-link" href="#" onclick="showMemberSettings(this); event.preventDefault();">Konton</a></li>
+            }
         </ul>
     </div>
 </div>
@@ -45,6 +49,11 @@
     function showChillinTextSettings(btn) {
         clearActiveSettingAndSetNewActiveButton(btn);
         renderSettingsPartialView("/ChillinTextSurface/RenderChillinTextsAction")
+    }
+
+    function showMemberSettings(btn) {
+        clearActiveSettingAndSetNewActiveButton(btn);
+        renderSettingsPartialView("/MemberAdminSurface/RenderMemberAdminAction");
     }
 
     function clearActiveSettingAndSetNewActiveButton(clickedButton) {
