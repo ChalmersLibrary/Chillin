@@ -6,7 +6,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
-using umbraco.cms.businesslogic.datatype;
 
 namespace Chalmers.ILL.Utilities
 {

@@ -3,7 +3,6 @@ using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Providers;
 using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
-using Examine;
 using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;

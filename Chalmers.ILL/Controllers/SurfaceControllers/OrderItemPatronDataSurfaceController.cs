@@ -14,7 +14,6 @@ using System.Configuration;
 using System.Net;
 using System.IO;
 using Chalmers.ILL.OrderItems;
-using Umbraco.Core.Models;
 using Chalmers.ILL.UmbracoApi;
 using Microsoft.Practices.Unity;
 

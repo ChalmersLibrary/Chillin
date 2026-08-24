@@ -8,7 +8,6 @@ using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
 using Chalmers.ILL.OrderItems;
-using umbraco.cms.businesslogic.member;
 using Chalmers.ILL.Members;
 using Newtonsoft.Json;
 using System.Configuration;
@@ -100,14 +99,15 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Get current member
                 int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
-                _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), new Member(memberId).Text);
+                var memberText = _memberInfoManager.GetCurrentMemberText(Request, Response);
+                _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), memberText);
 
                 // Return JSON to client
                 json.Success = true;
                 json.Message = "Took over lock.";
 
                 // Notify SignalR clients of the update
-                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
+                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), memberText);
 
             }
             catch (Exception e)
@@ -146,13 +146,13 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 else if (orderItem.EditedBy == "")
                 {
                     // Unlocked
-                    _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), new Member(memberId).Text);
+                    _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), _memberInfoManager.GetCurrentMemberText(Request, Response));
                     json.Success = true;
                     json.Message = "Order item locked by current member.";
                 }
 
                 // Notify SignalR clients of the update
-                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
+                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), _memberInfoManager.GetCurrentMemberText(Request, Response));
 
             }
             catch (Exception e)
@@ -195,7 +195,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 }
 
                 // Notify SignalR clients of the update
-                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
+                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), _memberInfoManager.GetCurrentMemberText(Request, Response));
 
             }
             catch (Exception e)

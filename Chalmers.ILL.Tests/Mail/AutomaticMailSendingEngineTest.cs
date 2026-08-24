@@ -1,7 +1,5 @@
 ﻿using Chalmers.ILL.Mail;
 using Chalmers.ILL.Templates;
-using Examine;
-using Examine.SearchCriteria;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -22,14 +20,6 @@ namespace Chalmers.ILL.Tests.Mail
             return new Chalmers.ILL.OrderItems.Fakes.StubIOrderItemSearcher()
             {
                 SearchString = (query) => { return fakeSearchResults; }
-            };
-        }
-
-        private ISearchCriteria GetFakeSearchCriteria()
-        {
-            return new Examine.SearchCriteria.Fakes.StubISearchCriteria()
-            {
-                RawQueryString = (query) => { return GetFakeSearchCriteria(); }
             };
         }
 

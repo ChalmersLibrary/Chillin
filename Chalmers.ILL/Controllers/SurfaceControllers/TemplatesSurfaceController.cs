@@ -1,12 +1,10 @@
 ﻿using Chalmers.ILL.Templates;
 using Chalmers.ILL.Models;
-using Examine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
-using Umbraco.Core.Services;
 using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers

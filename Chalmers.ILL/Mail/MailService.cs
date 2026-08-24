@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Hosting;
-using Umbraco.Core.Services;
 
 namespace Chalmers.ILL.Mail
 {

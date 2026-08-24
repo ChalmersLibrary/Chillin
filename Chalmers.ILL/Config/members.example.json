@@ -1,0 +1,12 @@
+[
+  {
+    "Login": "alice",
+    "PasswordHash": "<generate with System.Web.Helpers.Crypto.HashPassword, see below>",
+    "Roles": [ "Desk", "Administrator" ]
+  },
+  {
+    "Login": "bob",
+    "PasswordHash": "<generate with System.Web.Helpers.Crypto.HashPassword, see below>",
+    "Roles": [ "Desk" ]
+  }
+]

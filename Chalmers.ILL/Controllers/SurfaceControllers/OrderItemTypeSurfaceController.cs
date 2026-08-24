@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using umbraco.cms.businesslogic.member;
-using umbraco.cms.businesslogic.datatype;
 using System.Web.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Chalmers.ILL.Models;

@@ -1,8 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Chalmers.ILL.Controllers.SurfaceControllers;
-using Examine;
-using Examine.SearchCriteria;
 using System.Collections.Generic;
 using Microsoft.QualityTools.Testing.Fakes;
 using System.Collections;

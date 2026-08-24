@@ -1,5 +1,4 @@
 ﻿using Chalmers.ILL.Models;
-using Examine;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

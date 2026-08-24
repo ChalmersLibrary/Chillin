@@ -29,7 +29,7 @@ namespace Chalmers.ILL.Tests.Controllers
             var statuses = new List<DropdownOption> { new DropdownOption { Id = 1, Value = "01:Ny" } };
             var types = new List<DropdownOption> { new DropdownOption { Id = 10, Value = "Artikel" } };
 
-            var controller = MakeController(statuses, types);
+            var controller = MakeController(statuses, types, out _, out _);
             SetHttpContext(controller);
 
             var result = controller.RenderOrderItem(42) as PartialViewResult;
@@ -42,15 +42,85 @@ namespace Chalmers.ILL.Tests.Controllers
             Assert.AreEqual("Artikel", model.AvailableTypes[0].Value);
         }
 
+        [TestMethod]
+        public void TakeOverLockedOrderItem_SetsEditedByToCurrentMemberIdAndText()
+        {
+            var controller = MakeController(out var orderItemManager, out var notifier);
+            SetHttpContext(controller);
+
+            var result = controller.TakeOverLockedOrderItem(42) as JsonResult;
+            var json = result?.Data as ResultResponse;
+
+            Assert.IsTrue(json.Success);
+            Assert.AreEqual("1", orderItemManager.LastEditedByMemberId);
+            Assert.AreEqual("Test User", orderItemManager.LastEditedByMemberName);
+            Assert.AreEqual("1", notifier.LastEditedBy);
+            Assert.AreEqual("Test User", notifier.LastEditedByMemberName);
+        }
+
+        [TestMethod]
+        public void LockOrderItem_WhenUnlocked_LocksWithCurrentMemberIdAndText()
+        {
+            var controller = MakeController(out var orderItemManager, out var notifier);
+            SetHttpContext(controller);
+
+            var result = controller.LockOrderItem(42) as JsonResult;
+            var json = result?.Data as ResultResponse;
+
+            Assert.IsTrue(json.Success);
+            Assert.AreEqual("1", orderItemManager.LastEditedByMemberId);
+            Assert.AreEqual("Test User", orderItemManager.LastEditedByMemberName);
+        }
+
+        [TestMethod]
+        public void LockOrderItem_WhenAlreadyLocked_ReturnsFailureWithoutLocking()
+        {
+            var controller = MakeController(out var orderItemManager, out var notifier);
+            orderItemManager.EditedBy = "5";
+            SetHttpContext(controller);
+
+            var result = controller.LockOrderItem(42) as JsonResult;
+            var json = result?.Data as ResultResponse;
+
+            Assert.IsFalse(json.Success);
+            Assert.IsNull(orderItemManager.LastEditedByMemberId);
+        }
+
+        [TestMethod]
+        public void UnlockOrderItem_WhenLockedByCurrentMember_Unlocks()
+        {
+            var controller = MakeController(out var orderItemManager, out var notifier);
+            orderItemManager.EditedBy = "1";
+            SetHttpContext(controller);
+
+            var result = controller.UnlockOrderItem(42) as JsonResult;
+            var json = result?.Data as ResultResponse;
+
+            Assert.IsTrue(json.Success);
+            Assert.AreEqual("", orderItemManager.LastEditedByMemberId);
+            Assert.AreEqual("", orderItemManager.LastEditedByMemberName);
+        }
+
         private static OrderItemSurfaceController MakeController(
             List<DropdownOption> statuses,
-            List<DropdownOption> types)
+            List<DropdownOption> types,
+            out StubOrderItemManager orderItemManager,
+            out StubNotifier notifier)
         {
+            orderItemManager = new StubOrderItemManager();
+            notifier = new StubNotifier();
             return new OrderItemSurfaceController(
                 new StubMemberInfoManager(),
-                new StubOrderItemManager(),
-                new StubNotifier(),
+                orderItemManager,
+                notifier,
                 new StubOrderConfig(statuses, types));
+        }
+
+        private static OrderItemSurfaceController MakeController(
+            out StubOrderItemManager orderItemManager,
+            out StubNotifier notifier)
+        {
+            return MakeController(new List<DropdownOption>(), new List<DropdownOption>(), out orderItemManager, out notifier);
         }
 
         private static void SetHttpContext(Controller controller)
@@ -77,7 +147,11 @@ namespace Chalmers.ILL.Tests.Controllers
 
         class StubOrderItemManager : IOrderItemManager
         {
-            public OrderItemModel GetOrderItem(int nodeId) => new OrderItemModel { NodeId = nodeId, EditedBy = "" };
+            public string EditedBy = "";
+            public string LastEditedByMemberId;
+            public string LastEditedByMemberName;
+
+            public OrderItemModel GetOrderItem(int nodeId) => new OrderItemModel { NodeId = nodeId, EditedBy = EditedBy };
             public OrderItemModel GetOrderItem(string orderId) => null;
             public IEnumerable<OrderItemModel> GetLockedOrderItems(string memberId) => new List<OrderItemModel>();
             public List<LogItem> GetLogItems(int nodeId) => new List<LogItem>();
@@ -116,7 +190,11 @@ namespace Chalmers.ILL.Tests.Controllers
             public void SetReference(int nodeId, string reference, string eventId, bool doReindex = true, bool doSignal = true) { }
             public void SilentAnonymization(int nodeId, string reference, IList<LogItem> logs, string eventId, bool doReindex = true, bool doSignal = true) { }
             public void SetReadOnlyAtLibrary(int nodeId, bool readOnlyAtLibrary, string eventId, bool doReindex = true, bool doSignal = true) { }
-            public void SetEditedByData(int orderNodeId, string memberId, string memberName, bool doReindex = true, bool doSignal = true) { }
+            public void SetEditedByData(int orderNodeId, string memberId, string memberName, bool doReindex = true, bool doSignal = true)
+            {
+                LastEditedByMemberId = memberId;
+                LastEditedByMemberName = memberName;
+            }
             public void SetTitleInformation(int nodeId, string titleInformation, string eventId, bool doReindex = true, bool doSignal = true) { }
             public void AnonymizeOrder(int nodeId, string eventId, bool doReindex = true, bool doSignal = true) { }
             public void MakeDuplicate(int orderNodeId, string eventId, bool doReindex = true, bool doSignal = true) { }
@@ -126,9 +204,16 @@ namespace Chalmers.ILL.Tests.Controllers
 
         class StubNotifier : INotifier
         {
+            public string LastEditedBy;
+            public string LastEditedByMemberName;
+
             public void ReportNewOrderItemUpdate(IContent d) { }
             public void ReportNewOrderItemUpdate(OrderItemModel orderItem) { }
-            public void UpdateOrderItemUpdate(int nodeId, string editedBy, string editedByMemberName, bool significant = false, bool isPending = false, bool updateFromMail = false) { }
+            public void UpdateOrderItemUpdate(int nodeId, string editedBy, string editedByMemberName, bool significant = false, bool isPending = false, bool updateFromMail = false)
+            {
+                LastEditedBy = editedBy;
+                LastEditedByMemberName = editedByMemberName;
+            }
         }
 
         class StubOrderConfig : IChillinOrderConfiguration

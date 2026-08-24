@@ -67,13 +67,6 @@
     <Reference Include="Chalmers.ILL.Fakes">
       <HintPath>FakesAssemblies\Chalmers.ILL.Fakes.dll</HintPath>
     </Reference>
-    <Reference Include="Examine, Version=0.1.52.2941, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Chalmers.ILL\bin\Examine.dll</HintPath>
-    </Reference>
-    <Reference Include="Examine.0.1.52.2941.Fakes">
-      <HintPath>FakesAssemblies\Examine.0.1.52.2941.Fakes.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Exchange.WebServices, Version=15.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -104,6 +97,10 @@
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.Helpers.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.0\lib\net45\System.Web.Http.dll</HintPath>
@@ -115,9 +112,6 @@
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="umbraco">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\umbraco.dll</HintPath>
-    </Reference>
     <Reference Include="Umbraco.Core">
       <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Umbraco.Core.dll</HintPath>
     </Reference>
@@ -131,8 +125,12 @@
     <Compile Include="Controllers\MaintenanceSurfaceControllerTest.cs" />
     <Compile Include="Controllers\OrderItemSurfaceControllerTest.cs" />
     <Compile Include="Controllers\PageControllersTest.cs" />
+    <Compile Include="Controllers\PasswordSurfaceControllerTest.cs" />
     <Compile Include="Controllers\RoutingTest.cs" />
     <Compile Include="Controllers\StatisticsSurfaceControllerTest.cs" />
+    <Compile Include="Members\FileMembershipProviderTest.cs" />
+    <Compile Include="Members\FileRoleProviderTest.cs" />
+    <Compile Include="Members\MemberFileStoreTest.cs" />
     <Compile Include="Members\MemberInfoManagerTest.cs" />
     <Compile Include="OrderItems\BulkDataManagerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -148,7 +146,6 @@
     <None Include="app.config" />
     <Fakes Include="Fakes\Chalmers.ILL.fakes" />
     <Fakes Include="Fakes\System.Core.fakes" />
-    <Fakes Include="Fakes\Examine.fakes" />
     <Fakes Include="Fakes\System.fakes" />
     <Fakes Include="Fakes\mscorlib.fakes" />
     <None Include="packages.config" />

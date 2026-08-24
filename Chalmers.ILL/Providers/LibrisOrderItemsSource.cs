@@ -2,7 +2,6 @@
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Patron;
 using Chalmers.ILL.Utilities;
-using Examine;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

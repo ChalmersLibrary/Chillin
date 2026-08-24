@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using umbraco.cms.businesslogic.member;
-using System.Security.Cryptography;
+using System.Web.Security;
 using Chalmers.ILL.Members;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
@@ -29,15 +28,21 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         {
             if (ModelState.IsValid)
             {
-                // Get Member from LoginName and CurrentPassword provided in form/Model
-                var m = Member.GetMemberFromLoginNameAndPassword(_memberInfoManager.GetCurrentMemberLoginName(Request, Response), model.CurrentPassword);
+                var loginName = _memberInfoManager.GetCurrentMemberLoginName(Request, Response);
 
-                // If this computes to a real Member, change the password to NewPassword from form/Model
-                if (m != null)
+                // Validate the current password via the configured membership provider
+                if (Membership.ValidateUser(loginName, model.CurrentPassword))
                 {
-                    m.ChangePassword(HashPassword(model.NewPassword));
-                    m.Save();
-                    Response.Redirect(Request.Url.AbsolutePath + "?success=true");
+                    try
+                    {
+                        var user = Membership.GetUser(loginName);
+                        user.ChangePassword(model.CurrentPassword, model.NewPassword);
+                        Response.Redirect(Request.Url.AbsolutePath + "?success=true");
+                    }
+                    catch (Exception)
+                    {
+                        Response.Redirect(Request.Url.AbsolutePath + "?error=invalid-member");
+                    }
                 }
                 else
                 {
@@ -50,16 +55,6 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
 
             return Redirect(Request.Url.AbsolutePath);
-        }
-
-        // Compute Hash for provided NewPassword as it is stored hashed
-        // From: http://silogic.co.uk/january-2013/change-member-password-in-umbraco.aspx
-        string HashPassword(string password)
-        {
-            HMACSHA1 hash = new HMACSHA1();
-            hash.Key = System.Text.Encoding.Unicode.GetBytes(password);
-            string encodedPassword = Convert.ToBase64String(hash.ComputeHash(System.Text.Encoding.Unicode.GetBytes(password)));
-            return encodedPassword;
         }
     }
 }

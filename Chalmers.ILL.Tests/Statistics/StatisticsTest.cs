@@ -1,8 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Chalmers.ILL.Controllers.SurfaceControllers;
-using Examine;
-using Examine.SearchCriteria;
 using Chalmers.ILL.Statistics;
 using System.Collections.Generic;
 using Microsoft.QualityTools.Testing.Fakes;
@@ -20,14 +18,6 @@ namespace Chalmers.ILL.Tests.Statistics
             return new Chalmers.ILL.OrderItems.Fakes.StubIOrderItemSearcher()
             {
                 SearchString = (query) => { return GetFakeSearchResults(); }
-            };
-        }
-
-        private ISearchCriteria GetFakeSearchCriteria()
-        {
-            return new Examine.SearchCriteria.Fakes.StubISearchCriteria()
-            {
-                RawQueryString = (query) => { return GetFakeSearchCriteria(); }
             };
         }
 

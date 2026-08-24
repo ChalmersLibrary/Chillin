@@ -9,8 +9,6 @@ using System.IdentityModel;
 using System.IO;
 using System.Net;
 using System.Text;
-using umbraco.presentation.umbraco.dialogs;
-using Umbraco.Core;
 
 namespace Chalmers.ILL.Repositories
 {
