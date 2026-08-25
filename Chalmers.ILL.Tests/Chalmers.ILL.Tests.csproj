@@ -112,9 +112,6 @@
     <Reference Include="System.Web.Routing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Umbraco.Core">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Umbraco.Core.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DependencyResolution\UnityDependencyResolversTest.cs" />

@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
-  <Import Project="..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.props" Condition="Exists('..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -49,17 +48,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="businesslogic, Version=1.0.5021.24868, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\businesslogic.dll</HintPath>
-    </Reference>
-    <Reference Include="cms, Version=1.0.5021.24868, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\cms.dll</HintPath>
-    </Reference>
-    <Reference Include="controls">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\controls.dll</HintPath>
-    </Reference>
     <Reference Include="Elasticsearch.Net, Version=6.0.0.0, Culture=neutral, PublicKeyToken=96c599bbe3e70f5d, processorArchitecture=MSIL">
       <HintPath>..\packages\Elasticsearch.Net.6.3.1\lib\net461\Elasticsearch.Net.dll</HintPath>
       <Private>True</Private>
@@ -74,14 +62,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="interfaces">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\interfaces.dll</HintPath>
-    </Reference>
     <Reference Include="log4net">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.ApplicationBlocks.Data">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Microsoft.ApplicationBlocks.Data.dll</HintPath>
+      <HintPath>..\packages\log4net.2.0.12\lib\net45\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.0.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -134,9 +116,6 @@
     <Reference Include="Microsoft.Practices.Unity.Configuration">
       <HintPath>..\packages\Unity.3.0.1304.1\lib\Net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Web.Helpers">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Microsoft.Web.Helpers.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
@@ -165,15 +144,6 @@
     <Reference Include="Npgsql">
       <HintPath>..\packages\Npgsql.2.0.14.3\lib\net45\Npgsql.dll</HintPath>
     </Reference>
-    <Reference Include="Our.Umbraco.uGoLive">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Our.Umbraco.uGoLive.dll</HintPath>
-    </Reference>
-    <Reference Include="Our.Umbraco.uGoLive.47x">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Our.Umbraco.uGoLive.47x.dll</HintPath>
-    </Reference>
-    <Reference Include="Our.Umbraco.uGoLive.Checks">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Our.Umbraco.uGoLive.Checks.dll</HintPath>
-    </Reference>
     <Reference Include="Owin">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
@@ -182,21 +152,10 @@
     <Reference Include="QRCoder, Version=1.4.3.0, Culture=neutral, PublicKeyToken=c4ed5b9ae8358a28, processorArchitecture=MSIL">
       <HintPath>..\packages\QRCoder.1.4.3\lib\net40\QRCoder.dll</HintPath>
     </Reference>
-    <Reference Include="SQLCE4Umbraco">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\SQLCE4Umbraco.dll</HintPath>
-    </Reference>
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\System.Data.SqlServerCe.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Data.SqlServerCe.Entity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\System.Data.SqlServerCe.Entity.dll</HintPath>
-    </Reference>
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -256,39 +215,6 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.EnterpriseServices" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="TidyNet">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\TidyNet.dll</HintPath>
-    </Reference>
-    <Reference Include="umbraco">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\umbraco.dll</HintPath>
-    </Reference>
-    <Reference Include="Umbraco.Core">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Umbraco.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="umbraco.DataLayer">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\umbraco.DataLayer.dll</HintPath>
-    </Reference>
-    <Reference Include="umbraco.editorControls">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\umbraco.editorControls.dll</HintPath>
-    </Reference>
-    <Reference Include="umbraco.MacroEngines">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\umbraco.MacroEngines.dll</HintPath>
-    </Reference>
-    <Reference Include="umbraco.macroRenderings">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\umbraco.macroRenderings.dll</HintPath>
-    </Reference>
-    <Reference Include="umbraco.providers">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\umbraco.providers.dll</HintPath>
-    </Reference>
-    <Reference Include="Umbraco.Web.UI">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\Umbraco.Web.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="umbraco.XmlSerializers">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\umbraco.XmlSerializers.dll</HintPath>
-    </Reference>
-    <Reference Include="UrlRewritingNet.UrlRewriter">
-      <HintPath>..\packages\UmbracoCms.Core.6.1.6\lib\UrlRewritingNet.UrlRewriter.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -309,20 +235,9 @@
     <Content Include="bin\x86\sqlceme40.dll" />
     <Content Include="bin\x86\sqlceqp40.dll" />
     <Content Include="bin\x86\sqlcese40.dll" />
-    <Content Include="Config\404handlers.config" />
-    <Content Include="Config\BaseRestExtensions.config" />
-    <Content Include="Config\EmbeddedMedia.config" />
-    <Content Include="Config\feedProxy.config" />
-    <Content Include="Config\FileSystemProviders.config" />
     <Content Include="Config\log4net.config">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Config\metablogConfig.config" />
-    <Content Include="Config\restExtensions.config" />
-    <Content Include="Config\scripting.config" />
-    <Content Include="Config\Skinning.config" />
-    <Content Include="Config\tinyMceConfig.config" />
-    <Content Include="Config\xsltExtensions.config" />
     <Content Include="Css\chalmers.ill.print.css" />
     <Content Include="Css\dummy.txt" />
     <Content Include="images\cth_logo.png" />
@@ -394,8 +309,6 @@
     <Content Include="bin\amd64\Microsoft.VC90.CRT\Microsoft.VC90.CRT.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Config\Splashes\booting.aspx" />
-    <Content Include="Config\Splashes\noNodes.aspx" />
     <Content Include="Css\chalmers.ill.main.css" />
     <Content Include="default.aspx" />
     <Content Include="Global.asax" />
@@ -819,12 +732,9 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.props'))" />
-    <Error Condition="!Exists('..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets'))" />
     <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.props'))" />
     <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.targets'))" />
   </Target>
-  <Import Project="..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets" Condition="Exists('..\packages\UmbracoCms.6.1.6\build\net45\UmbracoCms.targets')" />
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>

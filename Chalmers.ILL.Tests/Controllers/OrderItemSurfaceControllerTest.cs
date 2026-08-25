@@ -15,7 +15,6 @@ using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.SignalR;
 using Chalmers.ILL.UmbracoApi;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Umbraco.Core.Models;
 using static Chalmers.ILL.Models.OrderItemModel;
 
 namespace Chalmers.ILL.Tests.Controllers
@@ -207,7 +206,6 @@ namespace Chalmers.ILL.Tests.Controllers
             public string LastEditedBy;
             public string LastEditedByMemberName;
 
-            public void ReportNewOrderItemUpdate(IContent d) { }
             public void ReportNewOrderItemUpdate(OrderItemModel orderItem) { }
             public void UpdateOrderItemUpdate(int nodeId, string editedBy, string editedByMemberName, bool significant = false, bool isPending = false, bool updateFromMail = false)
             {

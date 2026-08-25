@@ -229,16 +229,62 @@ men följande beroenden kvarstår.
   i 10 filer och motsvarande döda config i `Web.config` (`clientDependency`-sektionen, moduler,
   handlers, Razor-namnrymden `Examine`).
 
-- [ ] Ta bort `UmbracoCms`/`UmbracoCms.Core`-paketen  
-  Kräver att punkterna under "Autentisering & Membership" ovan är klara först — `umbraco.dll` används
-  fortfarande direkt av tre controllers. När de är migrerade kan hela paketet samt referenserna
-  `umbraco`, `Umbraco.Core`, `businesslogic`, `cms`, `interfaces`, `controls`, `umbraco.providers`,
-  `umbraco.editorControls`, `umbraco.DataLayer`, `umbraco.XmlSerializers`, `umbraco.macroRenderings`,
-  `umbraco.MacroEngines`, `Umbraco.Web.UI`, `UrlRewritingNet.UrlRewriter`, `SQLCE4Umbraco`, `TidyNet`,
-  `Microsoft.ApplicationBlocks.Data`, `Microsoft.Web.Helpers`, `Our.Umbraco.uGoLive*` samt
-  motsvarande config i `Web.config` (Umbraco-appSettings, `UmbracoModule`, Umbraco-handlers,
-  `RazorBuildProvider`/`RazorUmbracoFactory`, `FileSystemProviders`/`BaseRestExtensions`-sektionerna)
-  tas bort i ett svep.
+- [x] Ta bort `UmbracoCms`/`UmbracoCms.Core`-paketen  
+  Punkterna under "Autentisering & Membership" var redan klara (den ursprungliga farhågan om att
+  `umbraco.dll` fortfarande användes direkt av tre controllers var inaktuell) — en genomsökning hittade
+  bara två kvarvarande C#-beröringspunkter: en oanvänd `using Umbraco.Web.Models;` i
+  `ChalmersILLLogoutPageModel.cs`, och en död `ReportNewOrderItemUpdate(IContent d) {}`-overload
+  (plus dess `using Umbraco.Core.Models;`) i testprojektets `StubNotifier`
+  (`OrderItemSurfaceControllerTest.cs`) — noterad som kvarlämning i "Tester"-punkten ovan. Båda
+  togs bort utan vidare ersättning (dödkod). Alla övriga träffar på "umbraco" i kodbasen visade sig
+  vara namnrymden `Chalmers.ILL.UmbracoApi` (avsiktligt kvar, se arkitekturnoteringen), URL-strängen
+  `umbraco/surface/...` i alias-routen/QR-koden (avsiktligt kvar), eller konstantnamn/kommentarer.
+
+  Själva paketreferenserna togs bort ur `Chalmers.ILL.csproj`/`packages.config`: alla
+  `UmbracoCms.Core.6.1.6\lib\*`-referenser (`umbraco`, `Umbraco.Core`, `Umbraco.Web.UI`,
+  `businesslogic`, `cms`, `controls`, `interfaces`, `umbraco.DataLayer`, `umbraco.editorControls`,
+  `umbraco.MacroEngines`, `umbraco.macroRenderings`, `umbraco.providers`, `umbraco.XmlSerializers`,
+  `UrlRewritingNet.UrlRewriter`, `SQLCE4Umbraco`, `System.Data.SqlServerCe(.Entity)`, `TidyNet`,
+  `Microsoft.ApplicationBlocks.Data`, `Microsoft.Web.Helpers`, `Our.Umbraco.uGoLive*`), `UmbracoCms`-
+  och `UmbracoCms.Core`-posterna i `packages.config`, samt `UmbracoCms.props`/`.targets`-import och
+  felkontrollerna i csprojens `EnsureNuGetPackageBuildImports`-target. `Umbraco.Core`-referensen i
+  `Chalmers.ILL.Tests.csproj` togs bort i samma veva. **OBS:** `log4net`-referensen pekade på
+  `UmbracoCms.Core.6.1.6\lib\log4net.dll` — den pekar nu istället på den redan deklarerade
+  fristående `log4net`-paketreferensen (`packages.config` hade redan `log4net 2.0.12` men csprojen
+  använde av misstag fortfarande Umbraco-kopian).
+
+  `Web.config` städades: `FileSystemProviders`-, `BaseRestExtensions`- och `microsoft.scripting`-
+  sektionerna (med tillhörande `configSource`), alla `umbraco*`-appSettings (två block, inklusive
+  de "Umbraco connections"-nycklar som pekade på content-/data type-namn — verifierat att ingen av
+  dem läses någonstans i koden), `UmbracoModule`-registreringen (både den klassiska och IIS7-
+  varianten), Umbraco-handlers (channels, GoogleSpellChecker), `umbraco`-tagPrefixet, samt
+  `RazorBuildProvider`-overriden för `.cshtml`/`.vbhtml`/`.razor` togs bort. Den redan inaktiverade,
+  utkommenterade "Umbraco backoffice locked to Chalmers network"-rewrite-regeln togs också bort.
+  `<system.web.webPages.razor>`s `host`/`pages`/`namespaces` bytte från
+  `umbraco.MacroEngines.RazorUmbracoFactory`/`DynamicNodeContext`/`umbraco`-namnrymden till samma
+  standard-MVC-inställning (`MvcWebRazorHostFactory`/`WebViewPage`/`System.Web.Mvc*`-namnrymder) som
+  `Views/Web.config` redan använder sedan vymigreringen tidigare i listan. Motsvarande fyra
+  `Umbraco.*`-namnrymder togs bort ur `Views/Web.config.transform` (publish-transformen, missad vid
+  den tidigare städningen av `Views/Web.config`).
+
+  Elva rena Umbraco-konfigfiler utan kodberoenden togs bort helt (`Config/404handlers.config`,
+  `BaseRestExtensions.config`, `EmbeddedMedia.config`, `feedProxy.config`, `FileSystemProviders.config`,
+  `metablogConfig.config`, `restExtensions.config`, `scripting.config`, `Skinning.config`,
+  `tinyMceConfig.config`, `xsltExtensions.config`) tillsammans med `Config/Splashes/booting.aspx`
+  och `noNodes.aspx` (den senare hade en `CodeBehind`-attribut som pekade på en `noNodes.aspx.cs`
+  som inte ens fanns — redan dödkod) och deras `<Content Include>`-poster i csprojen.
+
+  Lokala, gitignorade runtime-kvarlämningar i `App_Data` (`Umbraco.sdf`, `umbraco.config`,
+  `Logs/UmbracoTraceLog.txt*`, `TEMP/PluginCache/umbraco-plugins.*`) rördes inte — ospårade i git
+  och utanför scope. De fysiska paketmapparna `packages\UmbracoCms.6.1.6`/`UmbracoCms.Core.6.1.6`
+  (också gitignorade) lämnades kvar på disk men refereras inte längre av något projekt.
+
+  **OBS — ej verifierat i webbläsare:** borttagningen av `RazorBuildProvider`-overriden och bytet av
+  `system.web.webPages.razor`-värdfabriken påverkar bara hur `.cshtml`-vyer kompileras vid körning,
+  vilket varken bygget eller testsviten (som inte renderar vyer) täcker. Byggt och alla 128 tester
+  gröna före och efter, men liksom de tidigare routing-punkterna bör detta stämmas av manuellt i en
+  riktig miljö (IIS/IIS Express) innan man litar på att appen fungerar utan `UmbracoCms`-paketen i
+  produktion.
 
 ## Tester
 
