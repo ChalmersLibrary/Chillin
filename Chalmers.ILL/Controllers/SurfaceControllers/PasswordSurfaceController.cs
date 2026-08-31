@@ -12,7 +12,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
     {
         // The form posts here directly (not to the settings page itself), so redirects must name
         // the settings page explicitly instead of reusing Request.Url.AbsolutePath.
-        const string SettingsPageUrl = "/ChalmersILLSettingsPage";
+        const string SettingsPageUrl = "/bestaellningar/instaellningar/";
 
         IMemberInfoManager _memberInfoManager;
 

@@ -93,8 +93,13 @@ men följande beroenden kvarstår.
   vanligt `Html.BeginForm("ChangePassword", "PasswordSurface", FormMethod.Post, ...)`.
   `PasswordSurfaceController.ChangePassword` byggde dessutom sina redirects på
   `Request.Url.AbsolutePath` (ett Umbraco-trick för att posta till en "snygg" URL och landa
-  tillbaka på samma sida) — pekade på `/bestaellningar/instaellningar`, en URL som inte matchar
-  dagens `RouteConfig` alls. Redirects pekar nu istället uttryckligen på `/ChalmersILLSettingsPage`.
+  tillbaka på samma sida) — pekade på `/bestaellningar/instaellningar`, en URL som vid det här
+  laget inte matchade `RouteConfig` alls (redirects pekade tillfälligt uttryckligen på
+  `/ChalmersILLSettingsPage` istället). **Uppdaterat igen senare:** `/bestaellningar` och
+  `/bestaellningar/instaellningar` är återinförda som permanenta alias-routes i `RouteConfig.cs`
+  (samma mönster som `LegacyUmbracoSurfaceAlias`), så att gamla bokmärken till dessa "fina" slugs
+  fortsätter fungera. Samtliga hårdkodade `/ChalmersILL{OrderListPage,SettingsPage}`-länkar i
+  vyer och denna controller pekar nu återigen på de gamla sluggarna; se `RoutingTest.cs`.
   `Views/Partials/Chalmers.ILL.ChangePassword.cshtml` (och dess modell `PasswordModel.cs`) var
   dödkod utan anropare — borttagna helt, liknande `GetMemberSurfaceController` tidigare.
   `Views/Partials/Settings/EditTemplates.cshtml`s inbäddade JS bytte från den gamla

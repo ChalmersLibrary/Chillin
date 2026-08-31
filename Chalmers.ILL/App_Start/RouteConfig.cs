@@ -20,6 +20,24 @@ namespace Chalmers.ILL
                 defaults: new { id = UrlParameter.Optional }
             );
 
+            // Backwards-compatibility aliases for the old Umbraco content-tree slugs that pointed
+            // at the order list and settings pages before the Umbraco removal. The app's own links
+            // use these slugs again (see ChalmersILL.cshtml et al.), so these routes are what make
+            // them resolve; the wildcard segment absorbs a trailing slash or stray path/query noise.
+            // Settings alias must be registered before the order-list alias, since the order-list
+            // alias's wildcard would otherwise swallow "/bestaellningar/instaellningar" too.
+            routes.MapRoute(
+                name: "LegacyBestaellningarInstaellningarSlugAlias",
+                url: "bestaellningar/instaellningar/{*pathInfo}",
+                defaults: new { controller = "ChalmersILLSettingsPage", action = "Index", pathInfo = UrlParameter.Optional }
+            );
+
+            routes.MapRoute(
+                name: "LegacyBestaellningarSlugAlias",
+                url: "bestaellningar/{*pathInfo}",
+                defaults: new { controller = "ChalmersILLOrderListPage", action = "Index", pathInfo = UrlParameter.Optional }
+            );
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",

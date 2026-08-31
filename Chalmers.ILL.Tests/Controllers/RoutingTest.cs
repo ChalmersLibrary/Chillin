@@ -61,6 +61,58 @@ namespace Chalmers.ILL.Tests.Controllers
         }
 
         [TestMethod]
+        public void LegacyBestaellningarSlugAlias_MapsToOrderListController()
+        {
+            var routes = new RouteCollection();
+            RouteConfig.RegisterRoutes(routes);
+
+            var routeData = GetRouteData(routes, "http://localhost/bestaellningar");
+
+            Assert.IsNotNull(routeData);
+            Assert.AreEqual("ChalmersILLOrderListPage", routeData.Values["controller"]);
+            Assert.AreEqual("Index", routeData.Values["action"]);
+        }
+
+        [TestMethod]
+        public void LegacyBestaellningarSlugAlias_WithTrailingSlash_MapsToOrderListController()
+        {
+            var routes = new RouteCollection();
+            RouteConfig.RegisterRoutes(routes);
+
+            var routeData = GetRouteData(routes, "http://localhost/bestaellningar/");
+
+            Assert.IsNotNull(routeData);
+            Assert.AreEqual("ChalmersILLOrderListPage", routeData.Values["controller"]);
+            Assert.AreEqual("Index", routeData.Values["action"]);
+        }
+
+        [TestMethod]
+        public void LegacyBestaellningarInstaellningarSlugAlias_MapsToSettingsController()
+        {
+            var routes = new RouteCollection();
+            RouteConfig.RegisterRoutes(routes);
+
+            var routeData = GetRouteData(routes, "http://localhost/bestaellningar/instaellningar");
+
+            Assert.IsNotNull(routeData);
+            Assert.AreEqual("ChalmersILLSettingsPage", routeData.Values["controller"]);
+            Assert.AreEqual("Index", routeData.Values["action"]);
+        }
+
+        [TestMethod]
+        public void LegacyBestaellningarInstaellningarSlugAlias_WithTrailingSlash_MapsToSettingsController()
+        {
+            var routes = new RouteCollection();
+            RouteConfig.RegisterRoutes(routes);
+
+            var routeData = GetRouteData(routes, "http://localhost/bestaellningar/instaellningar/");
+
+            Assert.IsNotNull(routeData);
+            Assert.AreEqual("ChalmersILLSettingsPage", routeData.Values["controller"]);
+            Assert.AreEqual("Index", routeData.Values["action"]);
+        }
+
+        [TestMethod]
         public void DefaultRoute_AxdResource_UsesStopRoutingHandler()
         {
             var routes = new RouteCollection();
