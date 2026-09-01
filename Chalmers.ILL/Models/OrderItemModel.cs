@@ -27,9 +27,13 @@ namespace Chalmers.ILL.Models
             PreviousStatusId = -1;
             LastDeliveryStatusId = -1;
             TypeId = -1;
+            Type = "";
             DeliveryLibraryId = -1;
+            DeliveryLibrary = "";
             CancellationReasonId = -1;
+            CancellationReason = "";
             PurchasedMaterialId = -1;
+            PurchasedMaterial = "";
             SierraInfo = new SierraModel();
             PatronAffiliation = "Ej hämtad";
         }

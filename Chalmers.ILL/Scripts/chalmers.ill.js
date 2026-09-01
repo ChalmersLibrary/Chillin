@@ -561,17 +561,19 @@ function loadOrderItemSummary(id)
             $("#" + json.NodeId + " div[data-column='createDate']").text(followUpDate.getFullYear() + "-" + ("00" + (followUpDate.getMonth() + 1)).substr(-2) + "-" + ("00" + followUpDate.getDate()).substr(-2));
 
             // Update type
-            $("#" + json.NodeId + " div[data-column='type']").text((json.Type.toString().toLowerCase().indexOf('inköpsförslag') > -1 ? purchaseLibraries[json.PurchaseLibrary] + ' ' + json.Type : json.Type));
+            var typeText = json.Type || '';
+            $("#" + json.NodeId + " div[data-column='type']").text((typeText.toLowerCase().indexOf('inköpsförslag') > -1 ? purchaseLibraries[json.PurchaseLibrary] + ' ' + typeText : typeText));
 
             // Update delivery library
             var delLibDiv = $("#" + json.NodeId + " div[data-column='deliveryLibrary']");
-            delLibDiv.text(getSigelFromLibraryName(json.DeliveryLibrary));
+            var deliveryLibraryText = json.DeliveryLibrary || '';
+            delLibDiv.text(getSigelFromLibraryName(deliveryLibraryText));
 
             // TODO: Should solve this in some less hard coded way.
             delLibDiv.removeClass("Huvudbiblioteket");
             delLibDiv.removeClass("Arkitekturbiblioteket");
             delLibDiv.removeClass("Lindholmenbiblioteket");
-            delLibDiv.addClass(json.DeliveryLibrary);
+            delLibDiv.addClass(deliveryLibraryText);
 
 
             // Update status

@@ -1807,18 +1807,28 @@ namespace Chalmers.ILL.OrderItems
             }
             orderItem.LastDeliveryStatusString = (orderItem.LastDeliveryStatus ?? "").Split(':').Last();
 
-            // Type — look up from config; preserve if not found
+            // Type — look up from config; preserve if not found; default to "" when unset,
+            // so an unclassified new order (TypeId == -1) never leaves Type as a C# null
+            // (callers like the order list view call Type.ToString() unconditionally).
             if (orderItem.TypeId != -1)
             {
                 var v = _orderConfig.GetValueById(orderItem.TypeId);
                 if (!string.IsNullOrEmpty(v)) orderItem.Type = v;
             }
+            else
+            {
+                orderItem.Type = "";
+            }
 
-            // Delivery Library — look up from config; preserve if not found
+            // Delivery Library — look up from config; preserve if not found; default to ""
             if (orderItem.DeliveryLibraryId != -1)
             {
                 var v = _orderConfig.GetValueById(orderItem.DeliveryLibraryId);
                 if (!string.IsNullOrEmpty(v)) orderItem.DeliveryLibrary = v;
+            }
+            else
+            {
+                orderItem.DeliveryLibrary = "";
             }
 
             // Cancellation reason
@@ -1827,12 +1837,20 @@ namespace Chalmers.ILL.OrderItems
                 var v = _orderConfig.GetValueById(orderItem.CancellationReasonId);
                 if (!string.IsNullOrEmpty(v)) orderItem.CancellationReason = v;
             }
+            else
+            {
+                orderItem.CancellationReason = "";
+            }
 
             // Purchased material
             if (orderItem.PurchasedMaterialId != -1)
             {
                 var v = _orderConfig.GetValueById(orderItem.PurchasedMaterialId);
                 if (!string.IsNullOrEmpty(v)) orderItem.PurchasedMaterial = v;
+            }
+            else
+            {
+                orderItem.PurchasedMaterial = "";
             }
 
             orderItem.EditedByCurrentMember = false;

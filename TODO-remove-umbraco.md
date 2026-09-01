@@ -95,6 +95,37 @@ men följande beroenden kvarstår.
   inte riktiga appvyer, lämnade orörda. `fileEncoding="UTF-8"` i `Web.config` behålls ändå som
   extra skydd (ofarligt, kan skydda `.aspx`-relaterat innehåll om sådant tillkommer).
 
+- [x] Fixa null `Type` (och `DeliveryLibrary`/`CancellationReason`/`PurchasedMaterial`) på nya ordrar  
+  Upptäckt av användaren: en nyskapad, ännu oklassificerad order (`TypeId == -1`, dvs. inget av
+  Bok/Artikel/Inköpsförslag valt) fick `Type` som en riktig C#-`null` istället för `""`, vilket
+  kraschar `type.ToString()`-anropet i `ChalmersILLOrderListPage.cshtml:233` (och motsvarande i
+  `chalmers.ill.js` vid SignalR-driven radrefresh). Grundorsak: `EntityFrameworkOrderItemManager.
+  FillOutStuff` (rad ~1810) hade en `if (orderItem.TypeId != -1) { ... }`-guard helt utan
+  `else`-gren. Commit "Goodbye umbraco data types." bytte ut den ursprungliga EF-migrerings-
+  koden (`orderItem.Type = orderItem.TypeId != -1 ? umbraco.library.GetPreValueAsString(...) :
+  ""` — som *alltid* satte en sträng) mot dagens `if`-utan-`else`, som lämnar `null` orört när
+  `TypeId == -1`. Exakt samma mönster fanns i tre andra fält i samma metod
+  (`DeliveryLibrary`/`CancellationReason`/`PurchasedMaterial`) — `Status`/`PreviousStatus`/
+  `LastDeliveryStatus` klarade sig undan eftersom de redan skyddas nedströms med
+  `(x ?? "").Split(...)`. Åtgärdat med `else`-grenar i `FillOutStuff` som sätter `""` (samma som
+  originalternären), plus samma default i `OrderItemModel`s konstruktor som extra skydd för
+  eventuella framtida skapandevägar som inte går via `FillOutStuff`. Karakteriseringstester i
+  nya `EntityFrameworkOrderItemManagerTest.cs` (anropar den privata `FillOutStuff` via
+  reflection med stubbad `IChillinOrderConfiguration`/`IOrderItemSearcher` — kräver ingen
+  databas eller Elasticsearch).
+
+  **Uppföljning, samma dag:** fixen ovan stoppar bara *nya* nullvärden — ordrar som redan hunnit
+  skapas med `Type`/`DeliveryLibrary` = `null` innan fixen ligger redan så i
+  Elasticsearch-indexet (listsidan läser därifrån, får aldrig `FillOutStuff` körd igen bara för
+  att visas), och kraschade fortfarande listsidan helt (så att ordern inte gick att öppna för
+  att klassificera manuellt). `ChalmersILLOrderListPage.cshtml:232-233` anropade `.ToString()`
+  direkt på `object type`/`object library` utan nullkoll — bytt mot `Convert.ToString(...)`
+  (returnerar `""` för `null` istället för att kasta `NullReferenceException`). Samma mönster i
+  `chalmers.ill.js` rad ~564-574 (SignalR-driven radrefresh) — `json.Type.toString()` kastade
+  `TypeError` på klientsidan; bytt mot `json.Type || ''`/`json.DeliveryLibrary || ''`. Ingen
+  testtäckning möjlig för dessa två ställen (Razor `@helper`-rendering och inline JS saknar
+  testinfrastruktur i det här projektet, se anteckning under "Tester").
+
 - [x] Fixa trasiga omdirigerings-URL:er efter inloggning  
   Upptäckt när ett konto faktiskt loggades in för första gången sedan inloggningsspärren ovan
   återinfördes: `LoginSurfaceController.HandleLogin` omdirigerar till

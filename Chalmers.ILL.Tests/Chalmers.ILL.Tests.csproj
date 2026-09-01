@@ -133,6 +133,7 @@
     <Compile Include="Members\MemberFileStoreTest.cs" />
     <Compile Include="Members\MemberInfoManagerTest.cs" />
     <Compile Include="OrderItems\BulkDataManagerTest.cs" />
+    <Compile Include="OrderItems\EntityFrameworkOrderItemManagerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statistics\StatisticsTest.cs" />
   </ItemGroup>
