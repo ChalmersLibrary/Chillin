@@ -84,6 +84,19 @@ men följande beroenden kvarstår.
   utan att behöva röra alla 24 drabbade vyfilerna. Kräver omstart av apppoolen för att slå
   igenom (Razor-vyer kompileras bara vid första anropet).
 
+- [x] Fixa trasiga omdirigerings-URL:er efter inloggning  
+  Upptäckt när ett konto faktiskt loggades in för första gången sedan inloggningsspärren ovan
+  återinfördes: `LoginSurfaceController.HandleLogin` omdirigerar till
+  `ConfigurationManager.AppSettings["orderListPageUrl"]` (icke-Desk-konton) eller hårdkodat
+  `/disk/` (Desk-konton) — men `orderListPageUrl` stod till `/lista` i `Web.config`, en gammal
+  slug som aldrig haft en matchande route, och `/disk/` saknade route helt. Ingen av URL:erna
+  märktes tidigare eftersom ingen inloggning någonsin behövde slutföras (se punkten om
+  inloggningsspärr ovan). `orderListPageUrl` ändrat till `/bestaellningar` (samma kanoniska slug
+  som redan återinfördes i `RouteConfig.cs`, se punkten om routing ovan). Ny
+  `LegacyDiskSlugAlias`-route tillagd i `RouteConfig.cs` (samma mönster som
+  `LegacyBestaellningarSlugAlias`) så `/disk/` faktiskt resolvar mot
+  `ChalmersILLDiskPageController`. Nya routingtester i `RoutingTest.cs`.
+
 - [x] Bygg en SuperAdmin-sida för kontohantering  
   Ny flik "Konton" i Inställningar-sidan (`MemberAdminSurfaceController` +
   `Views/Partials/Settings/MemberAdmin.cshtml`), synlig bara om

@@ -87,6 +87,32 @@ namespace Chalmers.ILL.Tests.Controllers
         }
 
         [TestMethod]
+        public void LegacyDiskSlugAlias_MapsToDiskPageController()
+        {
+            var routes = new RouteCollection();
+            RouteConfig.RegisterRoutes(routes);
+
+            var routeData = GetRouteData(routes, "http://localhost/disk");
+
+            Assert.IsNotNull(routeData);
+            Assert.AreEqual("ChalmersILLDiskPage", routeData.Values["controller"]);
+            Assert.AreEqual("Index", routeData.Values["action"]);
+        }
+
+        [TestMethod]
+        public void LegacyDiskSlugAlias_WithTrailingSlash_MapsToDiskPageController()
+        {
+            var routes = new RouteCollection();
+            RouteConfig.RegisterRoutes(routes);
+
+            var routeData = GetRouteData(routes, "http://localhost/disk/");
+
+            Assert.IsNotNull(routeData);
+            Assert.AreEqual("ChalmersILLDiskPage", routeData.Values["controller"]);
+            Assert.AreEqual("Index", routeData.Values["action"]);
+        }
+
+        [TestMethod]
         public void LegacyBestaellningarInstaellningarSlugAlias_MapsToSettingsController()
         {
             var routes = new RouteCollection();

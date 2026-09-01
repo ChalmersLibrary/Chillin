@@ -38,6 +38,15 @@ namespace Chalmers.ILL
                 defaults: new { controller = "ChalmersILLOrderListPage", action = "Index", pathInfo = UrlParameter.Optional }
             );
 
+            // Backwards-compatibility alias for the old Umbraco content-tree slug for the Desk
+            // landing page. LoginSurfaceController redirects members with the "Desk" role here
+            // after login; this route is what makes that URL resolve.
+            routes.MapRoute(
+                name: "LegacyDiskSlugAlias",
+                url: "disk/{*pathInfo}",
+                defaults: new { controller = "ChalmersILLDiskPage", action = "Index", pathInfo = UrlParameter.Optional }
+            );
+
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
