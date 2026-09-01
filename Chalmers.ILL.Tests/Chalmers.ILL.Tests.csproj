@@ -117,6 +117,7 @@
     <Compile Include="DependencyResolution\UnityDependencyResolversTest.cs" />
     <Compile Include="Mail\AutomaticMailSendingEngineTest.cs" />
     <Compile Include="Mail\MailBodyFixerTest.cs" />
+    <Compile Include="Controllers\AuthorizationTest.cs" />
     <Compile Include="Controllers\MediaItemControllersTest.cs" />
     <Compile Include="Controllers\ChillinTextSurfaceControllerTest.cs" />
     <Compile Include="Controllers\MaintenanceSurfaceControllerTest.cs" />

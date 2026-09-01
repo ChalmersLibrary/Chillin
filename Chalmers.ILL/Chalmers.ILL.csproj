@@ -609,6 +609,7 @@
     <Compile Include="Members\MemberInfoManager.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="Startup\" />

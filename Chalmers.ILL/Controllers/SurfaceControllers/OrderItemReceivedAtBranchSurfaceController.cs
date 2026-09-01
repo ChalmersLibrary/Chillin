@@ -8,6 +8,10 @@ using System.Web.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
+    // Must stay reachable without login: physical delivery slips already printed with QR codes
+    // point at this URL (see the LegacyUmbracoSurfaceAlias comment in RouteConfig.cs) and can't
+    // be reprinted.
+    [AllowAnonymous]
     public class OrderItemReceivedAtBranchSurfaceController : Controller
     {
         IOrderItemManager _orderItemManager;

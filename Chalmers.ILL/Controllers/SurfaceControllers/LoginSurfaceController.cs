@@ -9,6 +9,7 @@ using System.Configuration;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
+    [AllowAnonymous]
     public class LoginSurfaceController : Controller
     {
         IMemberInfoManager _memberInfoManager;

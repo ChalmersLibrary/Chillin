@@ -48,6 +48,22 @@ men följande beroenden kvarstår.
   [System.Web.Helpers.Crypto]::HashPassword("nya-losenordet-har")
   ```
 
+- [x] Återinför inloggningsspärr på skyddade sidor  
+  **Allvarligt fynd, upptäckt sent:** hela appen gick att nå utloggad, utan att någon kod
+  klagade. Skyddet av sidorna (allt utom inloggningssidan) satt aldrig i den här kodbasen —
+  det sköttes av Umbracos "Public Access"-nodskydd, konfigurerat i CMS-innehållsträdet, inte i
+  kod. Det försvann tyst när Umbraco togs bort och syntes inte förrän `ChalmersILLController`
+  (rotsidan `/`) slutade krascha (se punkten ovan om `RenderBody`) och den okrypterade
+  startsidan blev synlig. `Web.config` hade dessutom `<authorization><allow users="?" />`
+  (tillåter alla) och `<forms loginUrl="login.aspx">` som pekade på en aspx-sida som aldrig
+  funnits i MVC-appen. Åtgärdat med en global `AuthorizeAttribute` registrerad via ny
+  `App_Start/FilterConfig.cs` (kallad från `Global.asax.cs`), med `[AllowAnonymous]` bara på
+  `ChalmersILLLoginPageController`, `LoginSurfaceController` (login-POST) och
+  `OrderItemReceivedAtBranchSurfaceController` (QR-kod-flödet för redan utskrivna följesedlar,
+  se `LegacyUmbracoSurfaceAlias`-kommentaren i `RouteConfig.cs`). `loginUrl` uppdaterad till
+  `~/ChalmersILLLoginPage`. Karakteriseringstester i `AuthorizationTest.cs` verifierar både att
+  filtret registreras och exakt vilka controllers som är undantagna.
+
 - [x] Bygg en SuperAdmin-sida för kontohantering  
   Ny flik "Konton" i Inställningar-sidan (`MemberAdminSurfaceController` +
   `Views/Partials/Settings/MemberAdmin.cshtml`), synlig bara om
