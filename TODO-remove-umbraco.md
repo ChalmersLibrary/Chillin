@@ -79,10 +79,21 @@ men följande beroenden kvarstår.
   `ChalmersILLLogoutPage.cshtml`. Verktyget/editorn som gjorde de raderna sparade filerna utan
   BOM under den migreringen, vilket gjort dem sårbara sedan augusti — det syntes bara inte
   förrän inloggningsspärren ovan gjorde att `ChalmersILLLoginPage.cshtml` faktiskt renderades.
-  Åtgärdat med `fileEncoding="UTF-8"` tillagt i `<globalization>` — tvingar korrekt
-  UTF-8-läsning oavsett BOM, robust mot att fler filer tappar sin BOM på samma sätt i framtiden,
-  utan att behöva röra alla 24 drabbade vyfilerna. Kräver omstart av apppoolen för att slå
-  igenom (Razor-vyer kompileras bara vid första anropet).
+  Första försöket: `fileEncoding="UTF-8"` tillagt i `<globalization>`. **Räckte inte** —
+  verifierat i drift efteråt med kvarstående mojibake (`inkÃ¶psfÃ¶rslag` i
+  `ChalmersILLOrderListPage.cshtml`), trots att filens bytes på disk fortfarande var giltig,
+  enkelkodad UTF-8. Slutsats: `<globalization fileEncoding>` respekteras bara av det klassiska
+  `.aspx`-sidparsersystemet, inte av Razor-build-providern som läser `.cshtml`. Den faktiska
+  fixen är att lägga till en riktig UTF-8-BOM i varje `.cshtml`-fil som saknar en — det
+  respekteras universellt oavsett build provider. Gjort med nytt script
+  `scripts/Add-Utf8BomToCshtml.ps1` (rena byte-operationer, rör inte filernas innehåll) kört mot
+  `Chalmers.ILL/Views` — 8 filer saknade fortfarande BOM där (`ChalmersILL.cshtml`,
+  `ChalmersILLDiskPage.cshtml`, `ChalmersILLLoginPage.cshtml`, `ChalmersILLLogoutPage.cshtml`,
+  `ChalmersILLOrderListPage.cshtml`, `ChalmersILLSettingsPage.cshtml`, `ChalmersILLStartPage.cshtml`,
+  `Partials/Settings/MemberAdmin.cshtml`); resten av de tidigare räknade 24 filerna utan BOM
+  ligger under `Chalmers.ILL/Umbraco/Scripting/templates/cshtml/` — oanvänd Umbraco-scaffolding,
+  inte riktiga appvyer, lämnade orörda. `fileEncoding="UTF-8"` i `Web.config` behålls ändå som
+  extra skydd (ofarligt, kan skydda `.aspx`-relaterat innehåll om sådant tillkommer).
 
 - [x] Fixa trasiga omdirigerings-URL:er efter inloggning  
   Upptäckt när ett konto faktiskt loggades in för första gången sedan inloggningsspärren ovan
