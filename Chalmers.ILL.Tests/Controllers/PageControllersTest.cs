@@ -29,6 +29,21 @@ namespace Chalmers.ILL.Tests.Controllers
         }
 
         [TestMethod]
+        public void ChalmersILLController_Index_DoesNotReturnLayoutViewDirectly()
+        {
+            // ChalmersILL.cshtml is the shared layout (it calls @RenderBody()) and throws
+            // "cannot be requested directly because it calls the RenderBody method" if returned
+            // as the response view instead of being used via Layout = "ChalmersILL.cshtml".
+            var controller = new ChalmersILLController(new StubMemberInfoManager());
+            SetHttpContext(controller);
+
+            var result = controller.Index() as ViewResult;
+
+            Assert.IsNotNull(result);
+            Assert.AreNotEqual("~/Views/ChalmersILL.cshtml", result.ViewName);
+        }
+
+        [TestMethod]
         public void ChalmersILLController_Index_PopulatesMemberData()
         {
             var memberManager = new StubMemberInfoManager();

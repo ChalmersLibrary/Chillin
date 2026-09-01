@@ -15,9 +15,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
 
         public ActionResult Index()
         {
-            var customModel = new ChalmersILLModel();
+            var customModel = new ChalmersILLStartPageModel();
             _memberInfoManager.PopulateModelWithMemberData(Request, Response, customModel);
-            return View("~/Views/ChalmersILL.cshtml", customModel);
+            return View("~/Views/ChalmersILLStartPage.cshtml", customModel);
         }
     }
 }
