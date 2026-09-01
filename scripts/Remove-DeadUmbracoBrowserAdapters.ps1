@@ -47,31 +47,31 @@ if (-not $browserFiles) {
     exit 0
 }
 
-$matches = @()
+$matchedFiles = @()
 
 foreach ($file in $browserFiles) {
     $content = Get-Content -Path $file.FullName -Raw
     if ($content -match '(?i)umbraco') {
-        $matches += $file
+        $matchedFiles += $file
     }
 }
 
-if (-not $matches) {
+if (-not $matchedFiles) {
     Write-Host "Hittade $($browserFiles.Count) .browser-fil(er) under '$Path', men inga refererade till Umbraco." -ForegroundColor Green
     exit 0
 }
 
-Write-Host "Hittade $($matches.Count) .browser-fil(er) med Umbraco-referenser:" -ForegroundColor Cyan
-foreach ($file in $matches) {
+Write-Host "Hittade $($matchedFiles.Count) .browser-fil(er) med Umbraco-referenser:" -ForegroundColor Cyan
+foreach ($file in $matchedFiles) {
     Write-Host "  $($file.FullName)"
 }
 
 if ($Delete) {
-    foreach ($file in $matches) {
+    foreach ($file in $matchedFiles) {
         Remove-Item -Path $file.FullName -Force
         Write-Host "Borttagen: $($file.FullName)" -ForegroundColor Red
     }
-    Write-Host "`nKlart. $($matches.Count) fil(er) borttagna." -ForegroundColor Green
+    Write-Host "`nKlart. $($matchedFiles.Count) fil(er) borttagna." -ForegroundColor Green
 } else {
     Write-Host "`nDetta var en granskning (dry run) - inga filer togs bort." -ForegroundColor Yellow
     Write-Host "Kör med -Delete för att faktiskt ta bort filerna."
