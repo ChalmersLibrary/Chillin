@@ -64,6 +64,26 @@ men följande beroenden kvarstår.
   `~/ChalmersILLLoginPage`. Karakteriseringstester i `AuthorizationTest.cs` verifierar både att
   filtret registreras och exakt vilka controllers som är undantagna.
 
+- [x] Åtgärda mojibake (Ã¤/Ã¥/Ã¶) på sidor utan BOM  
+  Efter att inloggningsspärren ovan gjorde inloggningssidan synlig för alla igen upptäcktes att
+  åäö visades som `Ã¤`/`Ã¥`/`Ã¶` där. Orsak: `Web.config`s `<globalization>` deklarerade
+  `requestEncoding`/`responseEncoding` men inte `fileEncoding`, så ASP.NET:s Razor-parser läser
+  `.cshtml`-filer utan byte-order-mark (BOM) med systemets ANSI-kodsida istället för UTF-8 — 24
+  av 54 vyer saknar BOM, inklusive huvudlayouten `ChalmersILL.cshtml` och `ChalmersILLLoginPage.cshtml`.
+  **Rättelse:** detta är, till skillnad från vad som först antecknades här, en riktig regression
+  från Umbraco-borttagningen, inte en obesläktad gammal bugg. `git show` på commit
+  "Hello MVC views" (0d2279e, 2026-08-20) visar att raden som bytte ut Umbracos
+  `@inherits Umbraco.Web.Mvc.UmbracoViewPage<...>` mot `@inherits System.Web.Mvc.WebViewPage<...>`
+  hade BOM före ändringen (`-﻿@inherits ...` i diffen) men saknar den efter — samma mönster
+  upprepas i minst `ChalmersILLLoginPage.cshtml`, `ChalmersILLDiskPage.cshtml` och
+  `ChalmersILLLogoutPage.cshtml`. Verktyget/editorn som gjorde de raderna sparade filerna utan
+  BOM under den migreringen, vilket gjort dem sårbara sedan augusti — det syntes bara inte
+  förrän inloggningsspärren ovan gjorde att `ChalmersILLLoginPage.cshtml` faktiskt renderades.
+  Åtgärdat med `fileEncoding="UTF-8"` tillagt i `<globalization>` — tvingar korrekt
+  UTF-8-läsning oavsett BOM, robust mot att fler filer tappar sin BOM på samma sätt i framtiden,
+  utan att behöva röra alla 24 drabbade vyfilerna. Kräver omstart av apppoolen för att slå
+  igenom (Razor-vyer kompileras bara vid första anropet).
+
 - [x] Bygg en SuperAdmin-sida för kontohantering  
   Ny flik "Konton" i Inställningar-sidan (`MemberAdminSurfaceController` +
   `Views/Partials/Settings/MemberAdmin.cshtml`), synlig bara om
