@@ -18,6 +18,7 @@ namespace Chalmers.ILL
         {
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+            ViewEngineConfig.RegisterViewEngines(ViewEngines.Engines);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
         }
     }

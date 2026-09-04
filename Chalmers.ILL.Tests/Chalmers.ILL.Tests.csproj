@@ -127,6 +127,7 @@
     <Compile Include="Controllers\PasswordSurfaceControllerTest.cs" />
     <Compile Include="Controllers\RoutingTest.cs" />
     <Compile Include="Controllers\StatisticsSurfaceControllerTest.cs" />
+    <Compile Include="Controllers\ViewEngineConfigTest.cs" />
     <Compile Include="Members\FileMembershipProviderTest.cs" />
     <Compile Include="Members\FileRoleProviderTest.cs" />
     <Compile Include="Members\MemberAdminServiceTest.cs" />

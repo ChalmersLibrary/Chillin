@@ -126,6 +126,32 @@ men följande beroenden kvarstår.
   testtäckning möjlig för dessa två ställen (Razor `@helper`-rendering och inline JS saknar
   testinfrastruktur i det här projektet, se anteckning under "Tester").
 
+- [x] Återinför `~/Views/Partials/` som sökväg för `PartialView(...)`  
+  **Allvarligaste fyndet hittills.** Upptäckt när en order skulle öppnas: 500-fel
+  "The partial view 'Chalmers.ILL.OrderItem' was not found or no view engine supports the
+  searched locations" — trots att `OrderItemSurfaceController.RenderOrderItem` (och `_orderConfig`
+  m.m.) körde helt utan fel; kraschen sker efter att controllern returnerat, när MVC faktiskt
+  ska hitta och rendera vyn. Orsak: Umbracos egen view engine-registrering lade tidigare till
+  `~/Views/Partials/{0}.cshtml` som sökväg (Umbraco använder samma konvention för sina egna
+  makro-partials); ingen ersättning registrerades när Umbraco togs bort, och standard-
+  `RazorViewEngine` letar bara i `~/Views/{Controller}/` och `~/Views/Shared/`. **Detta bröt i
+  praktiken hela orderhanteringsflödet** — alla ~20 partial views under `Views/Partials/`
+  (`Chalmers.ILL.OrderItem`, samtliga `Chalmers.ILL.Action.*` såsom Return/Provider/Delivery/
+  Claim/Mail/PatronData/ReceiveBook/Reference/ProviderReturnDate/PatronReturnDate/Anonymize/
+  LogEntry, `Chalmers.ILL.LogItem`, alla `DeliveryType/*`, samt `Settings/ChangePassword`,
+  `Settings/EditTemplates`, `Settings/ModifyProviderData`, `Settings/ChillinText`,
+  `Settings/MemberAdmin`) har varit trasiga sedan Umbraco-borttagningen — de refereras alla via
+  bara namn (`PartialView("Chalmers.ILL.Action.Return")` osv.), inte fullständig `~/Views/...`-
+  sökväg. Ingen av de ~40 controller-testerna fångade detta eftersom de anropar controller-
+  metoden direkt utan att gå via `ViewEngines.Engines` — precis samma blinda fläck som
+  `RenderBody`-kraschen på rotsidan tidigare i den här listan. Åtgärdat med ny
+  `App_Start/ViewEngineConfig.cs` som lägger till `~/Views/Partials/{0}.cshtml` i både
+  `PartialViewLocationFormats` och `ViewLocationFormats` på den registrerade `RazorViewEngine`,
+  kallad från `Global.asax.cs`. Karakteriseringstester i nya `ViewEngineConfigTest.cs` verifierar
+  att sökvägen läggs till utan att de befintliga sökvägarna försvinner (kan inte verifiera att
+  en fysisk fil faktiskt hittas i ett ohostat testprojekt, bara att konfigurationen är rätt
+  sammansatt).
+
 - [x] Fixa trasiga omdirigerings-URL:er efter inloggning  
   Upptäckt när ett konto faktiskt loggades in för första gången sedan inloggningsspärren ovan
   återinfördes: `LoginSurfaceController.HandleLogin` omdirigerar till

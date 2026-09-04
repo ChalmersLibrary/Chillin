@@ -611,6 +611,7 @@
   <ItemGroup>
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\ViewEngineConfig.cs" />
     <Folder Include="Properties\PublishProfiles\" />
     <Folder Include="Startup\" />
     <Folder Include="Views\Home\" />
