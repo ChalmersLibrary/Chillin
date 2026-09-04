@@ -1,0 +1,17 @@
+{
+  "OrderStatus": [
+    { "Id": 0, "Order": 0, "Value": "<exempel>" }
+  ],
+  "OrderType": [
+    { "Id": 0, "Order": 0, "Value": "<exempel>" }
+  ],
+  "DeliveryLibrary": [
+    { "Id": 0, "Order": 0, "Value": "<exempel>" }
+  ],
+  "CancellationReason": [
+    { "Id": 0, "Order": 0, "Value": "<exempel>" }
+  ],
+  "PurchasedMaterial": [
+    { "Id": 0, "Order": 0, "Value": "<exempel>" }
+  ]
+}

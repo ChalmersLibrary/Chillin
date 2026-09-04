@@ -207,6 +207,7 @@ Chalmers.ILL/Config/*
 !Chalmers.ILL/Config/ExamineSettings.config
 !Chalmers.ILL/Config/umbracoSettings.config
 !Chalmers.ILL/Config/members.example.json
+!Chalmers.ILL/Config/chillinPrevalues.example.json
 Chalmers.ILL/Install
 Chalmers.ILL/MasterPages
 Chalmers.ILL/Media
