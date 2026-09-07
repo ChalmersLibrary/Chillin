@@ -171,6 +171,19 @@ men följande beroenden kvarstår.
   `StatusString` på andra ställen. Ingen testtäckning möjlig (samma begränsning som tidigare
   Razor-`@helper`-fynd, se anteckning under "Tester").
 
+  **Uppföljning, samma dag:** samma bugg fanns i ytterligare två statusväljare med identisk
+  `allowedStatusValues.Contains(status.Value)`-jämförelse — `Chalmers.ILL.Action.Mail.cshtml`
+  (skicka mail-partialen, rad ~132-165) och `Chalmers.ILL.Action.LogEntry.cshtml`
+  (loggpost-partialen, rad ~38-95, inklusive `maybeLost`/`lost`-specialfallen för
+  "Förlorad?"/"Förlorad"). Båda fixade med samma `.Split(':').Last()`-mönster. Sökte igenom
+  samtliga 7 filer som refererar `Model.AvailableStatuses` i hela `Views`-katalogen för att
+  bekräfta att inga fler ställen har samma bugg — de fyra kvarvarande
+  (`DeliveryType/BookInstantLoan.cshtml`, `DeliveryType/BookReadAtLibrary.cshtml`,
+  `DeliveryType/ArticleInInfodisk.cshtml`, `Chalmers.ILL.Action.ReceiveBook.cshtml`) använder
+  redan antingen `.Value.Contains("Utlånad"/"Levererad"/"Infodisk"/"Transport")` (delsträngs-
+  matchning, fungerar oavsett prefix) eller jämför hela `"17:FOLIO"`-strängen — inga ändringar
+  behövda där.
+
 - [x] Fixa trasiga omdirigerings-URL:er efter inloggning  
   Upptäckt när ett konto faktiskt loggades in för första gången sedan inloggningsspärren ovan
   återinfördes: `LoginSurfaceController.HandleLogin` omdirigerar till

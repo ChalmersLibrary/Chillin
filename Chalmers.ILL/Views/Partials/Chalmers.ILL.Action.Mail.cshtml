@@ -131,35 +131,39 @@
 
                                 foreach (var status in Model.AvailableStatuses)
                                 {
-                                    if (allowedStatusValues.Contains(status.Value))
+                                    // status.Value is the raw stored form ("02:Åtgärda"); allowedStatusValues
+                                    // (and PreviousStatusString above) are bare labels, so compare/display the
+                                    // part after the colon — same convention as StatusString/ParseStatusPrevalue.
+                                    var statusLabel = status.Value.Split(':').Last();
+                                    if (allowedStatusValues.Contains(statusLabel))
                                     {
-                                        if (status.Value == "Annullerad")
+                                        if (statusLabel == "Annullerad")
                                         {
                                             <li class="dropdown-submenu">
-                                                <a>@status.Value</a>
+                                                <a>@statusLabel</a>
                                                 <ul class="dropdown-menu">
                                                     @foreach (var cancellationReason in Model.AvailableCancellationReasons)
                                                     {
-                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @cancellationReason.Value', @cancellationReason.Id, -1); event.preventDefault();">@cancellationReason.Value</a></li>
+                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@statusLabel -> @cancellationReason.Value', @cancellationReason.Id, -1); event.preventDefault();">@cancellationReason.Value</a></li>
                                                     }
                                                 </ul>
                                             </li>
                                         }
-                                        else if (status.Value == "Inköpt")
+                                        else if (statusLabel == "Inköpt")
                                         {
                                             <li class="dropdown-submenu">
-                                                <a>@status.Value</a>
+                                                <a>@statusLabel</a>
                                                 <ul class="dropdown-menu">
                                                     @foreach (var purchasedMaterial in Model.AvailablePurchasedMaterials)
                                                     {
-                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @purchasedMaterial.Value', -1, @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
+                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@statusLabel -> @purchasedMaterial.Value', -1, @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
                                                     }
                                                 </ul>
                                             </li>
                                         }
                                         else
                                         {
-                                            <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value', -1, -1); event.preventDefault();">@status.Value</a></li>
+                                            <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@statusLabel', -1, -1); event.preventDefault();">@statusLabel</a></li>
                                         }
                                     }
                                 }
