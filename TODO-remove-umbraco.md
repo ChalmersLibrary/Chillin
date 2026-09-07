@@ -152,6 +152,25 @@ men följande beroenden kvarstår.
   en fysisk fil faktiskt hittas i ett ohostat testprojekt, bara att konfigurationen är rätt
   sammansatt).
 
+- [x] Fixa tom dropdown för snabbändring av status  
+  Upptäckt efter att `chillinPrevalues.json` fyllts i på riktigt: typ- och biblioteksbytet
+  fungerade, men "snabbändra status"-dropdownen i `Chalmers.ILL.OrderItem.cshtml` (rad ~100-168)
+  var tom. Orsak: `OrderStatus`-värden måste ha formen `"NN:Etikett"` (t.ex. `"02:Åtgärda"`) för
+  att resten av appen ska fungera — `ParseStatusPrevalue`/`StatusString`/`StartsWith("01:")`-
+  kontroller i `ChalmersILLOrderListPage.cshtml` och `FillOutStuff` beror alla på det formatet.
+  Men `allowedStatusValues.Contains(status.Value)` i den här dropdownen jämförde `status.Value`
+  (den fullständiga, oavkortade `"NN:Etikett"`-strängen) direkt mot en hårdkodad lista med bara
+  etiketter (`"Annullerad"`, `"Åtgärda"`, `"Inköpt"`, ...) — matchade aldrig. Verifierat via
+  `git show` på den allra första commiten (5a37c61, "Added intial code base.") att jämförelsen
+  där var mot rena Umbraco-prevalue-strängar utan prefix; det är alltså `AvailableStatuses`-
+  listans format som ändrats mellan gamla Umbraco-prevalues och den nya enhetliga
+  `chillinPrevalues.json`-listan (Umbraco höll tydligen en separat "ren etikett"-variant för
+  just den här dropdownen, skild från det prefixade lagrade `Status`-fältet), inte ett fel i
+  användarens data. Åtgärdat genom att jämföra/visa `status.Value.Split(':').Last()` istället
+  för `status.Value` rakt av — samma konvention som redan används i `ParseStatusPrevalue`/
+  `StatusString` på andra ställen. Ingen testtäckning möjlig (samma begränsning som tidigare
+  Razor-`@helper`-fynd, se anteckning under "Tester").
+
 - [x] Fixa trasiga omdirigerings-URL:er efter inloggning  
   Upptäckt när ett konto faktiskt loggades in för första gången sedan inloggningsspärren ovan
   återinfördes: `LoginSurfaceController.HandleLogin` omdirigerar till

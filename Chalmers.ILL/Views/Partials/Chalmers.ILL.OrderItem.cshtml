@@ -99,18 +99,22 @@
 
                         foreach (var status in Model.AvailableStatuses)
                         {
-                            if (allowedStatusValues.Contains(status.Value))
+                            // status.Value is the raw stored form ("02:Åtgärda"); allowedStatusValues
+                            // (and PreviousStatusString above) are bare labels, so compare/display the
+                            // part after the colon — same convention as StatusString/ParseStatusPrevalue.
+                            var statusLabel = status.Value.Split(':').Last();
+                            if (allowedStatusValues.Contains(statusLabel))
                             {
-                                if (status.Value == "Annullerad")
+                                if (statusLabel == "Annullerad")
                                 {
                                     <li class="dropdown-submenu">
                                         @if (status.Id == Model.OrderItem.StatusId)
                                         {
-                                            <a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a>
+                                            <a href="#" class="disabled-link"><span class="current">@statusLabel</span> <span class="glyphicon glyphicon-ok"></span></a>
                                         }
                                         else
                                         {
-                                            <a href="#">@status.Value</a>
+                                            <a href="#">@statusLabel</a>
                                         }
                                         <ul class="dropdown-menu">
                                             @foreach (var cancellationReason in Model.AvailableCancellationReasons)
@@ -127,16 +131,16 @@
                                         </ul>
                                     </li>
                                 }
-                                else if (status.Value == "Inköpt")
+                                else if (statusLabel == "Inköpt")
                                 {
                                     <li class="dropdown-submenu">
                                         @if (status.Id == Model.OrderItem.StatusId)
                                         {
-                                            <a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a>
+                                            <a href="#" class="disabled-link"><span class="current">@statusLabel</span> <span class="glyphicon glyphicon-ok"></span></a>
                                         }
                                         else
                                         {
-                                            <a href="#">@status.Value</a>
+                                            <a href="#">@statusLabel</a>
                                         }
                                         <ul class="dropdown-menu">
                                             @foreach (var purchasedMaterial in Model.AvailablePurchasedMaterials)
@@ -157,11 +161,11 @@
                                 {
                                     if (status.Id == Model.OrderItem.StatusId)
                                     {
-                                        <li><a href="#" class="disabled-link"><span class="current">@status.Value</span> <span class="glyphicon glyphicon-ok"></span></a></li>
+                                        <li><a href="#" class="disabled-link"><span class="current">@statusLabel</span> <span class="glyphicon glyphicon-ok"></span></a></li>
                                     }
                                     else
                                     {
-                                        <li><a href="#" onclick="setOrderItemStatus(@Model.OrderItem.NodeId, @status.Id); event.preventDefault();">@status.Value</a></li>
+                                        <li><a href="#" onclick="setOrderItemStatus(@Model.OrderItem.NodeId, @status.Id); event.preventDefault();">@statusLabel</a></li>
                                     }
                                 }
                             }
