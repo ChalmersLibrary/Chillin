@@ -1,8 +1,67 @@
 // Local Javascript
 
+// The busy-lock loading wave (the ring of circles shown while the site is locked). It is only
+// started/stopped around actual lock periods (see fullSiteBusyAnimationStart/Stop below) rather
+// than left running for the whole page lifetime: Snap.svg's animation engine (mina) computes
+// elapsed time from requestAnimationFrame, and a tab backgrounded for a long stretch resumes with
+// a huge time delta, which can make the linear interpolation overshoot far past the intended
+// r:4-12 range for a frame (surfacing as e.g. "<circle> attribute r: A negative value is not
+// valid"). Keeping the animation stopped whenever nothing is locked avoids ever hitting that.
+var busyBalls = [];
+var busyAnimationRunning = false;
+
 function animateLoadingBallCb() {
+    if (!busyAnimationRunning) {
+        return;
+    }
     this.animate(this.idleAttr, 500, mina.linear);
     this.next && this.next.animate(this.expandedAttr, 500, mina.linear, animateLoadingBallCb);
+}
+
+function startBusyBallAnimation() {
+    if (busyAnimationRunning) {
+        return;
+    }
+    busyAnimationRunning = true;
+
+    var s = Snap("#chilli");
+    s.clear();
+    busyBalls = [];
+
+    var numberOfBalls = 8;
+    var angle;
+
+    var ballIdle = { r: 4, fill: "#1e1e1e", opacity: 0.2 };
+    var ballExpanded = { r: 12, fill: "#19B9E6", opacity: 1 };
+    var prev = s.circle(50 + Math.cos(0) * 30, 50 + Math.sin(0) * 30, ballIdle.r);
+    prev.attr(ballIdle);
+    prev.idleAttr = ballIdle;
+    prev.expandedAttr = ballExpanded;
+    busyBalls.push(prev);
+
+    var curr;
+    var first = prev;
+    for (i = 1; i < numberOfBalls; i++) {
+        angle = Math.PI * 2 * (i / numberOfBalls);
+        curr = s.circle(50 + Math.cos(angle) * 30, 50 + Math.sin(angle) * 30, ballIdle.r);
+        curr.attr(ballIdle);
+        curr.idleAttr = ballIdle;
+        curr.expandedAttr = ballExpanded;
+        prev.next = curr;
+        prev = curr;
+        busyBalls.push(curr);
+    }
+    curr.next = first;
+
+    first.animate(ballExpanded, 500, mina.linear, animateLoadingBallCb);
+}
+
+function stopBusyBallAnimation() {
+    busyAnimationRunning = false;
+    busyBalls.forEach(function (ball) {
+        ball.stop();
+        ball.next = null;
+    });
 }
 
 // DOM READY
@@ -10,34 +69,6 @@ $(function () {
 
     // Every time document loads, release possible current Member locks
     $(document).ready(function () {
-
-        // Create the SVG image for the loading animation and start animating it in the backgorund
-        var s = Snap("#chilli");
-        var numberOfBalls = 8;
-        var angle;
-
-        var ballIdle = { r:4, fill: "#1e1e1e", opacity: 0.2 };
-        var ballExpanded = { r: 12, fill: "#19B9E6", opacity: 1 };
-        var prev = s.circle(50 + Math.cos(0) * 30, 50 + Math.sin(0) * 30, ballIdle.r);
-        prev.attr(ballIdle);
-        prev.idleAttr = ballIdle;
-        prev.expandedAttr = ballExpanded;
-
-        var curr;
-        var first = prev;
-        for (i = 1; i < numberOfBalls; i++) {
-            angle = Math.PI * 2 * (i / numberOfBalls);
-            curr = s.circle(50 + Math.cos(angle) * 30, 50 + Math.sin(angle) * 30, ballIdle.r);
-            curr.attr(ballIdle);
-            curr.idleAttr = ballIdle;
-            curr.expandedAttr = ballExpanded;
-            prev.next = curr;
-            prev = curr;
-        }
-        curr.next = first;
-
-        first.animate(ballExpanded, 500, mina.linear, animateLoadingBallCb);
-
 
         // Set up the filter buttons
         var btnGroup = $("#filter-buttons");
@@ -241,6 +272,8 @@ var $docTimer = $(document), timer;
 
 function fullSiteBusyAnimationStart()
 {
+    startBusyBallAnimation();
+
     timer && clearTimeout(timer);
     timer = setTimeout(function () {
         $("#lockscreen").animate({
@@ -259,6 +292,7 @@ function fullSiteBusyAnimationStop()
     $("#lockscreen").hide();
     $("#busylock").hide();
     $("#lockscreen").css("opacity", 0);
+    stopBusyBallAnimation();
 }
 
 function closeOrderItem(elem)
