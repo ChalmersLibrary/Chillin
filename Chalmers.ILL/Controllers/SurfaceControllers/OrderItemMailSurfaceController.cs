@@ -103,8 +103,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     }
 	            }
 
-                // Set status property if it differs from newStatus and if it is not -1 (no change)
-                if (orderItem.StatusId != m.newStatusId && orderItem.StatusId != -1)
+                // Set status property if it differs from current and if newStatusId is not -1 (no change)
+                if (orderItem.StatusId != m.newStatusId && m.newStatusId != -1)
                 {
                     _orderItemManager.SetStatus(m.nodeId, m.newStatusId, eventId, false, false);
                 }

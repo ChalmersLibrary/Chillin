@@ -160,12 +160,21 @@ men följande beroenden kvarstår.
   kontroller i `ChalmersILLOrderListPage.cshtml` och `FillOutStuff` beror alla på det formatet.
   Men `allowedStatusValues.Contains(status.Value)` i den här dropdownen jämförde `status.Value`
   (den fullständiga, oavkortade `"NN:Etikett"`-strängen) direkt mot en hårdkodad lista med bara
-  etiketter (`"Annullerad"`, `"Åtgärda"`, `"Inköpt"`, ...) — matchade aldrig. Verifierat via
-  `git show` på den allra första commiten (5a37c61, "Added intial code base.") att jämförelsen
-  där var mot rena Umbraco-prevalue-strängar utan prefix; det är alltså `AvailableStatuses`-
-  listans format som ändrats mellan gamla Umbraco-prevalues och den nya enhetliga
-  `chillinPrevalues.json`-listan (Umbraco höll tydligen en separat "ren etikett"-variant för
-  just den här dropdownen, skild från det prefixade lagrade `Status`-fältet), inte ett fel i
+  etiketter (`"Annullerad"`, `"Åtgärda"`, `"Inköpt"`, ...) — matchade aldrig.
+
+  **Bekräftad rotorsak** (`git show b4b2326 -- Chalmers.ILL/UmbracoApi/UmbracoWrapper.cs`): under
+  Umbraco fanns två separata vägar in till samma prevalue-data. `umbraco.library.GetPreValueAsString(id)`
+  gav den råa strängen inklusive `"NN:"`-prefixet (användes för att sätta `orderItem.Status`).
+  `UmbracoWrapper.GetAvailableValues(dataTypeName)` — som byggde `AvailableStatuses`/`AvailableTypes`
+  m.fl. för dropdown-UI:t via `PopulateModelWithAvailableValues` — läste **samma** prevalue-tabell
+  men klippte uttryckligen bort prefixet: `r.Value = statusType.Value.Split(':').Last();` (kommentar
+  i koden: "If we have '08:Something' then just return last part"). När "Goodbye umbraco data
+  types."-commiten slog ihop båda vägarna till en enda `IChillinOrderConfiguration`/
+  `chillinPrevalues.json`-lista försvann den tysta strip-logiken som `GetAvailableValues` gjorde —
+  `Get(key)` i nya `ChillinOrderConfiguration.cs` returnerar bara raden som den står i JSON-filen,
+  oavkortad, till båda användningarna. Så det stämmer att det bara är lagringen som skulle bytas
+  ut — men lagringsbytet råkade sudda ut en liten transformationsfunktion (`.Split(':').Last()`)
+  som satt dold inne i den gamla läsvägen, inte i själva datan. Inte ett fel i
   användarens data. Åtgärdat genom att jämföra/visa `status.Value.Split(':').Last()` istället
   för `status.Value` rakt av — samma konvention som redan används i `ParseStatusPrevalue`/
   `StatusString` på andra ställen. Ingen testtäckning möjlig (samma begränsning som tidigare

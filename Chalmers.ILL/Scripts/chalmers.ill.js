@@ -1033,7 +1033,7 @@ function sendMailForNewOrder(body, name, mail, libCardNr, delLibrary) {
 /* Send mail to Patron */
 function sendMailToPatron(mailData) {
     lockScreen();
-    if (message && recipientEmail) {
+    if (mailData.message && mailData.recipientEmail) {
         $.post("/OrderItemMailSurface/SendMail", mailData).done(function (json) {
             if (json.Success) {
                 loadOrderItemDetails(mailData.nodeId);
@@ -1048,10 +1048,10 @@ function sendMailToPatron(mailData) {
         });
     }
     else {
-        if (message == "") {
+        if (mailData.message == "") {
             alert("Du m\u00E5ste skriva ett meddelande till mottagaren.");
         }
-        if (recipientEmail == "") {
+        if (mailData.recipientEmail == "") {
             alert("Du m\u00E5ste ange en mottagande e-postadress.");
         }
         unlockScreen();
