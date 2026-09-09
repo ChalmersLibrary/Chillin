@@ -123,6 +123,7 @@
     <Compile Include="Controllers\MaintenanceSurfaceControllerTest.cs" />
     <Compile Include="Controllers\MemberAdminSurfaceControllerTest.cs" />
     <Compile Include="Controllers\OrderItemSurfaceControllerTest.cs" />
+    <Compile Include="Controllers\LogItemSurfaceControllerTest.cs" />
     <Compile Include="Controllers\PageControllersTest.cs" />
     <Compile Include="Controllers\PasswordSurfaceControllerTest.cs" />
     <Compile Include="Controllers\RoutingTest.cs" />

@@ -33,7 +33,7 @@
                             @{
                                 var allowedStatusValues = new String[] { "Annullerad", "Åtgärda", "Inköpt", "Väntar", "Förlorad?", "Förlorad" };
 
-                                Chalmers.ILL.Models.UmbracoDropdownListNtextDataType maybeLost = null, lost = null;
+                                Chalmers.ILL.Models.DropdownOption maybeLost = null, lost = null;
 
                                 foreach (var status in Model.AvailableStatuses)
                                 {

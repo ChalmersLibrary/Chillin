@@ -526,7 +526,6 @@
     <Compile Include="Models\PartialPage\ChalmersILLEditTemplatesModel.cs" />
     <Compile Include="Models\PartialPage\ChalmersILLOrderItemModel.cs" />
     <Compile Include="Models\StatisticsVariable.cs" />
-    <Compile Include="Models\UmbracoDropdownListNtextDataType.cs" />
     <Compile Include="Models\Mail\MailAttachment.cs" />
     <Compile Include="Models\OrderAttachment.cs" />
     <Compile Include="Models\Lock.cs" />
