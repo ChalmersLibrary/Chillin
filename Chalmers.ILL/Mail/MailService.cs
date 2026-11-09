@@ -1,26 +1,25 @@
-﻿using Chalmers.ILL.MediaItems;
+﻿using Chalmers.ILL.Configuration;
+using Chalmers.ILL.MediaItems;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Models.Mail;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
-using System.Web.Hosting;
-using Umbraco.Core.Services;
 
 namespace Chalmers.ILL.Mail
 {
     public class MailService : IMailService
     {
         IMediaItemManager _mediaItemManager;
-        IExchangeMailWebApi _exchangeMailWebApi;
+        IMailWebApi _exchangeMailWebApi;
+        IChillinConfiguration _config;
 
-        public MailService(IMediaItemManager mediaItemManager, IExchangeMailWebApi exchangeMailWebApi)
+        public MailService(IMediaItemManager mediaItemManager, IMailWebApi exchangeMailWebApi, IChillinConfiguration config)
         {
             _mediaItemManager = mediaItemManager;
             _exchangeMailWebApi = exchangeMailWebApi;
+            _config = config;
         }
 
         public void SendMail(OutgoingMailModel mailModel)
@@ -48,13 +47,13 @@ namespace Chalmers.ILL.Mail
                 }
             }
             string body = mailModel.message;
-            _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
-            _exchangeMailWebApi.SendMailMessage(mailModel.OrderId, body, ConfigurationManager.AppSettings["chalmersILLMailSubject"], mailModel.recipientName, mailModel.recipientEmail, attachments);
+            _exchangeMailWebApi.ConnectToExchangeService(_config.ChalmersIllExchangeLogin, _config.ChalmersIllExchangePassword);
+            _exchangeMailWebApi.SendMailMessage(mailModel.OrderId, body, _config.ChalmersIllMailSubject, mailModel.recipientName, mailModel.recipientEmail, attachments);
         }
 
         public void DeleteOldMessagesFromFolder(string folder, DateTime oldLimit)
         {
-            _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
+            _exchangeMailWebApi.ConnectToExchangeService(_config.ChalmersIllExchangeLogin, _config.ChalmersIllExchangePassword);
             _exchangeMailWebApi.DeleteOldMessagesFromFolder(folder, oldLimit);
         }
     }

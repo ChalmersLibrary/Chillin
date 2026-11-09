@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using umbraco.cms.businesslogic.datatype;
-using umbraco.cms.businesslogic.member;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
-using Umbraco.Web.Mvc;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Models.PartialPage;
 using System.Globalization;
@@ -16,18 +13,18 @@ using Chalmers.ILL.UmbracoApi;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class LogItemSurfaceController : SurfaceController
+    [Authorize]
+    public class LogItemSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 8; } }
 
         IOrderItemManager _orderItemManager;
-        IUmbracoWrapper _dataTypes;
+        IChillinOrderConfiguration _orderConfig;
 
-        public LogItemSurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper dataTypes)
+        public LogItemSurfaceController(IOrderItemManager orderItemManager, IChillinOrderConfiguration orderConfig)
         {
             _orderItemManager = orderItemManager;
-            _dataTypes = dataTypes;
+            _orderConfig = orderConfig;
         }
 
         /// <summary>
@@ -36,11 +33,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="nodeId">OrderItem Node Id</param>
         /// <returns>Partial View</returns>
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderLogEntryAction(int nodeId)
         {
             var pageModel = new ChalmersILLActionLogEntryModel(_orderItemManager.GetOrderItem(nodeId));
 
-            _dataTypes.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.LogEntry", pageModel);
@@ -52,6 +50,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="nodeId">OrderItem</param>
         /// <returns>Partial View</returns>
         [HttpGet]
+        [AllowViewer]
         public ActionResult GetLogItemsAsPartial(int nodeId)
         {
             // Call internal method to return List of LogItems for this OrderItem nodeId
@@ -66,13 +65,14 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// </summary>
         /// <param name="nodeId">OrderItem</param>
         /// <returns>Json Result</returns>
+        [AllowViewer]
         public JsonResult GetLogItems(int nodeId)
         {
             // The list of log entries to return binds to the model
             var logItems = _orderItemManager.GetLogItems(nodeId);
 
             // Return Json Result
-            return Json(logItems, JsonRequestBehavior.AllowGet);
+            return Json(logItems);
         }
 
         /// <summary>
@@ -82,7 +82,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="Type"></param>
         /// <param name="Message"></param>
         /// <returns></returns>
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
+        [RequiresOrderLock(Parameter = "nodeId")]
         public ActionResult WriteLogItem(int nodeId, string Type, string Message, string newFollowUpDate, int statusId, int cancellationReasonId, int purchasedMaterialId)
         {
             // Json response
@@ -132,7 +133,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

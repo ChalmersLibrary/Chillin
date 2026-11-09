@@ -1,8 +1,7 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoViewPage<Chalmers.ILL.Models.Page.ChalmersILLLogoutPageModel>
-@using umbraco.cms.businesslogic.member;
+﻿@model Chalmers.ILL.Models.Page.ChalmersILLLogoutPageModel
 @using Chalmers.ILL.Members;
 @{
-    Layout = "ChalmersILL.cshtml";
+    Layout = "~/Views/ChalmersILL.cshtml";
 }
 @{
 	Response.Redirect("/");

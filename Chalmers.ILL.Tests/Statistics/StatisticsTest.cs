@@ -1,13 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Chalmers.ILL.Controllers.SurfaceControllers;
-using Examine;
-using Examine.SearchCriteria;
 using Chalmers.ILL.Statistics;
 using System.Collections.Generic;
-using Microsoft.QualityTools.Testing.Fakes;
-using System.Collections;
-using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.Tests.Statistics
@@ -15,22 +10,6 @@ namespace Chalmers.ILL.Tests.Statistics
     [TestClass]
     public class DefaultStatCalcTests
     {
-        private IOrderItemSearcher GetFakeSearcher()
-        {
-            return new Chalmers.ILL.OrderItems.Fakes.StubIOrderItemSearcher()
-            {
-                SearchString = (query) => { return GetFakeSearchResults(); }
-            };
-        }
-
-        private ISearchCriteria GetFakeSearchCriteria()
-        {
-            return new Examine.SearchCriteria.Fakes.StubISearchCriteria()
-            {
-                RawQueryString = (query) => { return GetFakeSearchCriteria(); }
-            };
-        }
-
         private IEnumerable<OrderItemModel> GetFakeSearchResults()
         {
             return new List<OrderItemModel>()
@@ -72,40 +51,31 @@ namespace Chalmers.ILL.Tests.Statistics
         [TestMethod]
         public void CalculateDataPointValue_CountCommand_ReturnsCorrectValue()
         {
-            using (ShimsContext.Create())
-            {
-                var statCalc = new DefaultStatCalc();
+            var statCalc = new DefaultStatCalc();
 
-                var val = statCalc.CalculateDataPointValue(GetFakeSearchResults(), "COUNT");
+            var val = statCalc.CalculateDataPointValue(GetFakeSearchResults(), "COUNT");
 
-                Assert.AreEqual(6, val);
-            }
+            Assert.AreEqual(6, val);
         }
 
         [TestMethod]
         public void CalculateDataPointValue_AverageOrderLengthCommand_ReturnsCorrectValue()
         {
-            using (ShimsContext.Create())
-            {
-                var statCalc = new DefaultStatCalc();
+            var statCalc = new DefaultStatCalc();
 
-                var val = statCalc.CalculateDataPointValue(GetFakeSearchResults(), "AVERAGE_ORDER_LENGTH");
+            var val = statCalc.CalculateDataPointValue(GetFakeSearchResults(), "AVERAGE_ORDER_LENGTH");
 
-                Assert.AreEqual(1475, val);
-            }
+            Assert.AreEqual(1475, val);
         }
 
         [TestMethod]
         public void CalculateDataPointValue_MedianOrderLengthCommand_ReturnsCorrectValue()
         {
-            using (ShimsContext.Create())
-            {
-                var statCalc = new DefaultStatCalc();
+            var statCalc = new DefaultStatCalc();
 
-                var val = statCalc.CalculateDataPointValue(GetFakeSearchResults(), "MEDIAN_ORDER_LENGTH");
+            var val = statCalc.CalculateDataPointValue(GetFakeSearchResults(), "MEDIAN_ORDER_LENGTH");
 
-                Assert.AreEqual(1475, val);
-            }
+            Assert.AreEqual(1475, val);
         }
     }
 }

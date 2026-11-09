@@ -3,15 +3,14 @@ using Chalmers.ILL.OrderItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Umbraco.Core.Logging;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class OrderItemSearchSurfaceController : SurfaceController
+    public class OrderItemSearchSurfaceController : Controller
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(OrderItemSearchSurfaceController));
+
         private IOrderItemSearcher _orderItemSearcher;
         private IOrderItemManager _orderItemManager;
 
@@ -21,7 +20,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _orderItemManager = orderItemManager;
         }
 
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
         public ActionResult ReindexOrderItem(string orderId)
         {
             var json = new ResultResponse();
@@ -45,12 +44,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             }
             catch (Exception e)
             {
-                LogHelper.Error<OrderItemSearchSurfaceController>("Failed to reindex order item.", e);
+                _log.Error("Failed to reindex order item.", e);
                 json.Success = false;
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

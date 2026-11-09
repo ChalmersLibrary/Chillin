@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
-using umbraco.cms.businesslogic.member;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
@@ -13,8 +11,8 @@ using Chalmers.ILL.OrderItems;
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
 
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemReferenceSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemReferenceSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 4; } }
 
@@ -26,6 +24,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderReferenceAction(int nodeId)
         {
             // Get a new OrderItem populated with values for this node
@@ -35,7 +34,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return PartialView("Chalmers.ILL.Action.Reference", orderItem);
         }
 
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
+        [RequiresOrderLock(Parameter = "nodeId")]
         public ActionResult SetReference(int nodeId, string reference)
         {
             var json = new ResultResponse();
@@ -45,7 +45,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Find OrderItem
                 var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
-                _orderItemManager.SetReference(nodeId, reference, _orderItemManager.GenerateEventId(EVENT_TYPE), false, false);
+                _orderItemManager.SetReference(nodeId, reference, _orderItemManager.GenerateEventId(EVENT_TYPE));
 
                 // Construct JSON response for client (ie jQuery/getJSON)
                 json.Success = true;
@@ -57,7 +57,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
     }

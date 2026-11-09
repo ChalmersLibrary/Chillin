@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Chalmers.ILL.Models;
 using System.Net;
-using System.Configuration;
 using System.IO;
 using Newtonsoft.Json;
 using Chalmers.ILL.Templates;
 using System.Text;
-using Umbraco.Core.Logging;
 using Chalmers.ILL.Connections;
 
 namespace Chalmers.ILL.Patron
 {
     public class FolioPatronDataProvider : IPatronDataProvider
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(FolioPatronDataProvider));
         private ITemplateService _templateService;
         private IAffiliationDataProvider _affiliationDataProvider;
         private IFolioConnection _folioConnection;
@@ -68,13 +66,13 @@ namespace Chalmers.ILL.Patron
                     }
                     catch (Exception e)
                     {
-                        LogHelper.Error<FolioPatronDataProvider>("Error while fetching manual block data from Folio with (" + requestManualBlocksPath + "): ", e);
+                        _log.Error("Error while fetching manual block data from Folio with (" + requestManualBlocksPath + "): ", e);
                     }
                 }
             }
             catch (Exception e)
             {
-                LogHelper.Error<FolioPatronDataProvider>("Error while fetching patron data from Folio with (" + requestUserDataPath + "): ", e);
+                _log.Error("Error while fetching patron data from Folio with (" + requestUserDataPath + "): ", e);
             }
 
             return res;
@@ -174,7 +172,6 @@ namespace Chalmers.ILL.Patron
         private dynamic GetDataFromFolio(string pathAndQuery)
         {
             dynamic res = null;
-            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             if (_folioConnection.NeedNewToken())
             {
@@ -230,7 +227,7 @@ namespace Chalmers.ILL.Patron
                         }
                         else
                         {
-                            LogHelper.Error<FolioPatronDataProvider>("WebException on Folio request but no \"invalid token\" in response body.", e);
+                            _log.Error("WebException on Folio request but no \"invalid token\" in response body.", e);
                             throw e;
                         }
                     }

@@ -1,0 +1,12 @@
+[
+  {
+    "Login": "alice",
+    "PasswordHash": "<generate with Microsoft.AspNetCore.Identity.PasswordHasher<T> in IdentityV2 compatibility mode, see fas 3 in TODO-remove-dotnet-framework.md>",
+    "Roles": [ "Desk", "Administrator" ]
+  },
+  {
+    "Login": "bob",
+    "PasswordHash": "<generate with Microsoft.AspNetCore.Identity.PasswordHasher<T> in IdentityV2 compatibility mode, see fas 3 in TODO-remove-dotnet-framework.md>",
+    "Roles": [ "Desk" ]
+  }
+]

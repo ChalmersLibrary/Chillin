@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
-using umbraco.cms.businesslogic.member;
-using System.Configuration;
-using Examine;
-using UmbracoExamine;
 using Newtonsoft.Json;
 using System.Globalization;
 using Chalmers.ILL.Statistics;
@@ -17,8 +12,9 @@ using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class StatisticsSurfaceController : SurfaceController
+    [Authorize]
+    [AllowViewer]
+    public class StatisticsSurfaceController : Controller
     {
         private IOrderItemSearcher _orderItemSearcher;
 
@@ -56,11 +52,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 res.Message = "Failed to import document from data: " + e.Message;
             }
 
-            return Json(res, JsonRequestBehavior.AllowGet);
+            return Json(res);
         }
 
         /// <summary>
-        /// Get available values from the ChalmersILLOrderItemsSearcher for a list of keys.
+        /// Get available values from the order item searcher for a list of keys.
         /// </summary>
         /// <param name="req">The KeyValueRequest specifying what keys we want to fetch values for.</param>
         /// <returns>JsonResult containing the list of keys and the fetched available values for each key.</returns>
@@ -72,15 +68,19 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
             try
             {
-                var searcher = ExamineManager.Instance.SearchProviderCollection["ChalmersILLOrderItemsSearcher"];
-                var searchCriteria = searcher.CreateSearchCriteria(Examine.SearchCriteria.BooleanOperation.Or);
-                var allOrders = searcher.Search(searchCriteria.RawQuery("nodeTypeAlias:ChalmersILLOrderItem"));
+                var allOrders = _orderItemSearcher.Search("*");
 
                 foreach (var k in req.Keys) {
                     var keyValues = new KeyValues();
                     keyValues.Key = k;
+                    keyValues.QueryField = GetQueryField(k);
                     SetPrettyName(keyValues);
-                    keyValues.AvailableValues = allOrders.Where(x => x.Fields.ContainsKey(k)).Select(x => x.Fields[k]).Distinct().OrderBy(x => x).ToList();
+                    keyValues.AvailableValues = allOrders
+                        .Select(x => GetFieldValue(x, k))
+                        .Where(v => !string.IsNullOrEmpty(v))
+                        .Distinct()
+                        .OrderBy(x => x)
+                        .ToList();
                     res.KeyValues.Add(keyValues);
                 }
 
@@ -93,10 +93,38 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 res.Message = "Failed to fetch available values for keys: " + e.Message;
             }
 
-            return Json(res, JsonRequestBehavior.AllowGet);
+            return Json(res);
         }
 
         #region Private
+
+        /// <summary>
+        /// The search-index name for a filter key. The index stores the camelCased JSON property
+        /// names (see how the app's own queries elsewhere read status:, providerName:,
+        /// followUpDate:), while the keys here are C# property names - and two of them are not
+        /// top-level properties at all. Lucene field names are case sensitive, so filtering on
+        /// "Status:" or "Type:" matched nothing at all and every filtered figure came out zero.
+        /// </summary>
+        private static string GetQueryField(string key)
+        {
+            if (key == "pType") return "sierraInfo.ptype";
+            if (key == "HomeLibrary") return "sierraInfo.home_library";
+            return char.ToLowerInvariant(key[0]) + key.Substring(1);
+        }
+
+        private static string GetFieldValue(OrderItemModel item, string key)
+        {
+            if (key == "pType")
+            {
+                return item.SierraInfo?.ptype.ToString();
+            }
+            else if (key == "HomeLibrary")
+            {
+                return item.SierraInfo?.home_library;
+            }
+
+            return item.GetType().GetProperty(key)?.GetValue(item) as string;
+        }
 
         private void SetPrettyName(KeyValues kv)
         {

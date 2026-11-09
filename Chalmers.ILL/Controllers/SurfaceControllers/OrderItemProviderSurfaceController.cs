@@ -1,24 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
-using umbraco.cms.businesslogic.member;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
-using System.Configuration;
 using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Models.PartialPage;
-using Examine;
 using Chalmers.ILL.Providers;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
 
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemProviderSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemProviderSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 7; } }
         public static int PROVIDER_DATA_UPDATED_EVENT_TYPE { get { return 27; } }
@@ -33,6 +29,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderProviderAction(int nodeId)
         {
             // Get a new OrderItem populated with values for this node
@@ -47,6 +44,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
+        [RequiresOrderLock(Parameter = "nodeId")]
         public ActionResult SetProvider(int nodeId, string providerName, string providerOrderId, string providerInformation, string newFollowUpDate, bool updateStatusAndFollowUpDate = true)
         {
             var json = new ResultResponse();
@@ -85,7 +83,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

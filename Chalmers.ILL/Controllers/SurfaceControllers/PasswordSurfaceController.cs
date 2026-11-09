@@ -1,23 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using umbraco.cms.businesslogic.member;
-using Umbraco.Web.Mvc;
-using Umbraco.Web;
-using System.Security.Cryptography;
+using System;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Chalmers.ILL.Members;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class PasswordSurfaceController : SurfaceController
+    // Self-service on the caller's own account (requires their own current password to change
+    // it) - not an order/member-admin mutation, so safe for Viewer.
+    [AllowViewer]
+    public class PasswordSurfaceController : Controller
     {
-        IMemberInfoManager _memberInfoManager;
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(PasswordSurfaceController));
 
-        public PasswordSurfaceController(IMemberInfoManager memberInfoManager)
+        // The form posts here directly (not to the settings page itself), so redirects must name
+        // the settings page explicitly instead of reusing Request.Path.
+        const string SettingsPageUrl = "/bestaellningar/instaellningar/";
+
+        readonly Func<string, string, bool> _validateUser;
+        readonly Func<string, string, string, bool> _changePassword;
+
+        // See the same attribute on LoginSurfaceController for why this is required: without it,
+        // ASP.NET Core's DI-based controller activation is ambiguous between this constructor and
+        // the test-only one below, and throws on the very first request - invisible to unit tests.
+        [ActivatorUtilitiesConstructor]
+        public PasswordSurfaceController(FileMembershipProvider membershipProvider)
+            : this(membershipProvider.ValidateUser, membershipProvider.ChangePassword)
         {
-            _memberInfoManager = memberInfoManager;
+        }
+
+        // Allows tests to control the membership outcome without a configured Membership provider.
+        public PasswordSurfaceController(Func<string, string, bool> validateUser, Func<string, string, string, bool> changePassword)
+        {
+            _validateUser = validateUser;
+            _changePassword = changePassword;
         }
 
         [HttpGet]
@@ -27,45 +42,33 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult ChangePassword(Models.PartialPage.Settings.ChangePassword model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return Redirect(SettingsPageUrl + "?error=invalid-model");
+
+            // Use the signed authentication identity, not the unsigned ChalmersILL_memberLoginName
+            // cookie - that cookie is client-writable and must never decide whose password changes.
+            var loginName = User.Identity?.Name ?? "";
+
+            // Validate the current password via the configured membership provider
+            if (!_validateUser(loginName, model.CurrentPassword))
+                return Redirect(SettingsPageUrl + "?error=invalid-member");
+
+            try
             {
-                // Get Member from LoginName and CurrentPassword provided in form/Model
-                var m = Member.GetMemberFromLoginNameAndPassword(_memberInfoManager.GetCurrentMemberLoginName(Request, Response), model.CurrentPassword);
+                if (_changePassword(loginName, model.CurrentPassword, model.NewPassword))
+                    return Redirect(SettingsPageUrl + "?success=true");
 
-                // If this computes to a real Member, change the password to NewPassword from form/Model
-                if (m != null)
-                {
-                    m.ChangePassword(HashPassword(model.NewPassword));
-                    m.Save();
-                    Response.Redirect(CurrentPage.Url + "?success=true");
-                }
-
-                // Login+CurrentPassword doesn't match up to a Member
-                else
-                {
-                    Response.Redirect(CurrentPage.Url + "?error=invalid-member");
-                }
+                _log.Warn($"ChangePassword returned false for user '{loginName}'.");
+                return Redirect(SettingsPageUrl + "?error=invalid-member");
             }
-
-            // Something is missing in the Model, CurrentPassword or NewPassword
-            else
+            catch (Exception ex)
             {
-                Response.Redirect(CurrentPage.Url + "?error=invalid-model");
+                _log.Error($"ChangePassword threw for user '{loginName}'.", ex);
+                return Redirect(SettingsPageUrl + "?error=invalid-member");
             }
-
-            return RedirectToCurrentUmbracoPage();
-        }
-
-        // Compute Hash for provided NewPassword as it is stored hashed
-        // From: http://silogic.co.uk/january-2013/change-member-password-in-umbraco.aspx
-        string HashPassword(string password)
-        {
-            HMACSHA1 hash = new HMACSHA1();
-            hash.Key = System.Text.Encoding.Unicode.GetBytes(password);
-            string encodedPassword = Convert.ToBase64String(hash.ComputeHash(System.Text.Encoding.Unicode.GetBytes(password)));
-            return encodedPassword;
         }
     }
 }

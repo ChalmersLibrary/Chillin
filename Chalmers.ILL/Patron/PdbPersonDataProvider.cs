@@ -4,19 +4,17 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web;
 using Chalmers.ILL.Configuration;
 using Chalmers.ILL.Models;
 using Newtonsoft.Json;
-using Umbraco.Core.Logging;
-
 namespace Chalmers.ILL.Patron
 {
     public class PdbPersonDataProvider : IPersonDataProvider
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(PdbPersonDataProvider));
         private HttpClient _httpClient;
-        private IConfiguration _config;
-        public PdbPersonDataProvider(HttpClient httpClient, IConfiguration config)
+        private IChillinConfiguration _config;
+        public PdbPersonDataProvider(HttpClient httpClient, IChillinConfiguration config)
         {
             _httpClient = httpClient;
             _config = config;
@@ -98,7 +96,7 @@ namespace Chalmers.ILL.Patron
             catch (Exception e)
             {
                 // TODO: Should inject this
-                LogHelper.Error<PdbPersonDataProvider>("An error occured when fetching person data from PDB.", e);
+                _log.Error("An error occured when fetching person data from PDB.", e);
             }
 
             return res;

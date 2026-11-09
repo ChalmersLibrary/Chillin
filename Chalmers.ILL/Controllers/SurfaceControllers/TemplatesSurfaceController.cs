@@ -1,19 +1,17 @@
 ﻿using Chalmers.ILL.Templates;
 using Chalmers.ILL.Models;
-using Examine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Mvc;
-using Umbraco.Core.Services;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class TemplatesSurfaceController : SurfaceController
+    [Authorize]
+    public class TemplatesSurfaceController : Controller
     {
         ITemplateService _templateService;
         IOrderItemManager _orderItemManager;
@@ -25,6 +23,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderEditTemplatesAction()
         {
             var pageModel = new Models.PartialPage.Settings.EditTemplates();
@@ -36,6 +35,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult GetTemplateData(int nodeId)
         {
             var json = new ResultResponseWithStringData();
@@ -52,10 +52,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Misslyckades med att hitta malldata: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult GetPopulatedTemplateData(int templateId, int orderItemNodeId)
         {
             var json = new ResultResponseWithStringData();
@@ -73,10 +74,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Misslyckades med att populera malldata: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
         public ActionResult SetTemplateData(int nodeId, string data)
         {
             var json = new ResultResponse();
@@ -94,10 +95,10 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
         public ActionResult CreateTemplate(string description, bool acquisition)
         {
             var json = new ResultResponse();
@@ -115,7 +116,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         #region Private methods.

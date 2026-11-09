@@ -1,0 +1,28 @@
+@inject ClaudeborgenService ClaudeService
+@* The changelog (DESIGN.md, "Changelog"): the deployed changelog file plus conversations marked
+   done whose entry isn't in it yet, newest first. Rendered by the host where its changelog lives. *@
+@{
+    var entries = ClaudeService.ChangelogView();
+}
+<ul class="list-group" data-testid="changelog">
+    @foreach (var entry in entries)
+    {
+        <li class="list-group-item" data-testid="@(entry.ConversationId != null ? "claude-changelog-entry" : "changelog-entry")">
+            <h4>
+                @entry.Date@(string.IsNullOrEmpty(entry.Version) ? "" : " - " + entry.Version)
+                @if (entry.Pending)
+                {
+                    <small class="text-muted" title="@(entry.Fake ? "Snabbtestservern: klart-markeringen committas aldrig här." : "Klar, men ännu inte driftsatt här.")">
+                        @(entry.Fake ? "(fejk)" : "(på väg)")
+                    </small>
+                }
+            </h4>
+            <ul>
+                @foreach (var item in entry.Items)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        </li>
+    }
+</ul>

@@ -1,117 +1,78 @@
-﻿using Chalmers.ILL.Models.Page;
+using Chalmers.ILL.Models.Page;
+using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using umbraco.cms.businesslogic.member;
-using Umbraco.Core.Logging;
 
 namespace Chalmers.ILL.Members
 {
     public class MemberInfoManager : IMemberInfoManager
     {
-        public const string cookieKey = "ChalmersILL";
-        public const string memberIdKey = "memberId";
-        public const string memberTextKey = "memberText";
-        public const string memberLoginNameKey = "memberLoginName";
+        // Was a single "ChalmersILL" cookie with three System.Web HttpCookie subkeys
+        // (memberId/memberText/memberLoginName). ASP.NET Core cookies have no subkey concept,
+        // so this is now three separate cookies - a wire-format change, but the same data is
+        // available to the same call sites. Existing sessions are invalidated on deploy (users
+        // re-login), same as any auth-cookie format change.
+        public const string memberIdCookieKey = "ChalmersILL_memberId";
+        public const string memberTextCookieKey = "ChalmersILL_memberText";
+        public const string memberLoginNameCookieKey = "ChalmersILL_memberLoginName";
 
-        public int GetCurrentMemberId(HttpRequestBase request, HttpResponseBase response)
+        public int GetCurrentMemberId(HttpRequest request, HttpResponse response)
         {
-            string memberIdObject = null;
-            int memberId = 0;
+            var memberIdStr = request?.Cookies[memberIdCookieKey];
+            if (memberIdStr != null)
+                return Convert.ToInt32(Uri.UnescapeDataString(memberIdStr));
 
-            if (request != null && request.Cookies[MemberInfoManager.cookieKey] != null)
-            {
-                memberIdObject = request.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberIdKey];
-            }
-
-            if (memberIdObject != null)
-            {
-                memberId = Convert.ToInt32(Uri.UnescapeDataString(memberIdObject.ToString()));
-            }
-            else
-            {
-                memberId = GetCurrentMember(response).Id;
-            }
-
-            return memberId;
+            PopulateCookieFromCurrentUser(request, response);
+            return 0;
         }
 
-        public string GetCurrentMemberText(HttpRequestBase request, HttpResponseBase response)
+        public string GetCurrentMemberText(HttpRequest request, HttpResponse response)
         {
-            string memberTextObject = null;
-            string memberText = "";
+            var memberTextStr = request?.Cookies[memberTextCookieKey];
+            if (memberTextStr != null)
+                return Uri.UnescapeDataString(memberTextStr);
 
-            if (request != null && request.Cookies[MemberInfoManager.cookieKey] != null)
-            {
-                memberTextObject = request.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberTextKey];
-            }
-
-            if (memberTextObject != null)
-            {
-                memberText = Uri.UnescapeDataString(memberTextObject.ToString());
-            }
-            else
-            {
-                memberText = GetCurrentMember(response).Text;
-            }
-
-            return memberText;
+            PopulateCookieFromCurrentUser(request, response);
+            return request?.HttpContext?.User?.Identity?.Name ?? "";
         }
 
-        public string GetCurrentMemberLoginName(HttpRequestBase request, HttpResponseBase response)
+        public string GetCurrentMemberLoginName(HttpRequest request, HttpResponse response)
         {
-            string memberLoginNameObject = null;
-            string memberLoginName = "";
+            var memberLoginNameStr = request?.Cookies[memberLoginNameCookieKey];
+            if (memberLoginNameStr != null)
+                return Uri.UnescapeDataString(memberLoginNameStr);
 
-            if (request != null && request.Cookies[MemberInfoManager.cookieKey] != null)
-            {
-                memberLoginNameObject = request.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberLoginNameKey];
-            }
-
-            if (memberLoginNameObject != null)
-            {
-                memberLoginName = Uri.UnescapeDataString(memberLoginNameObject.ToString());
-            }
-            else
-            {
-                memberLoginName = GetCurrentMember(response).LoginName;
-            }
-
-            return memberLoginName;
+            PopulateCookieFromCurrentUser(request, response);
+            return request?.HttpContext?.User?.Identity?.Name ?? "";
         }
 
-        public void PopulateModelWithMemberData(HttpRequestBase request, HttpResponseBase response, ChalmersILLModel model)
+        public void PopulateModelWithMemberData(HttpRequest request, HttpResponse response, ChalmersILLModel model)
         {
             model.CurrentMemberId = GetCurrentMemberId(request, response);
             model.CurrentMemberText = GetCurrentMemberText(request, response);
             model.CurrentMemberLoginName = GetCurrentMemberLoginName(request, response);
         }
 
-        public void AddMemberToCache(HttpResponseBase response, Member member)
+        public void AddMemberToCache(HttpResponse response, int memberId, string memberText, string memberLoginName)
         {
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberIdKey] = Uri.EscapeUriString(Convert.ToString(member.Id));
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberTextKey] = Uri.EscapeUriString(member.Text);
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberLoginNameKey] = Uri.EscapeUriString(member.LoginName);
-            response.Cookies[MemberInfoManager.cookieKey].Expires = DateTime.Now.AddDays(1);
+            var options = new CookieOptions { Expires = DateTimeOffset.Now.AddDays(1) };
+            response.Cookies.Append(memberIdCookieKey, Uri.EscapeDataString(Convert.ToString(memberId)), options);
+            response.Cookies.Append(memberTextCookieKey, Uri.EscapeDataString(memberText), options);
+            response.Cookies.Append(memberLoginNameCookieKey, Uri.EscapeDataString(memberLoginName), options);
         }
 
-        public void ClearMemberCache(HttpResponseBase response)
+        public void ClearMemberCache(HttpResponse response)
         {
-            response.Cookies[MemberInfoManager.cookieKey].Expires = DateTime.Now.AddDays(-1);
+            response.Cookies.Delete(memberIdCookieKey);
+            response.Cookies.Delete(memberTextCookieKey);
+            response.Cookies.Delete(memberLoginNameCookieKey);
         }
 
-        #region Private methods
-
-        private Member GetCurrentMember(HttpResponseBase response)
+        private void PopulateCookieFromCurrentUser(HttpRequest request, HttpResponse response)
         {
-            var member = Member.GetCurrentMember();
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberIdKey] = Uri.EscapeUriString(Convert.ToString(member.Id));
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberTextKey] = Uri.EscapeUriString(member.Text);
-            response.Cookies[MemberInfoManager.cookieKey][MemberInfoManager.memberLoginNameKey] = Uri.EscapeUriString(member.LoginName);
-            return member;
+            var username = request?.HttpContext?.User?.Identity?.Name ?? "";
+            response.Cookies.Append(memberIdCookieKey, Uri.EscapeDataString("0"));
+            response.Cookies.Append(memberTextCookieKey, Uri.EscapeDataString(username));
+            response.Cookies.Append(memberLoginNameCookieKey, Uri.EscapeDataString(username));
         }
     }
 }
-
-        #endregion

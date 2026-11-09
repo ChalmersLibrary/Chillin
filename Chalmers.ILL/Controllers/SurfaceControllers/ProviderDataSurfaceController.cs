@@ -3,19 +3,17 @@ using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Providers;
 using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
-using Examine;
-using Microsoft.Practices.Unity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class ProviderDataSurfaceController : SurfaceController
+    [Authorize]
+    public class ProviderDataSurfaceController : Controller
     {
         ITemplateService _templateService;
         IProviderService _providerService;
@@ -32,6 +30,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderModifyProviderDataAction()
         {
             var pageModel = new Models.PartialPage.Settings.ModifyProviderData();
@@ -42,6 +41,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult GetNodeIdsForOrderItemsWithGivenProviderName(string providerName)
         {
             var ids = new List<int>();
@@ -58,10 +58,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // NOP. Just return empty list if we fail, this should be enough indication that something is wrong and needs investigation.
             }
 
-            return Json(ids, JsonRequestBehavior.AllowGet);
+            return Json(ids);
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult GetDeliveryTimeInHoursForProvider(string providerName)
         {
             int time = 0;
@@ -75,7 +76,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // NOP, fail silently and return zero delivery time.
             }
 
-            return Json(time, JsonRequestBehavior.AllowGet);
+            return Json(time);
         }
 
         [HttpPost]
@@ -96,7 +97,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 res.Message = "Misslyckades med att ändra leverantörsnamn på order: " + e.Message;
             }
 
-            return Json(res, JsonRequestBehavior.AllowGet);
+            return Json(res);
         }
     }
 }

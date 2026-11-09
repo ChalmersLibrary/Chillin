@@ -18,6 +18,9 @@
 x64/
 x86/
 build/
+!Chalmers.ILL/wwwroot/lib/eonasdan-bootstrap-datetimepicker/build/
+# Claudeborgen's MSBuild targets (commit stamp) - source, not build output; NuGet's build/ convention.
+!claudeborgen/dotnet/Claudeborgen.Web/build/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -161,7 +164,6 @@ ClientBin/
 *.pfx
 *.publishsettings
 node_modules/
-bower_components/
 
 # RIA/Silverlight projects
 Generated_Code/
@@ -201,11 +203,13 @@ Chalmers.ILL/App_Browsers
 Chalmers.ILL/App_Code
 Chalmers.ILL/App_Data
 Chalmers.ILL/App_Plugins
-Chalmers.ILL/bower_components
 Chalmers.ILL/Config/*
 !Chalmers.ILL/Config/ExamineIndex.config
 !Chalmers.ILL/Config/ExamineSettings.config
 !Chalmers.ILL/Config/umbracoSettings.config
+!Chalmers.ILL/Config/members.example.json
+!Chalmers.ILL/Config/chillinPrevalues.example.json
+!Chalmers.ILL/Config/log4net.config
 Chalmers.ILL/Install
 Chalmers.ILL/MasterPages
 Chalmers.ILL/Media
@@ -232,3 +236,15 @@ Migration/*.txt
 /Chalmers.ILL/.vscode
 /.vscode
 desktop.ini
+
+# Browser-driven verification tool (brytpunkten efter fas 2) - node_modules and its output
+browser-check/node_modules/
+browser-check/screenshots/
+
+# Claude Code local settings (machine-specific permissions)
+.claude/settings.local.json
+
+git-diff-viewer.py
+
+# Do not track devcontainer
+.devcontainer

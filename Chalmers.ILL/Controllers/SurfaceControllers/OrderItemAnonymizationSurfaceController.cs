@@ -1,19 +1,18 @@
 ﻿using Chalmers.ILL.Models;
 using Chalmers.ILL.OrderItems;
-using Microsoft.Exchange.WebServices.Data;
 using Nest;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemAnonymizationSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemAnonymizationSurfaceController : Controller
     {
         public static int MANUAL_ANONYMIZATION_EVENT_TYPE { get { return 31; } }
 
@@ -25,6 +24,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderAnonymizeAction(int nodeId)
         {
             // Get a new OrderItem populated with values for this node
@@ -34,7 +34,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return PartialView("Chalmers.ILL.Action.Anonymize", orderItem);
         }
 
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
+        [RequiresOrderLock(Parameter = "nodeId")]
         public ActionResult Anonymize(int nodeId, string reference, string logsSerialized)
         {
             var json = new ResultResponse();
@@ -57,10 +58,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         [HttpPost]
+        [RequiresOrderLock(Parameter = "nodeIds")]
         public ActionResult SetIsAnonymizedOnMultiple(int[] nodeIds, bool isAnonymized)
         {
             var json = new ResultResponse();
@@ -83,7 +85,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

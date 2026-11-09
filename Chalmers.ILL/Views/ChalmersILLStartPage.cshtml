@@ -1,11 +1,10 @@
-﻿@inherits Umbraco.Web.Mvc.UmbracoTemplatePage
-@using System.Configuration;
+﻿@model Chalmers.ILL.Models.Page.ChalmersILLStartPageModel
 @{
-    Layout = "ChalmersILL.cshtml";
+    Layout = "~/Views/ChalmersILL.cshtml";
 }
 
 @{
-    if (Convert.ToBoolean(ConfigurationManager.AppSettings["showManulMailFetchingTools"]))
+    if (Config.ShowManualMailFetchingTools)
     {
         <form class="form" role="form" onsubmit="return false;">
             <div class="row">
@@ -15,27 +14,27 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="message">Meddelande</label>
-                        <textarea class="form-control" rows="11" id="message" name="message"></textarea>
+                        <textarea class="form-control" rows="11" id="message" name="message" data-testid="new-order-message"></textarea>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="recipientName">Namn</label>
-                        <input type="text" class="form-control" id="recipientName" name="recipientName" value="">
+                        <input type="text" class="form-control" id="recipientName" name="recipientName" value="" data-testid="new-order-name">
                     </div>
                     <div class="form-group">
                         <label for="recipientEmail">E-post</label>
-                        <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="">
+                        <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="" data-testid="new-order-email">
                     </div>
                     <div class="form-group">
                         <label for="recipientLibNr">Bibliotekskortsnummer</label>
-                        <input type="text" class="form-control" id="recipientLibNr" name="recipientLibNr" value="">
+                        <input type="text" class="form-control" id="recipientLibNr" name="recipientLibNr" value="" data-testid="new-order-cardno">
                     </div>
                     <div class="form-group">
                         <div class="row">
                             <label class="col-md-12" for="deliveryLibrary">Bibliotek</label>
                             <div class="col-md-10">
-                                <select id="libraryselector" onchange="$('#deliveryLibrary').val($(this).find('option:selected').val())"class="form-control">
+                                <select id="libraryselector" data-testid="new-order-library" onchange="$('#deliveryLibrary').val($(this).find('option:selected').val())"class="form-control">
                                     <option value="Z">Huvudbiblioteket</option>
                                     <option value="Zl">Kuggen</option>
                                     <option value="Za">Arkitekturbiblioteket</option>
@@ -46,91 +45,23 @@
                             </div>
                         </div>
                     </div>
-                    <button class="btn btn-success" onclick="sendMailForNewOrder(this.form.message.value.toString().trim(), this.form.recipientName.value.toString().trim(), this.form.recipientEmail.value.toString().trim(), this.form.recipientLibNr.value.toString().trim(), this.form.deliveryLibrary.value.toString().trim());">Skicka in beställning</button>
+                    <button class="btn btn-success" data-testid="new-order-submit" onclick="sendMailForNewOrder(this.form.message.value.toString().trim(), this.form.recipientName.value.toString().trim(), this.form.recipientEmail.value.toString().trim(), this.form.recipientLibNr.value.toString().trim(), this.form.deliveryLibrary.value.toString().trim());">Skicka in beställning</button>
                 </div>
             </div>
         </form>
-        <button class="btn btn-danger" type="button" onclick="lockScreen(); $.post('/umbraco/surface/SystemSurface/SendOutAutomaticMailsThatAreDue', {}, function (data) { alert(JSON.stringify(data)); unlockScreen(); });">Skicka ut automatiska mail</button>
+        <button class="btn btn-danger" type="button" data-testid="send-automatic-mails" onclick="lockScreen(); $.post('/SystemSurface/SendOutAutomaticMailsThatAreDue', {}, function (data) { alert(JSON.stringify(data)); unlockScreen(); });">Skicka ut automatiska mail</button>
     }
 }
 
 <h2>Startsida</h2>
 
+@await Html.PartialAsync("~/Views/Claudeborgen/_StartPageSection.cshtml")
+
 <div>
     <h3>Nytt i Chillin</h3>
-    <ul class="list-group">
-        <li class="list-group-item">
-            <h4>2025-09-09 - v2.6.3</h4>
-            <ul>
-                <li>Ingen hämtning av låntagarbeställningar från Libris.</li>
-            </ul>
-        </li>
-        <li class="list-group-item">
-            <h4>2025-01-14 - v2.6.2</h4>
-            <ul>
-                <li>Autentisering med refreshtokens mot FOLIO.</li>
-            </ul>
-        </li>
-        <li class="list-group-item">
-            <h4>2024-11-20 - v2.6.1</h4>
-            <ul>
-                <li>Knapp för att göra kopia av order.</li>
-            </ul>
-        </li>
-        <li class="list-group-item">
-            <h4>2024-11-13 - v2.6.0</h4>
-            <ul>
-                <li>Regelbunden automatisk anonymisering av gamla ordrar.</li>
-                <li>Gränssnitt för manuell anonymisering av automatiskt anonymiserade ordrar.</li>
-                <li>Borttagning av skickade mail äldre än ett år.</li>
-            </ul>
-        </li>
-        <li class="list-group-item">
-            <h4>2023-11-13 - v2.5.1</h4>
-            <ul>
-                <li>mblock är nu bara block och innehåller information om huruvida låntagaren är blockerad för requests i FOLIO - antingen manuellt eller automatiskt.</li>
-                <li>Går ej att ta emot bok om låntagaren är blockerad i FOLIO.</li>
-            </ul>
-        </li>
-        <li class="list-group-item">
-            <h4>2023-10-04 - v2.5.0</h4>
-            <ul>
-                <li>Översiktlig logg på varje ärende som lyfter viktiga saker och länkar vidare till detaljerade loggen.</li>
-            </ul>
-        </li>
-        <li class="list-group-item">
-            <h4>2023-09-11 - v2.4.0</h4>
-            <ul>
-                <li>QR-kod för mottagning av artikel på filial. Vid scanning av QR-koden, från artikelns försättsblad, skickas mail till låntagare och status uppdateras på ordern.</li>
-            </ul>
-        </li>
-        <li class="list-group-item">
-            <h4>2023-06-13 - v2.3.0</h4>
-            <ul>
-                <li>Diskappen borttagen.</li>
-                <li>Automatiskt mailutskick till låntagare fyra dagar efter artikel skickats till filial.</li>
-            </ul>
-        </li>
-        <li class="list-group-item">
-            <h4>2022-12-05 - v2.2.0</h4>
-            <ul>
-                <li>Låntagarens tillhörighet och access till resurser hämtas från PDB.</li>
-                <li>Letar efter person med CID, personnummer och mail i PDB vid skapande av order.</li>
-                <li>Möjlighet att läsa in data från PDB manuellt.</li>
-            </ul>
-        </li>
-        <li class="list-group-item">
-            <h4>2022-10-20 - v2.1.0</h4>
-            <ul>
-                <li>Status active/inactive för kontot i FOLIO läses in och sparas i Chillin vid mailhämtning och manuell hämtning av beställardata.</li>
-                <li>Status på kontot i FOLIO används för att lägga upp informationsrutor vid beställning och mottagning av bok.</li>
-                <li>Informationsruta som påminner om retur i FOLIO efter retur i Chillin och status FOLIO.</li>
-                <li>Informationsruta som påminner om ändring av lånetid i FOLIO efter ändring av lånetid i Chillin och status FOLIO.</li>
-                <li>Status ändras inte vid ändring av lånetid om status är FOLIO.</li>
-                <li>Mallar går att skapa under inställningar.</li>
-            </ul>
-        </li>
-    </ul>
+    @* Changelog: Chalmers.ILL/changelog.json - hand-written entries and the ones Claudeborgen's runner
+       commits when the object owner marks a conversation done, in date order (claudeborgen/DESIGN.md). *@
+    @await Html.PartialAsync("~/Views/Claudeborgen/_Changelog.cshtml")
 </div>
 
 <div>

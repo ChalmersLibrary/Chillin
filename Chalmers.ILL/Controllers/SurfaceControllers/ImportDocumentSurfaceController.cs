@@ -1,6 +1,6 @@
 ﻿using System;
-using Umbraco.Web.Mvc;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Chalmers.ILL.Models;
 using System.IO;
 using System.Net;
@@ -10,8 +10,8 @@ using Chalmers.ILL.MediaItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class ImportDocumentSurfaceController : SurfaceController
+    [Authorize]
+    public class ImportDocumentSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 16; } }
 
@@ -31,6 +31,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="url">The url from which we should fetch the document.</param>
         /// <returns>Returns a result indicating how the request went.</returns>
         [HttpPost]
+        [RequiresOrderLock(Parameter = "orderItemNodeId")]
         public ActionResult ImportFromUrl(int orderItemNodeId, string url)
         {
             // Json response
@@ -80,7 +81,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Failed to import document: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         /// <summary>
@@ -91,6 +92,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="data">The base 64 encoded data which we should use to create the document.</param>
         /// <returns>Returns a result indicating how the request went.</returns>
         [HttpPost]
+        [RequiresOrderLock(Parameter = "orderItemNodeId")]
         public ActionResult ImportFromData(int orderItemNodeId, string filename, string data)
         {
             // Json response
@@ -125,7 +127,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Failed to import document from data: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

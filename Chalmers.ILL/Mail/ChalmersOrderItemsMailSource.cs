@@ -1,27 +1,19 @@
-﻿using Chalmers.ILL.Controllers.SurfaceControllers;
+﻿using Chalmers.ILL.Configuration;
+using Chalmers.ILL.Controllers.SurfaceControllers;
 using Chalmers.ILL.OrderItems;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Umbraco.Core.Logging;
 using Newtonsoft.Json;
-using Examine;
 using System.IO;
 using HtmlAgilityPack;
 using System.Text;
 using Chalmers.ILL.Extensions;
 using System.Text.RegularExpressions;
 using Chalmers.ILL.Patron;
-using Microsoft.Exchange.WebServices.Data;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.SignalR;
 using System.Threading;
-using Umbraco.Core.Services;
-using Umbraco.Core.Events;
-using Umbraco.Core.Models;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.MediaItems;
@@ -30,17 +22,20 @@ namespace Chalmers.ILL.Mail
 {
     public class ChalmersOrderItemsMailSource : ISource
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(ChalmersOrderItemsMailSource));
+
         public static int CREATE_ORDER_FROM_MAIL_DATA_EVENT_TYPE { get { return 20; } }
         public static int UPDATE_ORDER_FROM_MAIL_DATA_PATRON_EVENT_TYPE { get { return 21; } }
         public static int UPDATE_ORDER_FROM_MAIL_DATA_NOT_PATRON_EVENT_TYPE { get { return 22; } }
 
-        IExchangeMailWebApi _exchangeMailWebApi;
+        IMailWebApi _exchangeMailWebApi;
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
         IMediaItemManager _mediaItemManager;
         IPatronDataProvider _patronDataProvider;
         IPersonDataProvider _personDataProvider;
         IOrderItemSearcher _orderItemSearcher;
+        IChillinConfiguration _config;
 
         private SourcePollingResult _result;
         public SourcePollingResult Result
@@ -51,9 +46,9 @@ namespace Chalmers.ILL.Mail
             }
         }
 
-        public ChalmersOrderItemsMailSource(IExchangeMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager,
-            INotifier notifier, IMediaItemManager mediaItemManager, IPatronDataProvider patronDataProvider, IPersonDataProvider personDataProvider, 
-            IOrderItemSearcher orderItemSearcher)
+        public ChalmersOrderItemsMailSource(IMailWebApi exchangeMailWebApi, IOrderItemManager orderItemManager,
+            INotifier notifier, IMediaItemManager mediaItemManager, IPatronDataProvider patronDataProvider, IPersonDataProvider personDataProvider,
+            IOrderItemSearcher orderItemSearcher, IChillinConfiguration config)
         {
             _exchangeMailWebApi = exchangeMailWebApi;
             _orderItemManager = orderItemManager;
@@ -62,6 +57,7 @@ namespace Chalmers.ILL.Mail
             _patronDataProvider = patronDataProvider;
             _personDataProvider = personDataProvider;
             _orderItemSearcher = orderItemSearcher;
+            _config = config;
         }
 
         public SourcePollingResult Poll()
@@ -74,7 +70,7 @@ namespace Chalmers.ILL.Mail
             // Connect to Exchange Service
             try
             {
-                _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
+                _exchangeMailWebApi.ConnectToExchangeService(_config.ChalmersIllExchangeLogin, _config.ChalmersIllExchangePassword);
             }
             catch (Exception e)
             {
@@ -141,7 +137,7 @@ namespace Chalmers.ILL.Mail
                         {
                             item.Type = MailQueueType.ERROR;
                             item.ParseErrorMessage = "Chillin failed to process E-mail. Reason: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Failed to process one E-mail, tagging it with ERROR.", e);
+                            _log.Error("Failed to process one E-mail, tagging it with ERROR.", e);
                             _result.Errors++;
                             _result.Messages.Add(item.ParseErrorMessage);
                         }
@@ -212,7 +208,7 @@ namespace Chalmers.ILL.Mail
                             _orderItemManager.AddSierraDataToLog(orderItemNodeId, item.SierraPatronInfo, eventId);
 
                             // Archive the mail message to correct folder
-                            if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
+                            if (_config.ChalmersIllArchiveProcessedMails)
                             {
                                 var archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item);
                                 list[index].ArchiveFolderId = archiveFolderId;
@@ -228,7 +224,7 @@ namespace Chalmers.ILL.Mail
                         {
                             list[index].OrderItemNodeId = -1;
                             list[index].StatusResult = "Error creating new OrderItem node: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Error creating new OrderItem node", e);
+                            _log.Error("Error creating new OrderItem node", e);
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }
@@ -275,7 +271,7 @@ namespace Chalmers.ILL.Mail
                             // Archive the mail message to correct folder
                             try
                             {
-                                if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
+                                if (_config.ChalmersIllArchiveProcessedMails)
                                 {
                                     var archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item);
                                     list[index].ArchiveFolderId = archiveFolderId;
@@ -296,7 +292,7 @@ namespace Chalmers.ILL.Mail
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error following up reply on OrderItem: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Error following up reply on OrderItem", e);
+                            _log.Error("Error following up reply on OrderItem", e);
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }
@@ -377,7 +373,7 @@ namespace Chalmers.ILL.Mail
                             // Archive the mail message to correct folder
                             try
                             {
-                                if (ConfigurationManager.AppSettings["chalmersILLArchiveProcessedMails"] == "true")
+                                if (_config.ChalmersIllArchiveProcessedMails)
                                 {
                                     var archiveFolderId = _exchangeMailWebApi.ArchiveMailMessage(item);
                                     list[index].ArchiveFolderId = archiveFolderId;
@@ -398,7 +394,7 @@ namespace Chalmers.ILL.Mail
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error following up delivery on OrderItem: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Error following up delivery on OrderItem", e);
+                            _log.Error("Error following up delivery on OrderItem", e);
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }
@@ -410,7 +406,7 @@ namespace Chalmers.ILL.Mail
                             // Forward failed mail to bug fixers.
                             try
                             {
-                                foreach (var addressWithPotentialWs in ConfigurationManager.AppSettings["bugFixersMailingList"].Split(','))
+                                foreach (var addressWithPotentialWs in _config.BugFixersMailingList.Split(','))
                                 {
                                     var address = addressWithPotentialWs.Trim();
                                     try
@@ -419,25 +415,25 @@ namespace Chalmers.ILL.Mail
                                     }
                                     catch (Exception innerInnerExc)
                                     {
-                                        LogHelper.Error<SystemSurfaceController>("Failed to forward message to " + address + ".", innerInnerExc);
+                                        _log.Error("Failed to forward message to " + address + ".", innerInnerExc);
                                     }
                                 }
                             }
                             catch (Exception innerExc)
                             {
-                                LogHelper.Error<SystemSurfaceController>("Failed to forward message to bug fixers.", innerExc);
+                                _log.Error("Failed to forward message to bug fixers.", innerExc);
                             }
 
                             // Forward failed mail to manual handling.
-                            _exchangeMailWebApi.ForwardMailMessage(item, ConfigurationManager.AppSettings["chalmersILLForwardingAddress"]);
-                            list[index].StatusResult = "This message has been forwarded to " + ConfigurationManager.AppSettings["chalmersILLForwardingAddress"];
+                            _exchangeMailWebApi.ForwardMailMessage(item, _config.ChalmersIllForwardingAddress);
+                            list[index].StatusResult = "This message has been forwarded to " + _config.ChalmersIllForwardingAddress;
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error forwarding mail: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Error forwarding mail", e);
+                            _log.Error("Error forwarding mail", e);
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }
@@ -446,13 +442,13 @@ namespace Chalmers.ILL.Mail
                     {
                         try
                         {
-                            _exchangeMailWebApi.ForwardMailMessage(item, ConfigurationManager.AppSettings["chalmersILLForwardingAddress"]);
-                            list[index].StatusResult = "This message has been forwarded to " + ConfigurationManager.AppSettings["chalmersILLForwardingAddress"];
+                            _exchangeMailWebApi.ForwardMailMessage(item, _config.ChalmersIllForwardingAddress);
+                            list[index].StatusResult = "This message has been forwarded to " + _config.ChalmersIllForwardingAddress;
                         }
                         catch (Exception e)
                         {
                             list[index].StatusResult = "Error forwarding mail: " + e.Message;
-                            LogHelper.Error<SystemSurfaceController>("Error forwarding mail", e);
+                            _log.Error("Error forwarding mail", e);
                             _result.Errors++;
                             _result.Messages.Add(list[index].StatusResult);
                         }

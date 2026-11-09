@@ -2,11 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using Umbraco.Web.Mvc;
-using umbraco.cms.businesslogic.member;
-using umbraco.cms.businesslogic.datatype;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
@@ -14,8 +11,8 @@ using Chalmers.ILL.OrderItems;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemDeliveryLibrarySurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemDeliveryLibrarySurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 3; } }
 
@@ -33,6 +30,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="statusId">Delivery library DataType Id</param>
         /// <returns>MVC ActionResult with JSON</returns>
         [HttpGet]
+        [RequiresOrderLock(Parameter = "orderNodeId")]
         public ActionResult SetOrderItemDeliveryLibrary(int orderNodeId, int deliveryLibraryId)
         {
             var json = new ResultResponse();
@@ -54,7 +52,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

@@ -8,16 +8,15 @@ using Chalmers.ILL.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Net;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemClaimSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemClaimSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 13; } }
 
@@ -33,6 +32,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderClaimAction(int nodeId)
         {
             var pageModel = new ChalmersILLActionClaimModel(_orderItemManager.GetOrderItem(nodeId));
@@ -43,7 +43,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return PartialView("Chalmers.ILL.Action.Claim", pageModel);
         }
 
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
+        [RequiresOrderLock(PackJsonField = "nodeId")]
         public ActionResult ClaimItem(string packJson)
         {
             var json = new ResultResponse();
@@ -76,7 +77,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Misslyckades med att kräva: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         public class ClaimItemPackage

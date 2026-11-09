@@ -2,12 +2,11 @@
 using Chalmers.ILL.Repositories;
 using Chalmers.ILL.Services;
 using System;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class ChillinTextSurfaceController : SurfaceController
+    public class ChillinTextSurfaceController : Controller
     {
         private readonly IChillinTextRepository _chillinTextRepository;
         private readonly IJsonService _jsonService;
@@ -19,6 +18,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderChillinTextsAction()
         {
             var pageModel = _chillinTextRepository.All();
@@ -47,7 +47,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

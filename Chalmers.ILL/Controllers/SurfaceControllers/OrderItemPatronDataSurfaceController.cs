@@ -1,28 +1,23 @@
 ﻿using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
-using Npgsql;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using Chalmers.ILL.Patron;
-using System.Configuration;
 using System.Net;
 using System.IO;
 using Chalmers.ILL.OrderItems;
-using Umbraco.Core.Models;
 using Chalmers.ILL.UmbracoApi;
-using Microsoft.Practices.Unity;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemPatronDataSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemPatronDataSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 5; } }
 
@@ -30,19 +25,18 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         IPatronDataProvider _patronDataProviderSierraCache;
         IPatronDataProvider _patronDataProviderSierra;
         IPersonDataProvider _personDataProvider;
-        IUmbracoWrapper _umbraco;
 
         public OrderItemPatronDataSurfaceController(IOrderItemManager orderItemManager, IPatronDataProvider patronDataProviderSierraCache,
-            IPatronDataProvider patronDataProviderSierra, IPersonDataProvider personDataProvider, IUmbracoWrapper umbraco)
+            IPatronDataProvider patronDataProviderSierra, IPersonDataProvider personDataProvider)
         {
             _orderItemManager = orderItemManager;
             _patronDataProviderSierraCache = patronDataProviderSierraCache;
             _patronDataProviderSierra = patronDataProviderSierra;
             _personDataProvider = personDataProvider;
-            _umbraco = umbraco;
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderPatronDataView(int nodeId)
         {
             // Get a new OrderItem populated with values for this node
@@ -58,6 +52,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="pnr">The query string.</param>
         /// <returns>Returns a result indicating how the request went.</returns>
         [HttpGet]
+        [AllowViewer]
         public ActionResult QueryPatronDataFromCache(string query)
         {
             var json = new ResultResponse();
@@ -73,7 +68,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Success = false;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         /// <summary>
@@ -85,6 +80,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="pnr">The "personnummer" which we should search for.</param>
         /// <returns>Returns a result indicating how the request went.</returns>
         [HttpPost]
+        [RequiresOrderLock(Parameter = "orderItemNodeId")]
         public ActionResult FetchPatronDataUsingLcnOrPnr(int orderItemNodeId, string lcn, string pnr, bool cache=true)
         {
             var json = new ResultResponse();
@@ -120,7 +116,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Failed to load Sierra data from \"personnummer\" or library card number: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         /// <summary>
@@ -134,6 +130,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="cache">If we should fetch data from cache or not.</param>
         /// <returns>Result indicating how the request went.</returns>
         [HttpGet]
+        [RequiresOrderLock(Parameter = "orderItemNodeId")]
         public ActionResult FetchPatronDataUsingSierraId(int orderItemNodeId, string sierraId, bool cache = true)
         {
             var json = new ResultResponse();
@@ -171,7 +168,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Failed to load Sierra data using sierra identifier: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         /// <summary>
@@ -182,6 +179,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="lcn">The library card number which we should search for.</param>
         /// <returns>Returns a result indicating how the request went.</returns>
         [HttpPost]
+        [RequiresOrderLock(Parameter = "orderItemNodeId")]
         public ActionResult FetchPatronDataUsingLcn(int orderItemNodeId, string lcn, bool cache=true)
         {
             var json = new ResultResponse();
@@ -217,7 +215,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Failed to load Sierra data from library card number: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         /// <summary>
@@ -227,6 +225,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="data">CID, e-mail or pnr</param>
         /// <returns>Returns a result indicating how the request went.</returns>
         [HttpPost]
+        [RequiresOrderLock(Parameter = "orderItemNodeId")]
         public ActionResult FetchPatronDataUsingPdbRoundtrip(int orderItemNodeId, string data)
         {
             var json = new ResultResponse();
@@ -272,7 +271,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Failed to load Sierra data from \"personnummer\" or library card number: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         #region Private methods

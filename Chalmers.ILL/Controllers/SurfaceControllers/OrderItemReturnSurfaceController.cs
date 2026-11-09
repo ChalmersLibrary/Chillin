@@ -6,26 +6,26 @@ using Chalmers.ILL.UmbracoApi;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemReturnSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemReturnSurfaceController : Controller
     {
         public static int BOOK_RETURNED_HOME_EVENT_TYPE { get { return 14; } }
 
         IOrderItemManager _orderItemManager;
-        IUmbracoWrapper _umbraco;
+        IChillinOrderConfiguration _orderConfig;
 
         private readonly IFolioService _folioService;
         private const int STATUS_FOLIO = 17;
 
-        public OrderItemReturnSurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco, IFolioService folioService)
+        public OrderItemReturnSurfaceController(IOrderItemManager orderItemManager, IChillinOrderConfiguration orderConfig, IFolioService folioService)
         {
             _orderItemManager = orderItemManager;
-            _umbraco = umbraco;
+            _orderConfig = orderConfig;
             _folioService = folioService;
         }
 
@@ -35,17 +35,19 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="nodeId">OrderItem Node Id</param>
         /// <returns>Partial View</returns>
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderReturnAction(int nodeId)
         {
             var pageModel = new ChalmersILLActionReturnModel(_orderItemManager.GetOrderItem(nodeId));
 
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
 
             // The return format depends on the client's Accept-header
             return PartialView("Chalmers.ILL.Action.Return", pageModel);
         }
 
         [HttpPost]
+        [RequiresOrderLock(Parameter = "nodeId")]
         public ActionResult ReturnItem(int nodeId, string bookId, int status)
         {
             var json = new ResultResponse();
@@ -68,7 +70,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Misslyckades med att returnera: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

@@ -1,21 +1,18 @@
-﻿using Chalmers.ILL.Members;
+using Chalmers.ILL.Members;
 using Chalmers.ILL.Models.Page;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Mvc;
-using System.Web.Security;
-using umbraco;
-using umbraco.cms.businesslogic.member;
-using Umbraco.Web.Models;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Threading.Tasks;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
 {
-    public class ChalmersILLLogoutPageController : RenderMvcController
+    // A user whose auth cookie has already expired must still be able to reach this page to
+    // clear the separate, unsigned ChalmersILL cookie (see MemberInfoManager) — without
+    // [AllowAnonymous] the global AuthorizeAttribute would redirect them to login instead.
+    [AllowAnonymous]
+    public class ChalmersILLLogoutPageController : Controller
     {
         IMemberInfoManager _memberInfoManager;
 
@@ -24,20 +21,19 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers.Page
             _memberInfoManager = memberInfoManager;
         }
 
-        public override ActionResult Index(RenderModel model)
+        public async Task<IActionResult> Index()
         {
             var customModel = new ChalmersILLLogoutPageModel();
-
             _memberInfoManager.PopulateModelWithMemberData(Request, Response, customModel);
 
-            if (library.IsLoggedOn())
+            if (User.Identity.IsAuthenticated)
             {
-                var memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
-                FormsAuthentication.SignOut();
+                _memberInfoManager.GetCurrentMemberId(Request, Response);
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 _memberInfoManager.ClearMemberCache(Response);
             }
 
-            return CurrentTemplate(customModel);
+            return View("~/Views/ChalmersILLLogoutPage.cshtml", customModel);
         }
     }
 }

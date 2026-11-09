@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
-using umbraco.cms.businesslogic.member;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Chalmers.ILL.Configuration;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
-using Microsoft.Exchange.WebServices.Data;
-using System.Configuration;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Chalmers.ILL.OrderItems;
@@ -18,29 +15,33 @@ using Chalmers.ILL.Models.Mail;
 using Chalmers.ILL.Models.PartialPage;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Templates;
-using Umbraco.Core.Logging;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemMailSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemMailSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 6; } }
 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(OrderItemMailSurfaceController));
+
         IOrderItemManager _orderItemManager;
-        IExchangeMailWebApi _exchangeMailWebApi;
-        IUmbracoWrapper _dataTypes;
+        IMailWebApi _exchangeMailWebApi;
+        IChillinOrderConfiguration _orderConfig;
         IMailService _mailService;
         ITemplateService _templateService;
+        IChillinConfiguration _config;
 
-        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IExchangeMailWebApi exchangeMailWebApi, 
-            IUmbracoWrapper dataTypes, IMailService mailService, ITemplateService templateService)
+        public OrderItemMailSurfaceController(IOrderItemManager orderItemManager, IMailWebApi exchangeMailWebApi,
+            IChillinOrderConfiguration orderConfig, IMailService mailService, ITemplateService templateService,
+            IChillinConfiguration config)
         {
             _orderItemManager = orderItemManager;
             _exchangeMailWebApi = exchangeMailWebApi;
-            _dataTypes = dataTypes;
+            _orderConfig = orderConfig;
             _mailService = mailService;
             _templateService = templateService;
+            _config = config;
         }
 
         /// <summary>
@@ -49,11 +50,12 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="nodeId">OrderItem Node Id</param>
         /// <returns>Partial View</returns>
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderMailAction(int nodeId)
         {
             var model = new ChalmersILLActionMailModel(_orderItemManager.GetOrderItem(nodeId));
 
-            _dataTypes.PopulateModelWithAvailableValues(model);
+            _orderConfig.PopulateModelWithAvailableValues(model);
             model.SignatureTemplate = _templateService.GetTemplateData("SignatureTemplate", model.OrderItem);
             model.Templates = _templateService.GetManualTemplates();
 
@@ -66,7 +68,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// </summary>
         /// <param name="m">The data for the outgoing mail.</param>
         /// <returns>JSON result</returns>
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
+        [RequiresOrderLock(Parameter = "m")]
         public ActionResult SendMail(OutgoingMailPackageModel m)
         {
             var json = new ResultResponse();
@@ -104,8 +107,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                     }
 	            }
 
-                // Set status property if it differs from newStatus and if it is not -1 (no change)
-                if (orderItem.StatusId != m.newStatusId && orderItem.StatusId != -1)
+                // Set status property if it differs from current and if newStatusId is not -1 (no change)
+                if (orderItem.StatusId != m.newStatusId && m.newStatusId != -1)
                 {
                     _orderItemManager.SetStatus(m.nodeId, m.newStatusId, eventId, false, false);
                 }
@@ -134,7 +137,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         /// <summary>
@@ -147,7 +150,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="message">Mail message</param>
         /// <param name="newStatus">Change OrderItem status</param>
         /// <returns>JSON result</returns>
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
         public ActionResult SendMailForNewOrder(string message, string name, string mail, string libraryCardNumber, string deliveryLibrary)
         {
             var json = new ResultResponse();
@@ -162,20 +165,20 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                         "<div id='Purchase'>False</div>\n" +
                         "<div id='DeliveryLibrary'>" + deliveryLibrary + "</div>\n" +
                     "</div>\n";
-                _exchangeMailWebApi.ConnectToExchangeService(ConfigurationManager.AppSettings["chalmersIllExhangeLogin"], ConfigurationManager.AppSettings["chalmersIllExhangePass"]);
-                _exchangeMailWebApi.SendPlainMailMessage(body, "New request from TEST #new", ConfigurationManager.AppSettings["chalmersIllSenderAddress"]);
+                _exchangeMailWebApi.ConnectToExchangeService(_config.ChalmersIllExchangeLogin, _config.ChalmersIllExchangePassword);
+                _exchangeMailWebApi.SendPlainMailMessage(body, "New request from TEST #new", _config.ChalmersIllSenderAddress);
 
                 json.Success = true;
                 json.Message = "Sent mail for new order.";
             }
             catch (Exception e)
             {
-                LogHelper.Error<OrderItemMailSurfaceController>("Error while sending mail for new order.", e);
+                _log.Error("Error while sending mail for new order.", e);
                 json.Success = false;
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         /// <summary>
@@ -183,7 +186,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// </summary>
         /// <param name="m">The data for the outgoing mail.</param>
         /// <returns>JSON result</returns>
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
         public ActionResult SendSimpleMail(OutgoingMailModel m)
         {
             var res = new ResultResponse();
@@ -201,7 +204,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 res.Message = "Misslyckades med att skicka ut mail: " + e.Message;
             }
 
-            return Json(res, JsonRequestBehavior.AllowGet);
+            return Json(res);
         }
     }
 }

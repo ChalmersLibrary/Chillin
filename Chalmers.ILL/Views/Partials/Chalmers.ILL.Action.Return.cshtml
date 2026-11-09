@@ -11,7 +11,7 @@
     </div>
     <div class="row">
         <div class="col-md-6">
-            <button class="btn btn-success" onclick="returnItem();">Returnera</button>
+            <button class="btn btn-success" data-testid="return-confirm" onclick="returnItem();">Returnera</button>
         </div>
     </div>
     
@@ -19,7 +19,7 @@
         function returnItem() {
             lockScreen();
             let previousStatus = @Model.OrderItem.Status.Substring(0, 2)
-            $.post("/umbraco/surface/OrderItemReturnSurface/ReturnItem",
+            $.post("/OrderItemReturnSurface/ReturnItem",
                 {
                     nodeId: "@Model.OrderItem.NodeId",
                     bookId: "@Model.OrderItem.BookId",

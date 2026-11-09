@@ -1,12 +1,11 @@
 ﻿using Chalmers.ILL.Models;
 using Chalmers.ILL.OrderItems;
 using System;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class BookCirculationSurfaceController : SurfaceController
+    public class BookCirculationSurfaceController : Controller
     {
         public static int BOOK_RETURNED_FROM_BORROWER_EVENT_TYPE { get { return 23; } }
         public static int BOOK_LOANED_EVENT_TYPE { get { return 24; } }
@@ -37,7 +36,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Misslyckades med att returnera från filial: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         [HttpPost]
@@ -59,7 +58,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Misslyckades med att låna ut bok: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

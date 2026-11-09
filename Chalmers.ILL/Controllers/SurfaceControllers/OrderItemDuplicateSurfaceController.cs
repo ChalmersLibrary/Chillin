@@ -2,11 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using Umbraco.Web.Mvc;
-using umbraco.cms.businesslogic.member;
-using umbraco.cms.businesslogic.datatype;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
@@ -15,8 +12,8 @@ using Chalmers.ILL.OrderItems;
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
 
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemDuplicateSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemDuplicateSurfaceController : Controller
     {
         public static int MAKE_DUPLICATE_EVENT_TYPE { get { return 32; } }
 
@@ -28,6 +25,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         }
 
         [HttpPost]
+        [RequiresOrderLock(Parameter = "orderNodeId")]
         public ActionResult MakeDuplicate(int orderNodeId)
         {
             var json = new ResultResponse();
@@ -49,7 +47,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

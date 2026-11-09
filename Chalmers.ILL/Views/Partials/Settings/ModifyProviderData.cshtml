@@ -43,7 +43,7 @@
 
         if (fromProviderName.trim() && toProviderName.trim()) {
             lockScreen();
-            $.get("/umbraco/surface/ProviderDataSurface/GetNodeIdsForOrderItemsWithGivenProviderName", {
+            $.get("/ProviderDataSurface/GetNodeIdsForOrderItemsWithGivenProviderName", {
                 providerName: fromProviderName
             }).done(function (ids) {
                 var estimatedTime = Math.floor(ids.length * 4 / 60);
@@ -74,7 +74,7 @@
     }
 
     function changeProviderName(ids, index, providerName) {
-        $.post("/umbraco/surface/ProviderDataSurface/SetProviderName", {
+        $.post("/ProviderDataSurface/SetProviderName", {
             nodeId: ids[index],
             providerName: providerName
         }).done(function (res) {

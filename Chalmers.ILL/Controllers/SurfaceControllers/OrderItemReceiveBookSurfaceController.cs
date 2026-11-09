@@ -9,18 +9,18 @@ using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
 using Newtonsoft.Json;
 using System;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemReceiveBookSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemReceiveBookSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 10; } }
         public static int BOOK_RECEIVED_AT_BRANCH_EVENT_TYPE { get { return 25; } }
 
-        private  IUmbracoWrapper _umbraco;
+        private IChillinOrderConfiguration _orderConfig;
         private  IOrderItemManager _orderItemManager;
         private  ITemplateService _templateService;
         private  IMailService _mailService;
@@ -28,9 +28,9 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         private readonly IChillinTextRepository _chillinTextRepository;
 
         public OrderItemReceiveBookSurfaceController(
-            IUmbracoWrapper umbraco, 
-            IOrderItemManager orderItemManager, 
-            ITemplateService templateService, 
+            IChillinOrderConfiguration orderConfig,
+            IOrderItemManager orderItemManager,
+            ITemplateService templateService,
             IMailService mailService,
             IFolioService folioService,
             IChillinTextRepository chillinTextRepository)
@@ -38,17 +38,18 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _orderItemManager = orderItemManager;
             _templateService = templateService;
             _mailService = mailService;
-            _umbraco = umbraco;
+            _orderConfig = orderConfig;
             _folioService = folioService;
             _chillinTextRepository = chillinTextRepository;
         }
 
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderReceiveBookAction(int nodeId)
         {
             var standardTextTitle = _chillinTextRepository.ByTextField("standardTitleText");
             var pageModel = new ChalmersILLActionReceiveBookModel(_orderItemManager.GetOrderItem(nodeId), standardTextTitle.StandardTitleText);
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
             pageModel.BookAvailableMailTemplate = _templateService.GetTemplateData("BookAvailableMailTemplate");
             return PartialView("Chalmers.ILL.Action.ReceiveBook", pageModel);
         }
@@ -61,7 +62,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="dueDate">Delivery Library Due Date</param>
         /// <param name="providerInformation">Information about the provider</param>
         /// <returns>MVC ActionResult with JSON</returns>
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
+        [RequiresOrderLock(PackJsonField = "orderNodeId")]
         public ActionResult SetOrderItemDeliveryReceived(string packJson)
         {
             var json = new ResultResponse();
@@ -112,7 +114,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
 
@@ -124,7 +126,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="dueDate">Delivery Library Due Date</param>
         /// <param name="providerInformation">Information about the provider</param>
         /// <returns>MVC ActionResult with JSON</returns>
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
+        [RequiresOrderLock(Parameter = "nodeId")]
         public ActionResult SetOrderItemDeliveryReceivedAtBranch(int nodeId)
         {
             var json = new ResultResponse();
@@ -176,7 +179,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
 

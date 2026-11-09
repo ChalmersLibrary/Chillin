@@ -1,29 +1,30 @@
-﻿using Chalmers.ILL.Templates;
-using Chalmers.ILL.UmbracoApi;
+﻿using Chalmers.ILL.Configuration;
+using Chalmers.ILL.Templates;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Web;
 using Chalmers.ILL.Models;
 
 namespace Chalmers.ILL.Patron
 {
+    // Not wired up in Bootstrapper.cs - IPatronDataProvider currently resolves to
+    // FolioPatronDataProvider, and nothing constructs SierraCache. Left in place (fas 6 just
+    // migrates its config access), flagged as dead code in TODO-remove-dotnet-framework.md, fas 6.
     public class SierraCache : IPatronDataProvider
     {
-        IUmbracoWrapper _umbraco;
         ITemplateService _templateService;
         IAffiliationDataProvider _affiliationDataProvider;
+        IChillinConfiguration _config;
 
-        public SierraCache(IUmbracoWrapper umbraco, ITemplateService templateService, IAffiliationDataProvider affiliationDataProvider)
+        public SierraCache(ITemplateService templateService, IAffiliationDataProvider affiliationDataProvider, IChillinConfiguration config)
         {
-            _umbraco = umbraco;
             _templateService = templateService;
             _affiliationDataProvider = affiliationDataProvider;
+            _config = config;
         }
 
         public IPatronDataProvider Connect()
@@ -57,10 +58,10 @@ namespace Chalmers.ILL.Patron
 
             try
             {
-                HttpWebRequest fileReq = (HttpWebRequest)HttpWebRequest.Create(ConfigurationManager.AppSettings["patronCacheSolrQueryUrl"] + query + "&wt=json");
+                HttpWebRequest fileReq = (HttpWebRequest)HttpWebRequest.Create(_config.PatronCacheSolrQueryUrl + query + "&wt=json");
 
-                if (!String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthUsername"]) && !String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthPassword"]))
-                    fileReq.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthUsername"] + ":" + ConfigurationManager.AppSettings["patronCacheSolrBasicAuthPassword"])));
+                if (!String.IsNullOrWhiteSpace(_config.PatronCacheSolrBasicAuthUsername) && !String.IsNullOrWhiteSpace(_config.PatronCacheSolrBasicAuthPassword))
+                    fileReq.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(_config.PatronCacheSolrBasicAuthUsername + ":" + _config.PatronCacheSolrBasicAuthPassword)));
 
                 fileReq.CookieContainer = new CookieContainer();
                 fileReq.AllowAutoRedirect = true;
@@ -93,10 +94,10 @@ namespace Chalmers.ILL.Patron
             {
                 var query = "recordnum:" + sierraId;
 
-                HttpWebRequest fileReq = (HttpWebRequest)HttpWebRequest.Create(ConfigurationManager.AppSettings["patronCacheSolrQueryUrl"] + query + "&wt=json");
+                HttpWebRequest fileReq = (HttpWebRequest)HttpWebRequest.Create(_config.PatronCacheSolrQueryUrl + query + "&wt=json");
 
-                if (!String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthUsername"]) && !String.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthPassword"]))
-                    fileReq.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(ConfigurationManager.AppSettings["patronCacheSolrBasicAuthUsername"] + ":" + ConfigurationManager.AppSettings["patronCacheSolrBasicAuthPassword"])));
+                if (!String.IsNullOrWhiteSpace(_config.PatronCacheSolrBasicAuthUsername) && !String.IsNullOrWhiteSpace(_config.PatronCacheSolrBasicAuthPassword))
+                    fileReq.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(_config.PatronCacheSolrBasicAuthUsername + ":" + _config.PatronCacheSolrBasicAuthPassword)));
 
                 fileReq.CookieContainer = new CookieContainer();
                 fileReq.AllowAutoRedirect = true;

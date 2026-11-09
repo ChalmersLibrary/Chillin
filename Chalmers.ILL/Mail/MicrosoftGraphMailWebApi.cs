@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Dynamic;
 using System.Globalization;
 using System.Linq;
@@ -8,37 +7,30 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using Chalmers.ILL.Configuration;
 using Chalmers.ILL.Models.Mail;
-using Chalmers.ILL.UmbracoApi;
-using Chalmers.ILL.Utilities;
-using HtmlAgilityPack;
-using Microsoft.Exchange.WebServices.Data;
 using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Umbraco.Core.Logging;
-
 namespace Chalmers.ILL.Mail
 {
-    public class MicrosoftGraphMailWebApi : IExchangeMailWebApi
+    public class MicrosoftGraphMailWebApi : IMailWebApi
     {
-        // With client credentials flows the scopes is ALWAYS of the shape "resource/.default", as the 
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(MicrosoftGraphMailWebApi));
+
+        // With client credentials flows the scopes is ALWAYS of the shape "resource/.default", as the
         // application permissions need to be set statically (in the portal or by PowerShell), and then granted by
         // a tenant administrator
         private string[] scopes = new string[] { "https://graph.microsoft.com/.default" };
 
         private IConfidentialClientApplication _app;
         private HttpClient _httpClient;
-        private IConfiguration _config;
-        private IUmbracoWrapper _umbraco;
+        private IChillinConfiguration _config;
 
-        public MicrosoftGraphMailWebApi(HttpClient httpClient, IConfiguration config, IUmbracoWrapper umbraco)
+        public MicrosoftGraphMailWebApi(HttpClient httpClient, IChillinConfiguration config)
         {
             _httpClient = httpClient;
             _config = config;
-            _umbraco = umbraco;
         }
 
         /// <summary>
@@ -47,8 +39,6 @@ namespace Chalmers.ILL.Mail
         /// <returns>The Service reference</returns>
         public void ConnectToExchangeService(string username, string password)
         {
-            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-
             _app = ConfidentialClientApplicationBuilder.Create(_config.MicrosoftGraphClientId)
                 .WithClientSecret(_config.MicrosoftGraphClientSecret)
                 .WithAuthority(new Uri(_config.MicrosoftGraphAuthority))
@@ -157,27 +147,12 @@ namespace Chalmers.ILL.Mail
                 {
                     var m = new MailQueueModel();
 
-                    // Load Message Body as HTML with HtmlAgilityPack
-                    HtmlAgilityPack.HtmlDocument htmlDoc = new HtmlAgilityPack.HtmlDocument();
-                    htmlDoc.LoadHtml(MailBodyFixer.RemoveHtmlAroundLinks(mailData.body.content.ToString().Replace("<br>", "<br>\n")));
-
-                    // Query for OrderItem properties in MailQueueModel
-                    if (htmlDoc.DocumentNode.HasChildNodes && htmlDoc.GetElementbyId("chalmers.ill.orderitem") != null)
-                    {
-                        m.PatronName = htmlDoc.GetElementbyId("PatronName").InnerText;
-                        m.PatronEmail = htmlDoc.GetElementbyId("PatronEmail").InnerText;
-                        m.PatronCardNo = htmlDoc.GetElementbyId("PatronCardNo").InnerText;
-                        m.OriginalOrder = htmlDoc.GetElementbyId("OriginalOrder").InnerText;
-                        if (htmlDoc.GetElementbyId("Purchase") != null)
-                        {
-                            m.IsPurchaseRequest = Convert.ToBoolean(htmlDoc.GetElementbyId("Purchase").InnerText);
-                        }
-                        else
-                        {
-                            m.IsPurchaseRequest = false;
-                        }
-                        m.DeliveryLibrary = htmlDoc.GetElementbyId("DeliveryLibrary").InnerText;
-                    }
+                    // Parses the hidden "chalmers.ill.orderitem" div (if present) into
+                    // PatronName/PatronEmail/PatronCardNo/OriginalOrder/IsPurchaseRequest/
+                    // DeliveryLibrary, and always sets MessageBody from the plain-text rendering.
+                    // Shared with Isolated.FileMailWebApi (fas 6, isolerat läge steg A) so the fake
+                    // exercises the same parsing rules instead of only the transport.
+                    IncomingMailParser.ParseIncomingMailBody(m, mailData.body.content.ToString());
 
                     // Load all attachments
                     var attachmentList = new List<MailAttachment>();
@@ -205,29 +180,6 @@ namespace Chalmers.ILL.Mail
                     m.DateTimeReceived = mailData.receivedDateTime.ToString().Replace("T", " ").Remove(16).Trim();
                     m.Attachments = attachmentList;
 
-                    // Message body as text only
-                    var sb = new StringBuilder();
-
-                    if (htmlDoc != null && htmlDoc.DocumentNode != null)
-                    {
-                        var textNodes = htmlDoc.DocumentNode.SelectNodes("//text()");
-                        if (textNodes != null)
-                        {
-                            foreach (HtmlNode node in textNodes)
-                            {
-                                if (!node.HasChildNodes)
-                                {
-                                    string text = node.InnerText;
-                                    if (!string.IsNullOrEmpty(text))
-                                        sb.AppendLine(text.Trim());
-                                }
-                            }
-                        }
-                    }
-
-                    var messageText = sb.ToString();
-                    m.MessageBody = Helpers.HtmlToPlainText(messageText);
-                    
                     PatchToMicrosoftGraph(_config.MicrosoftGraphApiEndpoint + "/users/" + _config.MicrosoftGraphApiUserId + "/mailFolders/inbox/messages/" + m.Id, "{ \"isRead\":true }");
 
                     // Add this message to list
@@ -236,7 +188,7 @@ namespace Chalmers.ILL.Mail
             }
             catch (Exception e)
             {
-                LogHelper.Error<MicrosoftGraphMailWebApi>("Failed fetching mail from Microsoft Graph.", e);
+                _log.Error("Failed fetching mail from Microsoft Graph.", e);
             }
 
             return res;
@@ -258,7 +210,7 @@ namespace Chalmers.ILL.Mail
 
         public void SendMailMessage(string orderId, string body, string subject, string recipientName, string recipientAddress, IDictionary<string, byte[]> attachments)
         {
-            string senderEmail = ConfigurationManager.AppSettings["chalmersIllSenderAddress"];
+            string senderEmail = _config.ChalmersIllSenderAddress;
 
             dynamic message = new ExpandoObject();
             message.subject = subject + " #" + orderId;
@@ -332,7 +284,7 @@ namespace Chalmers.ILL.Mail
 
         public void SendPlainMailMessage(string body, string subject, string recipientAddress)
         {
-            string senderEmail = ConfigurationManager.AppSettings["chalmersIllSenderAddress"];
+            string senderEmail = _config.ChalmersIllSenderAddress;
 
             dynamic message = new ExpandoObject();
             message.subject = subject;
@@ -402,8 +354,6 @@ namespace Chalmers.ILL.Mail
         {
             dynamic res = null;
 
-            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-
             var tokenTask = _app.AcquireTokenForClient(scopes).ExecuteAsync();
             tokenTask.Wait();
             var tokenResult = tokenTask.Result;
@@ -433,8 +383,6 @@ namespace Chalmers.ILL.Mail
         private dynamic PostToMicrosoftGraph(string url, string data = null)
         {
             dynamic res = null;
-
-            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             var tokenTask = _app.AcquireTokenForClient(scopes).ExecuteAsync();
             tokenTask.Wait();
@@ -471,8 +419,6 @@ namespace Chalmers.ILL.Mail
         private dynamic PutToUpload(string url, byte[] data, IDictionary<string, string> headers = null)
         {
             dynamic res = null;
-
-            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             using (var requestMessage = new HttpRequestMessage(HttpMethod.Put, url))
             {
@@ -514,8 +460,6 @@ namespace Chalmers.ILL.Mail
         {
             dynamic res = null;
 
-            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
-
             var tokenTask = _app.AcquireTokenForClient(scopes).ExecuteAsync();
             tokenTask.Wait();
             var tokenResult = tokenTask.Result;
@@ -545,8 +489,6 @@ namespace Chalmers.ILL.Mail
         private dynamic PatchToMicrosoftGraph(string url, string data)
         {
             dynamic res = null;
-
-            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             var tokenTask = _app.AcquireTokenForClient(scopes).ExecuteAsync();
             tokenTask.Wait();

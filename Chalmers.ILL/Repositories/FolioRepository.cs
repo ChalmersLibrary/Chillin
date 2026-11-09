@@ -4,13 +4,9 @@ using Chalmers.ILL.Models;
 using Chalmers.ILL.Patron;
 using Newtonsoft.Json;
 using System;
-using System.Configuration;
-using System.IdentityModel;
 using System.IO;
 using System.Net;
 using System.Text;
-using umbraco.presentation.umbraco.dialogs;
-using Umbraco.Core;
 
 namespace Chalmers.ILL.Repositories
 {
@@ -91,8 +87,6 @@ namespace Chalmers.ILL.Repositories
             }
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(_folioConnection.GetFolioApiBaseAddress() + folioRequest.Path);
-
-            System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             request.Accept = folioRequest.Accept;
             request.ContentType = "application/json";

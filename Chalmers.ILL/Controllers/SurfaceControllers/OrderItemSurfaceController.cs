@@ -2,43 +2,38 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Utilities;
 using Chalmers.ILL.Extensions;
 using Chalmers.ILL.OrderItems;
-using umbraco.cms.businesslogic.member;
-using umbraco.cms.businesslogic.relation;
-using Umbraco.Core.Logging;
 using Chalmers.ILL.Members;
 using Newtonsoft.Json;
-using System.Configuration;
-using umbraco.cms.businesslogic.datatype;
 using Chalmers.ILL.SignalR;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Models.PartialPage;
-using Umbraco.Core.Services;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
 
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemSurfaceController : Controller
     {
+        private static readonly log4net.ILog _log = log4net.LogManager.GetLogger(typeof(OrderItemSurfaceController));
+
         IMemberInfoManager _memberInfoManager;
         IOrderItemManager _orderItemManager;
         INotifier _notifier;
-        IUmbracoWrapper _umbraco;
+        IChillinOrderConfiguration _orderConfig;
 
-        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager, IOrderItemManager orderItemManager, 
-            INotifier notifier, IUmbracoWrapper umbraco)
+        public OrderItemSurfaceController(IMemberInfoManager memberInfoManager, IOrderItemManager orderItemManager,
+            INotifier notifier, IChillinOrderConfiguration orderConfig)
         {
             _memberInfoManager = memberInfoManager;
             _orderItemManager = orderItemManager;
             _notifier = notifier;
-            _umbraco = umbraco;
+            _orderConfig = orderConfig;
         }
 
         public const string lockRelationType = "memberLocked";
@@ -50,6 +45,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="nodeId">The OrderItem Node Id</param>
         /// <returns>Partial View html data</returns>
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderOrderItem(int nodeId)
         {
             // Get current member.
@@ -61,7 +57,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             // Check if the current user has the lock for the item.
             pageModel.OrderItem.EditedByCurrentMember = pageModel.OrderItem.EditedBy != "" && pageModel.OrderItem.EditedBy == memberId.ToString();
 
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
 
             // Return Partial View to the client
             return PartialView("Chalmers.ILL.OrderItem", pageModel);
@@ -73,6 +69,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="nodeId">The OrderItem Node Id</param>
         /// <returns>JSON result</returns>
         [HttpGet]
+        [AllowViewer]
         public ActionResult GetOrderItem(int nodeId)
         {
             // Get current member.
@@ -85,7 +82,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             orderItem.EditedByCurrentMember = orderItem.EditedBy != "" && orderItem.EditedBy == memberId.ToString();
 
             // Return JSON object to the client to handle
-            return Json(orderItem, JsonRequestBehavior.AllowGet);
+            return Json(orderItem);
         }
 
         /// <summary>
@@ -103,24 +100,25 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 // Get current member
                 int memberId = _memberInfoManager.GetCurrentMemberId(Request, Response);
 
-                _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), new Member(memberId).Text);
+                var memberText = _memberInfoManager.GetCurrentMemberText(Request, Response);
+                _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), memberText);
 
                 // Return JSON to client
                 json.Success = true;
-                json.Message = "Took over lock.";
+                json.Message = "Du har tagit över låset.";
 
                 // Notify SignalR clients of the update
-                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
+                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), memberText);
 
             }
             catch (Exception e)
             {
                 // Return JSON to client
                 json.Success = false;
-                json.Message = "Error taking lock: " + e.Message;
+                json.Message = "Kunde inte ta över låset: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         /// <summary>
@@ -144,28 +142,28 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     // Locked by someone else
                     json.Success = false;
-                    json.Message = "OrderItem is already locked by MemberId " + memberId;
+                    json.Message = "Ordern är redan låst av en annan användare (medlems-id " + memberId + ").";
                 }
                 else if (orderItem.EditedBy == "")
                 {
                     // Unlocked
-                    _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), new Member(memberId).Text);
+                    _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), _memberInfoManager.GetCurrentMemberText(Request, Response));
                     json.Success = true;
-                    json.Message = "Order item locked by current member.";
+                    json.Message = "Ordern är nu låst av dig.";
                 }
 
                 // Notify SignalR clients of the update
-                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
+                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), _memberInfoManager.GetCurrentMemberText(Request, Response));
 
             }
             catch (Exception e)
             {
                 // Return JSON to client
                 json.Success = false;
-                json.Message = "Error locking OrderItem: " + e.Message;
+                json.Message = "Kunde inte låsa ordern: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         /// <summary>
@@ -189,32 +187,33 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 {
                     _orderItemManager.SetEditedByData(nodeId, "", "");
                     json.Success = true;
-                    json.Message = "OrderItem unlocked by Current Member.";
+                    json.Message = "Låset på ordern är släppt.";
                 }
                 else if (orderItem.EditedBy == "")
                 {
                     json.Success = true;
-                    json.Message = "OrderItem unlocked by current member.";
+                    json.Message = "Låset på ordern är släppt.";
                 }
 
                 // Notify SignalR clients of the update
-                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), new Member(memberId).Text);
+                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), _memberInfoManager.GetCurrentMemberText(Request, Response));
 
             }
             catch (Exception e)
             {
                 // Return JSON to client
                 json.Success = false;
-                json.Message = "Error unlocking OrderItem: " + e.Message;
+                json.Message = "Kunde inte släppa låset på ordern: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         /// <summary>
         /// Get all locked OrderItems for Current Member
         /// </summary>
         /// <returns>JSON result</returns>
+        [AllowViewer]
         public ActionResult GetLocksForCurrentMember()
         {
             // Response JSON
@@ -249,11 +248,11 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             {
                 // Return JSON to client.
                 json.Success = false;
-                json.Message = "Error reading locked OrderItems: " + e.Message;
-                LogHelper.Error<OrderItemSurfaceController>("Error reading locked OrderItems", e);
+                json.Message = "Kunde inte läsa vilka ordrar som är låsta: " + e.Message;
+                _log.Error("Error reading locked OrderItems", e);
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

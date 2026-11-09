@@ -1,19 +1,18 @@
 ﻿using Chalmers.ILL.Models;
 using Chalmers.ILL.OrderItems;
-using Microsoft.Exchange.WebServices.Data;
 using Nest;
 using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemResetAllAnonymizationFlagsSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemResetAllAnonymizationFlagsSurfaceController : Controller
     {
         public static int RESET_ALL_ANONYMIZATION_FLAGS_EVENT_TYPE { get { return 33; } }
 
@@ -24,7 +23,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             _orderItemManager = orderItemManager;
         }
 
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
+        [RequiresOrderLock(Parameter = "nodeId")]
         public ActionResult Reset(int nodeId)
         {
             var json = new ResultResponse();
@@ -45,7 +45,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Error: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
     }
 }

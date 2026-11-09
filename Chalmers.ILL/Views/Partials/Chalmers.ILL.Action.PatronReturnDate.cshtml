@@ -40,7 +40,7 @@
 
     function changePatronReturnDate() {
         lockScreen();
-        $.post("/umbraco/surface/OrderItemPatronReturnDateSurface/ChangeReturnDate", {
+        $.post("/OrderItemPatronReturnDateSurface/ChangeReturnDate", {
             packJson: JSON.stringify({
                 nodeId: @Model.OrderItem.NodeId,
                 logMsg: $("#log-message").val(),

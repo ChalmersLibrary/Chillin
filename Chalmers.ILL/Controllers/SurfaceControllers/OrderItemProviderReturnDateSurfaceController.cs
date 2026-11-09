@@ -8,13 +8,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    [MemberAuthorize(AllowType = "Standard")]
-    public class OrderItemProviderReturnDateSurfaceController : SurfaceController
+    [Authorize]
+    public class OrderItemProviderReturnDateSurfaceController : Controller
     {
         public static int EVENT_TYPE { get { return 12; } }
 
@@ -31,6 +31,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         /// <param name="nodeId">OrderItem Node Id</param>
         /// <returns>Partial View</returns>
         [HttpGet]
+        [AllowViewer]
         public ActionResult RenderProviderReturnDateAction(int nodeId)
         {
             var pageModel = new ChalmersILLActionProviderReturnDateModel(_orderItemManager.GetOrderItem(nodeId));
@@ -39,7 +40,8 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
             return PartialView("Chalmers.ILL.Action.ProviderReturnDate", pageModel);
         }
 
-        [HttpPost, ValidateInput(false)]
+        [HttpPost]
+        [RequiresOrderLock(PackJsonField = "nodeId")]
         public ActionResult ChangeReturnDate(string packJson)
         {
             var json = new ResultResponse();
@@ -73,7 +75,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
                 json.Message = "Misslyckades med att ändra återlämningsdatum från utlånande bibliotek: " + e.Message;
             }
 
-            return Json(json, JsonRequestBehavior.AllowGet);
+            return Json(json);
         }
 
         public class ChangeReturnDatePackage

@@ -1,0 +1,85 @@
+@model ClaudePageModel
+@* A conversation's page content; the host wraps it in its own layout via
+   IClaudeborgenHost.ConversationPage. *@
+@{
+    var c = Model.Conversation;
+}
+
+<p><a href="/">&larr; Startsidan</a></p>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-danger" data-testid="claude-error">@Model.Error</div>
+}
+
+<div id="claude-live" data-claude-refresh="/Claude/ConversationContent/@c.Id">
+    @await Html.PartialAsync("~/Views/Claudeborgen/_ConversationContent.cshtml", Model)
+</div>
+
+@{
+    var reverting = c.State == ConversationState.Reverting;
+}
+
+@if (reverting)
+{
+    <div class="alert @(c.NeedsIt ? "alert-danger" : "alert-info")" data-testid="claude-reverting">
+        @if (c.NeedsIt)
+        {
+            <strong>Ändringarna kunde inte tas bort.</strong> @: Se meddelandet ovan. När IT har tittat på det kan du försöka igen.
+        }
+        else
+        {
+            <strong>Arbetet avbryts.</strong> @: Runnern tar bort ändringarna från testgrenen. Sedan tas arbetet bort härifrån.
+        }
+    </div>
+}
+
+@* Outside the live-refreshed part, so a half-written message survives a refresh. *@
+@if (c.IsOpen && !reverting && Model.Access.CanWrite)
+{
+    <form method="post" action="/Claude/Reply/@c.Id" data-testid="claude-reply-form" data-claude-send>
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <label for="claude-reply">Nästa meddelande till Claude</label>
+            <textarea class="form-control" id="claude-reply" name="body" rows="4" required data-enter-sends></textarea>
+            <p class="help-block">Enter skickar, Shift+Enter ger ny rad. Skriv inga personuppgifter – allt du skriver skickas till Claude.</p>
+        </div>
+        <button type="submit" class="btn btn-primary">Skicka</button>
+    </form>
+}
+
+@if (c.IsOpen && Model.Access.CanStartAndClose && (!reverting || c.NeedsIt))
+{
+    <hr />
+    <div class="row">
+        <div class="col-md-8">
+            @if (!reverting)
+            {
+            @* The text is Claude's suggestion, improved after every round, until you change it: your
+               own text is saved right away (claude.js, data-claude-changelog) and then stays. *@
+            <form method="post" action="/Claude/Done/@c.Id" data-testid="claude-done-form">
+                @Html.AntiForgeryToken()
+                <label for="claude-changelog">Text i changelogen</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="claude-changelog" name="changelogText" value="@(c.ChangelogText ?? c.Title)" maxlength="@ClaudeborgenService.ChangelogTextMaxLength"
+                           data-claude-changelog="/Claude/ChangelogText/@c.Id">
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-success">Avsluta arbete och markera som färdigt</button>
+                    </span>
+                </div>
+                <p class="help-block">Claude föreslår texten och förbättrar den efter varje varv, tills du ändrar den själv. Töm rutan så föreslår Claude igen.</p>
+            </form>
+            }
+        </div>
+        @* padding-top: level with the box, below the label on the left. *@
+        <div class="col-md-4 text-right" style="@(reverting ? "" : "padding-top: 25px;")">
+            @* Everything the work pushed is reverted, then it's removed (DESIGN.md, "Avbryta ett arbete"). *@
+            <form method="post" action="/Claude/Cancel/@c.Id" onsubmit="return confirm('Avbryta och ta bort arbetet? Allt som har ändrats tas bort från testgrenen, och samtalet raderas.');" data-testid="claude-cancel-form">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">Avbryt och ta bort arbete</button>
+            </form>
+        </div>
+    </div>
+}
+
+<script src="/_content/Claudeborgen.Web/claude.js?v=@(Model.Settings.DeployedCommit() ?? "dev")" type="text/javascript"></script>

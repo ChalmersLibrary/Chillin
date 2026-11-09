@@ -4,25 +4,29 @@ using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
 using System;
-using System.Web.Mvc;
-using Umbraco.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {
-    public class OrderItemReceivedAtBranchSurfaceController : SurfaceController
+    // Must stay reachable without login: physical delivery slips already printed with QR codes
+    // point at this URL (see the LegacyUmbracoSurfaceAlias comment in RouteConfig.cs) and can't
+    // be reprinted.
+    [AllowAnonymous]
+    public class OrderItemReceivedAtBranchSurfaceController : Controller
     {
         IOrderItemManager _orderItemManager;
-        IUmbracoWrapper _umbraco;
+        IChillinOrderConfiguration _orderConfig;
         ITemplateService _templateService;
         IMailService _mailService;
 
         public static int ARTICLE_RECEIVED_AT_BRANCH_EVENT_TYPE { get { return 29; } }
 
-        public OrderItemReceivedAtBranchSurfaceController(IOrderItemManager orderItemManager, IUmbracoWrapper umbraco,
+        public OrderItemReceivedAtBranchSurfaceController(IOrderItemManager orderItemManager, IChillinOrderConfiguration orderConfig,
             ITemplateService templateService, IMailService mailService)
         {
             _orderItemManager = orderItemManager;
-            _umbraco = umbraco;
+            _orderConfig = orderConfig;
             _templateService = templateService;
             _mailService = mailService;
         }
@@ -36,7 +40,7 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
         public ActionResult RenderResponse(int nodeId)
         {
             var pageModel = new Models.Page.ReceivedAtBranchResultModel(_orderItemManager.GetOrderItem(nodeId));
-            _umbraco.PopulateModelWithAvailableValues(pageModel);
+            _orderConfig.PopulateModelWithAvailableValues(pageModel);
 
             if (pageModel.OrderItem != null)
             {

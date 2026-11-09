@@ -1,0 +1,167 @@
+// Everything the round does to the project checkout: git, build, tests. One interface, two
+// implementations - the real one, and the fake one for --fake (nothing is touched or pushed).
+import fs from "node:fs";
+import path from "node:path";
+import { RoundFailure } from "./errors.mjs";
+import { run, runShell, tail } from "./exec.mjs";
+
+// The project's changelog file (DESIGN.md, "Changelog"): a JSON array, newest first. Adds the
+// entry for a done conversation at the top, unless it's already there. Returns whether it changed.
+export function addChangelogEntry(file, { conversationId, date, text }, { readFile = fs.readFileSync, writeFile = fs.writeFileSync } = {}) {
+  let entries = [];
+  try {
+    entries = JSON.parse(readFile(file, "utf8"));
+  } catch (e) {
+    if (e.code !== "ENOENT") throw new Error(`Kunde inte läsa changelogen ${file}: ${e.message}`);
+  }
+  if (!Array.isArray(entries)) throw new Error(`Changelogen ${file} är inte en JSON-lista.`);
+  if (entries.some((e) => e.conversationId === conversationId)) return false;
+
+  entries.unshift({ date, items: [text], conversationId });
+  writeFile(file, JSON.stringify(entries, null, 2) + "\n");
+  return true;
+}
+
+// Hides the credentials of a URL like https://user:password@host/… in anything logged.
+export function redact(text) {
+  return String(text ?? "").replace(/(https?:\/\/)[^@\s/]+@/g, "$1***@");
+}
+
+export function createWorkspace({ cwd, branch, buildCommand, testCommand, testGreenTag, commandTimeoutMinutes, changelogFile, deployGitUrl = null, deployGitBranch = "master", log = () => {}, runImpl = run, shellImpl = runShell, files }) {
+  const timeoutMs = commandTimeoutMinutes * 60 * 1000;
+
+  async function git(...args) {
+    const r = await runImpl("git", args, { cwd, timeoutMs: 5 * 60 * 1000 });
+    if (r.code !== 0) throw new Error(`git ${args.join(" ")} misslyckades: ${tail(r.output, 1000)}`);
+    return r.stdout.trim();
+  }
+
+  async function command(line) {
+    const r = await shellImpl(line, { cwd, timeoutMs });
+    const summary = r.timedOut ? `Avbröts efter ${commandTimeoutMinutes} minuter.\n${tail(r.output)}` : tail(r.output);
+    return { ok: r.code === 0, summary };
+  }
+
+  return {
+    async hasChanges() {
+      return (await git("status", "--porcelain")) !== "";
+    },
+
+    // Up to date with the branch before Claude starts. Refuses a dirty tree rather than guessing
+    // whose changes those are.
+    async prepare() {
+      if (await this.hasChanges())
+        throw new RoundFailure("Arbetskatalogen har oincheckade ändringar sedan tidigare. Runnern rör dem inte - någon behöver titta (git status).");
+      await git("fetch", "origin", branch);
+      await git("checkout", branch);
+      await git("pull", "--rebase", "origin", branch);
+    },
+
+    build: () => command(buildCommand),
+    test: () => command(testCommand),
+
+    async commitAndPush(message) {
+      await git("add", "-A");
+      await git("commit", "-m", message);
+      try {
+        await git("push", "origin", `HEAD:${branch}`);
+      } catch {
+        // Someone else pushed meanwhile: rebase onto it once and retry.
+        await git("pull", "--rebase", "origin", branch);
+        await git("push", "origin", `HEAD:${branch}`);
+      }
+      await this.deploy();
+      return git("rev-parse", "HEAD");
+    },
+
+    // Azure Local Git: pushing there builds and deploys (DESIGN.md, "Driftsättning"). Forced - it's a
+    // deploy target, not a source of truth, so it simply gets exactly what the branch has. A failure
+    // doesn't fail the round (the change is on GitHub); the next push deploys everything anyway.
+    async deploy() {
+      if (!deployGitUrl) return;
+      const r = await runImpl("git", ["push", "--force", deployGitUrl, `HEAD:${deployGitBranch}`], { cwd, timeoutMs: 10 * 60 * 1000 });
+      if (r.code !== 0) log(`Kunde inte pusha till Azure för driftsättning: ${redact(tail(r.output, 800))}`);
+      else log("Pushat till Azure för driftsättning.");
+    },
+
+    // Keeps a failed round's changes without leaving the tree dirty for the next round.
+    async stash(message) {
+      await git("stash", "push", "--include-untracked", "-m", message);
+    },
+
+    async markGreen(commit) {
+      await git("tag", "-f", testGreenTag, commit);
+      await git("push", "-f", "origin", `refs/tags/${testGreenTag}`);
+    },
+
+    // Is `commit` part of what's deployed? True also when a later commit was deployed directly
+    // (CI may skip versions). Fetches first, since the deployed commit may be newer than ours.
+    async isDeployed(commit, deployedCommit) {
+      if (!deployedCommit) return false;
+      if (commit === deployedCommit) return true;
+      await runImpl("git", ["fetch", "--quiet", "origin", branch], { cwd, timeoutMs: 5 * 60 * 1000 });
+      const r = await runImpl("git", ["merge-base", "--is-ancestor", commit, deployedCommit], { cwd, timeoutMs: 60 * 1000 });
+      return r.code === 0; // 1 = not included; anything else (unknown commit) = can't tell, so not yet
+    },
+
+    // "Avbryt och ta bort arbete" (DESIGN.md, "Avbryta ett arbete"): revert everything the work
+    // pushed, newest first, as one commit - built first, like any change. A conflict (later work
+    // builds on it) or a red build pushes nothing and is reported. Returns the commit, or HEAD if
+    // there was nothing left to revert (someone already did it by hand).
+    async revertWork({ conversationId, title, commits }) {
+      await this.prepare();
+      const newestFirst = [...commits].reverse();
+      const revert = await runImpl("git", ["revert", "--no-commit", ...newestFirst], { cwd, timeoutMs: 5 * 60 * 1000 });
+      if (revert.code !== 0) {
+        await runImpl("git", ["revert", "--abort"], { cwd, timeoutMs: 60 * 1000 });
+        await runImpl("git", ["reset", "--hard", "HEAD"], { cwd, timeoutMs: 60 * 1000 });
+        throw new RoundFailure(`git revert gick inte rent igenom, troligen för att senare arbete bygger på samma kod:\n${tail(revert.output, 1500)}`);
+      }
+      if (!(await this.hasChanges())) return git("rev-parse", "HEAD");
+
+      const build = await this.build();
+      if (!build.ok) {
+        // The tree was clean before the revert (prepare), so this only throws away the revert.
+        await runImpl("git", ["reset", "--hard", "HEAD"], { cwd, timeoutMs: 60 * 1000 });
+        throw new RoundFailure(`Bygget blev rött utan arbetets ändringar:\n${build.summary}`);
+      }
+      return this.commitAndPush(`#${conversationId}: Avbrutet – ändringarna borttagna (${title})`);
+    },
+
+    // A done conversation's changelog entry, as its own small commit - no Claude, no build: it's
+    // data the app reads. Returns the commit (HEAD if the entry was already there).
+    async commitChangelogEntry(entry) {
+      if (!changelogFile) throw new RoundFailure("claudeborgen.json saknar changelogFile.");
+      await this.prepare();
+      const changed = addChangelogEntry(path.join(cwd, changelogFile), entry, files);
+      if (!changed) return git("rev-parse", "HEAD");
+      return this.commitAndPush(`Changelog: #${entry.conversationId} ${entry.text}`);
+    },
+  };
+}
+
+// --fake: no git, no build, no Claude changes. Tests are red/green per the markers in the latest
+// human message, same markers as the app's in-process FakeClaude ([röd], [röd!], [krasch] - the
+// last one handled in the fake Claude). Lets the whole runner <-> app chain be tried on the
+// isolated fast test server.
+export function createFakeWorkspace({ markers }) {
+  let counter = 0;
+  return {
+    // A question round changes nothing, like the real thing.
+    hasChanges: async () => { const m = markers(); return !(m.instruction.includes("[fråga]") && !m.isFixRound); },
+    prepare: async () => {},
+    build: async () => ({ ok: true, summary: "Bygget grönt (fejkat)." }),
+    async test() {
+      const m = markers();
+      const red = m.instruction.includes("[röd!]") || (m.instruction.includes("[röd]") && !m.isFixRound);
+      return red ? { ok: false, summary: "Fejkrunnern låtsades att 1 test är rött." } : { ok: true, summary: "Alla tester gröna (fejkat)." };
+    },
+    commitAndPush: async () => `fejk${Date.now().toString(16).slice(-5)}${++counter}`,
+    deploy: async () => {},
+    commitChangelogEntry: async () => `fejk-changelog${++counter}`,
+    revertWork: async () => `fejk-revert${++counter}`,
+    isDeployed: async () => true,
+    stash: async () => {},
+    markGreen: async () => {},
+  };
+}

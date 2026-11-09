@@ -1,6 +1,5 @@
 ﻿@model Chalmers.ILL.Models.PartialPage.ChalmersILLActionMailModel
 @using System.Globalization
-@using System.Configuration;
 
 <div class="action-header">Skicka mail</div>
 
@@ -11,10 +10,10 @@
                 <label for="">Mall</label>
                 <div>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-testid="mail-template-toggle" data-toggle="dropdown">
                             <span id="currently-selected-template">Tom</span> <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu" id="orderitem-mail-templatelist" role="menu">
+                        <ul class="dropdown-menu" id="orderitem-mail-templatelist" data-testid="mail-template-menu" role="menu">
                             <li><a href="#" onclick="selectTemplate(-1, 'Tom'); event.preventDefault();">Tom</a></li>
                             <li class="dropdown-submenu">
                                 <a href="#">Fjärrlån</a>
@@ -40,7 +39,7 @@
             </div>
             <div class="form-group">
                 <label for="message">Meddelande</label>
-                <textarea class="form-control" rows="12" id="message" name="message">
+                <textarea class="form-control" rows="12" data-testid="mail-message" id="message" name="message">
                 </textarea>
                 <div id="signatureStorage" style="display:none;">
 
@@ -52,14 +51,14 @@
                     {
                         foreach (var logItem in Model.OrderItem.LogItemsList.Where(x => x.Type == "MAIL"))
                         {
-                            @Html.Raw("\n---\n" + logItem.Message)
+                            @("\n---\n" + logItem.Message)
                             //We just want the first log entry
                             break;
                         }
                     }
                     else
                     {
-                        @Html.Raw("\n---\n" + Model.OrderItem.OriginalOrder)
+                        @("\n---\n" + Model.OrderItem.OriginalOrder)
                     }
                 }</div>
                 <div id="historyStorage" style="display:none;">@{
@@ -67,7 +66,7 @@
                     {
                         foreach (var logItem in Model.OrderItem.LogItemsList.Where(x => x.Type == "MAIL"))
                         {
-                            @Html.Raw("\n---\n" + logItem.Message)
+                            @("\n---\n" + logItem.Message)
                             //We just want the first log entry
                             break;
                         }
@@ -94,7 +93,7 @@
             </div>
             <div class="form-group">
                 <label for="recipientEmail">Mottagande e-postadress</label>
-                <input type="text" class="form-control" id="recipientEmail" name="recipientEmail" value="@Model.OrderItem.PatronEmail">
+                <input type="text" class="form-control" data-testid="mail-recipient-email" id="recipientEmail" name="recipientEmail" value="@Model.OrderItem.PatronEmail">
             </div>
             <div class="form-group">
                 <label for="followUpDate">Följs upp</label>
@@ -106,14 +105,14 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>Ny status</label> <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-content="@ConfigurationManager.AppSettings["statusEditingAtMailSendInfo"]"></span>
+                <label>Ny status</label> <span class="glyphicon glyphicon-info-sign" data-toggle="popover" data-content="@Config.StatusEditingAtMailSendInfo"></span>
                 <!-- Status button -->
                 <div>
                     <div class="btn-group">
                         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                            <span id="currently-selected-status" data-status-id="-10" data-cancellation-reason-id="-10" data-purchased-material-id="-10">Ej vald</span> <span class="caret"></span>
+                            <span id="mail-currently-selected-status" data-status-id="-10" data-cancellation-reason-id="-10" data-purchased-material-id="-10">Ej vald</span> <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu" id="orderitem-statuslist" role="menu">
+                        <ul class="dropdown-menu" id="orderitem-mail-statuslist" role="menu">
                             <li><a href="#" onclick="updateSelectedStatus(-1, 'Ingen förändring', -1, -1); event.preventDefault();">Ingen förändring</a></li>
                             @{
                                 var allowedStatusValues = new List<String>() { "Annullerad", "Inköpt" };
@@ -131,35 +130,39 @@
 
                                 foreach (var status in Model.AvailableStatuses)
                                 {
-                                    if (allowedStatusValues.Contains(status.Value))
+                                    // status.Value is the raw stored form ("02:Åtgärda"); allowedStatusValues
+                                    // (and PreviousStatusString above) are bare labels, so compare/display the
+                                    // part after the colon — same convention as StatusString/ParseStatusPrevalue.
+                                    var statusLabel = status.Value.Split(':').Last();
+                                    if (allowedStatusValues.Contains(statusLabel))
                                     {
-                                        if (status.Value == "Annullerad")
+                                        if (statusLabel == "Annullerad")
                                         {
                                             <li class="dropdown-submenu">
-                                                <a>@status.Value</a>
+                                                <a>@statusLabel</a>
                                                 <ul class="dropdown-menu">
                                                     @foreach (var cancellationReason in Model.AvailableCancellationReasons)
                                                     {
-                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @cancellationReason.Value', @cancellationReason.Id, -1); event.preventDefault();">@cancellationReason.Value</a></li>
+                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@statusLabel -> @cancellationReason.Value', @cancellationReason.Id, -1); event.preventDefault();">@cancellationReason.Value</a></li>
                                                     }
                                                 </ul>
                                             </li>
                                         }
-                                        else if (status.Value == "Inköpt")
+                                        else if (statusLabel == "Inköpt")
                                         {
                                             <li class="dropdown-submenu">
-                                                <a>@status.Value</a>
+                                                <a>@statusLabel</a>
                                                 <ul class="dropdown-menu">
                                                     @foreach (var purchasedMaterial in Model.AvailablePurchasedMaterials)
                                                     {
-                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value -> @purchasedMaterial.Value', -1, @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
+                                                        <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@statusLabel -> @purchasedMaterial.Value', -1, @purchasedMaterial.Id); event.preventDefault();">@purchasedMaterial.Value</a></li>
                                                     }
                                                 </ul>
                                             </li>
                                         }
                                         else
                                         {
-                                            <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@status.Value', -1, -1); event.preventDefault();">@status.Value</a></li>
+                                            <li><a href="#" onclick="updateSelectedStatus(@status.Id, '@statusLabel', -1, -1); event.preventDefault();">@statusLabel</a></li>
                                         }
                                     }
                                 }
@@ -169,7 +172,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <button class="btn btn-success" onclick="submitMailDispatch(this); event.preventDefault();">Skicka e-post</button>
+                <button class="btn btn-success" data-testid="mail-send" onclick="submitMailDispatch(this); event.preventDefault();">Skicka e-post</button>
             </div>
         </div>
    </div>
@@ -185,12 +188,16 @@
                 html: true
             });
 
-            $("#message").val($("#signatureStorage").html() + $("#historyStorage").html())
+            // .text() (not .html()): the storage divs' content is HTML-encoded server-side so a
+            // patron-controlled mail message can't inject markup into the page. .html() would
+            // return that markup back verbatim (literal "&lt;" etc.); .text() decodes it to the
+            // original plain text, which is what belongs in the textarea.
+            $("#message").val($("#signatureStorage").text() + $("#historyStorage").text())
                 .focus().scrollTop(0)[0].setSelectionRange(0, 0);
         });
 
         function updateSelectedStatus(newStatusId, newStatusText, cancellationReasonId, purchasedMaterialId) {
-            var currSelectedStatusObj = $("#currently-selected-status");
+            var currSelectedStatusObj = $("#mail-currently-selected-status");
             currSelectedStatusObj.data("status-id", newStatusId);
             currSelectedStatusObj.data("cancellation-reason-id", cancellationReasonId);
             currSelectedStatusObj.data("purchased-material-id", purchasedMaterialId);
@@ -198,7 +205,7 @@
         }
 
         function submitMailDispatch(obj) {
-            var newStatusObj = $("#currently-selected-status");
+            var newStatusObj = $("#mail-currently-selected-status");
             var newStatusId = newStatusObj.data("status-id");
             var newStatusCancellationReasonId = newStatusObj.data("cancellation-reason-id");
             var newStatusPurchasedMaterialId = newStatusObj.data("purchased-material-id");
@@ -226,15 +233,15 @@
         function selectTemplate(templateId, templateDescription) {
             $("#currently-selected-template").text(templateDescription);
             if (templateId == -1) {
-                $("#message").val($("#signatureStorage").html() + $("#historyOrOriginalOrderStorage").html())
+                $("#message").val($("#signatureStorage").text() + $("#historyOrOriginalOrderStorage").text())
                     .focus().scrollTop(0)[0].setSelectionRange(0, 0);
             } else {
                 var templateData = "";
 
-                $.getJSON("/umbraco/surface/TemplatesSurface/GetPopulatedTemplateData", { templateId:templateId, orderItemNodeId:@Model.OrderItem.NodeId })
+                $.getJSON("/TemplatesSurface/GetPopulatedTemplateData", { templateId:templateId, orderItemNodeId:@Model.OrderItem.NodeId })
                     .done(function (json) {
                         if (json.Success) {
-                            $("#message").val(json.Data + $("#historyStorage").html())
+                            $("#message").val(json.Data + $("#historyStorage").text())
                                 .focus().scrollTop(0)[0].setSelectionRange(0, 0);
                         }
                         else {
