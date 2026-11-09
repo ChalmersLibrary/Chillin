@@ -57,7 +57,7 @@ namespace Chalmers.ILL.Isolated
 
         public static void SeedSystemTemplatesIfMissing(string dataPath)
         {
-            // Written directly as Isolated.FileTemplateService's own one-file-per-template format
+            // Written directly as Templates.FileTemplateService's own one-file-per-template format
             // (DataPath/templates/{Id}.json) rather than through ITemplateService.CreateTemplate -
             // that method assigns its own auto-generated NodeName and offers no way to set the
             // exact NodeName these lookups require.

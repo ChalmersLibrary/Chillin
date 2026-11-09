@@ -24,9 +24,6 @@ namespace Chalmers.ILL.Isolated
         {
             typeof(IMailWebApi),
             typeof(IMediaItemManager),
-            typeof(IOrderItemSearcher),
-            typeof(ITemplateService),
-            typeof(IChillinTextRepository),
             typeof(IPatronDataProvider),
             typeof(IAffiliationDataProvider),
             typeof(IPersonDataProvider),

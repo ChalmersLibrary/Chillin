@@ -66,11 +66,11 @@ namespace Chalmers.ILL.Tests.Controllers
             Assert.IsNotNull(response);
             Assert.IsTrue(response.Success);
             Assert.AreEqual("Reindexed 0 orders.", response.Message);
-            Assert.AreEqual(0, searcher.AddedItems.Count);
+            Assert.AreEqual(0, searcher.RebuiltItems.Count);
         }
 
         [TestMethod]
-        public void RebuildSearchIndex_OrderFilesOnDisk_CallsAddedForEachAndSkipsCorruptOnes()
+        public void RebuildSearchIndex_OrderFilesOnDisk_RebuildsFromEachAndSkipsCorruptOnes()
         {
             var dataPath = Path.Combine(Path.GetTempPath(), "chillin-rebuild-" + Guid.NewGuid());
             var ordersDirectory = Path.Combine(dataPath, "orders");
@@ -87,7 +87,7 @@ namespace Chalmers.ILL.Tests.Controllers
             Assert.IsNotNull(response);
             Assert.IsTrue(response.Success);
             Assert.AreEqual("Reindexed 2 orders.", response.Message);
-            CollectionAssert.AreEquivalent(new List<int> { 1, 2 }, searcher.AddedItems.Select(o => o.NodeId).ToList());
+            CollectionAssert.AreEquivalent(new List<int> { 1, 2 }, searcher.RebuiltItems.Select(o => o.NodeId).ToList());
         }
 
         [TestMethod]
@@ -115,7 +115,7 @@ namespace Chalmers.ILL.Tests.Controllers
             Assert.IsNotNull(response);
             Assert.IsTrue(response.Success);
             Assert.AreEqual("Reindexed 1 orders.", response.Message);
-            CollectionAssert.AreEquivalent(new List<int> { 1 }, searcher.AddedItems.Select(o => o.NodeId).ToList());
+            CollectionAssert.AreEquivalent(new List<int> { 1 }, searcher.RebuiltItems.Select(o => o.NodeId).ToList());
         }
 
         [TestMethod]
@@ -225,15 +225,20 @@ namespace Chalmers.ILL.Tests.Controllers
 
         class RecordingOrderItemSearcher : IOrderItemSearcher
         {
-            public List<OrderItemModel> AddedItems { get; } = new List<OrderItemModel>();
+            public List<OrderItemModel> RebuiltItems { get; } = new List<OrderItemModel>();
 
             public IEnumerable<OrderItemModel> Search(string query) => new List<OrderItemModel>();
             public SearchResult Search(string query, int start, int size) => new SearchResult { Count = 0, Items = new List<OrderItemModel>() };
             public IEnumerable<OrderItemModel> Search(string query, int size, string[] fields) => new List<OrderItemModel>();
             public IEnumerable<string> AggregatedProviders() => new List<string>();
-            public void Added(OrderItemModel item) => AddedItems.Add(item);
+            public void Added(OrderItemModel item) { }
             public void Modified(OrderItemModel item) { }
             public void Deleted(OrderItemModel item) { }
+            public int Rebuild(IEnumerable<OrderItemModel> items)
+            {
+                RebuiltItems.AddRange(items);
+                return RebuiltItems.Count;
+            }
         }
 
         class ThrowingOrderItemSearcher : IOrderItemSearcher
@@ -242,9 +247,10 @@ namespace Chalmers.ILL.Tests.Controllers
             public SearchResult Search(string query, int start, int size) => new SearchResult { Count = 0, Items = new List<OrderItemModel>() };
             public IEnumerable<OrderItemModel> Search(string query, int size, string[] fields) => new List<OrderItemModel>();
             public IEnumerable<string> AggregatedProviders() => new List<string>();
-            public void Added(OrderItemModel item) => throw new InvalidOperationException("Search index unavailable.");
+            public void Added(OrderItemModel item) { }
             public void Modified(OrderItemModel item) { }
             public void Deleted(OrderItemModel item) { }
+            public int Rebuild(IEnumerable<OrderItemModel> items) => throw new InvalidOperationException("Search index unavailable.");
         }
     }
 }

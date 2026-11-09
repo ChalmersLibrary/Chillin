@@ -222,8 +222,9 @@ pollningen också kör det dagliga underhållet.
   under last hinner den andra renderingen se ordern olåst och begära låset en gång till.
   Reproducerat; se punkten i fas 11 i [TODO-remove-dotnet-framework.md](../../TODO-remove-dotnet-framework.md)
   för mekanism och förslag på rättning. Deklarerat i testet, inte tystat.
-- **Statistikens filter matchade ingenting alls** — åtgärdat 2026-10-05, men värt en kontroll mot
-  det riktiga Elasticsearch-indexet före driftsättning. Filtren byggde sin fråga av nycklarna
+- **Statistikens filter matchade ingenting alls** — åtgärdat 2026-10-05. (Den kontroll mot det
+  riktiga Elasticsearch-indexet som föreslogs här bortföll när ES ersattes av Lucene, som indexerar
+  under exakt de camelCase-namn som anges nedan.) Filtren byggde sin fråga av nycklarna
   `Status`, `Type`, `ProviderName` … med versal, medan indexet känner fälten vid sina
   camelCase-namn och Lucene är skiftlägeskänsligt — varje filtrerad siffra blev noll. Slutsatsen om
   indexets namn är dragen ur appens övriga frågor (`status:`, `providerName:`, `followUpDate:`),
@@ -237,7 +238,7 @@ pollningen också kör det dagliga underhållet.
   den andra pollningen återimporterade den första.
 - **Leverantörslistan är inte bara aggregerad.** TIB, Libris och Subito ligger fast; därutöver
   bidrar bara ordrar som lämnat Ny, Annullerad, Inköpt och Överförd med sina leverantörsnamn.
-  Samma regel i både den isolerade sökmotorn och Elasticsearch-varianten.
+  Regeln ligger i `LuceneOrderItemSearcher.AggregatedProviders`.
 - **”Kräv” och ”Lånetid mot låntagare” är spärrade för allt beställt efter 2021-05-16** av en
   hårdkodad datumjämförelse i orderpanelen. Ingen ny order kan nå dem.
 - **Systemmallarnas innehåll är platshållartext i isolerat läge.** Ett automatiskt

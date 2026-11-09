@@ -2,27 +2,29 @@ using System.IO;
 using Chalmers.ILL.Configuration;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Models.PartialPage.Settings;
-using Chalmers.ILL.Repositories;
 using Newtonsoft.Json;
 
-namespace Chalmers.ILL.Isolated
+namespace Chalmers.ILL.Repositories
 {
-    // File-based IChillinTextRepository for isolated mode (fas 6, isolerat läge steg A) - a single
-    // JSON document under DataPath/chillin_text.json, mirroring the real repository's single-document
-    // ES index. Unlike ChillinTextRepository.All() (which null-references if the ES index is empty),
-    // a missing file returns a document with an empty ChillinText rather than crashing, since there's
-    // no seeding step guaranteed to have run yet.
+    // A single JSON document under DataPath/chillin_text.json, mirroring the single-document ES
+    // index it replaced. Started as the isolated mode's fake (fas 6, isolerat läge steg A) and became
+    // the only store when Elasticsearch was removed. A missing file gives an empty ChillinText
+    // rather than crashing, since there's no seeding step guaranteed to have run yet.
     public class FileChillinTextRepository : IChillinTextRepository
     {
         private const string DocumentId = "1";
-        private readonly IChillinConfiguration _config;
+        private readonly string _dataPath;
 
-        public FileChillinTextRepository(IChillinConfiguration config)
+        public FileChillinTextRepository(IChillinConfiguration config) : this(config.DataPath)
         {
-            _config = config;
         }
 
-        private string FilePath => Path.Combine(_config.DataPath, "chillin_text.json");
+        public FileChillinTextRepository(string dataPath)
+        {
+            _dataPath = dataPath;
+        }
+
+        private string FilePath => Path.Combine(_dataPath, "chillin_text.json");
 
         public ChillinText ByTextField(string textField)
         {

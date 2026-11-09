@@ -13,7 +13,9 @@ namespace Chalmers.ILL.Migration
         public List<int> SpotCheckedNodeIds { get; } = new List<int>();
         public List<string> Errors { get; } = new List<string>();
 
-        public long? ElasticSearchDocCount;
+        public long? SearchIndexDocCount;
+        public int? ExportedTemplateCount;
+        public bool? ExportedChillinText;
 
         public bool Success => Errors.Count == 0;
     }

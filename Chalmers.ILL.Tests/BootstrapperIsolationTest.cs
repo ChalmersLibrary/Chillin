@@ -30,7 +30,7 @@ namespace Chalmers.ILL.Tests
         [TestMethod]
         public void RegisterTypes_IsolatedMode_SucceedsWithZeroConfigurationBeyondTheSwitch()
         {
-            // The regression the eager ElasticClient/FolioConnection construction used to cause:
+            // The regression the eager ElasticClient/FolioConnection construction used to cause (ES since removed):
             // nothing but Chillin:Isolated and a scratch DataPath is set here.
             var services = BuildServices(new Dictionary<string, string>
             {
@@ -55,8 +55,6 @@ namespace Chalmers.ILL.Tests
             var services = BuildServices(new Dictionary<string, string>
             {
                 ["Chillin:Isolated"] = "false",
-                ["Chillin:ElasticSearchUrl"] = "http://localhost:9200",
-                ["Chillin:ElasticSearchIndex"] = "chillintest",
                 ["Chillin:DataPath"] = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "chillin-live-test-" + System.Guid.NewGuid())
             });
 
@@ -111,7 +109,7 @@ namespace Chalmers.ILL.Tests
             // (AddSingleton<IOrderItemSearcher, T>), so a second IServiceProvider built from this
             // same IServiceCollection - exactly what Program.cs's builder.Build() does relative to
             // the "interim"/"final" providers built inside RegisterTypes - got its own, separate
-            // InMemoryOrderItemSearcher instance that FileOrderItemManager's writes never reached.
+            // searcher instance (then the in-memory fake) that FileOrderItemManager's writes never reached.
             var services = BuildServices(new Dictionary<string, string>
             {
                 ["Chillin:Isolated"] = "true",

@@ -54,11 +54,8 @@ namespace Chalmers.ILL.Configuration
         string ChalmersIllMailSubject { get; }
         string BugFixersMailingList { get; }
 
-        // Storage / search
+        // Storage
         string StorageConnectionString { get; }
-        string ElasticSearchUrl { get; }
-        string ElasticSearchIndex { get; }
-        string ElasticSearchTemplatesIndex { get; }
 
         // FOLIO
         string FolioApiBaseAddress { get; }

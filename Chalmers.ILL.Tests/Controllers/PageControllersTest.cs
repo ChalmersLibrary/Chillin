@@ -232,6 +232,7 @@ namespace Chalmers.ILL.Tests.Controllers
             public void Added(OrderItemModel item) { }
             public void Modified(OrderItemModel item) { }
             public void Deleted(OrderItemModel item) { }
+            public int Rebuild(IEnumerable<OrderItemModel> items) => 0;
         }
     }
 }

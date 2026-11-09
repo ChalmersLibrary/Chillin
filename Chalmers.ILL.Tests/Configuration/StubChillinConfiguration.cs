@@ -32,9 +32,6 @@ namespace Chalmers.ILL.Tests.Configuration
         public string BugFixersMailingList { get; set; }
 
         public string StorageConnectionString { get; set; }
-        public string ElasticSearchUrl { get; set; }
-        public string ElasticSearchIndex { get; set; }
-        public string ElasticSearchTemplatesIndex { get; set; }
 
         public string FolioApiBaseAddress { get; set; }
         public string FolioXOkapiTenant { get; set; }
