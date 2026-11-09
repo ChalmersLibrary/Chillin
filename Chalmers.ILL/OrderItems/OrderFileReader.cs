@@ -6,8 +6,8 @@ using Newtonsoft.Json;
 
 namespace Chalmers.ILL.OrderItems
 {
-    // Shared by Isolated.InMemoryOrderItemSearcher (loads its whole in-memory index from here at
-    // construction) and MaintenanceSurfaceController.RebuildSearchIndex (the "no way to
+    // Shared by LuceneOrderItemSearcher (rebuilds its index from here when it's missing) and
+    // MaintenanceSurfaceController.RebuildSearchIndex (the "no way to
     // re-populate the search index from the order files" gap flagged in
     // TODO-remove-dotnet-framework.md's testdata-for-dev-environment point) - both need the same
     // "every order file under DataPath/orders/" enumeration, so it lives in one place instead of

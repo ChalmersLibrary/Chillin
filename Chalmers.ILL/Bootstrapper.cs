@@ -17,8 +17,6 @@ using Chalmers.ILL.Templates;
 using Chalmers.ILL.UmbracoApi;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Nest;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -48,9 +46,9 @@ namespace Chalmers.ILL
 
             // Isolerat läge (fas 6, isolerat läge steg A): every integration seam is registered by
             // one branch or the other, never both, and never conditionally past this point - see
-            // IsolationGuard for the runtime proof. This is also why FolioConnection/ElasticClient
-            // (the two real clients that used to be constructed unconditionally right here) moved
-            // into RegisterLiveSeams: they must never run at all in isolated mode.
+            // IsolationGuard for the runtime proof. This is also why FolioConnection (once constructed
+            // unconditionally right here, like the since-removed ElasticClient) moved into
+            // RegisterLiveSeams: it must never run at all in isolated mode.
             if (config.Isolated)
             {
                 RegisterIsolatedSeams(services);
@@ -63,27 +61,27 @@ namespace Chalmers.ILL
             services.AddTransient<ISourceFactory, ChalmersSourceFactory>();
             services.AddTransient<IJsonService, JsonService>();
 
+            // Search, templates and Chillin texts live under DataPath in both modes since
+            // Elasticsearch was removed - no longer Live/Isolated seams.
+            //
+            // The searcher is registered as an instance, not a type (fixade en bugg 2026-09-29):
+            // with AddSingleton<IOrderItemSearcher, T> every IServiceProvider built from this
+            // collection - "final" below, and above all Program.cs's runtime provider - got its own
+            // instance, so FileOrderItemManager updated one while the order list searched another.
+            // For Lucene a second instance couldn't even open the index (write.lock).
+            var orderItemSearcher = new LuceneOrderItemSearcher(config);
+            services.AddSingleton<IOrderItemSearcher>(orderItemSearcher);
+            services.AddTransient<ITemplateService, FileTemplateService>();
+            services.AddTransient<IChillinTextRepository, FileChillinTextRepository>();
+
             // Rebuild now that the seam registrations above exist, so the resolves below can
             // construct their dependencies.
             interim = services.BuildServiceProvider();
             var templateService = interim.GetRequiredService<ITemplateService>();
             var affiliationDataProvider = interim.GetRequiredService<IAffiliationDataProvider>();
-            var orderItemSearcher = interim.GetRequiredService<IOrderItemSearcher>();
             var mediaItemManager = interim.GetRequiredService<IMediaItemManager>();
             var mailWebApi = interim.GetRequiredService<IMailWebApi>();
             var folioConnection = interim.GetRequiredService<IFolioConnection>();
-
-            // Fixade en bugg (2026-09-29): IOrderItemSearcher var registrerat typbaserat
-            // (AddSingleton<IOrderItemSearcher, T>/AddTransient), så varje IServiceProvider som
-            // byggs från den här IServiceCollection - "final" nedan, och framför allt Program.cs's
-            // riktiga runtime-provider - fick sin egen instans. FileOrderItemManager (skapad med
-            // orderItemSearcher-instansen ovan) reindexerade bara den instansen, medan
-            // ordinelistan (som löser IOrderItemSearcher via vanlig DI mot runtime-providern) läste
-            // en helt annan, aldrig uppdaterad instans - i isolerat läge en permanent ögonblicksbild
-            // från appstart. Samma instans-registrering som IOrderItemManager redan använder
-            // (se orderItemManager nedan) löser det: alla providers som byggs från den här
-            // collection:en (inklusive Program.cs's) återanvänder exakt detta objekt.
-            services.Replace(ServiceDescriptor.Singleton(orderItemSearcher));
 
             // members.json lives under DataPath now (fas 6, isolerat läge steg A, "Datarot") - not
             // next to the deployed binaries. ChillinOrderConfiguration itself is hardcoded (fas 10,
@@ -159,18 +157,10 @@ namespace Chalmers.ILL
 
         private static void RegisterLiveSeams(IServiceCollection services, IChillinConfiguration config)
         {
-            var elasticClientSettings = new ConnectionSettings(new Uri(config.ElasticSearchUrl));
-            elasticClientSettings.DefaultIndex(config.ElasticSearchIndex);
-            var elasticClient = new ElasticClient(elasticClientSettings);
-            services.AddSingleton<IElasticClient>(elasticClient);
-
             // EWS is gone (fas 8) - Graph is the only mail path now, see designbeslut in CLAUDE.md.
             services.AddTransient<IMailWebApi, MicrosoftGraphMailWebApi>();
             services.AddTransient<IMediaItemManager, BlobStorageMediaItemManager>();
-            services.AddTransient<IOrderItemSearcher, ElasticSearchOrderItemSearcher>();
-            services.AddTransient<ITemplateService, ElasticsearchTemplateService>();
             services.AddTransient<IAffiliationDataProvider, PdbAffiliationDataProvider>();
-            services.AddTransient<IChillinTextRepository, ChillinTextRepository>();
             services.AddTransient<IPersonDataProvider, PdbPersonDataProvider>();
 
             services.AddSingleton<IFolioConnection>(new FolioConnection(config)); // Singleton to reuse tokens between calls
@@ -187,12 +177,6 @@ namespace Chalmers.ILL
         {
             services.AddTransient<IMailWebApi, FileMailWebApi>();
             services.AddTransient<IMediaItemManager, FileMediaItemManager>();
-            // Steg B: singleton, not transient like the other seams here - it holds the whole
-            // order set in memory (see InMemoryOrderItemSearcher), a new instance per request
-            // would reload from disk every time and never see another instance's writes.
-            services.AddSingleton<IOrderItemSearcher, InMemoryOrderItemSearcher>();
-            services.AddTransient<ITemplateService, FileTemplateService>();
-            services.AddTransient<IChillinTextRepository, FileChillinTextRepository>();
 
             // One shared instance backs all three patron-shaped interfaces (fas 6, isolerat läge
             // steg A) so a lookup gives the same answer regardless of which interface asked.
@@ -222,9 +206,6 @@ namespace Chalmers.ILL
                     "Inga riktiga integrationer används. Fejkade sömmar:\n" +
                     " - IMailWebApi -> Isolated.FileMailWebApi\n" +
                     " - IMediaItemManager -> Isolated.FileMediaItemManager\n" +
-                    " - IOrderItemSearcher -> Isolated.InMemoryOrderItemSearcher (linjär sökning i minnet, se TODO)\n" +
-                    " - ITemplateService -> Isolated.FileTemplateService\n" +
-                    " - IChillinTextRepository -> Isolated.FileChillinTextRepository\n" +
                     " - IPatronDataProvider/IAffiliationDataProvider/IPersonDataProvider -> Isolated.FilePatronDataProvider\n" +
                     " - IFolioConnection -> Isolated.FakeFolioConnection\n" +
                     " - IFolio*Service/IFolioRepository -> Isolated.FakeFolio\n" +
@@ -233,7 +214,7 @@ namespace Chalmers.ILL
             }
             else
             {
-                _log.Info("Live-läge (Chillin:Isolated=false): riktiga integrationer registrerade (Elasticsearch, FOLIO, Graph-mail, Azure Blob Storage).");
+                _log.Info("Live-läge (Chillin:Isolated=false): riktiga integrationer registrerade (FOLIO, Graph-mail, Azure Blob Storage).");
             }
         }
     }

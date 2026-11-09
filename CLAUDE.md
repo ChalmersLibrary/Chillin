@@ -118,12 +118,16 @@ aktuella läget på grenen, inte bara startpunkten för det arbete som återstå
   inte EF6/SQL Server. Databasen är borttagen helt (inget `DbContext`, inga migrationer). Skriv inte
   ny kod som förutsätter en databas.
 - Datamodellen är redan ett dokumentaggregat: varje läsning hämtar hela ordern med `LogItemsList`,
-  `AttachmentList` och `SierraInfo`. All sökning, statistik och bulkdata går via `IOrderItemSearcher`
-  (Elasticsearch i drift, `Isolated.InMemoryOrderItemSearcher` i isolerat läge), aldrig via `DbContext`.
+  `AttachmentList` och `SierraInfo`. All sökning, statistik och bulkdata går via `IOrderItemSearcher`,
+  aldrig via `DbContext`.
+- **Sökning:** `LuceneOrderItemSearcher` — ett Lucene.NET-index på disk under `DataPath/search-index/`,
+  samma i drift och isolerat läge. Elasticsearch är borttaget helt; mallar och chillin-texter ligger
+  som filer under `DataPath` (`FileTemplateService`, `FileChillinTextRepository`). Indexet byggs om
+  från orderfilerna när det saknas eller när `SchemaVersion` höjts — höj den när dokumentformatet
+  ändras. Endast en process åt gången kan ha indexet öppet (Lucenes `write.lock`).
 - **Isolerat läge (fas 6/10):** `Chillin:Isolated=true` slår om ett antal DI-registreringar i
-  `Bootstrapper.cs` till filbaserade/i-minnes-fejkar (sökning, medlemslagring, mall- och
-  chillin-text-lagring m.fl.) för en avskuren testserver utan riktiga integrationer. Se
-  `IsolationGuard` och "Fastställda designbeslut" ovan.
+  `Bootstrapper.cs` till filbaserade fejkar (mail, media, låntagaruppslag, FOLIO) för en avskuren
+  testserver utan riktiga integrationer. Se `IsolationGuard` och "Fastställda designbeslut" ovan.
 - `INotifier.ReportNewOrderItemUpdate` har bara `OrderItemModel`-overloaden kvar; `IContent`-overloaden
   är borttagen.
 - **Enkelinstans är en hård förutsättning, inte bara en skalningsdetalj** (se "Fastställda

@@ -11,7 +11,7 @@ namespace Chalmers.ILL.Templates
     // Everything ITemplateService does beyond "load every template" and "save one template" is
     // pure logic (filtering, sorting, moustache substitution) that was previously duplicated
     // whenever a new backing store was added. Introduced in fas 6 (isolerat läge steg A) so
-    // ElasticsearchTemplateService and Isolated.FileTemplateService share it instead of drifting -
+    // ElasticsearchTemplateService (since removed) and FileTemplateService shared it instead of drifting -
     // an abstract base rather than a helper class because ReplaceMoustaches recursively calls back
     // into GetTemplateData (for "{{T:...}}" template injection), so it can't be a one-way utility.
     public abstract class TemplateServiceBase : ITemplateService

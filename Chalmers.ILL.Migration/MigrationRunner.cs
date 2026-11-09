@@ -18,9 +18,10 @@ namespace Chalmers.ILL.Migration
     //      ReadAll's in-memory grouping) and deep-compare it against the file that was written,
     //      so the check exercises the real source-vs-file path rather than comparing an object to
     //      itself.
-    //   3. Optionally, re-index every written order into Elasticsearch and compare the resulting
-    //      document count to the file count ("kör om ES-indexeringen efteråt och jämför
-    //      träffantal mot databasen").
+    //   3. Optionally, count the orders in the search index and compare to the file count ("kör om
+    //      ES-indexeringen efteråt och jämför träffantal mot databasen" - the index is Lucene now).
+    //      The searcher is handed over unopened: it opens on that first count and builds itself
+    //      from the files just written, the same way the app does at startup.
     public class MigrationRunner
     {
         private readonly IOrderItemSource _source;
@@ -43,7 +44,6 @@ namespace Chalmers.ILL.Migration
             var result = new MigrationResult();
             var orderIdToNodeId = new Dictionary<string, int>();
             var writtenNodeIds = new List<int>();
-            var writtenOrders = new List<OrderItemModel>();
 
             foreach (var order in _source.ReadAll())
             {
@@ -59,7 +59,6 @@ namespace Chalmers.ILL.Migration
 
                 _writer.WriteOrder(order);
                 writtenNodeIds.Add(order.NodeId);
-                writtenOrders.Add(order);
 
                 if (!string.IsNullOrEmpty(order.OrderId))
                     orderIdToNodeId[order.OrderId] = order.NodeId;
@@ -77,7 +76,7 @@ namespace Chalmers.ILL.Migration
             VerifySample(writtenNodeIds, result);
 
             if (_searcher != null)
-                ReindexAndVerify(writtenOrders, result);
+                VerifySearchIndex(result);
 
             return result;
         }
@@ -121,19 +120,14 @@ namespace Chalmers.ILL.Migration
             }
         }
 
-        private void ReindexAndVerify(List<OrderItemModel> writtenOrders, MigrationResult result)
+        private void VerifySearchIndex(MigrationResult result)
         {
-            foreach (var order in writtenOrders)
-            {
-                _searcher.Added(order);
-            }
-
             var count = _searcher.Search("*", 0, 0).Count;
-            result.ElasticSearchDocCount = count;
+            result.SearchIndexDocCount = count;
 
             if (count != result.WrittenFileCount)
             {
-                result.Errors.Add($"Elasticsearch-dokument ({count}) skiljer sig från antal skrivna filer ({result.WrittenFileCount}).");
+                result.Errors.Add($"Ordrar i sökindexet ({count}) skiljer sig från antal skrivna filer ({result.WrittenFileCount}).");
             }
         }
 

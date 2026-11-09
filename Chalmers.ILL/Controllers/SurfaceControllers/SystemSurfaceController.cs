@@ -9,7 +9,6 @@ using Chalmers.ILL.Mail;
 using Chalmers.ILL.UmbracoApi;
 using Chalmers.ILL.Models;
 using Chalmers.ILL.Configuration;
-using Nest;
 
 namespace Chalmers.ILL.Controllers.SurfaceControllers
 {

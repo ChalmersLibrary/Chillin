@@ -12,16 +12,16 @@ state - they will keep changing until that TODO list is checked off.
 
 ## Prerequisites
 1. [.NET SDK 10](https://dotnet.microsoft.com/download) or later.
-2. For full/live mode: an [Elasticsearch](https://www.elastic.co) instance, and (for mail/patron
-   lookups) Microsoft Graph and FOLIO credentials. None of these are required for isolated mode
-   below.
+2. For full/live mode: Microsoft Graph and FOLIO credentials (mail and patron lookups). Not
+   required for isolated mode below. Search needs no server - the search index is a Lucene index
+   under the data path, built from the order files on first start.
 
 ## Setup
 1. Clone this repository.
 2. Build and test: `dotnet build Chalmers.ILL.Tests/Chalmers.ILL.Tests.csproj` and
    `dotnet test Chalmers.ILL.Tests/Chalmers.ILL.Tests.csproj` (see [CLAUDE.md](CLAUDE.md)'s
    Testrutiner section).
-3. To run the app locally without any real Elasticsearch/mail/patron integrations, start it in
+3. To run the app locally without any real mail/patron integrations, start it in
    **isolated mode**: set `Chillin__Isolated=true` and `Chillin__DataPath=<a local directory>` as
    environment variables, then `dotnet run --project Chalmers.ILL`. Order status/type/delivery
    library dropdowns and mail templates are hardcoded/seeded and need no setup; a handful of test

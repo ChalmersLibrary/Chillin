@@ -10,8 +10,8 @@ namespace Chalmers.ILL.OrderItems
     // OrderId -> NodeId lookup for FileOrderItemManager.GetOrderItem(string orderId) (fas 7).
     // OrderId is immutable once an order is created (nothing ever changes it afterwards), so this
     // index only grows - written once per new order, in Register(), never touched on updates.
-    // A plain JSON file rather than a search against Elasticsearch: it works even when
-    // Elasticsearch is down/faked (isolerat läge), and avoids relying on Lucene query-string
+    // A plain JSON file rather than a search against the search index (then Elasticsearch): it
+    // works even when the index is down or being rebuilt, and avoids relying on Lucene query-string
     // escaping for a value that always contains hyphens.
     public class OrderIdIndex
     {
