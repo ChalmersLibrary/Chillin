@@ -276,6 +276,7 @@ namespace Chalmers.ILL.Tests.OrderItems
             public void Added(OrderItemModel item) => AddedCalls.Add(item);
             public void Modified(OrderItemModel item) => ModifiedCalls.Add(item);
             public void Deleted(OrderItemModel item) => DeletedCalls.Add(item);
+            public int Rebuild(IEnumerable<OrderItemModel> items) => 0;
 
             public void Reset()
             {

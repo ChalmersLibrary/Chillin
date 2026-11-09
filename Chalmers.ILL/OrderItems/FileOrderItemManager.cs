@@ -25,7 +25,7 @@ namespace Chalmers.ILL.OrderItems
     // The old thread-keyed DbContext dictionary is gone, but the batching behavior it enabled is
     // NOT incidental - controllers all over the app call Set*/AddLogItem with doReindex=false,
     // doSignal=false several times in a row, then a final call with the defaults (true, true) to
-    // flush everything together (one disk write, one Elasticsearch update, one SignalR notify).
+    // flush everything together (one disk write, one search index update, one SignalR notify).
     // _threadIdToPendingOrder replicates exactly that: an in-progress, not-yet-persisted order
     // keyed by the current managed thread (every request here is synchronous end to end - fas 4,
     // "noll async-actions" - so thread affinity holds for the lifetime of one request, same
@@ -138,8 +138,8 @@ namespace Chalmers.ILL.OrderItems
         // GetLockedOrderItems used to be `.Where(x => x.EditedBy == memberId)` against the database
         // - the one query in this class that wasn't a key lookup. A full directory scan of every
         // order file to answer it would be unacceptable at the documented volume (10 000-100 000
-        // orders), so it goes to Elasticsearch instead (fas 7, "Flytta EditedBy-uppslaget till
-        // Elasticsearch") - editedBy is already indexed on every order.
+        // orders), so it goes to the search index instead (fas 7, "Flytta EditedBy-uppslaget till
+        // Elasticsearch", now Lucene) - editedBy is already indexed on every order.
         public IEnumerable<OrderItemModel> GetLockedOrderItems(string memberId)
         {
             return _orderItemSearcher.Search("editedBy:\"" + memberId + "\"");

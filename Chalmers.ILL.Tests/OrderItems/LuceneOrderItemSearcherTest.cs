@@ -2,26 +2,40 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Chalmers.ILL.Configuration;
-using Chalmers.ILL.Isolated;
 using Chalmers.ILL.Models;
+using Chalmers.ILL.OrderItems;
 using Chalmers.ILL.Tests.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Chalmers.ILL.Tests.Isolated
+namespace Chalmers.ILL.Tests.OrderItems
 {
-    // Isolerat läge steg B, "Bygg den minimala sökersättaren". Table-driven against the exact
-    // frågekravlistan in TODO-remove-dotnet-framework.md - every query form actually issued by
-    // real call sites (verbatim where practical), plus the analyzer-dependent tokenization cases
-    // the TODO specifically calls out as easy to get wrong.
+    // Table-driven against the frågekravlista in TODO-remove-dotnet-framework.md (written for the
+    // isolated mode's in-memory searcher, which this replaced together with Elasticsearch) - every
+    // query form actually issued by real call sites (verbatim where practical), plus the
+    // analyzer-dependent tokenization cases the TODO specifically calls out as easy to get wrong.
     [TestClass]
-    public class InMemoryOrderItemSearcherTest
+    public class LuceneOrderItemSearcherTest
     {
-        private InMemoryOrderItemSearcher CreateSearcher() =>
-            new InMemoryOrderItemSearcher(new StubChillinConfiguration
-            {
-                DataPath = Path.Combine(Path.GetTempPath(), "chillin-inmemorysearcher-test-" + Guid.NewGuid())
-            });
+        private readonly List<LuceneOrderItemSearcher> _opened = new List<LuceneOrderItemSearcher>();
+
+        [TestCleanup]
+        public void CloseIndexes() => _opened.ForEach(s => s.Dispose());
+
+        private static string NewDataPath() => Path.Combine(Path.GetTempPath(), "chillin-lucenesearcher-test-" + Guid.NewGuid());
+
+        private LuceneOrderItemSearcher CreateSearcher(string dataPath = null)
+        {
+            var searcher = new LuceneOrderItemSearcher(new StubChillinConfiguration { DataPath = dataPath ?? NewDataPath() });
+            _opened.Add(searcher);
+            return searcher;
+        }
+
+        private static void WriteOrderFile(string dataPath, OrderItemModel order)
+        {
+            var bucketDir = Path.Combine(dataPath, "orders", (order.NodeId / 1000).ToString("D3"));
+            Directory.CreateDirectory(bucketDir);
+            File.WriteAllText(Path.Combine(bucketDir, order.NodeId + ".json"), Newtonsoft.Json.JsonConvert.SerializeObject(order));
+        }
 
         private static OrderItemModel NewOrder(int nodeId, string status = "", string type = "", string providerName = "")
         {
@@ -161,8 +175,7 @@ namespace Chalmers.ILL.Tests.Isolated
         {
             var searcher = CreateSearcher();
             searcher.Added(NewOrder(1));
-
-            // Every current-schema document always has every property (see OrderItemDocument's
+            // A bool is never null, so _exists_ on one is always true.
             // documented divergence), so _exists_ on a real property is always true here.
             Assert.AreEqual(1, searcher.Search("_exists_:isAnonymized").Count());
         }
@@ -292,7 +305,7 @@ namespace Chalmers.ILL.Tests.Isolated
             CollectionAssert.AreEqual(new[] { "Worldcat", "BLDSC" }, result.Skip(3).ToList());
         }
 
-        // --- Added / Modified / Deleted keep the in-memory index in sync ---------------------
+        // --- Added / Modified / Deleted keep the index in sync --------------------------------
 
         [TestMethod]
         public void AddedModifiedDeleted_KeepIndexInSync()
@@ -311,20 +324,127 @@ namespace Chalmers.ILL.Tests.Isolated
             Assert.AreEqual(0, searcher.Search("*").Count());
         }
 
-        // --- Loads existing order files from DataPath/orders/ at construction ----------------
+        // --- Beyond the in-memory fake: what Elasticsearch did and the fake didn't ------------
 
         [TestMethod]
-        public void Constructor_LoadsExistingOrderFilesFromDataPath()
+        public void Search_TrailingWildcard_Truncates()
         {
-            var dataPath = Path.Combine(Path.GetTempPath(), "chillin-inmemorysearcher-load-" + Guid.NewGuid());
-            var bucketDir = Path.Combine(dataPath, "orders", "000");
-            Directory.CreateDirectory(bucketDir);
-            var order = NewOrder(42, status: "Ny");
-            File.WriteAllText(Path.Combine(bucketDir, "42.json"), Newtonsoft.Json.JsonConvert.SerializeObject(order));
+            // The search tips promise truncation; the in-memory fake never supported it.
+            var searcher = CreateSearcher();
+            var order = NewOrder(1);
+            order.TitleInformation = "En avhandling om ångbåtar";
+            searcher.Added(order);
+            searcher.Added(NewOrder(2));
 
-            var searcher = new InMemoryOrderItemSearcher(new StubChillinConfiguration { DataPath = dataPath });
+            CollectionAssert.AreEquivalent(new[] { 1 }, searcher.Search("avhandl*").Select(o => o.NodeId).ToList());
+            CollectionAssert.AreEquivalent(new[] { 1 }, searcher.Search("titleInformation:Avhandl*").Select(o => o.NodeId).ToList());
+        }
+
+        [TestMethod]
+        public void Search_BareWord_MatchesLogEntries()
+        {
+            var searcher = CreateSearcher();
+            var order = NewOrder(1);
+            order.LogItemsList = new List<LogItem> { new LogItem { Type = "MAIL", Message = "Skickat till Lönnqvist" } };
+            searcher.Added(order);
+            searcher.Added(NewOrder(2));
+
+            CollectionAssert.AreEquivalent(new[] { 1 }, searcher.Search("lönnqvist").Select(o => o.NodeId).ToList());
+            CollectionAssert.AreEquivalent(new[] { 1 }, searcher.Search("logItemsList.type:MAIL").Select(o => o.NodeId).ToList());
+        }
+
+        [TestMethod]
+        public void Search_Phrase_DoesNotMatchAcrossTwoFields()
+        {
+            var searcher = CreateSearcher();
+            var order = NewOrder(1);
+            order.TitleInformation = "Om upplaga";
+            order.PatronName = "förlag";
+            searcher.Added(order);
+
+            Assert.AreEqual(0, searcher.Search("\"upplaga förlag\"").Count());
+            Assert.AreEqual(1, searcher.Search("\"om upplaga\"").Count());
+        }
+
+        [TestMethod]
+        public void Search_InvalidQuery_GivesNoHitsInsteadOfThrowing()
+        {
+            var searcher = CreateSearcher();
+            searcher.Added(NewOrder(1, status: "Ny"));
+
+            Assert.AreEqual(0, searcher.Search("status:(Ny").Count());
+            Assert.AreEqual(0, searcher.Search("status:(Ny", 0, 50).Count);
+        }
+
+        [TestMethod]
+        public void Search_Paged_CountsAllHitsAndSortsNewestFirst()
+        {
+            var searcher = CreateSearcher();
+            for (var i = 1; i <= 5; i++)
+                searcher.Added(NewOrder(i, status: "Ny"));
+
+            var page = searcher.Search("status:Ny", 1, 2);
+
+            Assert.AreEqual(5, page.Count);
+            CollectionAssert.AreEqual(new[] { 4, 3 }, page.Items.Select(o => o.NodeId).ToList());
+        }
+
+        [TestMethod]
+        public void Search_ReturnsTheWholeStoredOrder()
+        {
+            var searcher = CreateSearcher();
+            var order = NewOrder(1, status: "Ny");
+            order.LogItemsList = new List<LogItem> { new LogItem { Type = "LOG", Message = "Hej" } };
+            order.SierraInfo.record_id = 4242;
+            searcher.Added(order);
+
+            var found = searcher.Search("status:Ny").Single();
+
+            Assert.AreEqual("Hej", found.LogItemsList.Single().Message);
+            Assert.AreEqual(4242, found.SierraInfo.record_id);
+            Assert.AreEqual(order.CreateDate, found.CreateDate);
+        }
+
+        // --- The index on disk ----------------------------------------------------------------
+
+        [TestMethod]
+        public void Open_BuildsAMissingIndexFromTheOrderFiles()
+        {
+            var dataPath = NewDataPath();
+            WriteOrderFile(dataPath, NewOrder(42, status: "Ny"));
+            WriteOrderFile(dataPath, NewOrder(1042, status: "Beställd"));
+
+            var searcher = CreateSearcher(dataPath);
 
             Assert.AreEqual(1, searcher.Search("status:Ny").Count());
+            Assert.AreEqual(2, searcher.Search("*").Count());
+        }
+
+        [TestMethod]
+        public void Open_ReusesAnExistingIndexInsteadOfRebuilding()
+        {
+            var dataPath = NewDataPath();
+            var first = CreateSearcher(dataPath);
+            // Only in the index, no order file - a rebuild would lose it.
+            first.Added(NewOrder(7, status: "Ny"));
+            first.Dispose();
+            _opened.Remove(first);
+
+            var reopened = CreateSearcher(dataPath);
+
+            Assert.AreEqual(1, reopened.Search("status:Ny").Count());
+        }
+
+        [TestMethod]
+        public void Rebuild_ReplacesTheWholeIndex()
+        {
+            var searcher = CreateSearcher();
+            searcher.Added(NewOrder(1, status: "Ny"));
+
+            var count = searcher.Rebuild(new[] { NewOrder(2, status: "Beställd"), NewOrder(3, status: "Beställd") });
+
+            Assert.AreEqual(2, count);
+            CollectionAssert.AreEquivalent(new[] { 2, 3 }, searcher.Search("*").Select(o => o.NodeId).ToList());
         }
     }
 }

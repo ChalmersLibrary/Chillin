@@ -13,5 +13,8 @@ namespace Chalmers.ILL.OrderItems
         void Added(OrderItemModel item);
         void Modified(OrderItemModel item);
         void Deleted(OrderItemModel item);
+
+        // Replaces the whole index with these orders; returns how many were indexed.
+        int Rebuild(IEnumerable<OrderItemModel> items);
     }
 }

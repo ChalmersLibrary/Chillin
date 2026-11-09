@@ -46,7 +46,7 @@ Dessa är avstämda med användaren 2026-09-09/10 och ska inte omprövas utan ny
 |---|---|
 | Target framework | **`net10.0`** (LTS), men via `net48` som mellanstation — se fas 1a/1b. OBS: bara SDK 9.0.109 finns installerat på maskinen, SDK 10 måste installeras före fas 1b. |
 | Lagring | **Ta bort databasen helt.** EF6, SQL Server och de 19 migrationerna ersätts av en fil per order på disk. Motiverat av att datamodellen redan är ett dokumentaggregat och att all sökning sker i Elasticsearch — se fas 7. *(Ersätter tidigare beslut om att behålla EF6; det föll när datamodellen granskades närmare.)* |
-| Sökning | **Elasticsearch är oförändrat** och blir efter lagringsbytet den enda vägen för sökning, statistik, bulkdata **och** de få icke-nyckelbaserade uppslagen. |
+| Sökning | **Lucene.NET-index på disk under `DataPath`, Elasticsearch borttaget helt** — även mallarna och chillin-texterna, som nu är filer. Indexet är den enda vägen för sökning, statistik, bulkdata och de få icke-nyckelbaserade uppslagen, och byggs om från orderfilerna när det saknas. Se "Ersätt Elasticsearch med Lucene.NET" före fas 11. *(Ersätter beslutet "Elasticsearch är oförändrat"; avstämt 2026-11-09 efter ett mätförsök.)* |
 | Driftmiljö | **Azure App Service för Linux** (webbapp, inte container). Byte från dagens Windows-plan — valt för dev/drift-paritet, se fas 10. Kräver ny App Service-plan; kod­arbetet är identiskt oavsett. |
 | Utvecklingsmiljö | **Linux**, direkt och i devcontainer. Samma OS som drift, vilket är hela poängen. |
 | Skalning | **Enkelinstans.** Liten app. Ingen SignalR-backplane behövs, inga utskalningsproblem för filbaserad lagring. Dokumenteras som förutsättning så att en framtida utskalning inte tyst bryter funktionalitet. |
@@ -54,7 +54,7 @@ Dessa är avstämda med användaren 2026-09-09/10 och ska inte omprövas utan ny
 | Mail | **Graph-vägen är den som körs i drift.** EWS (`ExchangeMailWebApi.cs`, `EWS-Api-2.0`) tas bort helt, inte migreras. |
 | DbContext-livstid | **Frågan bortfaller** med lagringsbytet ovan. Dagens `Dictionary<threadId, DbContext>` utan låsning försvinner tillsammans med EF6 i stället för att byggas om till scoped DI. |
 | Loggning | **log4net behålls**, `Microsoft.Extensions.Logging` väljs bort. Loggfiler på disk, minimal Azure-integration, ingen Application Insights. M.E.L. har ingen inbyggd filprovider, så ett byte hade krävt Serilog/NLog som nytt beroende. Se fas 6. *(2026-09-16)* |
-| Isolerad testserver | **Egen Azure App Service på Linux-planet**, helt avskuren: alla integrationer fejkade i processen, även Elasticsearch och Blob Storage. Persistent egen data under `/home/data`. Inga testverktyg i gränssnittet. Se fas 10, "Isolerad testserver". *(2026-09-16)* |
+| Isolerad testserver | **Egen Azure App Service på Linux-planet**, helt avskuren: alla integrationer fejkade i processen, även Blob Storage. Sökningen är densamma som i drift (Lucene), inte fejkad. Persistent egen data under `/home/data`. Inga testverktyg i gränssnittet. Se fas 10, "Isolerad testserver". *(2026-09-16)* |
 
 **Arbetsordning härifrån** (avstämd 2026-09-16, ersätter den rena fasföljden):
 
@@ -2359,8 +2359,8 @@ den måste bevaras när koden byter till `ForwardedHeaders`.
   Med Linux på båda sidor är devcontainern en trogen repetition av produktion, så den här punkten är
   inte längre den riskspärr den hade varit vid ett OS-glapp — men den är fortfarande motiverad.
   Kvarvarande skillnader som bara finns i Azure: front-endens uppladdningsgräns, `X-Forwarded-*` och
-  TLS-terminering, `/home`-lagringen, `Always On`-beteendet, och åtkomsten till Elasticsearch,
-  Blob Storage och FOLIO från Azures nätverk snarare än från utvecklingsmaskinen.
+  TLS-terminering, `/home`-lagringen, `Always On`-beteendet, och åtkomsten till Blob Storage och
+  FOLIO från Azures nätverk snarare än från utvecklingsmaskinen.
   Kör fas 11 mot den nya Linux-appen innan domänen flyttas dit (se punkten om planbytet ovan).
 
 - [ ] **Se över cron-anropen mot `SystemSurfaceController`**
@@ -2492,6 +2492,8 @@ och `Always On`.
   **Avgränsning som måste skrivas in i fas 11:** en egen utvärderare avviker från ES i kantfall,
   särskilt i sökrutan. Testservern kan därför **inte** användas för att verifiera sökbeteende — den
   verifierar att appen fungerar. Sökningen ska provas mot riktig Elasticsearch före driftsättning.
+  *(Bortfallet 2026-11-09: den egna utvärderaren är ersatt av Lucene.NET, samma i drift och på
+  testservern — se "Ersätt Elasticsearch med Lucene.NET".)*
 
   **Genomfört 2026-09-17**, efter avstämning med användaren om default-fälten för sökrutans fria
   läge (`AskUserQuestion` i sessionen — svaret blev "alla textfält på `OrderItemModel`", dvs. det
@@ -2594,6 +2596,60 @@ och `Always On`.
   fas 5): "Status"-stycket pekar inte längre ut klient-asset-pipelinen som en av de två stora
   återstående bitarna.
 
+## Ersätt Elasticsearch med Lucene.NET
+
+Avstämt med användaren 2026-11-09, efter ett mätförsök med 100 000 genererade ordrar (17 KB i
+snitt). Ett eget index utan omvänd ordlista höll inte: fritext över loggarna tog 5–12 s per
+sökning, eller slut på minnet om orden cachades. Den isolerade fejken dog redan vid 20 000 ordrar
+(1,5 GB). Lucene.NET på disk: start 0,2 s, ~120 MB minne, alla frågor 1–160 ms, index 400 MB,
+uppdatering av en order 0,4 s, full ombyggnad ~3,5 min. Träffantalen stämde med fejken på
+12 av 14 frågor; de två avvikelserna (fras över fältgräns, datumintervall) är rättade här. Gjort
+före fas 11 i stället för att migrera ES-klienten vidare, eftersom det tar bort en hel extern
+tjänst ur driften och testservern.
+
+- [x] **`LuceneOrderItemSearcher` ersätter `ElasticSearchOrderItemSearcher` och
+  `Isolated.InMemoryOrderItemSearcher`**
+  `OrderItems/LuceneOrderItemSearcher.cs`, index under `DataPath/search-index/`, samma i båda
+  lägena. ES `query_string`-syntax *är* Lucenes klassiska frågesyntax, så alla anropsställen och
+  söktipsen fungerar oförändrade; det ES lägger till (`_exists_`, "bara negationer = allt utom",
+  `*` = allt, datumintervall) ligger i `EsLikeQueryParser`. Ett dokument per order: varje
+  bladvärde i orderns camelCase-JSON som eget fält (samma namn som NEST gav), `_all` för fältlös
+  fritext (alla strängvärden, även loggen — som ES, bredare än fejkens toppnivåfält), och hela
+  ordern lagrad som `_source`, så sökträffar aldrig läser orderfilerna. Positionsglapp 100 mellan
+  värden så att en fras inte matchar över en fältgräns. Trunkering (`avhandl*`) fungerar — den
+  saknades i fejken trots att söktipsen utlovar den.
+  Kvar som tidigare: `Search(query)` ger högst 10 000 träffar (ES `max_result_window`), sorterat
+  nyast först; en ogiltig fråga ger noll träffar i stället för undantag.
+  Nytt i `IOrderItemSearcher`: `Rebuild(items)` — ersätter hela indexet (sökningar ser det gamla
+  tills det nya är committat). `MaintenanceSurfaceController.RebuildSearchIndex` använder den.
+  Indexet öppnas vid uppstart i `Program.cs` och byggs då om från orderfilerna om det saknas eller
+  är byggt av en äldre `SchemaVersion`. Stängs vid `ApplicationStopped` så att nästa process får
+  `write.lock`; en överlappande omstart väntar upp till 60 s på låset.
+- [x] **Mallar och chillin-texter som filer**
+  `FileTemplateService` (en JSON-fil per mall under `DataPath/templates/`) och
+  `FileChillinTextRepository` (`DataPath/chillin_text.json`) — fejkarna från isolerat läge steg A,
+  flyttade till `Templates/` resp. `Repositories/` och nu enda implementation.
+  `ElasticsearchTemplateService`, `ChillinTextRepository`, NEST och `Elasticsearch.Net` borttagna.
+  `IOrderItemSearcher`, `ITemplateService` och `IChillinTextRepository` är inte längre sömmar i
+  `IsolationGuard`. Konfigurationsnycklarna `ElasticSearchUrl`/`ElasticSearchIndex`/
+  `ElasticSearchTemplatesIndex` borttagna.
+- [x] **Migreringsverktyget**
+  `Chalmers.ILL.Migration` bygger alltid sökindexet från de skrivna orderfilerna och jämför antalet
+  (ersätter återindexeringen till ES). Nytt: `--elasticsearch-url <gamla servern>
+  --elasticsearch-templates-index <index>` läser mallarna och chillin-texten ur den gamla ES-servern
+  (vanlig HTTP mot `_search`, bara läsning) och skriver dem som filer — de låg aldrig i SQL och
+  följer annars inte med. `ElasticsearchExport.cs`.
+- [ ] **Verifiera Lucene på Azure Files** — 🖐️ görs på den isolerade testservern, före fas 11.
+  `/home` på Linux-planen är en SMB-montering. Ej uppmätt: öppning och sökning (mmap över SMB),
+  hur lång en full ombyggnad tar där, och att `write.lock` (native fil-lås) fungerar och släpps
+  vid omstart. Faller något av det: lägg indexet på lokal disk (t.ex. `/tmp`) och bygg om det vid
+  varje uppstart — orderfilerna under `/home` är ändå sanningen. Kontrollera också att en första
+  ombyggnad ryms inom App Services starttidsgräns (230 s som standard,
+  `WEBSITES_CONTAINER_START_TIME_LIMIT`), eller bygg indexet med migreringsverktyget i förväg.
+- [ ] **Kör migreringsverktyget med `--elasticsearch-url` vid driftsättningen** — 🖐️ mot den
+  gamla ES-servern, så att mallar och chillin-texter följer med. Kontrollera antalet mallar i
+  rapporten mot mallsidan i den gamla appen.
+
 ---
 
 ## Fas 11: Genomtestning före driftsättning
@@ -2620,8 +2676,8 @@ som ändå kräver handpåläggning är utmärkta nedan.
 **Kör den slutliga genomgången mot den nya Linux-appen i Azure, inte bara i devcontainern.** Samma OS
 på båda sidor gör devcontainern till en trogen repetition, så glappet är litet — men inte noll. Det
 som bara finns i Azure: front-endens uppladdningsgräns, `X-Forwarded-*` och TLS-terminering,
-`/home`-lagringen, `Always On`, och nätverksåtkomsten till Elasticsearch, Blob Storage och FOLIO.
-Den gamla Windows-appen kan stå kvar orörd som återställningsväg tills domänen flyttas (se fas 10).
+`/home`-lagringen (där sökindexet ligger), `Always On`, och nätverksåtkomsten till Blob Storage och
+FOLIO. Den gamla Windows-appen kan stå kvar orörd som återställningsväg tills domänen flyttas (se fas 10).
 
 **Ärvda, ännu overifierade punkter från Umbraco-borttagningen** (markerade "ej verifierat i webbläsare"
 i [TODO-remove-umbraco.md](TODO-remove-umbraco.md)) — de är fortfarande overifierade och måste med här:
@@ -3068,7 +3124,7 @@ i [TODO-remove-umbraco.md](TODO-remove-umbraco.md)) — de är fortfarande overi
   finns kvar bredvid den aktuella filen) - `rollingStyle=Date` fungerar som konfigurerat.
 - [ ] **De externa integrationerna** — 🖐️ **kräver handpåläggning.** FOLIO och Graph ska vid det här
   laget vara provade mot sina testinstanser (steg 2 i testtrappan ovan); det som återstår här är att
-  verifiera dem i skarp konfiguration, tillsammans med Elasticsearch-sökning och -indexering, Azure
+  verifiera dem i skarp konfiguration, tillsammans med Azure
   Blob-uppladdning/-nedladdning av bilagor, patrondata och Libris-pollning.
   Mailutskick bör gå mot en testadress i det allra sista steget — det är den integration som kan
   orsaka mest skada om den beter sig fel, eftersom den når låntagare direkt.

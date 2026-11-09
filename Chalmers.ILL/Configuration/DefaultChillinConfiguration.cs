@@ -74,9 +74,6 @@ namespace Chalmers.ILL.Configuration
         public string BugFixersMailingList => Get(nameof(BugFixersMailingList));
 
         public string StorageConnectionString => Get(nameof(StorageConnectionString));
-        public string ElasticSearchUrl => Get(nameof(ElasticSearchUrl));
-        public string ElasticSearchIndex => Get(nameof(ElasticSearchIndex));
-        public string ElasticSearchTemplatesIndex => Get(nameof(ElasticSearchTemplatesIndex));
 
         public string FolioApiBaseAddress => Get(nameof(FolioApiBaseAddress));
         public string FolioXOkapiTenant => Get(nameof(FolioXOkapiTenant));

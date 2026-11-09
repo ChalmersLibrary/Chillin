@@ -39,13 +39,12 @@
   <Import Project="..\claudeborgen\dotnet\Claudeborgen.Web\build\Claudeborgen.Web.targets" />
 
   <ItemGroup>
-    <!-- Latest within the 6.x line (fas 8) - NEST's major version is pinned to the Elasticsearch
-         server's major version, so this stays compatible with whatever 6.x server is in drift
-         without needing to know the exact minor. A jump to a newer major (NEST 7/8, or
-         Elastic.Clients.Elasticsearch) is a client-and-possibly-server decision that needs the
-         actual server version confirmed first - see TODO-remove-dotnet-framework.md, fas 8. -->
-    <PackageReference Include="Elasticsearch.Net" Version="6.8.11" />
-    <PackageReference Include="NEST" Version="6.8.11" />
+    <!-- Embedded search index on disk, replacing Elasticsearch (see OrderItems/LuceneOrderItemSearcher).
+         Lucene is the engine Elasticsearch itself is built on, so query_string syntax carries over.
+         4.8 has been in beta for years but is the line every .NET Lucene user is on. -->
+    <PackageReference Include="Lucene.Net" Version="4.8.0-beta00017" />
+    <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00017" />
+    <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00017" />
     <PackageReference Include="HtmlAgilityPack" Version="1.13.0" />
     <PackageReference Include="log4net" Version="3.4.0" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.90.0" />

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Chalmers.ILL.Migration;
 using Chalmers.ILL.Models;
+using Chalmers.ILL.OrderItems;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 
@@ -164,6 +165,21 @@ namespace Chalmers.ILL.Tests.Migration
             Assert.IsNotNull(written.LogItemsList);
             Assert.IsNotNull(written.AttachmentList);
             Assert.IsNotNull(written.SierraInfo);
+        }
+
+        [TestMethod]
+        public void Run_WithSearcher_CountsTheIndexBuiltFromTheWrittenFiles()
+        {
+            var orders = new List<OrderItemModel> { MakeOrder(1, "a"), MakeOrder(2, "b") };
+
+            MigrationResult result;
+            using (var searcher = new LuceneOrderItemSearcher(_dataPath))
+            {
+                result = new MigrationRunner(new FakeOrderItemSource(orders), new OrderFileWriter(_ordersDirectory), 2, searcher).Run();
+            }
+
+            Assert.IsTrue(result.Success, string.Join("; ", result.Errors));
+            Assert.AreEqual(2, result.SearchIndexDocCount);
         }
     }
 }

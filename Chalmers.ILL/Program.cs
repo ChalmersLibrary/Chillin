@@ -101,14 +101,21 @@ if (app.Services.GetRequiredService<Chalmers.ILL.OrderItems.IOrderItemManager>()
     fileOrderItemManager.SetNotifier(app.Services.GetRequiredService<Chalmers.ILL.SignalR.INotifier>());
 }
 
+// Open the search index now rather than on the first search: if it's missing or was built by an
+// older schema it's rebuilt from the order files here, at startup (minutes for ~100k orders).
+// Closed on shutdown so the next process (a restart can overlap this one) gets write.lock.
+if (app.Services.GetRequiredService<IOrderItemSearcher>() is LuceneOrderItemSearcher luceneOrderItemSearcher)
+{
+    luceneOrderItemSearcher.EnsureOpen();
+    app.Lifetime.ApplicationStopped.Register(luceneOrderItemSearcher.Dispose);
+}
 
 // Fas 10, "Ordna testdata för utvecklingsmiljön": isolated mode only (local devcontainer or the
-// isolated test server) - never a live DataPath. Isolated.FileTemplateService reads fresh from
-// disk on every call; InMemoryOrderItemSearcher instead holds its snapshot in memory and only
-// sees later writes because Bootstrapper.RegisterTypes now registers the single resolved
-// instance rather than a type (see the fix there, 2026-09-29) - so this still has no ordering
-// requirement against Bootstrapper.RegisterTypes the way chillinPrevalues.json used to have, and
-// can live entirely after the app is built and use the real, DI-resolved services. Order creation
+// isolated test server) - never a live DataPath. FileTemplateService reads fresh from disk on
+// every call, and seeded orders reach the search index through IOrderItemManager like any other
+// write - so this has no ordering requirement against Bootstrapper.RegisterTypes the way
+// chillinPrevalues.json used to have, and can live entirely after the app is built and use the
+// real, DI-resolved services. Order creation
 // goes through the same SetStatus/SetType calls every controller uses, so a seeded order can
 // never drift from what a real save produces. members.json is deliberately NOT seeded here -
 // creating a first account (there is no chicken-and-egg way to do it through the UI) is a

@@ -32,7 +32,6 @@ namespace Chalmers.ILL.Tests.Configuration
             Assert.AreEqual("http://localhost:5000/", sut.BaseUrl);
             Assert.AreEqual("localhost", sut.TestServer);
             Assert.AreEqual("127.0.0.1", sut.CronServerIpAddress);
-            Assert.AreEqual("http://localhost:9200", sut.ElasticSearchUrl);
         }
 
         [TestMethod]
@@ -42,16 +41,16 @@ namespace Chalmers.ILL.Tests.Configuration
 
             Assert.AreNotEqual("http://localhost:5000/", sut.BaseUrl);
             Assert.AreNotEqual("localhost", sut.TestServer);
-            Assert.AreNotEqual("http://localhost:9200", sut.ElasticSearchUrl);
+            Assert.AreNotEqual("127.0.0.1", sut.CronServerIpAddress);
         }
 
         [TestMethod]
         public void BothEnvironments_StillSeeKeysThatOnlyLiveInTheBaseFile()
         {
-            // ElasticSearchIndex isn't environment-specific (unlike ElasticSearchUrl) and stays in
-            // appsettings.json - proves the environment overlay doesn't shadow the base file.
-            Assert.AreEqual("chillindev", Load("Development").ElasticSearchIndex);
-            Assert.AreEqual("chillindev", Load("Production").ElasticSearchIndex);
+            // StorageConnectionString isn't environment-specific and stays in appsettings.json -
+            // proves the environment overlay doesn't shadow the base file.
+            StringAssert.Contains(Load("Development").StorageConnectionString, "devstoreaccount1");
+            StringAssert.Contains(Load("Production").StorageConnectionString, "devstoreaccount1");
         }
     }
 }
