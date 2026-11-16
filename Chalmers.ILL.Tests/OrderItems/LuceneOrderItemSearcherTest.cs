@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Chalmers.ILL.Models;
@@ -225,6 +226,26 @@ namespace Chalmers.ILL.Tests.OrderItems
 
             CollectionAssert.AreEquivalent(new[] { 1 }, isoForm);
             CollectionAssert.AreEquivalent(new[] { 1 }, compactForm);
+        }
+
+        // The statistics page (ChalmersILLStatisticsPage.cshtml, getQueryDateString) sends its
+        // period in Examine's format, in UTC - before this was understood every column was 0.
+        [TestMethod]
+        public void Search_DateRange_StatisticsPageFormat_IsUtcAgainstTheServerClock()
+        {
+            var searcher = CreateSearcher();
+            var inRange = NewOrder(1);
+            inRange.CreateDate = new DateTime(2026, 6, 15, 12, 0, 0);
+            var outOfRange = NewOrder(2);
+            outOfRange.CreateDate = new DateTime(2027, 6, 1);
+            searcher.Added(inRange);
+            searcher.Added(outOfRange);
+
+            string Utc(DateTime local) => local.ToUniversalTime().ToString("yyyyMMddHHmmssfff", CultureInfo.InvariantCulture);
+            var results = searcher.Search($"createDate:[{Utc(new DateTime(2026, 1, 1))} TO {Utc(new DateTime(2027, 1, 1))}] AND NOT createDate:{Utc(new DateTime(2027, 1, 1))}")
+                .Select(o => o.NodeId).ToList();
+
+            CollectionAssert.AreEquivalent(new[] { 1 }, results);
         }
 
         [TestMethod]

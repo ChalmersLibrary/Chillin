@@ -686,6 +686,11 @@ namespace Chalmers.ILL.OrderItems
                 const DateTimeStyles styles = DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal;
                 if (DateTime.TryParseExact(text, DateFormats, CultureInfo.InvariantCulture, styles, out var exact))
                     return exact;
+                // The statistics page's bounds, in Umbraco Examine's date format: the browser's
+                // local period start in UTC. The orders hold the server's clock (DateTime.Now), so
+                // compare against that.
+                if (DateTime.TryParseExact(text, "yyyyMMddHHmmssfff", CultureInfo.InvariantCulture, styles, out var utc))
+                    return utc.ToLocalTime();
                 return null;
             }
         }

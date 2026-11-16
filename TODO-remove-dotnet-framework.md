@@ -2625,6 +2625,13 @@ tjänst ur driften och testservern.
   Indexet öppnas vid uppstart i `Program.cs` och byggs då om från orderfilerna om det saknas eller
   är byggt av en äldre `SchemaVersion`. Stängs vid `ApplicationStopped` så att nästa process får
   `write.lock`; en överlappande omstart väntar upp till 60 s på låset.
+  **Rättat 2026-11-16:** statistiksidan skickar sina periodgränser i Umbraco Examines format
+  (`yyyyMMddHHmmssfff`, i UTC), som `EsLikeQueryParser` inte kände igen — varje datumkolumn i
+  statistiken blev 0. Fejken hade ignorerat datumintervallet, så e2e `STAT-003` gick igenom på fel
+  grund; den sätter nu perioden till innevarande år och kräver träffar. Gränserna jämförs mot
+  serverns klocka (`ToLocalTime`), eftersom ordrarnas datum är `DateTime.Now`. Hur ES tolkade
+  formatet går inte att se i repot (mappningen låg på ES-servern) — jämför en statistiktabell mot
+  den gamla appen i fas 11.
 - [x] **Mallar och chillin-texter som filer**
   `FileTemplateService` (en JSON-fil per mall under `DataPath/templates/`) och
   `FileChillinTextRepository` (`DataPath/chillin_text.json`) — fejkarna från isolerat läge steg A,
