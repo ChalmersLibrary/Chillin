@@ -1359,6 +1359,13 @@ notificationHubConnection.on("updateStream", function (value) {
                 $("#"+value.NodeId).removeAttr("data-locked-by-memberid");
             }
         }
+        else if (value.EditedBy == $("#memberIdContainer").attr("data-memberid")) {
+            // Our own lock, broadcast by LockOrderItem before its response reaches the lock script
+            // in this pane. Reloading here rendered the pane a second time, which could read the
+            // order before the lock was written and lock it again.
+            $("#" + value.NodeId).attr("data-locked-by-memberid", value.EditedBy);
+            $("#action-buttons-" + value.NodeId).attr("data-locked-by-memberid", value.EditedBy);
+        }
         else {
             // We don't hold the lock ourselves (we may never have tried, or opened it just
             // before someone else locked it) - reload so the rendered pane actually reflects

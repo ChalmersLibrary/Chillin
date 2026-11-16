@@ -120,8 +120,8 @@ export class OrderRow {
   /**
    * Picks an item out of one of the order panel's dropdowns and waits for the server to confirm.
    *
-   * Opening an order takes its lock, and the resulting SignalR notification makes the page
-   * re-render the details - which closes a dropdown that was just opened. The retry covers that
+   * Any SignalR notification about the open order (another user's change, a lock released)
+   * re-renders the details - which closes a dropdown that was just opened. The retry covers that
    * (and slow machines) by starting over whenever the menu vanishes underneath the click.
    *
    * `path` is the chain of items to walk inside the menu; the status menu nests a submenu under

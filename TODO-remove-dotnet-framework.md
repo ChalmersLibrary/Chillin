@@ -2924,8 +2924,10 @@ i [TODO-remove-umbraco.md](TODO-remove-umbraco.md)) — de är fortfarande overi
   `ChalmersILLStartPage.cshtml` verifierade 2026-09-22 — båda renderar med navbar. Femte vyn,
   `ChalmersILLLogoutPage.cshtml`, gör `Response.Redirect("/")` innan något markup hinner skickas
   (se koden), så dess `Layout`-tilldelning är i praktiken aldrig i spel — inget att verifiera där.
-- [ ] **En orderpanel tar om sitt eget lås och krockar med sig själv.** Utrett 2026-10-09;
-  mekanismen är reproducerad, rättningen återstår. Låg tidigare här som ”ett betraktande fönster
+- [x] **En orderpanel tar om sitt eget lås och krockar med sig själv.** Utrett 2026-10-09;
+  rättat 2026-11-16 (se **Rättat** sist i punkten). Felet fanns redan i Umbraco-versionen på
+  `master` — ingen regression, men rättat före integrationstestet eftersom testarna annars hade
+  rapporterat det som nytt. Låg tidigare här som ”ett betraktande fönster
   försökte ta ett lås efter en serveromstart” — den beskrivningen var fel, se nedan.
 
   **Vad som observerades.** `RT-003` (`e2e/tests/realtime.spec.ts`) har två inloggade fönster mot
@@ -2978,6 +2980,19 @@ i [TODO-remove-umbraco.md](TODO-remove-umbraco.md)) — de är fortfarande overi
   - Broadcasta inte på felgrenen i `LockOrderItem`.
   - Lägg ett regressionstest i `tests/locks.spec.ts` på att en öppning ger exakt ett `LockOrderItem`-anrop.
   - Ta bort `guard.allow(/redan låst av en annan användare/)` i `RT-003` när detta är rättat.
+
+  **Rättat** — inte riktigt enligt förslaget. En `takeLock`-flagga hade också tagit bort att en
+  panel som står öppen tar låset när någon annan släpper det (omritningen i `updateStream` bäddar in
+  låsskriptet igen), och det beteendet finns i dag. I stället:
+  - `updateStream` ritar inte om panelen när sändningen gäller det egna låset (`EditedBy` är den
+    egna medlemmen) utan sätter bara `data-locked-by-memberid`. En öppning ger nu
+    `render → LOCK`, inte `render → LOCK → render`.
+  - `LockOrderItem` svarar OK utan att skriva eller sända om anroparen redan har låset, så en
+    kvarvarande dubbel låsning (t.ex. två flikar för samma medlem) är ofarlig.
+  - Meddelandet namnger innehavaren (`EditedByMemberName`), och felgrenen sänder ingenting.
+  - Enhetstester i `OrderItemSurfaceControllerTest` (`LockOrderItem_WhenAlreadyLocked_*`,
+    `..._WhenAlreadyLockedByTheCaller_*`), e2e `LOCK-006` (en öppning = en `RenderOrderItem` och ett
+    `LockOrderItem`), och `allow()` borttagen i `RT-003`.
 
 - [x] **SignalR-realtidsuppdateringar.** Öppna orderlistan i två webbläsarfönster, ändra en order i det
   ena och kontrollera att det andra uppdateras. Detta fångar både PascalCase/camelCase-problemet i
