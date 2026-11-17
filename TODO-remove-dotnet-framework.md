@@ -46,7 +46,7 @@ Dessa är avstämda med användaren 2026-09-09/10 och ska inte omprövas utan ny
 |---|---|
 | Target framework | **`net10.0`** (LTS), men via `net48` som mellanstation — se fas 1a/1b. OBS: bara SDK 9.0.109 finns installerat på maskinen, SDK 10 måste installeras före fas 1b. |
 | Lagring | **Ta bort databasen helt.** EF6, SQL Server och de 19 migrationerna ersätts av en fil per order på disk. Motiverat av att datamodellen redan är ett dokumentaggregat och att all sökning sker i Elasticsearch — se fas 7. *(Ersätter tidigare beslut om att behålla EF6; det föll när datamodellen granskades närmare.)* |
-| Sökning | **Lucene.NET-index på disk under `DataPath`, Elasticsearch borttaget helt** — även mallarna och chillin-texterna, som nu är filer. Indexet är den enda vägen för sökning, statistik, bulkdata och de få icke-nyckelbaserade uppslagen, och byggs om från orderfilerna när det saknas. Se "Ersätt Elasticsearch med Lucene.NET" före fas 11. *(Ersätter beslutet "Elasticsearch är oförändrat"; avstämt 2026-11-09 efter ett mätförsök.)* |
+| Sökning | **Lucene.NET-index på lokal disk med en kopia under `DataPath`, Elasticsearch borttaget helt** — även mallarna och chillin-texterna, som nu är filer. Indexet är den enda vägen för sökning, statistik, bulkdata och de få icke-nyckelbaserade uppslagen. Uppstart läser tillbaka kopian; saknas den byggs indexet om från orderfilerna i bakgrunden. Se "Ersätt Elasticsearch med Lucene.NET" före fas 11. *(Ersätter beslutet "Elasticsearch är oförändrat"; avstämt 2026-11-09 efter ett mätförsök. Lokal disk med kopia avstämt 2026-11-11, efter mätningar på snabbtestservern.)* |
 | Driftmiljö | **Azure App Service för Linux** (webbapp, inte container). Byte från dagens Windows-plan — valt för dev/drift-paritet, se fas 10. Kräver ny App Service-plan; kod­arbetet är identiskt oavsett. |
 | Utvecklingsmiljö | **Linux**, direkt och i devcontainer. Samma OS som drift, vilket är hela poängen. |
 | Skalning | **Enkelinstans.** Liten app. Ingen SignalR-backplane behövs, inga utskalningsproblem för filbaserad lagring. Dokumenteras som förutsättning så att en framtida utskalning inte tyst bryter funktionalitet. |
@@ -196,7 +196,7 @@ appen. Det är den egenskapen som gör dem värda att ta tidigt.
     opåverkad.
   **Skärpt 2026-10-19 (Lars):** "De enda som ska ha skrivrätt på ordrar är Administrator." Nu är det
   bara rollen `Administrator` som är opåverkad; alla andra roller (`Desk`, `SuperAdmin` utan
-  `Administrator`, claudeborgens `ObjektSpecialist`/`ObjektSpecialistIT`) behandlas som "Viewer" ovan.
+  `Administrator`) behandlas som "Viewer" ovan.
   Layouten dolde redan redigeringsknapparna för icke-administratörer (kosmetiskt); nu stämmer servern
   med det. Diskappen, som `Desk` var till för, används inte längre.
   Medvetet default-deny (spärra allt, öppna upp läsningar) snarare än default-allow (lista alla
@@ -2625,6 +2625,13 @@ tjänst ur driften och testservern.
   Indexet öppnas vid uppstart i `Program.cs` och byggs då om från orderfilerna om det saknas eller
   är byggt av en äldre `SchemaVersion`. Stängs vid `ApplicationStopped` så att nästa process får
   `write.lock`; en överlappande omstart väntar upp till 60 s på låset.
+  **Rättat 2026-11-16:** statistiksidan skickar sina periodgränser i Umbraco Examines format
+  (`yyyyMMddHHmmssfff`, i UTC), som `EsLikeQueryParser` inte kände igen — varje datumkolumn i
+  statistiken blev 0. Fejken hade ignorerat datumintervallet, så e2e `STAT-003` gick igenom på fel
+  grund; den sätter nu perioden till innevarande år och kräver träffar. Gränserna jämförs mot
+  serverns klocka (`ToLocalTime`), eftersom ordrarnas datum är `DateTime.Now`. Hur ES tolkade
+  formatet går inte att se i repot (mappningen låg på ES-servern) — jämför en statistiktabell mot
+  den gamla appen i fas 11.
 - [x] **Mallar och chillin-texter som filer**
   `FileTemplateService` (en JSON-fil per mall under `DataPath/templates/`) och
   `FileChillinTextRepository` (`DataPath/chillin_text.json`) — fejkarna från isolerat läge steg A,
@@ -2639,13 +2646,53 @@ tjänst ur driften och testservern.
   --elasticsearch-templates-index <index>` läser mallarna och chillin-texten ur den gamla ES-servern
   (vanlig HTTP mot `_search`, bara läsning) och skriver dem som filer — de låg aldrig i SQL och
   följer annars inte med. `ElasticsearchExport.cs`.
-- [ ] **Verifiera Lucene på Azure Files** — 🖐️ görs på den isolerade testservern, före fas 11.
-  `/home` på Linux-planen är en SMB-montering. Ej uppmätt: öppning och sökning (mmap över SMB),
-  hur lång en full ombyggnad tar där, och att `write.lock` (native fil-lås) fungerar och släpps
-  vid omstart. Faller något av det: lägg indexet på lokal disk (t.ex. `/tmp`) och bygg om det vid
-  varje uppstart — orderfilerna under `/home` är ändå sanningen. Kontrollera också att en första
-  ombyggnad ryms inom App Services starttidsgräns (230 s som standard,
-  `WEBSITES_CONTAINER_START_TIME_LIMIT`), eller bygg indexet med migreringsverktyget i förväg.
+- [x] **Verifiera Lucene på Azure Files** — mätt på snabbtestservern 2026-11-10/11 med 100 000
+  genererade ordrar (samma generator som mätförsöket, tillfälliga mätadresser på `claudeborgen`):
+  | Mätning | Resultat |
+  |---|---|
+  | Sökning med indexet direkt på `/home` | fungerar, 1–2 s i värsta fall (lokalt högst 160 ms) |
+  | `write.lock` på `/home` | tas vid start och släpps vid omstart |
+  | Skriva 100 000 orderfiler till `/home` (4 parallellt) | 552 s |
+  | Full ombyggnad med indexet på `/home` | **3 394 s** — 16 ggr långsammare än lokalt |
+  | Läsa 100 000 orderfiler en i taget | över 800 s (avbrutet) — ~8+ ms per fil |
+  | Indexet | 1 456 MB i 59 filer (mätförsökets 400 MB saknade `_source`) |
+  | Kopiera indexet `/home` → lokal disk | 27,8 s |
+  | Kopiera indexet lokal disk → `/home` | 7,7 s |
+
+  Slutsats: fördröjningen per fil på `/home` (SMB) är flaskhalsen, inte bandbredden. En ombyggnad
+  vid uppstart hade gjort att appen aldrig hann starta (230 s-gränsen). Löst nedan.
+- [x] **Indexet på lokal disk, kopia på `/home`** — avstämt 2026-11-11.
+  `LuceneOrderItemSearcher` arbetar mot ett index under temp-katalogen (`/tmp` i App Service) och
+  håller en kopia i `DataPath/search-index/` (samma katalog som indexet låg i förut, så ett
+  befintligt index där läses tillbaka som vilken kopia som helst):
+  - Uppstart: kopian kopieras till lokal disk (~30 s för 100 000 ordrar) — orderfilerna läses inte.
+  - Sparning: ~30 s efter första osparade ändringen, och vid avstängning. Bara filer som är nya
+    sedan förra sparningen kopieras (Lucene ändrar aldrig en skriven fil); `segments_N` sist, så
+    kopian alltid är en hel commit.
+  - Krasch: varje ändring skriver först sitt NodeId till `DataPath/search-index-pending.txt`, och
+    en sparning tömmer det den täcker. Uppstart indexerar om de ordrarna från orderfilerna.
+  - Ingen kopia, eller en från äldre `SchemaVersion`: ombyggnad i bakgrunden, nyaste först, 8
+    filer läses parallellt. Sidhuvudet visar "Sökindexet byggs om (X av Y ordrar)", och
+    `SystemSurfaceController` hoppar över de schemalagda jobben (`Update`, automatiska mail) tills
+    den är klar — de hittar sina ordrar via indexet, och mailkällan kopplar inkommande mail till
+    ordrar via det. Ändringar under ombyggnaden skrivs inte över av den äldre filversion
+    ombyggnaden kan ha läst. Migreringsverktyget bygger om synkront.
+  - `write.lock` hålls på `DataPath/search-index/` hela processens livstid, så en överlappande
+    omstart väntar på föregående process sista sparning.
+  Verifierat lokalt i webbläsare med 20 000 ordrar: ombyggnad i bakgrunden med meddelandet (sidor
+  svarar under tiden), omstart svarar efter 3 s utan ombyggnad, och en ändring följd av `kill -9`
+  finns kvar efter omstart.
+  Läsningen under ombyggnaden har en begränsad kö (8 egna lästrådar, högst 256 ordrar i förväg).
+  Första versionen läste med PLINQ utan gräns: läsningen hann före indexeringen och fyllde minnet,
+  och snabbtestservern slutade svara (2026-11-11). Lokalt med 100 000 ordrar: gamla versionen 2 GB
+  och inget svar på 20 s; nya 6,5 min, högst 1 010 MB, inloggningssidan högst 0,5 s och sökning
+  0,3–1,1 s under hela ombyggnaden.
+- [x] **Verifiera lokalt index med kopia på snabbtestservern** — 🖐️ med 100 000 testordrar
+  (2026-11-12): ombyggnad i bakgrunden 631 s (mot 3 394 s med indexet på `/home`) och appen svarar
+  under tiden; återläsning vid omstart 7–9 s (28,5 s första gången, med ett äldre index i fler
+  segment); en ändring följd av omstart finns kvar, och en ändring följd av `pkill -9 dotnet`
+  indexeras om vid uppstart ("ikapp med 1 ordrar"). Testordrarna är borttagna och mätkoden
+  (`Isolated/LoadTestDataController.cs`) borttagen från `claudeborgen`.
 - [ ] **Kör migreringsverktyget med `--elasticsearch-url` vid driftsättningen** — 🖐️ mot den
   gamla ES-servern, så att mallar och chillin-texter följer med. Kontrollera antalet mallar i
   rapporten mot mallsidan i den gamla appen.
@@ -2884,8 +2931,10 @@ i [TODO-remove-umbraco.md](TODO-remove-umbraco.md)) — de är fortfarande overi
   `ChalmersILLStartPage.cshtml` verifierade 2026-09-22 — båda renderar med navbar. Femte vyn,
   `ChalmersILLLogoutPage.cshtml`, gör `Response.Redirect("/")` innan något markup hinner skickas
   (se koden), så dess `Layout`-tilldelning är i praktiken aldrig i spel — inget att verifiera där.
-- [ ] **En orderpanel tar om sitt eget lås och krockar med sig själv.** Utrett 2026-10-09;
-  mekanismen är reproducerad, rättningen återstår. Låg tidigare här som ”ett betraktande fönster
+- [x] **En orderpanel tar om sitt eget lås och krockar med sig själv.** Utrett 2026-10-09;
+  rättat 2026-11-16 (se **Rättat** sist i punkten). Felet fanns redan i Umbraco-versionen på
+  `master` — ingen regression, men rättat före integrationstestet eftersom testarna annars hade
+  rapporterat det som nytt. Låg tidigare här som ”ett betraktande fönster
   försökte ta ett lås efter en serveromstart” — den beskrivningen var fel, se nedan.
 
   **Vad som observerades.** `RT-003` (`e2e/tests/realtime.spec.ts`) har två inloggade fönster mot
@@ -2938,6 +2987,19 @@ i [TODO-remove-umbraco.md](TODO-remove-umbraco.md)) — de är fortfarande overi
   - Broadcasta inte på felgrenen i `LockOrderItem`.
   - Lägg ett regressionstest i `tests/locks.spec.ts` på att en öppning ger exakt ett `LockOrderItem`-anrop.
   - Ta bort `guard.allow(/redan låst av en annan användare/)` i `RT-003` när detta är rättat.
+
+  **Rättat** — inte riktigt enligt förslaget. En `takeLock`-flagga hade också tagit bort att en
+  panel som står öppen tar låset när någon annan släpper det (omritningen i `updateStream` bäddar in
+  låsskriptet igen), och det beteendet finns i dag. I stället:
+  - `updateStream` ritar inte om panelen när sändningen gäller det egna låset (`EditedBy` är den
+    egna medlemmen) utan sätter bara `data-locked-by-memberid`. En öppning ger nu
+    `render → LOCK`, inte `render → LOCK → render`.
+  - `LockOrderItem` svarar OK utan att skriva eller sända om anroparen redan har låset, så en
+    kvarvarande dubbel låsning (t.ex. två flikar för samma medlem) är ofarlig.
+  - Meddelandet namnger innehavaren (`EditedByMemberName`), och felgrenen sänder ingenting.
+  - Enhetstester i `OrderItemSurfaceControllerTest` (`LockOrderItem_WhenAlreadyLocked_*`,
+    `..._WhenAlreadyLockedByTheCaller_*`), e2e `LOCK-006` (en öppning = en `RenderOrderItem` och ett
+    `LockOrderItem`), och `allow()` borttagen i `RT-003`.
 
 - [x] **SignalR-realtidsuppdateringar.** Öppna orderlistan i två webbläsarfönster, ändra en order i det
   ena och kontrollera att det andra uppdateras. Detta fångar både PascalCase/camelCase-problemet i

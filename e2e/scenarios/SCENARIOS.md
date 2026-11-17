@@ -110,6 +110,7 @@ allt som gäller så länge appen körs på en enda instans, men inte mer än s�
 | LOCK-003 | ”Överta låset” flyttar låset, och den förra redaktören får veta det | `tests/locks.spec.ts` |
 | LOCK-004 | Att stänga en order släpper dess lås | `tests/locks.spec.ts` |
 | LOCK-005 | Servern nekar en ändring från den som inte håller låset (regression c8d5ad8) | `tests/locks.spec.ts` |
+| LOCK-006 | Att öppna en order renderar och låser den en gång — panelen ritas inte om av sitt eget lås | `tests/locks.spec.ts` |
 | ROLE-001 | Viewer kan läsa orderlistan men ingen ändringsknapp är användbar | `tests/roles.spec.ts` |
 | ROLE-002 | Konto utan roller nekas på alla sidor | `tests/roles.spec.ts` |
 | ROLE-003 | Viewer når Inställningar men kan inte ändra något där | `tests/roles.spec.ts` |

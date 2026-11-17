@@ -84,12 +84,12 @@ namespace Chalmers.ILL.Tests.Controllers
             Assert.IsNull(orderItemManager.LastEditedByMemberId);
         }
 
-        // Characterization of two defects on the already-locked path, both found while chasing the
-        // fas 11 item "Ett betraktande fönster försökte ta ett lås efter en serveromstart". They are
-        // what made that observation unreadable: the alert text names the *caller*, so the member id
-        // in it was read as the lock holder's and the alert attributed to the wrong window.
+        // The fas 11 item "En orderpanel tar om sitt eget lås och krockar med sig själv": the alert
+        // named the caller, so a pane locking a second time told the user the order was locked by
+        // "another user" - themselves - and the failed attempt was broadcast as if the caller now
+        // held the lock, telling the real holder it had been taken over.
         [TestMethod]
-        public void LockOrderItem_WhenAlreadyLocked_MessageNamesTheCallerInsteadOfTheHolder()
+        public void LockOrderItem_WhenAlreadyLocked_MessageNamesTheHolder()
         {
             var controller = MakeController(out var orderItemManager, out _);
             orderItemManager.EditedBy = "5";
@@ -99,12 +99,11 @@ namespace Chalmers.ILL.Tests.Controllers
             var json = (controller.LockOrderItem(42) as JsonResult)?.Value as ResultResponse;
 
             Assert.IsFalse(json.Success);
-            StringAssert.Contains(json.Message, "medlems-id 1");
-            Assert.IsFalse(json.Message.Contains("5"), "the holder's id is nowhere in the message");
+            Assert.AreEqual("Ordern är redan låst av Holder.", json.Message);
         }
 
         [TestMethod]
-        public void LockOrderItem_WhenAlreadyLocked_StillBroadcastsTheCallerAsEditedBy()
+        public void LockOrderItem_WhenAlreadyLocked_BroadcastsNothing()
         {
             var controller = MakeController(out var orderItemManager, out var notifier);
             orderItemManager.EditedBy = "5";
@@ -113,8 +112,22 @@ namespace Chalmers.ILL.Tests.Controllers
 
             controller.LockOrderItem(42);
 
-            Assert.AreEqual("1", notifier.LastEditedBy);
-            Assert.AreEqual("Test User", notifier.LastEditedByMemberName);
+            Assert.IsNull(notifier.LastEditedBy);
+        }
+
+        [TestMethod]
+        public void LockOrderItem_WhenAlreadyLockedByTheCaller_SucceedsWithoutWritingOrBroadcasting()
+        {
+            var controller = MakeController(out var orderItemManager, out var notifier);
+            orderItemManager.EditedBy = "1";
+            orderItemManager.EditedByMemberName = "Test User";
+            SetHttpContext(controller);
+
+            var json = (controller.LockOrderItem(42) as JsonResult)?.Value as ResultResponse;
+
+            Assert.IsTrue(json.Success);
+            Assert.IsNull(orderItemManager.LastEditedByMemberId);
+            Assert.IsNull(notifier.LastEditedBy);
         }
 
         [TestMethod]

@@ -34,9 +34,12 @@ test.describe("locks", () => {
     await editor.goto();
     await editor.row(reference).open();
 
-    // Opening took the lock.
-    const held = await (await page.request.get("/OrderItemSurface/GetLocksForCurrentMember")).json();
-    expect(held.List.length, "opening an order should take its lock").toBeGreaterThan(0);
+    // Opening took the lock - the lock call goes out once the pane has rendered.
+    await expect
+      .poll(async () => (await (await page.request.get("/OrderItemSurface/GetLocksForCurrentMember")).json()).List.length, {
+        message: "opening an order should take its lock",
+      })
+      .toBeGreaterThan(0);
 
     // The order list gives up every lock the current member holds when it loads.
     await editor.reload();
@@ -88,12 +91,16 @@ test.describe("locks", () => {
     const editor = new OrderListPage(page);
     await editor.goto();
     const row = editor.row(reference);
+    // Straight after opening, before the lock call has answered: the pane releases the lock
+    // itself when the answer finds it closed.
     await row.open();
     await row.close();
 
-    const response = await page.request.get(`/OrderItemSurface/GetLocksForCurrentMember`);
-    const body = await response.json();
-    expect(body.List, "closing an order should give up its lock").toEqual([]);
+    await expect
+      .poll(async () => (await (await page.request.get("/OrderItemSurface/GetLocksForCurrentMember")).json()).List, {
+        message: "closing an order should give up its lock",
+      })
+      .toEqual([]);
   });
 
   test("LOCK-005: the server refuses a change from someone who does not hold the lock", async ({ ownApp, guard }) => {
@@ -118,5 +125,30 @@ test.describe("locks", () => {
     const body = await response.json();
     expect(body.Success).toBeFalsy();
     expect(body.Message).toContain("låst av");
+  });
+
+  test("LOCK-006: opening an order renders it and locks it once", async ({ ownApp, guard }) => {
+    guard.allow(/Successfully sent new order/);
+    const { page } = await ownApp();
+    const reference = await createOrderThroughMail(page, "e2e-lock-006");
+
+    const editor = new OrderListPage(page);
+    await editor.goto();
+    const calls: string[] = [];
+    page.on("request", (r) => {
+      const name = new URL(r.url()).pathname.match(/\/OrderItemSurface\/(RenderOrderItem|LockOrderItem)$/)?.[1];
+      if (name) calls.push(name);
+    });
+
+    const row = editor.row(reference);
+    await row.open();
+    await expect(row.details.getByTestId("order-type-toggle")).toBeVisible();
+    // The lock's own SignalR broadcasts arrive after the open; give them time to (not) re-render.
+    await page.waitForTimeout(2_000);
+
+    // Before the fix the broadcasts re-rendered the pane, and a second render that read the order
+    // before the lock was written locked again - "Ordern är redan låst av en annan användare" about
+    // oneself (fas 11, "En orderpanel tar om sitt eget lås och krockar med sig själv").
+    expect(calls).toEqual(["RenderOrderItem", "LockOrderItem"]);
   });
 });

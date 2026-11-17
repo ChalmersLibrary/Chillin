@@ -277,7 +277,12 @@
                     <!-- Lock OrderItem to current Member -->
                     <script type="text/javascript">
                         $.getJSON("/OrderItemSurface/LockOrderItem?nodeId=@Model.OrderItem.NodeId", function (json) {
-                            if (json.Success) {
+                            if (json.Success && !$("#@Model.OrderItem.NodeId").hasClass("open")) {
+                                // Closed before the lock landed - closing only releases a lock it
+                                // knows about, so release this one here.
+                                $.getJSON("/OrderItemSurface/UnlockOrderItem?nodeId=@Model.OrderItem.NodeId");
+                            }
+                            else if (json.Success) {
                                 $("#@Model.OrderItem.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
                                 $("#action-buttons-@Model.OrderItem.NodeId").attr("data-locked-by-memberid", $("#memberIdContainer").attr("data-memberid"));
                             }

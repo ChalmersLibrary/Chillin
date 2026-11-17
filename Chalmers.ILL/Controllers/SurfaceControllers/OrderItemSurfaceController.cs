@@ -138,23 +138,30 @@ namespace Chalmers.ILL.Controllers.SurfaceControllers
 
                 var orderItem = _orderItemManager.GetOrderItem(nodeId);
 
-                if (orderItem.EditedBy != "")
+                if (orderItem.EditedBy == memberId.ToString())
                 {
-                    // Locked by someone else
-                    json.Success = false;
-                    json.Message = "Ordern är redan låst av en annan användare (medlems-id " + memberId + ").";
+                    // Already ours - a pane rendered again before the first lock call had landed
+                    // locks a second time. Nothing changes, so nothing to tell the other clients.
+                    json.Success = true;
+                    json.Message = "Ordern är redan låst av dig.";
                 }
-                else if (orderItem.EditedBy == "")
+                else if (orderItem.EditedBy != "")
+                {
+                    // Locked by someone else. Not broadcast: that would tell every client the
+                    // caller holds the lock, and the actual holder would be told it was taken over.
+                    json.Success = false;
+                    json.Message = "Ordern är redan låst av " + (string.IsNullOrEmpty(orderItem.EditedByMemberName) ? "medlems-id " + orderItem.EditedBy : orderItem.EditedByMemberName) + ".";
+                }
+                else
                 {
                     // Unlocked
                     _orderItemManager.SetEditedByData(nodeId, memberId.ToString(), _memberInfoManager.GetCurrentMemberText(Request, Response));
                     json.Success = true;
                     json.Message = "Ordern är nu låst av dig.";
+
+                    // Notify SignalR clients of the update
+                    _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), _memberInfoManager.GetCurrentMemberText(Request, Response));
                 }
-
-                // Notify SignalR clients of the update
-                _notifier.UpdateOrderItemUpdate(nodeId, memberId.ToString(), _memberInfoManager.GetCurrentMemberText(Request, Response));
-
             }
             catch (Exception e)
             {

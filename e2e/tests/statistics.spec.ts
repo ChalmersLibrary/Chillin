@@ -95,6 +95,12 @@ test.describe("statistics, filtered", () => {
       .filter({ has: page.locator(".panel-heading", { hasText: /^\s*Typ\s*$/ }) });
     await expect(typeFilter).toBeVisible();
 
+    // The demo orders are created today, and the page defaults to 2014. The fake searcher before
+    // Lucene ignored the date range, so this went unnoticed until the index honoured it.
+    const year = new Date().getFullYear();
+    await page.locator("#fromDate").fill(`${year}-01-01 00:00`);
+    await page.locator("#toDate").fill(`${year + 1}-01-01 00:00`);
+
     // One variable counting everything...
     await addVariable(page, "E2E alla");
 
