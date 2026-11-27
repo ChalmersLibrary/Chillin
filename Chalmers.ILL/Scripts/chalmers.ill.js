@@ -301,6 +301,13 @@ function unlockScreen() {
     }
 }
 
+/* Escapes free text (reference, log messages) before it is put into the page with .html().
+   Quotes are left as is on purpose: the text only ends up in element content and in
+   double-quoted href attributes, and addSaveDocumentButton's href regex stops at quotes. */
+function escapeHtml(text) {
+    return (text == null ? "" : String(text)).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
 function replaceURLWithHTMLLinks(text) {
     var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;()]*[-A-Z0-9+&@#()\/%=~_|()\S]+)/ig;
     return text.replace(exp, '<a target="blank" class="reflink" href="$1">$1</a>');
@@ -606,7 +613,7 @@ function loadOrderItemSummary(id)
             }
 
             // Reference with links
-            $("#" + json.NodeId + " div[data-column='reference']").html(replaceURLWithHTMLLinks(json.Reference.replace(/\n/g, "<br />")));
+            $("#" + json.NodeId + " div[data-column='reference']").html(replaceURLWithHTMLLinks(escapeHtml(json.Reference).replace(/\n/g, "<br />")));
 
             // Mark as locked if being edited by other member
             if (json.EditedBy != "" && json.EditedByCurrentMember == false) {

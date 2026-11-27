@@ -453,7 +453,7 @@
 }
     <script type="text/javascript">
     $.each($("#log-@Model.OrderItem.NodeId .log-message:contains('http')"), function () {
-            $(this).html(addSaveDocumentButton(@Model.OrderItem.NodeId, replaceURLWithHTMLLinks($(this).text())));
+            $(this).html(addSaveDocumentButton(@Model.OrderItem.NodeId, replaceURLWithHTMLLinks(escapeHtml($(this).text()))));
     });
     </script>
 </div>
