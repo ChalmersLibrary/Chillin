@@ -465,8 +465,8 @@
     }
 
     var chillinVars = {
-        eventIdToEventName: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.EventIdToEventNameMapping).Replace("<", "\\u003c")),
-        orderItemData: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.OrderItem).Replace("<", "\\u003c"))
+        eventIdToEventName: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.EventIdToEventNameMapping)),
+        orderItemData: @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.OrderItem))
     }
 
     $(function () {
