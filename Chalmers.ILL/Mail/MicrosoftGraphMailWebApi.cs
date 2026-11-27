@@ -458,7 +458,16 @@ namespace Chalmers.ILL.Mail
                 var response = sendTask.Result;
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception("Non success status code [" + response.StatusCode + "] on post to Microsoft Graph: " + response.ReasonPhrase);
+                    var exception = new Exception("Non success status code [" + response.StatusCode + "] on post to Microsoft Graph: " + response.ReasonPhrase);
+                    try
+                    {
+                        LogHelper.Error<MicrosoftGraphMailWebApi>("Post to Microsoft Graph failed: " + url + " Response: " + response.Content.ReadAsStringAsync().Result, exception);
+                    }
+                    catch
+                    {
+                        // Logging must not replace the original error.
+                    }
+                    throw exception;
                 }
                 var readTask = response.Content.ReadAsStringAsync();
                 readTask.Wait();
