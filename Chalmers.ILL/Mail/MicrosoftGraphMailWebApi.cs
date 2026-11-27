@@ -420,7 +420,7 @@ namespace Chalmers.ILL.Mail
                 var response = sendTask.Result;
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception("Non success status code [" + response.StatusCode + "] on get from Microsoft Graph: " + response.ReasonPhrase);
+                    throw CreateAndLogGraphError("get from", url, response);
                 }
                 var readTask = response.Content.ReadAsStringAsync();
                 readTask.Wait();
@@ -428,6 +428,34 @@ namespace Chalmers.ILL.Mail
             }
 
             return res;
+        }
+
+        /// <summary>
+        /// Builds the exception for a failed Microsoft Graph call and logs it. Graph explains a
+        /// failure (e.g. an invalid recipient on BadRequest) only in the response body, which the
+        /// reason phrase alone doesn't carry, so the body goes both into the log and the message.
+        /// </summary>
+        private Exception CreateAndLogGraphError(string verb, string url, HttpResponseMessage response)
+        {
+            string responseBody = "";
+            try
+            {
+                responseBody = response.Content.ReadAsStringAsync().Result;
+                if (responseBody.Length > 2000)
+                {
+                    responseBody = responseBody.Substring(0, 2000) + "...";
+                }
+            }
+            catch
+            {
+                responseBody = "(could not read response body)";
+            }
+
+            var exception = new Exception("Non success status code [" + response.StatusCode + "] on " + verb +
+                " Microsoft Graph: " + response.ReasonPhrase + ". Response: " + responseBody);
+            // Query string left out: upload session URLs carry an access token there.
+            LogHelper.Error<MicrosoftGraphMailWebApi>("Microsoft Graph call failed: " + url.Split('?')[0], exception);
+            return exception;
         }
 
         private dynamic PostToMicrosoftGraph(string url, string data = null)
@@ -458,7 +486,7 @@ namespace Chalmers.ILL.Mail
                 var response = sendTask.Result;
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception("Non success status code [" + response.StatusCode + "] on post to Microsoft Graph: " + response.ReasonPhrase);
+                    throw CreateAndLogGraphError("post to", url, response);
                 }
                 var readTask = response.Content.ReadAsStringAsync();
                 readTask.Wait();
@@ -500,7 +528,7 @@ namespace Chalmers.ILL.Mail
                 var response = sendTask.Result;
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception("Non success status code [" + response.StatusCode + "] on put to Microsoft Graph: " + response.ReasonPhrase);
+                    throw CreateAndLogGraphError("put to", url, response);
                 }
                 var readTask = response.Content.ReadAsStringAsync();
                 readTask.Wait();
@@ -532,7 +560,7 @@ namespace Chalmers.ILL.Mail
                 var response = sendTask.Result;
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception("Non success status code [" + response.StatusCode + "] on delete to Microsoft Graph: " + response.ReasonPhrase);
+                    throw CreateAndLogGraphError("delete to", url, response);
                 }
                 var readTask = response.Content.ReadAsStringAsync();
                 readTask.Wait();
@@ -567,7 +595,7 @@ namespace Chalmers.ILL.Mail
                 var response = sendTask.Result;
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception("Non success status code [" + response.StatusCode + "] on patch to Microsoft Graph: " + response.ReasonPhrase);
+                    throw CreateAndLogGraphError("patch to", url, response);
                 }
                 var readTask = response.Content.ReadAsStringAsync();
                 readTask.Wait();
